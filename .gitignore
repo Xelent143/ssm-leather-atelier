@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (we don't actually use node, but the dev script could)
+node_modules/
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+
+# Local artifacts
+*.log
+.vercel

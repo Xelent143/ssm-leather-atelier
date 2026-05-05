@@ -1,0 +1,9 @@
+{
+  "name": "ssm-leather-atelier",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local dev wrapper for the SSM leather apparel ecommerce site.",
+  "scripts": {
+    "dev": "python3 -m http.server 5173 --bind 127.0.0.1"
+  }
+}
