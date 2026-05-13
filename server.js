@@ -5,6 +5,7 @@ const path = require('path');
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || '0.0.0.0';
+const assetCdnBase = (process.env.ASSET_CDN_BASE || '').replace(/\/+$/, '');
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -41,6 +42,16 @@ function resolvePath(urlPath) {
 const server = http.createServer((req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     send(res, 405, 'Method not allowed');
+    return;
+  }
+
+  const requestPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  if (assetCdnBase && requestPath.startsWith('/assets/generated/')) {
+    res.writeHead(302, {
+      Location: `${assetCdnBase}${requestPath}`,
+      'Cache-Control': 'public, max-age=300',
+    });
+    res.end();
     return;
   }
 
