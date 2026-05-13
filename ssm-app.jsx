@@ -16,6 +16,13 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 }/*EDITMODE-END*/;
 
 // SSM_SEO comes from ssm-data.jsx
+const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
+const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
+const pathProductSlug = () => {
+  const match = window.location.pathname.match(/^\/products\/([a-z0-9-]+)\/?$/);
+  return match ? match[1] : null;
+};
+
 function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
     : (view === 'shop' && params?.gender === 'Men') ? SSM_SEO.shopMen
@@ -46,6 +53,8 @@ function applySEO(view, params) {
 function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [view, setView] = React.useState(() => {
+    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
+    if (initialSlug && productFromSlug(initialSlug)) return 'pdp';
     // Resume from hash on refresh.
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
@@ -53,7 +62,11 @@ function App() {
       'press','giftcard','faq','size','ship','contact','search','notfound'
     ].includes(h) ? h : 'home';
   });
-  const [params, setParams] = React.useState({});
+  const [params, setParams] = React.useState(() => {
+    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
+    const product = initialSlug ? productFromSlug(initialSlug) : null;
+    return product ? { product } : {};
+  });
   const [cart, setCart] = React.useState(() => {
     try {
       const raw = window.localStorage && localStorage.getItem('ssm:cart');
@@ -76,11 +89,16 @@ function App() {
   // SEO sync
   React.useEffect(() => { applySEO(view, params); }, [view, params]);
 
-  // Hash sync (so refresh keeps you on the right page)
+  // URL sync (product pages use crawlable paths; legacy pages keep hash routes)
   React.useEffect(() => {
+    if (view === 'pdp' && params?.product?.slug) {
+      const path = `/products/${params.product.slug}`;
+      if (window.location.pathname !== path) window.history.replaceState(null, '', path);
+      return;
+    }
     const h = '#/' + view;
     if (window.location.hash !== h) window.history.replaceState(null, '', h);
-  }, [view]);
+  }, [view, params]);
 
   const go = (v, p = {}) => {
     setView(v);

@@ -296,6 +296,50 @@ function productEditor(product) {
           ${field('Maker', 'maker', product.maker)}
           ${field('Image path', 'image', product.image, 'text', true)}
           ${textareaField('Description', 'description', product.description)}
+          <div class="field full"><h3>SEO and AI discovery</h3></div>
+          ${field('SEO title', 'seoTitle', product.seoTitle, 'text', true)}
+          ${textareaField('SEO description', 'seoDescription', product.seoDescription)}
+          ${textareaField('Schema description', 'schemaDescription', product.schemaDescription)}
+          ${field('Canonical URL', 'canonicalUrl', product.canonicalUrl, 'url', true)}
+          ${field('Brand', 'brand', product.brand)}
+          ${field('SKU', 'sku', product.sku)}
+          ${field('MPN', 'mpn', product.mpn)}
+          ${field('GTIN / UPC / EAN', 'gtin', product.gtin)}
+          ${field('Google product category', 'googleProductCategory', product.googleProductCategory, 'text', true)}
+          ${field('Product type', 'productType', product.productType)}
+          ${selectField('Condition', 'condition', product.condition || 'NewCondition', ['NewCondition', 'UsedCondition', 'RefurbishedCondition'])}
+          ${field('Price valid until', 'priceValidUntil', product.priceValidUntil, 'date')}
+          ${field('Primary image', 'primaryImage', product.primaryImage || product.image, 'text', true)}
+          ${textareaField('Gallery images', 'galleryImagesText', (product.galleryImages || []).join('\\n'))}
+          ${field('Image alt text', 'imageAltText', product.imageAltText, 'text', true)}
+          <div class="field full"><h3>Variants, apparel attributes, and merchant fields</h3></div>
+          ${field('Material', 'material', product.material)}
+          ${field('Color', 'color', product.color)}
+          ${field('Size system', 'sizeSystem', product.sizeSystem)}
+          ${field('Size type', 'sizeType', product.sizeType)}
+          ${field('Age group', 'ageGroup', product.ageGroup)}
+          ${field('Item group ID', 'itemGroupId', product.itemGroupId)}
+          ${field('Variant options', 'variantOptionsText', (product.variantOptions || []).join(', '), 'text', true)}
+          ${field('Shipping weight', 'shippingWeight', product.shippingWeight)}
+          ${textareaField('Shipping policy', 'shippingPolicy', product.shippingPolicy)}
+          ${textareaField('Return policy', 'returnPolicy', product.returnPolicy)}
+          ${field('Rating value', 'ratingValue', product.ratingValue || '', 'number')}
+          ${field('Review count', 'reviewCount', product.reviewCount || '', 'number')}
+          <div class="field full"><h3>MOTOGRIP product authority</h3></div>
+          ${field('Leather type', 'leatherType', product.leatherType)}
+          ${field('Leather origin', 'leatherOrigin', product.leatherOrigin)}
+          ${field('Leather thickness', 'leatherThickness', product.leatherThickness)}
+          ${field('Lining', 'lining', product.lining)}
+          ${field('Hardware', 'hardware', product.hardware)}
+          ${field('Closure type', 'closureType', product.closureType)}
+          ${field('Armor compatibility', 'armorCompatibility', product.armorCompatibility)}
+          ${field('Weather resistance', 'weatherResistance', product.weatherResistance)}
+          ${field('Riding use case', 'ridingUseCase', product.ridingUseCase)}
+          ${field('Season', 'season', product.season)}
+          ${textareaField('Care instructions', 'careInstructions', product.careInstructions)}
+          ${textareaField('Fit notes', 'fitNotes', product.fitNotes)}
+          ${field('Craft method', 'craftMethod', product.craftMethod, 'text', true)}
+          ${field('Warranty', 'warranty', product.warranty, 'text', true)}
           <div class="field full">
             <div class="toggle-line">
               <div>
@@ -526,21 +570,28 @@ function bindShell() {
   });
 
   document.querySelectorAll('[data-product-field]').forEach((input) => {
-    input.addEventListener('input', () => {
+    const assignProductField = () => {
       const product = productById();
       const key = input.dataset.productField;
-      if (input.type === 'checkbox') product[key] = input.checked;
-      else if (input.type === 'number') product[key] = input.value === '' ? '' : Number(input.value);
-      else product[key] = input.value;
+      if (key === 'galleryImagesText') {
+        product.galleryImages = input.value.split('\n').map((value) => value.trim()).filter(Boolean);
+      } else if (key === 'variantOptionsText') {
+        product.variantOptions = input.value.split(',').map((value) => value.trim()).filter(Boolean);
+      } else if (input.type === 'checkbox') {
+        product[key] = input.checked;
+      } else if (input.type === 'number') {
+        product[key] = input.value === '' ? '' : Number(input.value);
+      } else {
+        product[key] = input.value;
+      }
       if (key === 'title' && !product.slug) product.slug = slugify(input.value);
+    };
+    input.addEventListener('input', () => {
+      assignProductField();
       markDirty();
     });
     input.addEventListener('change', () => {
-      const product = productById();
-      const key = input.dataset.productField;
-      if (input.type === 'checkbox') product[key] = input.checked;
-      else if (input.type === 'number') product[key] = input.value === '' ? '' : Number(input.value);
-      else product[key] = input.value;
+      assignProductField();
       markDirty();
     });
   });
@@ -582,6 +633,47 @@ function bindShell() {
       image: 'assets/generated/leather-detail.png',
       stock: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
       maker: '',
+      seoTitle: '',
+      seoDescription: '',
+      canonicalUrl: '',
+      schemaDescription: '',
+      brand: 'MOTOGRIP GEAR',
+      sku: id,
+      mpn: '',
+      gtin: '',
+      googleProductCategory: 'Apparel & Accessories > Clothing > Outerwear > Coats & Jackets',
+      productType: 'Motorcycle leather gear',
+      condition: 'NewCondition',
+      priceValidUntil: '',
+      primaryImage: 'assets/generated/leather-detail.png',
+      galleryImages: [],
+      imageAltText: 'MOTOGRIP GEAR leather product',
+      material: 'Leather',
+      color: '',
+      sizeSystem: 'US',
+      sizeType: 'Regular',
+      ageGroup: 'Adult',
+      itemGroupId: id,
+      variantOptions: ['Size', 'Leather', 'Fit'],
+      shippingWeight: '',
+      shippingPolicy: 'Complimentary express shipping on stock pieces',
+      returnPolicy: '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support',
+      ratingValue: '',
+      reviewCount: '',
+      careInstructions: '',
+      fitNotes: '',
+      leatherType: '',
+      leatherOrigin: '',
+      leatherThickness: '',
+      lining: '',
+      hardware: '',
+      closureType: '',
+      armorCompatibility: '',
+      weatherResistance: '',
+      ridingUseCase: '',
+      season: '',
+      craftMethod: '',
+      warranty: '',
     });
     state.selectedProductId = id;
     markDirty();

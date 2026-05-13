@@ -126,7 +126,8 @@ function HeroCentered() {
 
 function ProductCard({ product, onQuickView, go }) {
   return (
-    <div className="card" style={{ cursor: 'pointer' }} onClick={() => go('pdp', { product })}>
+    <a href={`/products/${product.slug}`} className="card" style={{ cursor: 'pointer', display: 'block' }}
+      onClick={(e) => { e.preventDefault(); go('pdp', { product }); }}>
       <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '3/4' }}>
         <div className="ph card-img" data-img="1" data-label={product.name}
           style={{ position: 'absolute', inset: 0, '--img': `url(${product.img})` }} />
@@ -155,7 +156,7 @@ function ProductCard({ product, onQuickView, go }) {
         </div>
         <div style={{ fontFamily: 'var(--display)', fontSize: 19, whiteSpace: 'nowrap' }}>${product.price.toLocaleString()}</div>
       </div>
-    </div>
+    </a>
   );
 }
 
