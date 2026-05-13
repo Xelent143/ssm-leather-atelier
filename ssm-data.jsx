@@ -1,6 +1,6 @@
 // Product catalog + leather material data + nav + content for inner pages.
-// All copy is in the SSM voice: concrete over abstract, italicized second clause,
-// Roman section markers, mono captions. Edit copy here and every page picks it up.
+// Public copy now follows the MOTOGRIP GEAR voice: direct, road-tested,
+// fit-aware, and precise. Edit copy here and every page picks it up.
 
 const A = (name) => `assets/generated/${name}`;
 
@@ -37,7 +37,7 @@ const SSM_PRODUCTS = [
       piece: "Sigrid cut the first Voltaire from a single hide in 2018, working from a borrowed pattern and three nights of sketches. Six years on, this is the seventh evolution — shoulders cleaner, asymmetric line softened, hand-rubbed at the placket so it wears in faster.",
       craft: "Vegetable-tanned lambskin, twelve months in the pit. Cut from the central panels for unbroken grain. Eight stitches per inch on a vintage Singer 31-15. YKK Excella in aged brass. Edges burnished by hand with beeswax.",
       fit: "Slim through chest and shoulder, slightly cropped at the hip. Model is 5'10\" wearing M. Consider sizing up over a heavier knit. Sleeves shorten on request — write to your maker.",
-      origin: "Cut and signed by Sigrid in our Brooklyn workshop. Yours will carry her initials inside the placket.",
+      origin: "Cut and checked in the MOTOGRIP fit room. Yours will carry the maker's initials inside the placket.",
     },
   },
   {
@@ -81,21 +81,21 @@ const SSM_PRODUCTS = [
     story: {
       piece: "We did not want to make leather trousers until we found a hide that moved like cloth. Two years in development with our Tuscan tannery; the result is a stretch napa that holds its line and moves with the leg. The Saoirse is the first piece cut from it.",
       craft: "Stretch napa with 4% elastane in the warp — invisible, essential. Hidden waistband stay; concealed zip; satin stripe down the inseam. No back yoke seam. Hand-finished hem.",
-      fit: "High-rise, slim through thigh, gently flared at the ankle. Sized to a size up from your denim. Hems can be shortened in atelier within 60 days, complimentary.",
+      fit: "High-rise, slim through thigh, gently flared at the ankle. Sized to a size up from your denim. Hems can be shortened in the fit room within 60 days, complimentary.",
       origin: "Cut and stitched by Helena, our pattern-cutter for women's tailoring since 2020.",
     },
   },
   {
     id: 'p5', slug: 'ridgemont-double-rider',
     name: 'Ridgemont Double Rider', cat: 'Jackets', gender: 'Men',
-    price: 1450, hue: 5, tag: 'Atelier',
+    price: 1450, hue: 5, tag: 'Fit Lab',
     blurb: 'Heritage cut · cordovan trim',
     img: SSM_ASSETS.cafe, alt: SSM_ASSETS.biker,
     maker: 'Bayard T.', signedSince: 2014,
     stock: { XS: 0, S: 1, M: 2, L: 1, XL: 0, XXL: 0 },
     story: {
       piece: "The Ridgemont is the oldest pattern in the house — cut to a 1953 American sloper, modified once in 2017 and never since. We make twelve a year. It is the jacket the founders wore on the day we opened in 2014, and the jacket Bayard still wears most days.",
-      craft: "Heavyweight horse-front shell, cordovan piping at the lapel and cuff. Belted waist with a brass single-prong. Quilted satin lining; inner ticket pocket; 'SSM · MMXIV' embossed at the placket.",
+      craft: "Heavyweight horse-front shell, cordovan piping at the lapel and cuff. Belted waist with a brass single-prong. Quilted satin lining; inner ticket pocket; 'MOTOGRIP · ROAD ARMOR' embossed at the placket.",
       fit: "Heritage cut — broader through chest and shoulder than the Hadley, intentionally. Wear over a knit or a heavy shirt. Consider sizing down if you prefer a closer line.",
       origin: "Bayard has cut every Ridgemont since the day we opened. He is the only person in the workshop who can.",
     },
@@ -193,7 +193,7 @@ const SSM_PRODUCTS = [
   {
     id: 'p12', slug: 'maren-statement',
     name: 'Maren Statement Jacket', cat: 'Jackets', gender: 'Women',
-    price: 1350, hue: 0, tag: 'Atelier',
+    price: 1350, hue: 0, tag: 'Fit Lab',
     blurb: 'Sculpted shoulder · waxed lamb',
     img: SSM_ASSETS.biker, alt: SSM_ASSETS.detail,
     maker: 'Iola V.', signedSince: 2017,
@@ -274,7 +274,7 @@ const SSM_LININGS = [
 const SSM_NAV = [
   { label: 'Women', view: 'shop', filter: 'Women' },
   { label: 'Men', view: 'shop', filter: 'Men' },
-  { label: 'Atelier', view: 'mto' },
+  { label: 'Fit Lab', view: 'mto' },
   { label: 'Lookbook', view: 'lookbook' },
   { label: 'Journal', view: 'journal' },
   { label: 'Heritage', view: 'about' },
@@ -358,10 +358,10 @@ const SSM_JOURNAL = [
 
 const SSM_FAQ = [
   { group: 'Sizing & Fit', items: [
-    { q: 'How does the SSM jacket sizing run?', a: 'Most of our jackets run true to size against a fitted shirt. The Voltaire and Solene are intentionally close — consider sizing up over a heavy knit. The Ridgemont and Idris are heritage cuts and run slightly larger. Each PDP carries a model-and-size note.' },
-    { q: 'I am between sizes. What do you recommend?', a: 'Size up if you intend to layer; size down if you prefer a closer line. We offer complimentary fit alterations on stock pieces within 30 days of receipt, in person at the Brooklyn studio or by post.' },
+    { q: 'How does MOTOGRIP GEAR jacket sizing run?', a: 'Most jackets run true to size over a fitted shirt. Ride-cut pieces leave room for reach through the shoulder; close-cut styles may need one size up over a heavy layer. Each PDP carries a model-and-size note.' },
+    { q: 'I am between sizes. What do you recommend?', a: 'Size up if you intend to layer; size down if you prefer a closer line. Choose made to measure when chest, shoulder, sleeve, or waist fit needs rider-specific adjustment.' },
     { q: 'Do you make extended sizes?', a: 'Currently XS through XXL on stock pieces. For sizes outside this range, begin a Made-to-Order commission — we cut from your measurements.' },
-    { q: 'How are leather trousers supposed to fit?', a: 'Sized to a size up from your usual denim. The waistband softens within a week; the seat softens within a month. Hems can be shortened in atelier, complimentary, within 60 days of receipt.' },
+    { q: 'How are leather trousers supposed to fit?', a: 'Sized to a size up from your usual denim. The waistband softens within a week; the seat softens within a month. Hems can be shortened in the fit room, complimentary, within 60 days of receipt.' },
   ] },
   { group: 'Leather & Care', items: [
     { q: 'How do I care for my piece?', a: 'Wipe with a soft dry cloth after wear. Condition twice a year with a small amount of neatsfoot oil or a beeswax-based conditioner. Avoid prolonged direct sun. Store on a wide wooden hanger, never on a wire.' },
@@ -377,13 +377,13 @@ const SSM_FAQ = [
   ] },
   { group: 'Shipping', items: [
     { q: 'Where do you ship?', a: 'Worldwide. Complimentary express shipping on all orders, signed for at receipt.' },
-    { q: 'How long does shipping take?', a: 'Atelier Express is 2–3 working days within North America, 3–5 within Europe, 5–7 elsewhere. White Glove (5–7 days, by appointment) is available within New York City and London.' },
+    { q: 'How long does shipping take?', a: 'Road Express is 2-3 working days within North America, 3-5 within Europe, 5-7 elsewhere. White Glove delivery is available by appointment in select cities.' },
     { q: 'Are duties included?', a: 'Yes — all prices include duties for shipments within the US, EU, UK, Switzerland, Norway, Canada, Australia, and Japan. Duties for other regions are calculated at checkout.' },
   ] },
   { group: 'Returns', items: [
     { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
-    { q: 'How do I start a return?', a: 'Write to atelier@ssm.example or open the order in your account. We will send a return label and a small leather pouch to send the piece back in.' },
-    { q: 'How long do refunds take?', a: 'Refunds process within 3 working days of receipt at the Brooklyn studio.' },
+    { q: 'How do I start a return?', a: 'Write to fit@motogripgear.example or open the order in your account. We will send a return label and packing instructions.' },
+    { q: 'How long do refunds take?', a: 'Refunds process within 3 working days of receipt at the MOTOGRIP fit room.' },
   ] },
   { group: 'Repairs', items: [
     { q: 'Do you offer lifetime repairs?', a: 'Yes — every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
@@ -396,7 +396,7 @@ const SSM_FAQ = [
   ] },
   { group: 'Sustainability', items: [
     { q: 'Where do you source your leather?', a: 'A single tannery in the hills outside Pisa, since 2014. All vegetable-tanned, all by-product hides from the Italian beef and lamb trade.' },
-    { q: 'Are SSM pieces sustainable?', a: 'We do not use the word lightly. Vegetable tanning is slower and lower-impact than chrome; our pieces are repaired for life rather than replaced; everything ships by sea except urgent commissions. The full picture is on Sustainability.' },
+    { q: 'Are MOTOGRIP pieces sustainable?', a: 'We do not use the word lightly. Durable gear is the starting point: repairable leather, replaceable hardware, slower tanning where available, and fit options that keep the piece in rotation longer.' },
   ] },
 ];
 
@@ -413,9 +413,9 @@ const SSM_CARE = [
 // ── Stockists (used by /stockists) ──────────────────────────────────────────
 
 const SSM_STOCKISTS = [
-  { name: 'The Brooklyn Atelier', city: 'Brooklyn, NY', addr: '143 Greenpoint Avenue, NY 11222', hours: 'Tue–Sat · 11–6 · By appointment', phone: '+1 (212) 555 0143', primary: true },
+  { name: 'MOTOGRIP Fit Garage', city: 'Los Angeles, CA', addr: '812 Mateo Street, CA 90021', hours: 'Tue-Sat · 11-6 · By appointment', phone: '+1 (213) 555 0143', primary: true },
   { name: 'Hôtel Particulier (showroom)', city: 'Paris', addr: '14 rue du Pré-aux-Clercs, 75007', hours: 'By appointment only', phone: '+33 1 45 44 91 92' },
-  { name: 'Yamato Atelier (trunk show)', city: 'Tokyo', addr: 'Aoyama 5-chome · twice yearly', hours: 'Spring · Autumn', phone: '—' },
+  { name: 'Yamato Moto Room (trunk show)', city: 'Tokyo', addr: 'Aoyama 5-chome · twice yearly', hours: 'Spring · Autumn', phone: '—' },
 ];
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
@@ -432,30 +432,30 @@ const SSM_PRESS = [
 // ── SEO defaults (used by ssm-app to set <title> + meta) ────────────────────
 
 const SSM_SEO = {
-  home:       { title: 'SSM — Leather Atelier · Hand-cut in Brooklyn since MMXIV', desc: 'Vegetable-tanned, hand-stitched, hand-numbered. Made by a single craftsperson in our Brooklyn workshop. Lifetime repair on every piece.' },
-  shop:       { title: 'The Collection · SSM Atelier', desc: 'Twelve hand-numbered silhouettes for women and men. Vegetable-tanned hides, single-maker construction.' },
-  shopWomen:  { title: 'For her — Leather jackets, vests, trousers · SSM', desc: 'Cut to a woman\'s frame, not a smaller man\'s. Hand-numbered jackets, vests and leather trousers.' },
-  shopMen:    { title: 'For him — Leather jackets, vests, trousers · SSM', desc: 'Built for shoulder, not for show. Hand-stitched cafe racers, double riders, long coats and more.' },
-  pdp:        { title: '%name% — %cat%, %gender% · SSM Atelier' },
-  mto:        { title: 'Made to Order · SSM Atelier', desc: 'Choose the silhouette, leather, hardware, lining, monogram. One craftsperson. Six to ten weeks. One of one.' },
-  lookbook:   { title: 'Lookbook · SSM Atelier', desc: 'Hourwitch — the winter MMXXVI film. Six pieces, photographed at dusk on the old coast road.' },
-  journal:    { title: 'Sleeve Notes · The SSM Journal', desc: 'On the hide, the maker, the wardrobe. Long-form notes from the Brooklyn workshop.' },
-  about:      { title: 'Heritage · SSM, A small house, built slowly', desc: 'Founded 2014 in a 600-square-foot Brooklyn workshop. Eleven craftspeople. One Tuscan tannery.' },
-  care:       { title: 'Leather Care Guide · SSM', desc: 'How to clean, condition, store and live with your SSM piece. Five steps, written by the people who made it.' },
-  repairs:    { title: 'Repairs & Restoration · SSM', desc: 'Lifetime repair on every piece. Bring it back at fifty; we will know how it was made.' },
-  concierge:  { title: 'Concierge & Bespoke · SSM', desc: 'Ground-up commissions, in-person fittings and private appointments at the Brooklyn studio.' },
-  sustain:    { title: 'Sustainability · SSM', desc: 'Vegetable-tanned, single-tannery, repaired for life. The honest version.' },
-  stockists:  { title: 'Find SSM · Stockists & Studio', desc: 'The Brooklyn studio, the Paris showroom, the Tokyo trunk shows.' },
-  press:      { title: 'Press · SSM Atelier', desc: 'A small archive of mentions and a single email for press enquiries.' },
-  giftcard:   { title: 'Gift Cards · SSM Atelier', desc: 'A piece, but unchosen. Denominations from $250 to $5,000, with a handwritten note.' },
-  faq:        { title: 'Frequently Asked · SSM', desc: 'Sizing, leather, made-to-order, shipping, returns, repairs.' },
-  size:       { title: 'Size Guide · SSM', desc: 'Numerical tables and how to measure for jackets, vests, and leather trousers.' },
-  ship:       { title: 'Shipping & Returns · SSM', desc: 'Complimentary express worldwide. 30-day returns on stock pieces.' },
-  contact:    { title: 'Contact · SSM Atelier', desc: 'Atelier, Concierge, Press — three pathways, each goes to a real human.' },
-  account:    { title: 'Your Atelier · SSM', desc: 'Orders, commissions, fit profile, atelier notes.' },
-  cart:       { title: 'Your Bag · SSM' },
-  checkout:   { title: 'Checkout · SSM' },
-  notfound:   { title: 'This piece is no longer in the atelier · SSM', desc: '' },
+  home:       { title: 'MOTOGRIP GEAR — Road-Cut Leather Jackets & Moto Gear', desc: 'Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options. Built for grip, weather, and daily miles.' },
+  shop:       { title: 'The Gear · MOTOGRIP GEAR', desc: 'Road-cut leather jackets, vests, trousers, and long coats with reinforced hardware and made-to-measure fit options.' },
+  shopWomen:  { title: 'Women\'s Moto Leather Gear · MOTOGRIP GEAR', desc: 'Leather jackets, vests, and trousers cut for movement, structure, and made-to-measure fit.' },
+  shopMen:    { title: 'Men\'s Moto Leather Gear · MOTOGRIP GEAR', desc: 'Cafe racers, double riders, long coats, vests, and leather trousers built for shoulder, reach, and road wear.' },
+  pdp:        { title: '%name% — %cat%, %gender% · MOTOGRIP GEAR' },
+  mto:        { title: 'Made to Measure · MOTOGRIP GEAR', desc: 'Choose the silhouette, leather, hardware, lining, and measurements. Road-cut custom leather gear with a precise fit.' },
+  lookbook:   { title: 'Lookbook · MOTOGRIP GEAR', desc: 'Road-tested leather gear photographed with asphalt, speed, weather, and controlled studio detail.' },
+  journal:    { title: 'Road Notes · MOTOGRIP GEAR', desc: 'Fit notes, hide notes, product testing, and care guidance from MOTOGRIP GEAR.' },
+  about:      { title: 'Brand · MOTOGRIP GEAR', desc: 'Premium motorcycle leather gear built around grip, guard, motion, and precision.' },
+  care:       { title: 'Leather Care Guide · MOTOGRIP GEAR', desc: 'How to clean, condition, store, and keep your MOTOGRIP leather gear road-ready.' },
+  repairs:    { title: 'Repairs & Restoration · MOTOGRIP GEAR', desc: 'Repairable leather, replaceable hardware, and service guidance for long-term gear ownership.' },
+  concierge:  { title: 'Custom & Concierge · MOTOGRIP GEAR', desc: 'Custom leather gear, fit support, and private measurement guidance.' },
+  sustain:    { title: 'Sustainability · MOTOGRIP GEAR', desc: 'Repairable construction, durable leather, and fit options designed to keep gear in rotation longer.' },
+  stockists:  { title: 'Find MOTOGRIP GEAR · Stockists & Fit Garage', desc: 'MOTOGRIP fitting locations, showroom appointments, and trunk shows.' },
+  press:      { title: 'Press · MOTOGRIP GEAR', desc: 'Brand notes, product imagery, and press contact for MOTOGRIP GEAR.' },
+  giftcard:   { title: 'Gift Cards · MOTOGRIP GEAR', desc: 'Give road-cut leather gear without guessing the size.' },
+  faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
+  size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
+  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Complimentary express worldwide. 30-day returns on stock pieces.' },
+  contact:    { title: 'Contact · MOTOGRIP GEAR', desc: 'Fit support, custom orders, press, and service.' },
+  account:    { title: 'Your Garage · MOTOGRIP GEAR', desc: 'Orders, custom builds, fit profile, and service notes.' },
+  cart:       { title: 'Your Bag · MOTOGRIP GEAR' },
+  checkout:   { title: 'Checkout · MOTOGRIP GEAR' },
+  notfound:   { title: 'This gear is no longer available · MOTOGRIP GEAR', desc: '' },
 };
 
 Object.assign(window, {

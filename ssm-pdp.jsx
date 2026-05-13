@@ -14,6 +14,17 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const [notifyOpen, setNotifyOpen] = React.useState(false);
   const [notifyEmail, setNotifyEmail] = React.useState('');
   const [notifyDone, setNotifyDone] = React.useState(false);
+  const [fitMode, setFitMode] = React.useState('standard');
+  const [measurements, setMeasurements] = React.useState({
+    height: '',
+    chest: '',
+    naturalWaist: '',
+    lowerWaist: '',
+    shoulder: '',
+    hips: '',
+    sleeves: '',
+    weight: '',
+  });
 
   const images = [
     { label: 'On model · 3/4', src: p.img },
@@ -27,6 +38,28 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
   const inStock = sizeStock(size) > 0;
   const finalPiece = p.stock && Object.values(p.stock).reduce((a,b) => a+b, 0) <= 4;
+  const madeToMeasureSurcharge = p.madeToMeasureSurcharge ?? 50;
+  const isMadeToMeasure = fitMode === 'made-to-measure';
+  const displayPrice = p.price + (isMadeToMeasure ? madeToMeasureSurcharge : 0);
+  const updateMeasurement = (key, value) => setMeasurements(m => ({ ...m, [key]: value }));
+  const measurementFields = [
+    ['height', 'Height', 'in/cm'],
+    ['chest', 'Chest', 'in/cm'],
+    ['naturalWaist', 'Natural waist', 'in/cm'],
+    ['lowerWaist', 'Lower waist', 'in/cm'],
+    ['shoulder', 'Shoulder', 'in/cm'],
+    ['hips', 'Hips', 'in/cm'],
+    ['sleeves', 'Sleeves', 'in/cm'],
+    ['weight', 'Weight', 'lbs'],
+  ];
+  const productSpecs = [
+    ['Body material', p.story?.craft?.split('.')[0] || p.blurb],
+    ['Leather type', lObj?.name || 'Selected hide'],
+    ['Lining', 'Breathable satin, selected for the house silhouette'],
+    ['Closure', p.cat === 'Pants' ? 'Concealed zip and hand-finished waistband' : 'YKK Excella hardware'],
+    ['Fit service', `Standard sizing or made to measure (+$${madeToMeasureSurcharge})`],
+    ['Customization', 'Available by leather, size, measurements, and custom fit request'],
+  ];
 
   const reviews = [
     { who: 'Iola V., Brooklyn',  rating: 5, date: 'March MMXXVI',  body: `My ${p.name.split(' ')[0]} arrived with a small note from ${p.maker}. Three weeks in, the placket has softened just where I hoped.` },
@@ -90,13 +123,13 @@ function PDP({ product, go, addToCart, onQuickView }) {
         <div style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
             {p.cat.toUpperCase()} · {p.gender.toUpperCase()}
-            {p.tag === 'Atelier' && <> · ATELIER</>}
+            {p.tag === 'Fit Lab' && <> · FIT LAB</>}
             {finalPiece && <> · FINAL PIECES</>}
           </div>
           <h1 className="display" style={{ fontSize: 48, lineHeight: 1, margin: 0, fontWeight: 400 }}>{p.name}</h1>
           <div style={{ color: 'var(--fg-3)', fontSize: 14, marginTop: 12, lineHeight: 1.6 }}>{p.blurb}</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 24, marginBottom: 32 }}>
-            <span className="display" style={{ fontSize: 32 }}>${p.price.toLocaleString()}</span>
+            <span className="display" style={{ fontSize: 32 }}>${displayPrice.toLocaleString()}</span>
             <span className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>USD · DUTIES INCLUDED</span>
           </div>
 
@@ -161,15 +194,71 @@ function PDP({ product, go, addToCart, onQuickView }) {
               {inStock
                 ? (sizeStock(size) <= 2
                     ? `${sizeStock(size)} ${sizeStock(size) === 1 ? 'PIECE' : 'PIECES'} REMAIN IN ${size}`
-                    : `IN ATELIER · ${size}`)
+                    : `IN STOCK · ${size}`)
                 : `SOLD OUT IN ${size} · NOTIFY ME WHEN RESTOCKED`}
             </div>
           )}
 
+          <div style={{ marginBottom: 24 }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+              <span>FIT</span>
+              <span style={{ color: 'var(--fg-4)' }}>MADE TO MEASURE +${madeToMeasureSurcharge}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: isMadeToMeasure ? 14 : 0 }}>
+              {[
+                { id: 'standard', title: 'Standard size', detail: `Cut to size ${size}` },
+                { id: 'made-to-measure', title: 'Made to measure', detail: `Pattern adjusted from your measurements · +$${madeToMeasureSurcharge}` },
+              ].map(opt => {
+                const active = fitMode === opt.id;
+                return (
+                  <button key={opt.id} onClick={() => setFitMode(opt.id)}
+                    aria-pressed={active}
+                    style={{
+                      textAlign: 'left', padding: 14, border: `1px solid ${active ? 'var(--accent-2)' : 'var(--line-2)'}`,
+                      background: active ? 'rgba(176,138,76,0.08)' : 'transparent',
+                      color: 'var(--fg)', minHeight: 82, cursor: 'pointer',
+                    }}>
+                    <div style={{ fontFamily: 'var(--display)', fontSize: 18, lineHeight: 1.1 }}>{opt.title}</div>
+                    <div className="mono" style={{ fontSize: 8, color: active ? 'var(--accent-2)' : 'var(--fg-4)', marginTop: 8, lineHeight: 1.5 }}>
+                      {opt.detail.toUpperCase()}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {isMadeToMeasure && (
+              <div className="page-fade" style={{
+                display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10,
+                padding: 14, border: '1px solid var(--line)', background: 'var(--bg-2)',
+              }}>
+                {measurementFields.map(([key, label, placeholder]) => (
+                  <label key={key} className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {label.toUpperCase()}
+                    <input value={measurements[key]} onChange={e => updateMeasurement(key, e.target.value)}
+                      placeholder={placeholder}
+                      style={{
+                        width: '100%', padding: '10px 0', background: 'transparent', border: 'none',
+                        borderBottom: '1px solid var(--line-2)', color: 'var(--fg)',
+                        fontFamily: 'var(--sans)', fontSize: 13, outline: 'none',
+                      }} />
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           {inStock ? (
             <button className="btn" style={{ width: '100%', justifyContent: 'center', marginBottom: 8 }}
-              onClick={() => addToCart(p, { leather: lObj.name, size })}>
-              Add to Bag — ${p.price.toLocaleString()}
+              onClick={() => addToCart(p, {
+                leather: lObj.name,
+                size,
+                price: displayPrice,
+                surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
+                fitMode,
+                fitLabel: isMadeToMeasure ? 'Made to measure' : 'Standard size',
+                measurements: isMadeToMeasure ? measurements : null,
+              })}>
+              Add to Bag — ${displayPrice.toLocaleString()}
             </button>
           ) : (
             <>
@@ -202,7 +291,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
           )}
           <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 24 }}
             onClick={() => go('mto', { startWith: p })}>
-            Customize in Atelier <Icon name="arrow" size={14} />
+            Customize in Fit Lab <Icon name="arrow" size={14} />
           </button>
 
           {/* Made-by line */}
@@ -223,7 +312,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
             { id: 'details', t: 'The Piece', content: p.story?.piece || p.blurb },
             { id: 'craft',   t: 'The Craft', content: p.story?.craft || 'Twelve months in our vegetable-tanning pit, cut by hand from the central panels.' },
             { id: 'fit',     t: 'Fit & Care', content: p.story?.fit || 'Slim-regular fit through chest and shoulder. Wipe with a soft cloth; condition twice yearly.' },
-            { id: 'origin',  t: 'Made by', content: p.story?.origin || 'Cut and signed in our Brooklyn workshop.' },
+            { id: 'specs',   t: 'Specifications', content: productSpecs },
+            { id: 'origin',  t: 'Made by', content: p.story?.origin || 'Cut and checked in the MOTOGRIP fit room.' },
             { id: 'ship',    t: 'Shipping & Returns', content: 'Complimentary express shipping worldwide. 30-day returns on stock pieces. Made-to-order pieces are final sale, with complimentary fit alterations within 60 days of receipt.' },
           ].map(s => (
             <div key={s.id} style={{ borderTop: '1px solid var(--line)' }}>
@@ -237,7 +327,16 @@ function PDP({ product, go, addToCart, onQuickView }) {
               </button>
               {openSection === s.id && (
                 <div className="page-fade" style={{ paddingBottom: 18, color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.75 }}>
-                  {s.content}
+                  {Array.isArray(s.content) ? (
+                    <div style={{ borderTop: '1px solid var(--line-2)' }}>
+                      {s.content.map(([feature, spec]) => (
+                        <div key={feature} style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: 16, padding: '12px 0', borderBottom: '1px solid var(--line)' }}>
+                          <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>{feature.toUpperCase()}</div>
+                          <div>{spec}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : s.content}
                 </div>
               )}
             </div>
@@ -299,7 +398,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.sleeve}</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.length}</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: stk === 0 ? 'var(--fg-4)' : (stk <= 2 ? 'var(--accent-2)' : 'var(--fg-2)'), padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>
-                  {stk === 0 ? 'SOLD OUT' : stk <= 2 ? `${stk} REMAIN` : 'IN ATELIER'}
+                  {stk === 0 ? 'SOLD OUT' : stk <= 2 ? `${stk} REMAIN` : 'IN STOCK'}
                 </div>
                 <div style={{ padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>
                   {r.s !== size && (

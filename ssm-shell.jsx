@@ -3,6 +3,35 @@
 // a footer with real link wiring, and a small "Estimated delivery" note in
 // the bag drawer.
 
+function MotoGripLogo({ compact = false }) {
+  const mark = compact ? 26 : 34;
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      gap: compact ? 8 : 10, color: 'var(--fg)', minWidth: 0,
+    }}>
+      <svg width={mark} height={mark} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <path d="M10 7h28l6 7v19L24 43 4 33V14z" fill="var(--bg-3)" stroke="var(--accent-2)" strokeWidth="2"/>
+        <path d="M12 33 31 14M20 38l16-16" stroke="var(--fg)" strokeWidth="2.2" strokeLinecap="round"/>
+        <path d="M14 14h7l3 8 3-8h7" fill="none" stroke="var(--fg)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      <div style={{ textAlign: 'left', lineHeight: 1, minWidth: 0 }}>
+        <div className="mono" style={{
+          fontSize: compact ? 12 : 16, letterSpacing: compact ? '0.12em' : '0.16em',
+          fontWeight: 700, whiteSpace: 'nowrap',
+        }}>
+          MOTOGRIP
+        </div>
+        {!compact && (
+          <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 5, letterSpacing: '0.22em', whiteSpace: 'nowrap' }}>
+            GEAR · ROAD ARMOR
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -62,17 +91,9 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
         )}
 
         {/* CENTER: logo */}
-        <button onClick={() => go('home')} aria-label="SSM Home"
+        <button onClick={() => go('home')} aria-label="MOTOGRIP GEAR Home"
           style={{ cursor: 'pointer', textAlign: 'center', background: 'transparent', border: 0, padding: 0, color: 'var(--fg)' }}>
-          <div style={{
-            fontFamily: 'var(--display)', fontSize: isMobile ? 22 : 28,
-            letterSpacing: '0.32em', fontWeight: 500, paddingLeft: '0.32em',
-          }}>SSM</div>
-          {!isMobile && (
-            <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: -2, letterSpacing: '0.4em' }}>
-              ATELIER · EST. 2014
-            </div>
-          )}
+          <MotoGripLogo compact={isMobile} />
         </button>
 
         {/* RIGHT: actions */}
@@ -102,7 +123,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
           background: 'var(--bg)', padding: '20px',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 22, letterSpacing: '0.32em', paddingLeft: '0.32em' }}>SSM</div>
+            <MotoGripLogo compact />
             <button onClick={() => setMobileOpen(false)} aria-label="Close menu"
               style={{ background: 'transparent', border: 0, padding: 4, color: 'var(--fg)', cursor: 'pointer' }}>
               <Icon name="close" size={20} />
@@ -201,7 +222,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
             <div style={{ padding: '80px 0', textAlign: 'center', color: 'var(--fg-3)' }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 8 }}>The bag is empty.</div>
               <div className="mono" style={{ fontSize: 10, marginBottom: 24 }}>BEGIN WITH A PIECE</div>
-              <button className="btn" onClick={() => { onClose(); go('shop'); }}>Browse Atelier</button>
+              <button className="btn" onClick={() => { onClose(); go('shop'); }}>Browse Gear</button>
             </div>
           ) : items.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 16, padding: '20px 0', borderBottom: '1px solid var(--line)' }}>
@@ -212,6 +233,19 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
                   {item.leather} · SIZE {item.size}
                 </div>
+                {item.fitLabel && (
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 5 }}>
+                    {item.fitLabel.toUpperCase()}{item.surcharge ? ` · +$${item.surcharge}` : ''}
+                  </div>
+                )}
+                {item.measurements && Object.values(item.measurements).some(Boolean) && (
+                  <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 5, lineHeight: 1.6 }}>
+                    {Object.entries(item.measurements)
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1').toUpperCase()}: ${v}`)
+                      .join(' · ')}
+                  </div>
+                )}
                 <div style={{ flex: 1 }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--line)', padding: '6px 10px' }}>
@@ -240,7 +274,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
           <div style={{ padding: '20px 32px', borderTop: '1px solid var(--line)', background: 'var(--bg-3)' }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               <input value={promo} onChange={e => setPromo(e.target.value)}
-                placeholder="Atelier code (optional)"
+                placeholder="Fit note (optional)"
                 style={{ flex: 1, background: 'transparent', border: 'none',
                   borderBottom: '1px solid var(--line-2)', padding: '8px 0',
                   color: 'var(--fg)', fontFamily: 'var(--mono)', fontSize: 11, outline: 'none' }} />
@@ -357,7 +391,7 @@ function SearchOverlay({ open, onClose, onSubmit }) {
     if (q.trim()) onSubmit(q.trim());
   };
 
-  const suggestions = ['Voltaire', 'Cognac', 'Tannery', 'Trousers', 'Made to Order'];
+  const suggestions = ['Biker jacket', 'Cafe racer', 'Made to measure', 'Trousers', 'Road armor'];
 
   return (
     <div className="page-fade" style={{
@@ -375,7 +409,7 @@ function SearchOverlay({ open, onClose, onSubmit }) {
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24, letterSpacing: '0.4em' }}>
-          ✦ &nbsp; SEARCH THE ATELIER &nbsp; ✦
+          MOTOGRIP GEAR · SEARCH
         </div>
         <form onSubmit={submit} style={{ width: '100%', maxWidth: 720 }}>
           <input ref={inputRef} value={q} onChange={e => setQ(e.target.value)}
@@ -406,9 +440,9 @@ function SearchOverlay({ open, onClose, onSubmit }) {
 
 function Footer({ go }) {
   const cols = [
-    { h: 'Atelier', items: [
-      { l: 'Made to Order', go: () => go('mto') },
-      { l: 'Bespoke / Concierge', go: () => go('concierge') },
+    { h: 'Fit Lab', items: [
+      { l: 'Made to Measure', go: () => go('mto') },
+      { l: 'Custom / Concierge', go: () => go('concierge') },
       { l: 'Leather Care', go: () => go('care') },
       { l: 'Repairs & Restoration', go: () => go('repairs') },
     ] },
@@ -420,7 +454,7 @@ function Footer({ go }) {
       { l: 'Pants', go: () => go('shop', { cat: 'Pants' }) },
       { l: 'Gift Cards', go: () => go('giftcard') },
     ] },
-    { h: 'House', items: [
+    { h: 'Brand', items: [
       { l: 'Heritage', go: () => go('about') },
       { l: 'Workshop', go: () => go('about') },
       { l: 'Lookbook', go: () => go('lookbook') },
@@ -444,13 +478,13 @@ function Footer({ go }) {
         display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: 48, marginBottom: 56,
       }}>
         <div>
-          <div style={{ fontFamily: 'var(--display)', fontSize: 32, letterSpacing: '0.32em', paddingLeft: '0.32em', marginBottom: 16 }}>SSM</div>
+          <div style={{ marginBottom: 16 }}><MotoGripLogo /></div>
           <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7, maxWidth: 320, marginBottom: 24 }}>
-            Made by hand in a Brooklyn atelier. Each piece is the work of a single craftsperson, signed and numbered.
+            Road-cut leather gear with measured fit, reinforced hardware, and made-to-measure options for riders who notice the details.
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <input type="email" placeholder="Email for atelier dispatches"
-              aria-label="Email for atelier dispatches"
+            <input type="email" placeholder="Email for road notes"
+              aria-label="Email for road notes"
               style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: '1px solid var(--line-2)',
                 padding: '10px 0', color: 'var(--fg)', fontFamily: 'var(--sans)', fontSize: 12, outline: 'none' }} />
             <button className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)', background: 'transparent', border: 0, cursor: 'pointer' }}>
@@ -458,7 +492,7 @@ function Footer({ go }) {
             </button>
           </div>
           <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 12, lineHeight: 1.7, maxWidth: 320 }}>
-            FIRST VIEWING OF EVERY CHAPTER · NO DISCOUNTS · UNSUBSCRIBE ANY TIME
+            NEW DROPS · FIT NOTES · PRODUCT TESTS · UNSUBSCRIBE ANY TIME
           </div>
         </div>
         {cols.map(col => (
@@ -476,7 +510,7 @@ function Footer({ go }) {
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 32, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 16 }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>© SSM ATELIER · BROOKLYN, NY · ALL RIGHTS RESERVED</div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>© MOTOGRIP GEAR · ROAD ARMOR · ALL RIGHTS RESERVED</div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => go('faq')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>PRIVACY</button>
           <button onClick={() => go('faq')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>TERMS</button>
@@ -502,4 +536,4 @@ function Marquee({ items }) {
   );
 }
 
-Object.assign(window, { Header, Footer, CartDrawer, QuickView, SearchOverlay, Marquee, Icon });
+Object.assign(window, { Header, Footer, CartDrawer, QuickView, SearchOverlay, Marquee, Icon, MotoGripLogo });

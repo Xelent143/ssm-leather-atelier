@@ -13,3 +13,5 @@ npm-debug.log*
 # Local artifacts
 *.log
 .vercel
+assets/generated/_orig/
+assets/generated/atelier-workbench.jpg

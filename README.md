@@ -1,8 +1,9 @@
-# SSM Leather Atelier
+# MOTOGRIP GEAR
 
-A luxury leather house — Brooklyn-cut jackets, vests and trousers, hand-numbered.
-This repo is the public site: a static React prototype with a Made-to-Order
-configurator, a journal, a lookbook, and the rest of the house.
+Premium motorcycle leather gear — road-cut jackets, vests and trousers with
+made-to-measure fit options. This repo is the public site: a static React
+prototype with a product page, made-to-measure cart flow, journal, lookbook,
+and brand system.
 
 ## What's inside
 
@@ -36,8 +37,23 @@ Or just open `index.html` directly — it's self-contained.
 
 ## Deploy
 
-This is a static site. `vercel.json` handles caching headers and the JSX
-content-type so Vercel serves the app correctly. To deploy:
+This is a static site. Railway runs `npm start`, which serves `index.html`
+and assets through `server.js` on the required `$PORT`.
+
+```bash
+npm start
+```
+
+Railway CLI deployment:
+
+```bash
+npx @railway/cli login
+npx @railway/cli init
+npx @railway/cli up
+```
+
+Vercel is still supported. `vercel.json` handles caching headers and the JSX
+content-type so Vercel serves the app correctly:
 
 ```bash
 vercel --prod
@@ -48,12 +64,13 @@ vercel --prod
 * React 18 (UMD)
 * Babel-standalone for in-browser JSX (no build step)
 * Cormorant Garamond + Inter + JetBrains Mono
-* CSS variables for the dark / light / heritage palettes
+* CSS variables for the light / dark / heritage palettes
 
 When the site graduates to production, port the JSX into a Vite + React
 toolchain (see `SSM_AUDIT_AND_BUILD_PLAN.md` for the full migration plan).
 
 ## Brand voice
 
-Concrete over abstract. Italicized second clause. Roman section markers,
-mono caption labels. Every product piece is signed by the maker who cut it.
+Direct, road-tested, fit-aware, and precise. See
+`MOTOGRIP_BRAND_IDENTITY.md` for the full identity, voice, logo, and imagery
+prompt system.

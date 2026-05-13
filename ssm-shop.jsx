@@ -37,14 +37,14 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
       const ok = sizes.some(s => !p.stock || p.stock[s] > 0);
       if (!ok) return false;
     }
-    // availability — illustrative: 'In atelier' is everything with stock,
-    // 'Made to order' is everything (since MTO is offered for all),
+    // availability - illustrative: 'In stock' is everything with stock,
+    // 'Made to measure' is everything (since MTO is offered for all),
     // 'Final pieces' = total stock <=2.
     if (availability.length) {
       const total = p.stock ? Object.values(p.stock).reduce((a,b) => a+b, 0) : 99;
       const tags = [];
-      if (total > 0) tags.push('In atelier');
-      tags.push('Made to order');
+      if (total > 0) tags.push('In stock');
+      tags.push('Made to measure');
       if (total <= 4) tags.push('Final pieces');
       if (!availability.some(a => tags.includes(a))) return false;
     }
@@ -80,7 +80,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     <div className="page-fade">
       <section style={{ padding: '64px 48px 32px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-          ATELIER {gender !== 'All' ? `· ${gender.toUpperCase()}` : ''} {cat !== 'All' ? `· ${cat.toUpperCase()}` : ''}
+          GEAR {gender !== 'All' ? `· ${gender.toUpperCase()}` : ''} {cat !== 'All' ? `· ${cat.toUpperCase()}` : ''}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 24 }}>
           <h1 className="display" style={{ fontSize: 'clamp(48px, 7vw, 104px)', margin: 0, lineHeight: 0.95, fontWeight: 400 }}>
@@ -224,7 +224,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
             </div>
             <div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 14 }}>AVAILABILITY</div>
-              {['In atelier', 'Made to order', 'Final pieces'].map(a => {
+              {['In stock', 'Made to measure', 'Final pieces'].map(a => {
                 const checked = availability.includes(a);
                 return (
                   <label key={a} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', cursor: 'pointer', color: 'var(--fg-2)', fontSize: 12 }}>
@@ -279,16 +279,16 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
             ON THE COLLECTION
           </div>
           <div style={{ maxWidth: 720, fontSize: 16, color: 'var(--fg-3)', lineHeight: 1.85 }}>
-            Every piece in the SSM collection is cut from the central panels of a single vegetable-tanned hide and signed inside the placket by the maker. We make twelve silhouettes — four jackets, three vests, three trousers, two long coats — in editions of no more than 250 a year. Each piece carries a lifetime repair promise and a hand-numbered card.
+            Every piece in the MOTOGRIP GEAR collection is cut for movement first: reach at the shoulder, clean structure at the chest, reinforced hardware, and leather that earns its patina on the road. Stock sizing is available now; made-to-measure fit adds $50 and can be tuned per product in the backend later.
           </div>
           <div style={{ marginTop: 24, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <button className="mono ulink" onClick={() => go('about')}
               style={{ fontSize: 10, color: 'var(--accent-2)', background: 'transparent', border: 0, cursor: 'pointer' }}>
-              READ THE HERITAGE →
+              READ THE BRAND →
             </button>
             <button className="mono ulink" onClick={() => go('mto')}
               style={{ fontSize: 10, color: 'var(--accent-2)', background: 'transparent', border: 0, cursor: 'pointer' }}>
-              CONTINUE IN ATELIER →
+              START MADE TO MEASURE →
             </button>
           </div>
         </section>

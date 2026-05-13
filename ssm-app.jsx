@@ -20,10 +20,10 @@ function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
     : (view === 'shop' && params?.gender === 'Men') ? SSM_SEO.shopMen
     : SSM_SEO[view] || SSM_SEO.home;
-  let title = seo?.title || 'SSM — Leather Atelier';
+  let title = seo?.title || 'MOTOGRIP GEAR — Road-Cut Leather Jackets & Moto Gear';
   let desc  = seo?.desc  || '';
-  if (view === 'pdp' && params?.product) {
-    const p = params.product;
+  if (view === 'pdp') {
+    const p = params?.product || SSM_PRODUCTS[0];
     title = SSM_SEO.pdp.title
       .replace('%name%', p.name)
       .replace('%cat%', p.cat)
@@ -31,7 +31,7 @@ function applySEO(view, params) {
     desc = (p.story?.piece || p.blurb || '').slice(0, 158);
   }
   if (view === 'article' && params?.article) {
-    title = `${params.article.title} · SSM Journal`;
+    title = `${params.article.title} · MOTOGRIP Road Notes`;
     desc = params.article.dek || '';
   }
   document.title = title;
@@ -40,7 +40,7 @@ function applySEO(view, params) {
     m = document.createElement('meta'); m.setAttribute('name', 'description');
     document.head.appendChild(m);
   }
-  m.setAttribute('content', desc || 'Vegetable-tanned, hand-stitched, hand-numbered. Made by a single craftsperson in our Brooklyn workshop.');
+  m.setAttribute('content', desc || 'Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options.');
 }
 
 function App() {
@@ -88,16 +88,24 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  // Cart merging — same product + size + leather increments qty rather than dupes.
+  // Cart merging — same product + size + leather + fit selection increments qty.
   const addToCart = (product, opts) => {
     setCart(prev => {
-      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}`;
+      const measurementSig = (m) => m ? Object.entries(m).map(([k, v]) => `${k}:${v || ''}`).join('|') : '';
+      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}|${it.fitMode || 'standard'}|${measurementSig(it.measurements)}`;
       const incoming = {
         baseId: product.id,
         id: product.id + '-' + Date.now(),
-        name: product.name, price: product.price, qty: 1,
+        name: product.name,
+        price: opts.price ?? (product.price + (opts.surcharge || 0)),
+        basePrice: product.price,
+        surcharge: opts.surcharge || 0,
+        qty: 1,
         img: product.img,
         leather: opts.leather, size: opts.size,
+        fitMode: opts.fitMode || 'standard',
+        fitLabel: opts.fitLabel || null,
+        measurements: opts.measurements || null,
       };
       const idx = prev.findIndex(it => sig(it) === sig(incoming));
       if (idx > -1) {
@@ -116,7 +124,7 @@ function App() {
   };
 
   const themeClass =
-    (t.palette === 'light' ? 'theme-light ' : t.palette === 'heritage' ? 'theme-heritage ' : '') +
+    (t.palette === 'dark' ? 'theme-dark ' : t.palette === 'heritage' ? 'theme-heritage ' : 'theme-light ') +
     'font-' + t.displayFont;
 
   return (
@@ -157,7 +165,7 @@ function App() {
       <QuickView product={quickView} onClose={() => setQuickView(null)} addToCart={addToCart} go={go} />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} onSubmit={submitSearch} />
 
-      <TweaksPanel title="SSM · Tweaks">
+      <TweaksPanel title="MOTOGRIP · Tweaks">
         <TweakSection label="Palette" />
         <TweakRadio label="Theme" value={t.palette}
           options={[

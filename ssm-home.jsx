@@ -21,26 +21,26 @@ function HeroFullbleed() {
       }}>
         <div style={{ maxWidth: 640 }}>
           <div className="mono" style={{ fontSize: 11, color: 'var(--accent-2)', marginBottom: 24, letterSpacing: '0.3em' }}>
-            ATELIER · COLLECTION X
+            MOTOGRIP GEAR · ROAD ARMOR
           </div>
           <h1 className="display" style={{
             fontSize: 'clamp(56px, 8vw, 124px)', lineHeight: 0.96, margin: 0, fontWeight: 400,
           }}>
-            Built for the<br/>
-            <em style={{ fontFamily: 'var(--display)', fontStyle: 'italic', color: 'var(--accent-2)' }}>quiet rebellion</em>
+            Built for the lean.<br/>
+            <em style={{ fontFamily: 'var(--display)', fontStyle: 'italic', color: 'var(--accent-2)' }}>Cut for the grip.</em>
           </h1>
           <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7, maxWidth: 480, marginTop: 28 }}>
-            Vegetable-tanned hides. Hand-cut, hand-stitched, hand-numbered. The new winter collection is now in the atelier.
+            Protective leather gear with measured fit, road-ready hardware, and made-to-measure options for the rider, not the rack.
           </div>
         </div>
         <div style={{ display: 'flex', gap: 12, paddingBottom: 6 }}>
-          <button className="btn">Discover the Collection</button>
-          <button className="btn btn-ghost">Watch the Film</button>
+          <button className="btn">Shop the Gear</button>
+          <button className="btn btn-ghost">Build Your Fit</button>
         </div>
       </div>
       <div style={{ position: 'absolute', right: 48, top: 120, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', letterSpacing: '0.4em' }}>
-          N° 047 / 250 · MMXXVI
+          ROAD SPEC / MMXXVI
         </div>
       </div>
     </section>
@@ -58,22 +58,22 @@ function HeroSplit() {
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
         background: 'var(--bg)',
       }}>
-        <div className="mono" style={{ fontSize: 11, color: 'var(--accent-2)', marginBottom: 32 }}>WINTER · MMXXVI</div>
+        <div className="mono" style={{ fontSize: 11, color: 'var(--accent-2)', marginBottom: 32 }}>ROAD SPEC · MMXXVI</div>
         <h1 className="display" style={{ fontSize: 'clamp(48px, 6vw, 88px)', lineHeight: 1, margin: 0, fontWeight: 400 }}>
-          Hides that<br/>remember.
+          Leather that<br/>holds.
         </h1>
         <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7, marginTop: 32, maxWidth: 440 }}>
-          Twelve months in the tanning pit. Two weeks under the cutter's knife. A lifetime on your shoulders. Each piece signed by the hand that made it.
+          Abrasion-minded hides, shoulder room for the reach, hardware that works with gloves on. Built for long miles and clean lines.
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 40 }}>
-          <button className="btn">Shop the Edit</button>
-          <button className="btn btn-ghost">The Atelier</button>
+          <button className="btn">Shop the Gear</button>
+          <button className="btn btn-ghost">Fit Lab</button>
         </div>
         <div style={{ marginTop: 'auto', paddingTop: 64, display: 'flex', gap: 32 }}>
           {[
-            { n: '01', t: 'Single-maker' },
-            { n: '02', t: 'Vegetable-tanned' },
-            { n: '03', t: 'Lifetime repair' },
+            { n: '01', t: 'Ride-cut' },
+            { n: '02', t: 'Reinforced' },
+            { n: '03', t: 'Made to measure' },
           ].map(s => (
             <div key={s.n}>
               <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)' }}>{s.n}</div>
@@ -100,20 +100,20 @@ function HeroCentered() {
       <div style={{ position: 'absolute', inset: 0, background: 'var(--hero-center-scrim)' }} />
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 36, letterSpacing: '0.4em' }}>
-        ✦ &nbsp; ATELIER · MMXXVI &nbsp; ✦
+        MOTOGRIP · ROAD ARMOR
       </div>
       <h1 className="display" style={{
         fontSize: 'clamp(64px, 11vw, 180px)', lineHeight: 0.92, margin: 0, fontWeight: 400, letterSpacing: '-0.02em',
       }}>
-        Every stitch,<br/>
-        <em style={{ color: 'var(--accent-2)' }}>a small vow.</em>
+        Every panel,<br/>
+        <em style={{ color: 'var(--accent-2)' }}>a purpose.</em>
       </h1>
       <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7, maxWidth: 560, marginTop: 32 }}>
-        Vegetable-tanned leather. Cut by hand, finished by feel. Made to remain.
+        Jackets, vests, and leather trousers cut to move on the bike and hold their line off it.
       </div>
       <div style={{ display: 'flex', gap: 12, marginTop: 40 }}>
-        <button className="btn">Discover the Collection</button>
-        <button className="btn btn-ghost">Made to Order →</button>
+        <button className="btn">Shop the Gear</button>
+        <button className="btn btn-ghost">Made to Measure →</button>
       </div>
       </div>
       <div style={{ position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, zIndex: 2 }}>
@@ -133,9 +133,9 @@ function ProductCard({ product, onQuickView, go }) {
         {product.tag && (
           <div className="mono" style={{
             position: 'absolute', top: 16, left: 16,
-            fontSize: 9, color: product.tag === 'Atelier' ? 'var(--accent-2)' : 'var(--fg)',
-            background: product.tag === 'Atelier' ? 'transparent' : 'rgba(10,9,8,0.5)',
-            border: product.tag === 'Atelier' ? '1px solid var(--accent-2)' : 'none',
+            fontSize: 9, color: product.tag === 'Fit Lab' ? 'var(--accent-2)' : 'var(--fg)',
+            background: product.tag === 'Fit Lab' ? 'transparent' : 'rgba(10,9,8,0.5)',
+            border: product.tag === 'Fit Lab' ? '1px solid var(--accent-2)' : 'none',
             padding: '5px 9px', letterSpacing: '0.18em',
           }}>{product.tag}</div>
         )}
@@ -161,10 +161,10 @@ function ProductCard({ product, onQuickView, go }) {
 
 function CategoryStrip({ go }) {
   const cats = [
-    { name: 'Jackets', label: 'OUTERWEAR · 24 PIECES', filter: 'Jackets', img: SSM_IMAGES.catJackets },
+    { name: 'Jackets', label: 'ROAD ARMOR · 24 PIECES', filter: 'Jackets', img: SSM_IMAGES.catJackets },
     { name: 'Vests', label: 'LAYERING · 12 PIECES', filter: 'Vests', img: SSM_IMAGES.catVests },
-    { name: 'Trousers', label: 'TAILORING · 16 PIECES', filter: 'Pants', img: SSM_IMAGES.catPants },
-    { name: 'Atelier', label: 'MADE TO ORDER · BESPOKE', filter: null, view: 'mto', img: SSM_IMAGES.catAtelier },
+    { name: 'Trousers', label: 'RIDE-CUT · 16 PIECES', filter: 'Pants', img: SSM_IMAGES.catPants },
+    { name: 'Fit Lab', label: 'MADE TO MEASURE · CUSTOM', filter: null, view: 'mto', img: SSM_IMAGES.catAtelier },
   ];
   return (
     <section style={{ padding: '120px 48px 80px' }}>
@@ -172,7 +172,7 @@ function CategoryStrip({ go }) {
         <div>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>I · CATEGORIES</div>
           <h2 className="display" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', margin: 0, lineHeight: 1, fontWeight: 400 }}>
-            Four houses, one hide.
+            Four ways to gear up.
           </h2>
         </div>
         <span className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)' }}>VIEW ALL →</span>
@@ -208,7 +208,7 @@ function FeaturedRow({ products, onQuickView, go }) {
         <div>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>II · NEW ARRIVALS</div>
           <h2 className="display" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', margin: 0, lineHeight: 1, fontWeight: 400 }}>
-            Just off the bench.
+            Fresh from the road room.
           </h2>
         </div>
         <span className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)' }} onClick={() => go('shop')}>VIEW ALL →</span>
@@ -232,7 +232,7 @@ function AtelierFeature({ go }) {
             Cut to the<br/>contour of you.
           </h2>
           <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.8, marginBottom: 32 }}>
-            Choose the hide, the lining, the hardware, the silhouette. A single craftsperson is assigned to your piece, and you correspond with them throughout. Six to ten weeks. One of one.
+            Choose the hide, lining, hardware, and silhouette. Add made-to-measure notes when stock sizing needs rider-specific reach, chest, waist, or sleeve refinement.
           </div>
           <div style={{ display: 'flex', gap: 32, marginBottom: 40 }}>
             {[
@@ -246,7 +246,7 @@ function AtelierFeature({ go }) {
               </div>
             ))}
           </div>
-          <button className="btn" onClick={() => go('mto')}>Begin a Commission <Icon name="arrow" size={14} /></button>
+          <button className="btn" onClick={() => go('mto')}>Start the Fit <Icon name="arrow" size={14} /></button>
         </div>
         <div className="ph grain" data-img="1" data-label=""
           style={{ aspectRatio: '4/5', '--img': `url(${SSM_IMAGES.atelier})` }} />
@@ -310,7 +310,7 @@ function Home({ go, onQuickView, heroVariant }) {
   return (
     <div className="page-fade">
       <Hero variant={heroVariant} />
-      <Marquee items={['HAND-CUT IN BROOKLYN', 'COMPLIMENTARY GLOBAL SHIPPING', 'LIFETIME REPAIR PROMISE', 'EVERY PIECE NUMBERED', 'VEGETABLE-TANNED HIDES', 'ATELIER MMXXVI']} />
+      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'COMPLIMENTARY GLOBAL SHIPPING', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
       <CategoryStrip go={go} />
       <FeaturedRow products={SSM_PRODUCTS} onQuickView={onQuickView} go={go} />
       <AtelierFeature go={go} />

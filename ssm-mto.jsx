@@ -40,7 +40,7 @@ function MTO({ go, startWith, addToCart }) {
     <div className="page-fade">
       <div style={{ padding: '40px 48px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>ATELIER · MADE TO ORDER</div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>FIT LAB · MADE TO MEASURE</div>
           <h1 className="display" style={{ fontSize: 'clamp(48px, 6vw, 88px)', margin: 0, lineHeight: 0.95, fontWeight: 400 }}>
             Begin a commission.
           </h1>
@@ -284,7 +284,7 @@ function MTO({ go, startWith, addToCart }) {
           <div style={{ marginTop: 32, padding: 20, background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
             <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginBottom: 6 }}>EST. DELIVERY</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 22 }}>August 2026</div>
-            <div style={{ color: 'var(--fg-3)', fontSize: 12, marginTop: 6 }}>Shipped from Brooklyn, signed for at receipt.</div>
+            <div style={{ color: 'var(--fg-3)', fontSize: 12, marginTop: 6 }}>Shipped from the MOTOGRIP Fit Garage, signed for at receipt.</div>
           </div>
         </aside>
       </div>

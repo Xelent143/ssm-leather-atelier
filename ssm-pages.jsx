@@ -173,7 +173,7 @@ function Journal({ go }) {
 
       <CTAStrip
         title="The first viewing of every chapter."
-        body="Subscribe to atelier dispatches — we send a short note when a journal entry, a lookbook chapter or a small batch of pieces leaves the workshop. No discounts, no surveys, no other people's products."
+        body="Subscribe to road notes - we send a short note when a journal entry, lookbook chapter, or small batch of gear leaves the fit room. No discounts, no surveys, no other people's products."
         primary="Subscribe"
         ghost="Continue to the shop"
         onPrimary={() => {}}
@@ -340,7 +340,7 @@ function Repairs({ go }) {
       />
 
       <PrincipleTriad items={[
-        { n: 'I', t: 'Post', c: 'Write to repairs@ssm.example with photos. We respond within two working days with a return label and a short questionnaire.' },
+        { n: 'I', t: 'Post', c: 'Write to service@motogripgear.example with photos. We respond within two working days with a return label and a short questionnaire.' },
         { n: 'II', t: 'Assess', c: 'Your piece is examined by the maker who signed it, where possible. We send a quote and a timeline. Most work is included; some is not. We are honest about both.' },
         { n: 'III', t: 'Return', c: 'Approximately six weeks from receipt. We ship it back signed-for, conditioned, with a small handwritten note from the bench.' },
       ]} />
@@ -407,7 +407,7 @@ function Concierge({ go }) {
         eyebrow="IX · CONCIERGE & BESPOKE"
         title="A piece"
         italic="from a single conversation."
-        dek="Bespoke is the ground-up commission — your silhouette, your hide, your hardware, fit in person at the Brooklyn studio. Beyond Made-to-Order. Reserved for the houses we already know."
+        dek="Custom is the ground-up commission: your silhouette, your hide, your hardware, fit in person at the MOTOGRIP Fit Garage. Beyond standard made-to-measure. Reserved for the builds we can execute properly."
         image={SSM_IMAGES.concierge}
       />
 
@@ -429,7 +429,7 @@ function Concierge({ go }) {
           </div>
           {[
             { n: '01', t: 'Initial conversation', c: 'A 45-minute call or studio visit. We discuss your wardrobe, the piece you have in mind, and whether bespoke is the right answer.' },
-            { n: '02', t: 'First fitting', c: 'In Brooklyn or by appointment in Paris. Measurements, hide selection, sketches.' },
+            { n: '02', t: 'First fitting', c: 'In Los Angeles or by appointment in Paris. Measurements, hide selection, sketches.' },
             { n: '03', t: 'Toile', c: 'A muslin or scrap-leather mock-up. We review the line and make adjustments.' },
             { n: '04', t: 'Final fitting', c: 'The finished piece, in your hands, with the maker who built it.' },
           ].map(s => (
@@ -448,7 +448,7 @@ function Concierge({ go }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
           {[
-            { t: 'Existing client', c: 'You already own one or more SSM pieces.' },
+            { t: 'Existing client', c: 'You already own one or more MOTOGRIP pieces.' },
             { t: 'Or referred', c: 'A current client has written to us on your behalf.' },
             { t: 'Commission begins at $5,000', c: 'Including all fittings, the hide, and the maker\'s time. A 30% deposit secures the calendar slot.' },
           ].map(p => (
@@ -540,7 +540,7 @@ function Stockists({ go }) {
         eyebrow="XI · STOCKISTS & STUDIO"
         title="Three doors"
         italic="and a calendar."
-        dek="The Brooklyn studio is the home of the workshop. Paris is by appointment. Tokyo we visit twice a year."
+        dek="The MOTOGRIP Fit Garage is the home of the measurement room. Paris is by appointment. Tokyo we visit twice a year."
       />
 
       <section style={{ padding: '0 48px 96px' }}>
@@ -579,7 +579,7 @@ function Stockists({ go }) {
       </section>
 
       <CTAStrip
-        title="Visiting Brooklyn?"
+        title="Visiting the Fit Garage?"
         body="Write ahead. The workshop is small; we open the door for one client at a time and we want yours to be unhurried."
         primary="Request a studio visit"
         ghost="Continue browsing"
@@ -630,7 +630,7 @@ function Press({ go }) {
           PRESS ENQUIRIES
         </div>
         <div className="display" style={{ fontSize: 32, lineHeight: 1.3 }}>
-          press@ssm.example
+          press@motogripgear.example
         </div>
         <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7, marginTop: 16 }}>
           Press kit (logos, lookbook PDFs, founders' bios) available on request. We generally respond within two working days.
@@ -727,9 +727,9 @@ function GiftCards({ go }) {
           }}>
             <div>
               <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', letterSpacing: '0.4em', marginBottom: 12 }}>
-                ATELIER · GIFT
+                MOTOGRIP · GIFT
               </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 36, color: '#e8d9b8', letterSpacing: '0.32em' }}>SSM</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 22, color: '#e8d9b8', letterSpacing: '0.18em', fontWeight: 700 }}>MOTOGRIP</div>
             </div>
             <div>
               <div className="mono" style={{ fontSize: 9, color: 'rgba(232,217,184,0.5)' }}>
@@ -808,8 +808,8 @@ function FAQ({ go }) {
 
       <CTAStrip
         title="Did not find your answer?"
-        body="Write to us. The atelier inbox is read by a real person; we generally reply within a working day."
-        primary="Write to the atelier"
+        body="Write to us. The MOTOGRIP fit inbox is read by a real person; we generally reply within a working day."
+        primary="Write to the fit room"
         ghost="Browse the journal"
         onPrimary={() => go('contact')}
         onGhost={() => go('journal')}
@@ -921,7 +921,7 @@ function SizeGuide({ go }) {
       <CTAStrip
         title="Still unsure?"
         body="Send us your three closest measurements (chest, shoulder, sleeve) and a recent photo of a jacket that fits well. We will reply with a recommendation."
-        primary="Write to the atelier"
+        primary="Write to the fit room"
         ghost="Begin a Made-to-Order"
         onPrimary={() => go('contact')}
         onGhost={() => go('mto')}
@@ -978,7 +978,7 @@ function ShippingReturns({ go }) {
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>HOW</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>One label, one note.</div>
             <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>
-              Open the order in your account or write to atelier@ssm.example. We send a return label and a small leather pouch in the post. Refunds process within three working days of the piece arriving back at the workshop.
+              Open the order in your account or write to fit@motogripgear.example. We send a return label and packing instructions. Refunds process within three working days of the piece arriving back at the fit room.
             </div>
           </div>
         </div>
@@ -990,7 +990,7 @@ function ShippingReturns({ go }) {
 // ── Contact ─────────────────────────────────────────────────────────────────
 
 function Contact({ go }) {
-  const [pathway, setPathway] = React.useState('atelier');
+  const [pathway, setPathway] = React.useState('fit');
   return (
     <div className="page-fade">
       <PageHero
@@ -1002,9 +1002,9 @@ function Contact({ go }) {
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, marginBottom: 48 }}>
           {[
-            { id: 'atelier',   t: 'Atelier',   e: 'atelier@ssm.example',   c: 'General enquiries, sizing, returns, repairs. Replies within one working day.' },
-            { id: 'concierge', t: 'Concierge', e: 'concierge@ssm.example', c: 'Bespoke commissions, in-person fittings, private appointments. Replies within two working days.' },
-            { id: 'press',     t: 'Press',     e: 'press@ssm.example',     c: 'Press kit, lookbook PDFs, founders\' bios. Replies within two working days.' },
+            { id: 'fit',       t: 'Fit Room',  e: 'fit@motogripgear.example',       c: 'General enquiries, sizing, returns, repairs. Replies within one working day.' },
+            { id: 'custom',    t: 'Custom',    e: 'custom@motogripgear.example',    c: 'Made-to-measure orders, in-person fittings, private appointments. Replies within two working days.' },
+            { id: 'press',     t: 'Press',     e: 'press@motogripgear.example',     c: 'Press kit, imagery, brand notes, and product details. Replies within two working days.' },
           ].map(p => (
             <div key={p.id} onClick={() => setPathway(p.id)}
               style={{
@@ -1014,7 +1014,7 @@ function Contact({ go }) {
                 marginRight: -1, marginBottom: -1,
               }}>
               <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-                {p.id === 'atelier' ? 'I' : p.id === 'concierge' ? 'II' : 'III'}
+                {p.id === 'fit' ? 'I' : p.id === 'custom' ? 'II' : 'III'}
               </div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 8 }}>{p.t}</div>
               <div className="mono" style={{ fontSize: 11, color: 'var(--fg-2)', marginBottom: 12 }}>{p.e}</div>
@@ -1056,13 +1056,13 @@ function Contact({ go }) {
               V · BY HAND, BY FOOT
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 16 }}>
-              The Brooklyn Atelier
+              MOTOGRIP Fit Garage
             </div>
             <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
-              143 Greenpoint Avenue<br/>Brooklyn, NY 11222<br/>United States
+              812 Mateo Street<br/>Los Angeles, CA 90021<br/>United States
             </div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 20, lineHeight: 1.8 }}>
-              TUE–SAT · 11–6<br/>BY APPOINTMENT<br/>+1 (212) 555 0143
+              TUE-SAT · 11-6<br/>BY APPOINTMENT<br/>+1 (213) 555 0143
             </div>
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('stockists')}>
               Other locations
@@ -1086,7 +1086,7 @@ function NotFound({ go }) {
         <h1 className="display" style={{
           fontSize: 'clamp(48px, 7vw, 104px)', margin: 0, lineHeight: 0.95, fontWeight: 400,
         }}>
-          This piece is no longer<br/><em style={{ color: 'var(--accent-2)' }}>in the atelier.</em>
+          This gear is no longer<br/><em style={{ color: 'var(--accent-2)' }}>available.</em>
         </h1>
         <div style={{ color: 'var(--fg-3)', fontSize: 16, lineHeight: 1.7, marginTop: 32 }}>
           The page you were looking for has either been retired, repaired, or never existed. The collection is just through there.
@@ -1129,7 +1129,7 @@ function SearchResults({ go, query, onQuickView }) {
       <PageHero
         eyebrow="XIX · SEARCH"
         title={q ? <>Results for</> : <>Search the</>}
-        italic={q ? `"${query}".` : 'atelier.'}
+        italic={q ? `"${query}".` : 'gear.'}
         meta={q ? `${products.length} pieces · ${journal.length} essays` : ''}
       />
 
