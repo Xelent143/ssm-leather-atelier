@@ -7,7 +7,7 @@ function MotoGripLogo({ compact = false }) {
   const logoHeight = compact ? 34 : 52;
   return (
     <img
-      src="/assets/motogrip-logo-site.png"
+      src="/assets/motogrip-logo-transparent.png"
       alt="MOTOGRIP GEAR"
       style={{
         display: 'block',
@@ -15,7 +15,6 @@ function MotoGripLogo({ compact = false }) {
         width: 'auto',
         maxWidth: compact ? 154 : 250,
         objectFit: 'contain',
-        mixBlendMode: 'multiply',
       }}
     />
   );

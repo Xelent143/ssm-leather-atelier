@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="Road-cut leather jackets, vests, and trousers with made-to-measure fit options." />
 <meta name="twitter:image" content="assets/generated/hero-atelier-campaign.png" />
 
-<link rel="icon" href="/assets/motogrip-logo-site.png" />
+<link rel="icon" href="/assets/motogrip-logo-transparent.png" />
 
 <!-- JSON-LD: Organization -->
 <script type="application/ld+json">
@@ -31,7 +31,7 @@
   "@type": "Organization",
   "name": "MOTOGRIP GEAR",
   "url": "https://motogripgear.example",
-  "logo": "https://motogripgear.example/assets/motogrip-logo-site.png",
+  "logo": "https://motogripgear.example/assets/motogrip-logo-transparent.png",
   "foundingDate": "2026",
   "address": {
     "@type": "PostalAddress",
@@ -1306,7 +1306,7 @@ function MotoGripLogo({ compact = false }) {
   const logoHeight = compact ? 34 : 52;
   return (
     <img
-      src="/assets/motogrip-logo-site.png"
+      src="/assets/motogrip-logo-transparent.png"
       alt="MOTOGRIP GEAR"
       style={{
         display: 'block',
@@ -1314,7 +1314,6 @@ function MotoGripLogo({ compact = false }) {
         width: 'auto',
         maxWidth: compact ? 154 : 250,
         objectFit: 'contain',
-        mixBlendMode: 'multiply',
       }}
     />
   );
