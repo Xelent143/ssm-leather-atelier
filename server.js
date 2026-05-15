@@ -116,7 +116,7 @@ function productPath(product) {
 }
 
 function productImageUrl(req, imagePath) {
-  if (!imagePath) return absoluteUrl(req, '/assets/motogrip-logo.svg');
+  if (!imagePath) return absoluteUrl(req, '/assets/motogrip-logo-site.png');
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   if (assetCdnBase && cleanPath.startsWith('/assets/generated/')) return `${assetCdnBase}${cleanPath}`;
   return absoluteUrl(req, cleanPath);

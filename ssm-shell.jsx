@@ -4,31 +4,20 @@
 // the bag drawer.
 
 function MotoGripLogo({ compact = false }) {
-  const mark = compact ? 26 : 34;
+  const logoHeight = compact ? 34 : 52;
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      gap: compact ? 8 : 10, color: 'var(--fg)', minWidth: 0,
-    }}>
-      <svg width={mark} height={mark} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-        <path d="M10 7h28l6 7v19L24 43 4 33V14z" fill="var(--bg-3)" stroke="var(--accent-2)" strokeWidth="2"/>
-        <path d="M12 33 31 14M20 38l16-16" stroke="var(--fg)" strokeWidth="2.2" strokeLinecap="round"/>
-        <path d="M14 14h7l3 8 3-8h7" fill="none" stroke="var(--fg)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      <div style={{ textAlign: 'left', lineHeight: 1, minWidth: 0 }}>
-        <div className="mono" style={{
-          fontSize: compact ? 12 : 16, letterSpacing: compact ? '0.12em' : '0.16em',
-          fontWeight: 700, whiteSpace: 'nowrap',
-        }}>
-          MOTOGRIP
-        </div>
-        {!compact && (
-          <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 5, letterSpacing: '0.22em', whiteSpace: 'nowrap' }}>
-            GEAR · ROAD ARMOR
-          </div>
-        )}
-      </div>
-    </div>
+    <img
+      src="/assets/motogrip-logo-site.png"
+      alt="MOTOGRIP GEAR"
+      style={{
+        display: 'block',
+        height: logoHeight,
+        width: 'auto',
+        maxWidth: compact ? 154 : 250,
+        objectFit: 'contain',
+        mixBlendMode: 'multiply',
+      }}
+    />
   );
 }
 

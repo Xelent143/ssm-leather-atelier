@@ -81,6 +81,19 @@ button {
   max-height: 26px;
 }
 
+.brand-mark.wide {
+  width: 92px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.brand-mark.wide img {
+  width: 82px;
+  max-width: none;
+  max-height: 30px;
+  mix-blend-mode: multiply;
+}
+
 .eyebrow {
   color: var(--faint);
   font-size: 11px;

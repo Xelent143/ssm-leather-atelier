@@ -98,7 +98,7 @@ function renderLogin(error = '') {
     <main class="login-shell">
       <form class="login-card" id="login-form">
         <div class="login-brand">
-          <div class="brand-mark"><img src="/assets/motogrip-logo.svg" alt=""></div>
+          <div class="brand-mark wide"><img src="/assets/motogrip-logo-site.png" alt=""></div>
           <div>
             <div class="eyebrow">Admin</div>
             <h1>MOTOGRIP GEAR</h1>
@@ -136,7 +136,7 @@ function shell(content) {
     <div class="admin-shell">
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="brand-mark"><img src="/assets/motogrip-logo.svg" alt=""></div>
+          <div class="brand-mark wide"><img src="/assets/motogrip-logo-site.png" alt=""></div>
           <div>
             <div class="eyebrow">Admin</div>
             <div>MOTOGRIP GEAR</div>
