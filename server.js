@@ -11,6 +11,7 @@ const adminPassword = process.env.ADMIN_PASSWORD || 'motogrip-admin';
 const sessionTtlMs = 1000 * 60 * 60 * 12;
 const dataDir = path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
+const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const sessions = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 
@@ -62,6 +63,27 @@ function ensureStore() {
 function readStore() {
   ensureStore();
   return JSON.parse(fs.readFileSync(storePath, 'utf8'));
+}
+
+function readPublicStore() {
+  const runtimeStore = readStore();
+  let seedStore = { settings: {}, products: [] };
+  try {
+    seedStore = JSON.parse(fs.readFileSync(merchantStorePath, 'utf8'));
+  } catch {
+    // The runtime admin store remains usable if the repository seed is absent.
+  }
+
+  const productsBySlug = new Map();
+  for (const product of seedStore.products || []) productsBySlug.set(product.slug, product);
+  for (const product of runtimeStore.products || []) productsBySlug.set(product.slug, product);
+
+  return {
+    ...seedStore,
+    ...runtimeStore,
+    settings: { ...(seedStore.settings || {}), ...(runtimeStore.settings || {}) },
+    products: [...productsBySlug.values()],
+  };
 }
 
 function writeStore(store) {
@@ -277,7 +299,7 @@ function injectProductHead(html, product, store, req) {
 }
 
 function serveProductPage(req, res, slug) {
-  const store = readStore();
+  const store = readPublicStore();
   const product = store.products.find((item) => item.slug === slug && item.status !== 'archived');
   if (!product) {
     send(res, 404, 'Product not found');
@@ -294,7 +316,7 @@ function serveProductPage(req, res, slug) {
 }
 
 function serveSitemap(req, res) {
-  const store = readStore();
+  const store = readPublicStore();
   const urls = [
     '/',
     '/#/shop',
@@ -335,7 +357,7 @@ function merchantCondition(value) {
 }
 
 function serveMerchantFeed(req, res) {
-  const store = readStore();
+  const store = readPublicStore();
   const currency = store.settings.currency || 'USD';
   const items = [];
 
@@ -476,7 +498,7 @@ function normalizeStore(input) {
 
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/catalog' && req.method === 'GET') {
-    sendJson(res, 200, publicCatalog(readStore()));
+    sendJson(res, 200, publicCatalog(readPublicStore()));
     return true;
   }
 
