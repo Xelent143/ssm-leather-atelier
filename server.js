@@ -416,7 +416,7 @@ ${items.join('\n')}
   </channel>
 </rss>
 `;
-  send(res, 200, feed, 'application/xml; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
+  send(res, 200, feed, 'application/xml; charset=utf-8', { 'Cache-Control': 'no-cache, max-age=0' });
 }
 
 function normalizeStore(input) {
