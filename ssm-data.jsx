@@ -382,7 +382,7 @@ const SSM_FAQ = [
   ] },
   { group: 'Returns', items: [
     { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
-    { q: 'How do I start a return?', a: 'Write to fit@motogripgear.example or open the order in your account. We will send a return label and packing instructions.' },
+    { q: 'How do I start a return?', a: 'Open the order in your account or use the Contact page. We will send return instructions after reviewing the request.' },
     { q: 'How long do refunds take?', a: 'Refunds process within 3 working days of receipt at the MOTOGRIP fit room.' },
   ] },
   { group: 'Repairs', items: [
@@ -413,9 +413,7 @@ const SSM_CARE = [
 // ── Stockists (used by /stockists) ──────────────────────────────────────────
 
 const SSM_STOCKISTS = [
-  { name: 'MOTOGRIP Fit Garage', city: 'Los Angeles, CA', addr: '812 Mateo Street, CA 90021', hours: 'Tue-Sat · 11-6 · By appointment', phone: '+1 (213) 555 0143', primary: true },
-  { name: 'Hôtel Particulier (showroom)', city: 'Paris', addr: '14 rue du Pré-aux-Clercs, 75007', hours: 'By appointment only', phone: '+33 1 45 44 91 92' },
-  { name: 'Yamato Moto Room (trunk show)', city: 'Tokyo', addr: 'Aoyama 5-chome · twice yearly', hours: 'Spring · Autumn', phone: '—' },
+  { name: 'MOTOGRIP GEAR', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'By appointment', phone: '+1 (860) 397-3707', primary: true },
 ];
 
 // ── Press (used by /press) ──────────────────────────────────────────────────

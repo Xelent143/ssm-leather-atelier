@@ -340,7 +340,7 @@ function Repairs({ go }) {
       />
 
       <PrincipleTriad items={[
-        { n: 'I', t: 'Post', c: 'Write to service@motogripgear.example with photos. We respond within two working days with a return label and a short questionnaire.' },
+        { n: 'I', t: 'Post', c: 'Use the Contact page with photos. We respond with the next steps after reviewing the repair request.' },
         { n: 'II', t: 'Assess', c: 'Your piece is examined by the maker who signed it, where possible. We send a quote and a timeline. Most work is included; some is not. We are honest about both.' },
         { n: 'III', t: 'Return', c: 'Approximately six weeks from receipt. We ship it back signed-for, conditioned, with a small handwritten note from the bench.' },
       ]} />
@@ -630,7 +630,7 @@ function Press({ go }) {
           PRESS ENQUIRIES
         </div>
         <div className="display" style={{ fontSize: 32, lineHeight: 1.3 }}>
-          press@motogripgear.example
+          MOTOGRIPGEAR.COM / CONTACT
         </div>
         <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7, marginTop: 16 }}>
           Press kit (logos, lookbook PDFs, founders' bios) available on request. We generally respond within two working days.
@@ -978,7 +978,7 @@ function ShippingReturns({ go }) {
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>HOW</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>One label, one note.</div>
             <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>
-              Open the order in your account or write to fit@motogripgear.example. We send a return label and packing instructions. Refunds process within three working days of the piece arriving back at the fit room.
+              Open the order in your account or use the Contact page. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
             </div>
           </div>
         </div>
@@ -1002,9 +1002,9 @@ function Contact({ go }) {
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, marginBottom: 48 }}>
           {[
-            { id: 'fit',       t: 'Fit Room',  e: 'fit@motogripgear.example',       c: 'General enquiries, sizing, returns, repairs. Replies within one working day.' },
-            { id: 'custom',    t: 'Custom',    e: 'custom@motogripgear.example',    c: 'Made-to-measure orders, in-person fittings, private appointments. Replies within two working days.' },
-            { id: 'press',     t: 'Press',     e: 'press@motogripgear.example',     c: 'Press kit, imagery, brand notes, and product details. Replies within two working days.' },
+            { id: 'fit',       t: 'Fit Room',  e: 'Use the contact form below', c: 'General enquiries, sizing, returns, and repairs.' },
+            { id: 'custom',    t: 'Custom',    e: 'Use the contact form below', c: 'Made-to-measure orders, custom work, and appointments.' },
+            { id: 'press',     t: 'Press',     e: 'Use the contact form below', c: 'Press kit, imagery, brand notes, and product details.' },
           ].map(p => (
             <div key={p.id} onClick={() => setPathway(p.id)}
               style={{
@@ -1056,13 +1056,13 @@ function Contact({ go }) {
               V · BY HAND, BY FOOT
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 16 }}>
-              MOTOGRIP Fit Garage
+              MOTOGRIP GEAR
             </div>
             <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
-              812 Mateo Street<br/>Los Angeles, CA 90021<br/>United States
+              1172 N Main St<br/>Waterbury, CT 06704<br/>United States
             </div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 20, lineHeight: 1.8 }}>
-              TUE-SAT · 11-6<br/>BY APPOINTMENT<br/>+1 (213) 555 0143
+              BY APPOINTMENT<br/>+1 (860) 397-3707
             </div>
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('stockists')}>
               Other locations
