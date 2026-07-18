@@ -31,10 +31,9 @@
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "MOTOGRIP GEAR",
-  "url": "https://motogripgear.com",
+  "name": "MOTOGRIP GEAR LLC",
+  "url": "https://motogripgear.com/",
   "logo": "https://motogripgear.com/assets/motogrip-logo-transparent.png",
-  "foundingDate": "2026",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "1172 N Main St",
@@ -43,6 +42,8 @@
     "postalCode": "06704",
     "addressCountry": "US"
   },
+  "telephone": "+1-860-397-3707",
+  "areaServed": "Worldwide",
   "sameAs": []
 }
 </script>
@@ -1320,9 +1321,9 @@ const SSM_FAQ = [
     { q: 'How is payment structured?', a: 'Fifty percent at submission, fifty percent at delivery. We hold the deposit until the commission ships.' },
   ] },
   { group: 'Shipping', items: [
-    { q: 'Where do you ship?', a: 'Worldwide. Complimentary express shipping on all orders, signed for at receipt.' },
-    { q: 'How long does shipping take?', a: 'Road Express is 2-3 working days within North America, 3-5 within Europe, 5-7 elsewhere. White Glove delivery is available by appointment in select cities.' },
-    { q: 'Are duties included?', a: 'Yes — all prices include duties for shipments within the US, EU, UK, Switzerland, Norway, Canada, Australia, and Japan. Duties for other regions are calculated at checkout.' },
+    { q: 'Where do you ship?', a: 'Worldwide shipping is available. Shipping costs, delivery estimates, and applicable duties are shown at checkout.' },
+    { q: 'How long does shipping take?', a: 'Your estimated delivery window is shown at checkout and depends on the destination and selected shipping service.' },
+    { q: 'Are duties included?', a: 'Applicable duties and taxes depend on the destination. Any available charges or guidance are shown during checkout.' },
   ] },
   { group: 'Returns', items: [
     { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
@@ -1357,7 +1358,7 @@ const SSM_CARE = [
 // ── Stockists (used by /stockists) ──────────────────────────────────────────
 
 const SSM_STOCKISTS = [
-  { name: 'MOTOGRIP GEAR', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'By appointment', phone: '+1 (860) 397-3707', primary: true },
+  { name: 'MOTOGRIP GEAR LLC', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'Mon-Fri · 9:00 AM-5:00 PM', phone: '+1 (860) 397-3707', primary: true },
 ];
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
@@ -1392,7 +1393,7 @@ const SSM_SEO = {
   giftcard:   { title: 'Gift Cards · MOTOGRIP GEAR', desc: 'Give road-cut leather gear without guessing the size.' },
   faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
-  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Complimentary express worldwide. 30-day returns on stock pieces.' },
+  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery and return information.' },
   contact:    { title: 'Contact · MOTOGRIP GEAR', desc: 'Fit support, custom orders, press, and service.' },
   account:    { title: 'Your Garage · MOTOGRIP GEAR', desc: 'Orders, custom builds, fit profile, and service notes.' },
   cart:       { title: 'Your Bag · MOTOGRIP GEAR' },
@@ -1761,7 +1762,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
               <span style={{ fontFamily: 'var(--display)', fontSize: 22 }}>${subtotal.toLocaleString()}</span>
             </div>
             <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 16 }}>
-              Complimentary shipping · Duties calculated at checkout
+              Worldwide shipping available · Duties calculated at checkout
             </div>
             <button className="btn" style={{ width: '100%', justifyContent: 'center' }}
               onClick={() => { onClose(); go('checkout'); }}>
@@ -2329,7 +2330,7 @@ function Home({ go, onQuickView, heroVariant }) {
   return (
     <div className="page-fade">
       <Hero variant={heroVariant} />
-      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'COMPLIMENTARY GLOBAL SHIPPING', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
+      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
       <CategoryStrip go={go} />
       <FeaturedRow products={SSM_PRODUCTS} onQuickView={onQuickView} go={go} />
       <AtelierFeature go={go} />
@@ -2785,7 +2786,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
           <div style={{ display: 'flex', gap: 12, padding: '14px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', marginBottom: 24 }}>
             {[
               { i: '✦', t: 'Hand-numbered' },
-              { i: '⌖', t: 'Free shipping' },
+              { i: '⌖', t: 'Worldwide shipping' },
               { i: '↻', t: 'Lifetime repair' },
             ].map(b => (
               <div key={b.t} style={{ flex: 1, textAlign: 'center' }}>
@@ -2964,7 +2965,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             { id: 'fit',     t: 'Fit & Care', content: p.story?.fit || 'Slim-regular fit through chest and shoulder. Wipe with a soft cloth; condition twice yearly.' },
             { id: 'specs',   t: 'Specifications', content: productSpecs },
             { id: 'origin',  t: 'Made by', content: p.story?.origin || 'Cut and checked in the MOTOGRIP fit room.' },
-            { id: 'ship',    t: 'Shipping & Returns', content: 'Complimentary express shipping worldwide. 30-day returns on stock pieces. Made-to-order pieces are final sale, with complimentary fit alterations within 60 days of receipt.' },
+            { id: 'ship',    t: 'Shipping & Returns', content: 'Worldwide shipping is available. Shipping costs, delivery estimates, and applicable duties are shown at checkout. Stock pieces can be returned within 30 days. Made-to-order pieces are final sale, with complimentary fit alterations within 60 days of receipt.' },
           ].map(s => (
             <div key={s.id} style={{ borderTop: '1px solid var(--line)' }}>
               <button onClick={() => setOpenSection(openSection === s.id ? null : s.id)}
@@ -4209,7 +4210,7 @@ function Concierge({ go }) {
           </div>
           {[
             { n: '01', t: 'Initial conversation', c: 'A 45-minute call or studio visit. We discuss your wardrobe, the piece you have in mind, and whether bespoke is the right answer.' },
-            { n: '02', t: 'First fitting', c: 'In Los Angeles or by appointment in Paris. Measurements, hide selection, sketches.' },
+            { n: '02', t: 'Fit consultation', c: 'Measurements, hide selection, and design details are reviewed remotely or by confirmed appointment.' },
             { n: '03', t: 'Toile', c: 'A muslin or scrap-leather mock-up. We review the line and make adjustments.' },
             { n: '04', t: 'Final fitting', c: 'The finished piece, in your hands, with the maker who built it.' },
           ].map(s => (
@@ -4320,7 +4321,7 @@ function Stockists({ go }) {
         eyebrow="XI · STOCKISTS & STUDIO"
         title="Three doors"
         italic="and a calendar."
-        dek="The MOTOGRIP Fit Garage is the home of the measurement room. Paris is by appointment. Tokyo we visit twice a year."
+        dek="MOTOGRIP GEAR LLC is based in Waterbury, Connecticut. Contact our team before visiting for fit support or an appointment."
       />
 
       <section style={{ padding: '0 48px 96px' }}>
@@ -4717,21 +4718,20 @@ function ShippingReturns({ go }) {
     <div className="page-fade">
       <PageHero
         eyebrow="XVI · SHIPPING & RETURNS"
-        title="Complimentary,"
-        italic="signed for."
+        title="Worldwide,"
+        italic="shipping available."
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
           {[
-            { region: 'United States',     time: '2–3 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'European Union',    time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'United Kingdom',    time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Switzerland · Norway', time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Canada',            time: '4–6 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Japan · Australia', time: '5–7 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Rest of world',     time: '5–10 working days', cost: 'Complimentary', notes: 'Duties at checkout' },
-            { region: 'White Glove · NYC + LDN', time: 'By appointment', cost: '+ $40', notes: 'Hand-delivered, fitting included' },
+            { region: 'United States',     time: 'At checkout', cost: 'At checkout', notes: 'Tracked delivery' },
+            { region: 'European Union',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'United Kingdom',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Switzerland · Norway', time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Canada',            time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Japan · Australia', time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Rest of world',     time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
           ].map((r, i) => (
             <div key={r.region} style={{
               padding: '20px 24px', borderBottom: '1px solid var(--line)',
@@ -4836,13 +4836,13 @@ function Contact({ go }) {
               V · BY HAND, BY FOOT
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 16 }}>
-              MOTOGRIP GEAR
+              MOTOGRIP GEAR LLC
             </div>
             <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
               1172 N Main St<br/>Waterbury, CT 06704<br/>United States
             </div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 20, lineHeight: 1.8 }}>
-              BY APPOINTMENT<br/>+1 (860) 397-3707
+              MON-FRI · 9:00 AM-5:00 PM<br/>SAT-SUN · CLOSED<br/>+1 (860) 397-3707
             </div>
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('stockists')}>
               Other locations
