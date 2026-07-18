@@ -319,10 +319,6 @@ function serveSitemap(req, res) {
   const store = readPublicStore();
   const urls = [
     '/',
-    '/#/shop',
-    '/#/mto',
-    '/#/size',
-    '/#/ship',
     ...store.products.filter((product) => product.status !== 'archived').map(productPath),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
