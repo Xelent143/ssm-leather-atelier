@@ -276,7 +276,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
               <span style={{ fontFamily: 'var(--display)', fontSize: 22 }}>${subtotal.toLocaleString()}</span>
             </div>
             <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 16 }}>
-              Complimentary shipping · Duties calculated at checkout
+              Worldwide shipping available · Duties calculated at checkout
             </div>
             <button className="btn" style={{ width: '100%', justifyContent: 'center' }}
               onClick={() => { onClose(); go('checkout'); }}>

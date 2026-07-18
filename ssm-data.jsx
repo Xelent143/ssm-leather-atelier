@@ -376,9 +376,9 @@ const SSM_FAQ = [
     { q: 'How is payment structured?', a: 'Fifty percent at submission, fifty percent at delivery. We hold the deposit until the commission ships.' },
   ] },
   { group: 'Shipping', items: [
-    { q: 'Where do you ship?', a: 'Worldwide. Complimentary express shipping on all orders, signed for at receipt.' },
-    { q: 'How long does shipping take?', a: 'Road Express is 2-3 working days within North America, 3-5 within Europe, 5-7 elsewhere. White Glove delivery is available by appointment in select cities.' },
-    { q: 'Are duties included?', a: 'Yes — all prices include duties for shipments within the US, EU, UK, Switzerland, Norway, Canada, Australia, and Japan. Duties for other regions are calculated at checkout.' },
+    { q: 'Where do you ship?', a: 'Worldwide shipping is available. Shipping costs, delivery estimates, and applicable duties are shown at checkout.' },
+    { q: 'How long does shipping take?', a: 'Your estimated delivery window is shown at checkout and depends on the destination and selected shipping service.' },
+    { q: 'Are duties included?', a: 'Applicable duties and taxes depend on the destination. Any available charges or guidance are shown during checkout.' },
   ] },
   { group: 'Returns', items: [
     { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
@@ -413,7 +413,7 @@ const SSM_CARE = [
 // ── Stockists (used by /stockists) ──────────────────────────────────────────
 
 const SSM_STOCKISTS = [
-  { name: 'MOTOGRIP GEAR', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'By appointment', phone: '+1 (860) 397-3707', primary: true },
+  { name: 'MOTOGRIP GEAR LLC', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'Mon-Fri · 9:00 AM-5:00 PM', phone: '+1 (860) 397-3707', primary: true },
 ];
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
@@ -448,7 +448,7 @@ const SSM_SEO = {
   giftcard:   { title: 'Gift Cards · MOTOGRIP GEAR', desc: 'Give road-cut leather gear without guessing the size.' },
   faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
-  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Complimentary express worldwide. 30-day returns on stock pieces.' },
+  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery and return information.' },
   contact:    { title: 'Contact · MOTOGRIP GEAR', desc: 'Fit support, custom orders, press, and service.' },
   account:    { title: 'Your Garage · MOTOGRIP GEAR', desc: 'Orders, custom builds, fit profile, and service notes.' },
   cart:       { title: 'Your Bag · MOTOGRIP GEAR' },

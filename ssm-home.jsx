@@ -311,7 +311,7 @@ function Home({ go, onQuickView, heroVariant }) {
   return (
     <div className="page-fade">
       <Hero variant={heroVariant} />
-      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'COMPLIMENTARY GLOBAL SHIPPING', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
+      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
       <CategoryStrip go={go} />
       <FeaturedRow products={SSM_PRODUCTS} onQuickView={onQuickView} go={go} />
       <AtelierFeature go={go} />

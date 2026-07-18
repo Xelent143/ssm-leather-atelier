@@ -429,7 +429,7 @@ function Concierge({ go }) {
           </div>
           {[
             { n: '01', t: 'Initial conversation', c: 'A 45-minute call or studio visit. We discuss your wardrobe, the piece you have in mind, and whether bespoke is the right answer.' },
-            { n: '02', t: 'First fitting', c: 'In Los Angeles or by appointment in Paris. Measurements, hide selection, sketches.' },
+            { n: '02', t: 'Fit consultation', c: 'Measurements, hide selection, and design details are reviewed remotely or by confirmed appointment.' },
             { n: '03', t: 'Toile', c: 'A muslin or scrap-leather mock-up. We review the line and make adjustments.' },
             { n: '04', t: 'Final fitting', c: 'The finished piece, in your hands, with the maker who built it.' },
           ].map(s => (
@@ -540,7 +540,7 @@ function Stockists({ go }) {
         eyebrow="XI · STOCKISTS & STUDIO"
         title="Three doors"
         italic="and a calendar."
-        dek="The MOTOGRIP Fit Garage is the home of the measurement room. Paris is by appointment. Tokyo we visit twice a year."
+        dek="MOTOGRIP GEAR LLC is based in Waterbury, Connecticut. Contact our team before visiting for fit support or an appointment."
       />
 
       <section style={{ padding: '0 48px 96px' }}>
@@ -937,21 +937,20 @@ function ShippingReturns({ go }) {
     <div className="page-fade">
       <PageHero
         eyebrow="XVI · SHIPPING & RETURNS"
-        title="Complimentary,"
-        italic="signed for."
+        title="Worldwide,"
+        italic="shipping available."
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
           {[
-            { region: 'United States',     time: '2–3 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'European Union',    time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'United Kingdom',    time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Switzerland · Norway', time: '3–5 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Canada',            time: '4–6 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Japan · Australia', time: '5–7 working days', cost: 'Complimentary', notes: 'Duties included' },
-            { region: 'Rest of world',     time: '5–10 working days', cost: 'Complimentary', notes: 'Duties at checkout' },
-            { region: 'White Glove · NYC + LDN', time: 'By appointment', cost: '+ $40', notes: 'Hand-delivered, fitting included' },
+            { region: 'United States',     time: 'At checkout', cost: 'At checkout', notes: 'Tracked delivery' },
+            { region: 'European Union',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'United Kingdom',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Switzerland · Norway', time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Canada',            time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Japan · Australia', time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
+            { region: 'Rest of world',     time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
           ].map((r, i) => (
             <div key={r.region} style={{
               padding: '20px 24px', borderBottom: '1px solid var(--line)',
@@ -1056,13 +1055,13 @@ function Contact({ go }) {
               V · BY HAND, BY FOOT
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 16 }}>
-              MOTOGRIP GEAR
+              MOTOGRIP GEAR LLC
             </div>
             <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
               1172 N Main St<br/>Waterbury, CT 06704<br/>United States
             </div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 20, lineHeight: 1.8 }}>
-              BY APPOINTMENT<br/>+1 (860) 397-3707
+              MON-FRI · 9:00 AM-5:00 PM<br/>SAT-SUN · CLOSED<br/>+1 (860) 397-3707
             </div>
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('stockists')}>
               Other locations
