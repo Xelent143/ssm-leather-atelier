@@ -1104,13 +1104,92 @@ const SSM_LININGS = [
 // ── Navigation ──────────────────────────────────────────────────────────────
 
 const SSM_NAV = [
-  { label: 'Women', view: 'shop', filter: 'Women' },
-  { label: 'Men', view: 'shop', filter: 'Men' },
-  { label: 'Fit Lab', view: 'mto' },
-  { label: 'Lookbook', view: 'lookbook' },
-  { label: 'Journal', view: 'journal' },
-  { label: 'Heritage', view: 'about' },
+  { label: 'Men', view: 'shop', filter: 'Men', mega: 'Men' },
+  { label: 'Women', view: 'shop', filter: 'Women', mega: 'Women' },
+  { label: 'Customize', view: 'mto' },
+  { label: 'Brand', view: 'about' },
+  { label: 'Gift', view: 'contact' },
+  { label: 'Gifting', view: 'giftcard' },
+  { label: 'Sale', view: 'shop' },
+  { label: 'Design Your Own', view: 'mto' },
 ];
+
+const SSM_MEGA_MENUS = {
+  Men: [
+    {
+      title: 'Leather Jackets',
+      links: ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Suede Jackets', 'Varsity Jackets', 'Leather Vests', 'Leather Blazers', 'Fur & Shearling', 'Aviator Jackets', 'Puffer Jackets', 'Hooded Leather Jackets', 'Best Seller', 'Clearance - 50% OFF', 'Factory Seconds - 40% Off', 'Winter Jackets'],
+      cat: 'Jackets',
+    },
+    {
+      title: 'Tech & Fabric Jackets',
+      links: ['Summer Jackets', 'Denim Jackets', 'Waxed Canvas Jackets', 'Puffer Vests', 'Windbreaker & Puffers', 'Lightweight Jackets', 'Soft Shell Jackets', 'Down Jacket'],
+      cat: 'Jackets',
+    },
+    {
+      title: 'Coats',
+      links: ['Leather Coats', 'Trench & Winter Coats', 'Wool Coats & Jackets', 'Fur & Shearling Coats', 'Leather Dusters'],
+      cat: 'Jackets',
+    },
+    {
+      title: 'Riding Gear',
+      links: ['Leather Vests', 'Riding Trousers', 'Cafe Racer Jackets', 'Double Rider Jackets', 'Road-Cut Essentials'],
+      cat: 'Vests',
+    },
+    {
+      title: 'Bags',
+      links: ['Leather Bags', 'Vintage Leather Bags', 'Laptop Bags', 'Travel Bags', 'Business Bags', 'Leather Backpacks'],
+      cat: 'Vests',
+    },
+    {
+      title: 'Gifts',
+      links: ['Gift Set', 'Gifts For Him', 'Gift Card'],
+      view: 'giftcard',
+    },
+    {
+      title: 'Leather Accessories',
+      links: ['Leather Accessories', 'Leather Wallets', 'Leather Belts'],
+      cat: 'Vests',
+    },
+  ],
+  Women: [
+    {
+      title: 'Leather Jackets',
+      links: ['All Leather Jackets', 'Biker Jackets', 'Bomber Jackets', 'Cropped Jackets', 'Suede Jackets', 'Leather Blazers', 'Hooded Leather Jackets', 'Fur & Shearling', 'Best Seller', 'New Arrivals'],
+      cat: 'Jackets',
+    },
+    {
+      title: 'Vests & Layers',
+      links: ['Leather Vests', 'Puffer Vests', 'Tailored Vests', 'Lightweight Layers', 'Road-Cut Essentials'],
+      cat: 'Vests',
+    },
+    {
+      title: 'Coats',
+      links: ['Leather Coats', 'Trench & Winter Coats', 'Shearling Coats', 'Long Coats', 'Leather Dusters'],
+      cat: 'Jackets',
+    },
+    {
+      title: 'Trousers',
+      links: ['Leather Trousers', 'Riding Trousers', 'High-Rise Leather Pants', 'Made-to-Measure Pants'],
+      cat: 'Pants',
+    },
+    {
+      title: 'Bags',
+      links: ['Leather Bags', 'Vintage Leather Bags', 'Laptop Bags', 'Travel Bags', 'Crossbody Bags', 'Leather Backpacks'],
+      cat: 'Vests',
+    },
+    {
+      title: 'Gifts',
+      links: ['Gift Set', 'Gifts For Her', 'Gift Card'],
+      view: 'giftcard',
+    },
+    {
+      title: 'Customize',
+      links: ['Design Your Own', 'Made to Measure', 'Choose Your Leather', 'Fit Consultation'],
+      view: 'mto',
+    },
+  ],
+};
 
 // ── Journal entries (used by /journal grid + article page) ──────────────────
 
@@ -1322,6 +1401,7 @@ function MotoGripLogo({ compact = false }) {
 function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [openMega, setOpenMega] = React.useState(null);
   const [isMobile, setIsMobile] = React.useState(
     typeof window !== 'undefined' ? window.innerWidth < 900 : false
   );
@@ -1337,25 +1417,48 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
     };
   }, []);
 
-  React.useEffect(() => { setMobileOpen(false); }, [view]);
+  React.useEffect(() => {
+    setMobileOpen(false);
+    setOpenMega(null);
+  }, [view]);
+
+  React.useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setOpenMega(null);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, []);
+
+  const navigate = (item, section) => {
+    const destination = section?.view || item.view;
+    const params = destination === 'shop'
+      ? { gender: item.filter || null, cat: section?.cat || null }
+      : null;
+    setOpenMega(null);
+    go(destination, params);
+  };
+
+  const megaSections = openMega ? SSM_MEGA_MENUS[openMega] : null;
 
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: scrolled ? 'var(--chrome-bg)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
-      WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
-      borderBottom: scrolled ? '1px solid var(--line)' : '1px solid transparent',
+      background: 'var(--chrome-bg)',
+      backdropFilter: 'blur(20px) saturate(140%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+      borderBottom: '1px solid var(--line)',
       transition: 'all 0.3s ease',
-    }}>
+    }} onMouseLeave={() => setOpenMega(null)}>
       <div style={{
         display: 'grid',
         gridTemplateColumns: isMobile ? 'auto 1fr auto' : '1fr auto 1fr',
         alignItems: 'center',
-        padding: isMobile ? '14px 20px' : '18px 48px',
+        minHeight: isMobile ? 66 : 88,
+        padding: isMobile ? '10px 20px' : '14px 48px',
         gap: isMobile ? 16 : 32,
       }}>
-        {/* LEFT: nav (desktop) or hamburger (mobile) */}
+        {/* LEFT: hamburger on mobile; spacer on desktop */}
         {isMobile ? (
           <button onClick={() => setMobileOpen(true)} aria-label="Open menu"
             style={{ background: 'transparent', border: 0, padding: 4, color: 'var(--fg)', cursor: 'pointer' }}>
@@ -1363,19 +1466,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
               <path d="M0 1h22M0 7h22M0 13h22"/>
             </svg>
           </button>
-        ) : (
-          <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-            {SSM_NAV.map(n => (
-              <button key={n.label} onClick={() => go(n.view, n.filter ? { gender: n.filter } : null)}
-                className="ulink"
-                style={{
-                  fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
-                  color: 'var(--fg-2)', fontWeight: 500,
-                  background: 'transparent', border: 0, padding: 0, cursor: 'pointer',
-                }}>{n.label}</button>
-            ))}
-          </nav>
-        )}
+        ) : <div />}
 
         {/* CENTER: logo */}
         <button onClick={() => go('home')} aria-label="MOTOGRIP GEAR Home"
@@ -1403,6 +1494,70 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
         </div>
       </div>
 
+      {!isMobile && (
+        <nav aria-label="Primary navigation" style={{
+          minHeight: 54,
+          display: 'flex',
+          alignItems: 'stretch',
+          justifyContent: 'center',
+          gap: 34,
+          padding: '0 40px',
+          borderTop: '1px solid var(--line)',
+        }}>
+          {SSM_NAV.map(n => {
+            const active = openMega === n.mega;
+            return (
+              <button key={n.label}
+                onMouseEnter={() => setOpenMega(n.mega || null)}
+                onFocus={() => setOpenMega(n.mega || null)}
+                onClick={() => navigate(n)}
+                aria-expanded={n.mega ? active : undefined}
+                className="ulink"
+                style={{
+                  position: 'relative', fontSize: 11, letterSpacing: '0.11em', textTransform: 'uppercase',
+                  color: 'var(--fg-2)', fontWeight: 500, whiteSpace: 'nowrap',
+                  background: 'transparent', border: 0, padding: '0 0 1px', cursor: 'pointer',
+                }}>
+                {n.label}
+                {active && <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: 'var(--fg)' }} />}
+              </button>
+            );
+          })}
+        </nav>
+      )}
+
+      {!isMobile && megaSections && (
+        <div role="region" aria-label={`${openMega} categories`} className="page-fade" style={{
+          position: 'absolute', top: '100%', left: 0, right: 0,
+          background: 'var(--bg)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)',
+          boxShadow: '0 18px 40px rgba(20,18,15,0.08)',
+          padding: '34px clamp(48px, 10vw, 205px) 48px',
+        }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(5, minmax(140px, 1fr))',
+            columnGap: 52, rowGap: 36, maxWidth: 1640, margin: '0 auto',
+          }}>
+            {megaSections.map((section) => (
+              <section key={section.title}>
+                <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 14, letterSpacing: '0.16em' }}>
+                  {section.title}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 9 }}>
+                  {section.links.map((label) => (
+                    <button key={label} onClick={() => navigate(
+                      SSM_NAV.find(item => item.mega === openMega), section
+                    )} className="ulink" style={{
+                      color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0,
+                      fontSize: 13, lineHeight: 1.25, textAlign: 'left', cursor: 'pointer',
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="page-fade" style={{
@@ -1418,7 +1573,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
             {SSM_NAV.map(n => (
-              <button key={n.label} onClick={() => go(n.view, n.filter ? { gender: n.filter } : null)}
+              <button key={n.label} onClick={() => navigate(n)}
                 style={{
                   textAlign: 'left', padding: '20px 0', borderBottom: '1px solid var(--line)',
                   fontFamily: 'var(--display)', fontSize: 28, fontWeight: 400,
