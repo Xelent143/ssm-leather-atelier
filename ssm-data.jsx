@@ -413,7 +413,16 @@ const SSM_CARE = [
 // ── Stockists (used by /stockists) ──────────────────────────────────────────
 
 const SSM_STOCKISTS = [
-  { name: 'MOTOGRIP GEAR LLC', city: 'Waterbury, CT', addr: '1172 N Main St, Waterbury, CT 06704', hours: 'Mon-Fri · 9:00 AM-5:00 PM', phone: '+1 (860) 397-3707', primary: true },
+  {
+    name: 'MOTOGRIP GEAR LLC', region: 'United States', city: 'Waterbury, CT',
+    addr: '1172 N Main St, Waterbury, CT 06704, United States',
+    phone: '+1 860 217 7937', whatsapp: '+44 7309 114348', email: 'info@motogripgear.com', primary: true,
+  },
+  {
+    name: 'MOTOGRIP LIMITED', region: 'United Kingdom', city: 'Bradford',
+    addr: 'Unit 16, Lonsdale Works, Bradford BD3 9TF, United Kingdom',
+    phone: '+44 7309 114348', whatsapp: '+44 7309 114348', email: 'info@motogripgear.com', primary: false,
+  },
 ];
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
