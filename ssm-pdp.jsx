@@ -137,7 +137,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
           <div style={{ display: 'flex', gap: 12, padding: '14px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', marginBottom: 24 }}>
             {[
               { i: '✦', t: 'Hand-numbered' },
-              { i: '⌖', t: 'Free shipping' },
+              { i: '⌖', t: 'Worldwide shipping' },
               { i: '↻', t: 'Lifetime repair' },
             ].map(b => (
               <div key={b.t} style={{ flex: 1, textAlign: 'center' }}>
@@ -314,7 +314,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             { id: 'fit',     t: 'Fit & Care', content: p.story?.fit || 'Slim-regular fit through chest and shoulder. Wipe with a soft cloth; condition twice yearly.' },
             { id: 'specs',   t: 'Specifications', content: productSpecs },
             { id: 'origin',  t: 'Made by', content: p.story?.origin || 'Cut and checked in the MOTOGRIP fit room.' },
-            { id: 'ship',    t: 'Shipping & Returns', content: 'Complimentary express shipping worldwide. 30-day returns on stock pieces. Made-to-order pieces are final sale, with complimentary fit alterations within 60 days of receipt.' },
+            { id: 'ship',    t: 'Shipping & Returns', content: 'Worldwide shipping is available. Shipping costs, delivery estimates, and applicable duties are shown at checkout. Stock pieces can be returned within 30 days. Made-to-order pieces are final sale, with complimentary fit alterations within 60 days of receipt.' },
           ].map(s => (
             <div key={s.id} style={{ borderTop: '1px solid var(--line)' }}>
               <button onClick={() => setOpenSection(openSection === s.id ? null : s.id)}
