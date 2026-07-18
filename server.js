@@ -311,6 +311,92 @@ ${urls.map((urlPath) => `  <url><loc>${escapeHtml(absoluteUrl(req, urlPath))}</l
   send(res, 200, xml, 'application/xml; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
 }
 
+function escapeXml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function merchantGender(value) {
+  const normalized = String(value || '').toLowerCase();
+  if (normalized === 'men' || normalized === 'male') return 'male';
+  if (normalized === 'women' || normalized === 'female') return 'female';
+  return 'unisex';
+}
+
+function merchantCondition(value) {
+  const normalized = String(value || '').toLowerCase();
+  if (normalized.includes('used')) return 'used';
+  if (normalized.includes('refurbished')) return 'refurbished';
+  return 'new';
+}
+
+function serveMerchantFeed(req, res) {
+  const store = readStore();
+  const currency = store.settings.currency || 'USD';
+  const items = [];
+
+  store.products
+    .filter((product) => product.status === 'active')
+    .forEach((product) => {
+      const variants = Object.keys(product.stock || {}).length
+        ? Object.entries(product.stock)
+        : [[product.size || 'One Size', Number(product.inventory || 0)]];
+      const sku = product.sku || product.id;
+      const groupId = product.itemGroupId || product.slug || product.id;
+      const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
+      const image = productImageUrl(req, product.primaryImage || product.image);
+      const description = product.schemaDescription || product.description || `${product.title} by MOTOGRIP GEAR.`;
+
+      variants.forEach(([size, quantity]) => {
+        const variantId = `${sku}-${String(size).replace(/[^a-z0-9]+/gi, '-')}`;
+        const fields = [
+          ['id', variantId],
+          ['title', `${product.title} - Size ${size}`],
+          ['description', description],
+          ['link', link],
+          ['image_link', image],
+          ['availability', Number(quantity) > 0 ? 'in_stock' : 'out_of_stock'],
+          ['price', `${Number(product.price || 0).toFixed(2)} ${currency}`],
+          ['condition', merchantCondition(product.condition)],
+          ['brand', product.brand || store.settings.storeName || 'MOTOGRIP GEAR'],
+          ['mpn', product.mpn || sku],
+          ['identifier_exists', 'true'],
+          ['google_product_category', product.googleProductCategory],
+          ['product_type', product.productType || product.category],
+          ['age_group', String(product.ageGroup || 'adult').toLowerCase()],
+          ['gender', merchantGender(product.gender)],
+          ['size', size],
+          ['size_system', String(product.sizeSystem || 'US').toUpperCase()],
+          ['size_type', String(product.sizeType || 'regular').toLowerCase()],
+          ['item_group_id', groupId],
+          ['color', product.color],
+          ['material', product.material || product.leatherType],
+          ['shipping_weight', product.shippingWeight],
+          ['custom_label_0', product.category],
+          ['custom_label_1', product.madeToMeasureEnabled ? 'Made to measure available' : 'Standard sizing'],
+        ].filter(([, value]) => value !== undefined && value !== '');
+
+        items.push(`    <item>\n${fields.map(([name, value]) => `      <g:${name}>${escapeXml(value)}</g:${name}>`).join('\n')}\n    </item>`);
+      });
+    });
+
+  const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+  <channel>
+    <title>${escapeXml(store.settings.storeName || 'MOTOGRIP GEAR')} Product Feed</title>
+    <link>${escapeXml(absoluteUrl(req, '/'))}</link>
+    <description>Current products and size variants for Google Merchant Center.</description>
+${items.join('\n')}
+  </channel>
+</rss>
+`;
+  send(res, 200, feed, 'application/xml; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
+}
+
 function normalizeStore(input) {
   const current = readStore();
   const products = Array.isArray(input.products) ? input.products : current.products;
@@ -498,6 +584,11 @@ const server = http.createServer(async (req, res) => {
 
     if (requestPath === '/sitemap.xml') {
       serveSitemap(req, res);
+      return;
+    }
+
+    if (requestPath === '/google-merchant-feed.xml') {
+      serveMerchantFeed(req, res);
       return;
     }
 
