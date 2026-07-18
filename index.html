@@ -846,6 +846,15 @@ const SSM_ASSETS = {
   atelier: A('atelier-workbench.png'),
   lookbook: A('lookbook-loft.png'),
   detail: A('leather-detail.png'),
+  hoodedVestFront: A('hooded-contrast-moto-vest-front.png'),
+  hoodedVestBack: A('hooded-contrast-moto-vest-back.png'),
+  hoodedVestSide: A('hooded-contrast-moto-vest-side.png'),
+  hoodedVestDetail: A('hooded-contrast-moto-vest-detail.png'),
+  hoodedVestInfographic: A('hooded-contrast-moto-vest-infographic.png'),
+  hoodedVestLifestyle: A('hooded-contrast-moto-vest-lifestyle.png'),
+  hoodedVestOriginalFront: A('hooded-contrast-moto-vest-original-front.jpg'),
+  hoodedVestOriginalBack: A('hooded-contrast-moto-vest-original-back.jpg'),
+  hoodedVestOriginalInterior: A('hooded-contrast-moto-vest-original-interior.jpg'),
   // optional (generated). Pages fall back to atelier/detail if these are missing.
   tannery: A('tannery-tuscany.png'),
   care: A('leather-care-detail.png'),
@@ -857,6 +866,33 @@ const SSM_ASSETS = {
 // origin (the maker line). Stock is illustrative but realistic for a hand-house.
 
 const SSM_PRODUCTS = [
+  {
+    id: 'p13', slug: 'black-white-hooded-leather-moto-vest',
+    name: 'Black & White Hooded Leather Moto Vest', cat: 'Vests', gender: 'Men',
+    price: 250, hue: 0, tag: 'New',
+    blurb: 'Perforated cowhide · quilted contrast yoke · drawcord hood',
+    img: SSM_ASSETS.hoodedVestFront, alt: SSM_ASSETS.hoodedVestDetail,
+    material: 'Perforated cowhide leather', materialLocked: true,
+    materialNote: 'Breathable perforated body with a diamond-quilted contrast yoke',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    sizes: ['XS','S','M','L','XL','XXL','3XL','4XL','5XL','6XL'],
+    stock: { XS: 3, S: 3, M: 3, L: 3, XL: 3, XXL: 3, '3XL': 3, '4XL': 3, '5XL': 3, '6XL': 3 },
+    gallery: [
+      { label: 'Front · on model', src: SSM_ASSETS.hoodedVestFront },
+      { label: 'Back · on model', src: SSM_ASSETS.hoodedVestBack },
+      { label: 'Side · on model', src: SSM_ASSETS.hoodedVestSide },
+      { label: 'Detail · leather and stitching', src: SSM_ASSETS.hoodedVestDetail },
+      { label: 'Features · infographic', src: SSM_ASSETS.hoodedVestInfographic },
+      { label: 'Lifestyle · motorcycle', src: SSM_ASSETS.hoodedVestLifestyle },
+      { label: 'Interior · original product', src: SSM_ASSETS.hoodedVestOriginalInterior },
+    ],
+    story: {
+      piece: "A bold black-and-white motorcycle vest designed for warm-weather riding and distinctive streetwear styling. The hooded silhouette adds casual versatility while the structured yoke keeps the profile clean.",
+      craft: "Perforated cowhide leather body with a diamond-quilted white contrast yoke. Full front zip, drawcord hood, two flap chest pockets, two vertical hand pockets, contrast stitching, and a monochrome stars-and-stripes satin lining.",
+      fit: "Regular through the torso and designed for comfortable layering. Available in XS through 6XL, with made-to-measure ordering for a personalized fit.",
+      origin: "Produced by the MOTOGRIP GEAR workshop with standard-size and made-to-measure options.",
+    },
+  },
   {
     id: 'p1', slug: 'voltaire-biker',
     name: 'Voltaire Biker Jacket', cat: 'Jackets', gender: 'Women',
@@ -1271,7 +1307,7 @@ const SSM_FAQ = [
   { group: 'Sizing & Fit', items: [
     { q: 'How does MOTOGRIP GEAR jacket sizing run?', a: 'Most jackets run true to size over a fitted shirt. Ride-cut pieces leave room for reach through the shoulder; close-cut styles may need one size up over a heavy layer. Each PDP carries a model-and-size note.' },
     { q: 'I am between sizes. What do you recommend?', a: 'Size up if you intend to layer; size down if you prefer a closer line. Choose made to measure when chest, shoulder, sleeve, or waist fit needs rider-specific adjustment.' },
-    { q: 'Do you make extended sizes?', a: 'Currently XS through XXL on stock pieces. For sizes outside this range, begin a Made-to-Order commission — we cut from your measurements.' },
+    { q: 'Do you make extended sizes?', a: 'Selected styles are available from XS through 6XL. Made-to-measure ordering is also available for a personalized fit.' },
     { q: 'How are leather trousers supposed to fit?', a: 'Sized to a size up from your usual denim. The waistband softens within a week; the seat softens within a month. Hems can be shortened in the fit room, complimentary, within 60 days of receipt.' },
   ] },
   { group: 'Leather & Care', items: [
@@ -1747,6 +1783,8 @@ function QuickView({ product, onClose, addToCart, go }) {
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
   if (!product) return null;
+  const quickLeather = product.material || SSM_LEATHERS.find(l => l.id === leather)?.name;
+  const quickSizes = product.sizes || ['XS','S','M','L','XL'];
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div className="drawer-overlay" onClick={onClose}
@@ -1770,18 +1808,20 @@ function QuickView({ product, onClose, addToCart, go }) {
           <div style={{ color: 'var(--fg-3)', fontSize: 13, marginBottom: 20 }}>{product.blurb}</div>
           <div style={{ fontFamily: 'var(--display)', fontSize: 26, marginBottom: 28 }}>${product.price.toLocaleString()}</div>
 
-          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 10 }}>Leather · {SSM_LEATHERS.find(l => l.id === leather)?.name}</div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-            {SSM_LEATHERS.map(l => (
-              <button key={l.id} className={`swatch ${leather === l.id ? 'active' : ''}`}
-                aria-label={l.name} title={l.name}
-                style={{ background: l.swatch, padding: 0 }} onClick={() => setLeather(l.id)} />
-            ))}
-          </div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: product.materialLocked ? 24 : 10 }}>Leather · {quickLeather}</div>
+          {!product.materialLocked && (
+            <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+              {SSM_LEATHERS.map(l => (
+                <button key={l.id} className={`swatch ${leather === l.id ? 'active' : ''}`}
+                  aria-label={l.name} title={l.name}
+                  style={{ background: l.swatch, padding: 0 }} onClick={() => setLeather(l.id)} />
+              ))}
+            </div>
+          )}
 
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 10 }}>Size</div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
-            {['XS','S','M','L','XL'].map(s => (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+            {quickSizes.map(s => (
               <button key={s} onClick={() => setSize(s)} aria-label={`Size ${s}`}
                 style={{
                   width: 44, height: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -1796,7 +1836,7 @@ function QuickView({ product, onClose, addToCart, go }) {
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn" style={{ flex: 1, justifyContent: 'center' }}
-              onClick={() => { addToCart(product, { leather: SSM_LEATHERS.find(l=>l.id===leather).name, size }); onClose(); }}>
+              onClick={() => { addToCart(product, { leather: quickLeather, size }); onClose(); }}>
               Add to Bag
             </button>
             <button className="btn btn-ghost" onClick={() => { onClose(); go && go('pdp', { product }); }}>Full Details</button>
@@ -2507,7 +2547,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
             <div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 14 }}>SIZE</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {['XS','S','M','L','XL','XXL'].map(s => {
+                {['XS','S','M','L','XL','XXL','3XL','4XL','5XL','6XL'].map(s => {
                   const on = sizes.includes(s);
                   return (
                     <button key={s} onClick={() => toggle(sizes, setSizes)(s)}
@@ -2524,7 +2564,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
             </div>
             <div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 14 }}>MAX PRICE</div>
-              <input type="range" min="500" max="1500" step="20" value={maxPrice}
+              <input type="range" min="200" max="1500" step="20" value={maxPrice}
                 onChange={e => setMaxPrice(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--accent-2)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--fg-3)', marginTop: 4 }}>
@@ -2637,7 +2677,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
     weight: '',
   });
 
-  const images = [
+  const images = p.gallery || [
     { label: 'On model · 3/4', src: p.img },
     { label: 'Detail · placket', src: p.alt || p.img },
     { label: 'Detail · stitching', src: SSM_ASSETS.detail },
@@ -2646,6 +2686,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
   ];
 
   const lObj = SSM_LEATHERS.find(l => l.id === leather);
+  const productLeather = p.material || lObj?.name || 'Selected hide';
+  const productSizes = p.sizes || ['XS','S','M','L','XL','XXL'];
   const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
   const inStock = sizeStock(size) > 0;
   const finalPiece = p.stock && Object.values(p.stock).reduce((a,b) => a+b, 0) <= 4;
@@ -2665,7 +2707,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   ];
   const productSpecs = [
     ['Body material', p.story?.craft?.split('.')[0] || p.blurb],
-    ['Leather type', lObj?.name || 'Selected hide'],
+    ['Leather type', productLeather],
     ['Lining', 'Breathable satin, selected for the house silhouette'],
     ['Closure', p.cat === 'Pants' ? 'Concealed zip and hand-finished waistband' : 'YKK Excella hardware'],
     ['Fit service', `Standard sizing or made to measure (+$${madeToMeasureSurcharge})`],
@@ -2759,16 +2801,18 @@ function PDP({ product, go, addToCart, onQuickView }) {
           </div>
 
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
-            <span>LEATHER · {lObj.name.toUpperCase()}</span>
-            <span style={{ color: 'var(--fg-4)' }}>{lObj.desc}</span>
+            <span>LEATHER · {productLeather.toUpperCase()}</span>
+            <span style={{ color: 'var(--fg-4)' }}>{p.materialNote || lObj?.desc}</span>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 28 }}>
-            {SSM_LEATHERS.map(l => (
-              <button key={l.id} className={`swatch ${leather === l.id ? 'active' : ''}`}
-                aria-label={l.name} title={l.name}
-                style={{ background: l.swatch, padding: 0 }} onClick={() => setLeather(l.id)} />
-            ))}
-          </div>
+          {!p.materialLocked && (
+            <div style={{ display: 'flex', gap: 10, marginBottom: 28 }}>
+              {SSM_LEATHERS.map(l => (
+                <button key={l.id} className={`swatch ${leather === l.id ? 'active' : ''}`}
+                  aria-label={l.name} title={l.name}
+                  style={{ background: l.swatch, padding: 0 }} onClick={() => setLeather(l.id)} />
+              ))}
+            </div>
+          )}
 
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
             <span>SIZE</span>
@@ -2778,7 +2822,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 12 }}>
-            {['XS','S','M','L','XL','XXL'].map(s => {
+            {productSizes.map(s => {
               const stock = sizeStock(s);
               const out = stock === 0;
               const low = stock > 0 && stock < 2;
@@ -2861,7 +2905,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
           {inStock ? (
             <button className="btn" style={{ width: '100%', justifyContent: 'center', marginBottom: 8 }}
               onClick={() => addToCart(p, {
-                leather: lObj.name,
+                leather: productLeather,
                 size,
                 price: displayPrice,
                 surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
