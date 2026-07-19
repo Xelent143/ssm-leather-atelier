@@ -537,14 +537,14 @@ function Stockists({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XI · STOCKISTS & STUDIO"
-        title="Three doors"
-        italic="and a calendar."
-        dek="MOTOGRIP GEAR LLC is based in Waterbury, Connecticut. Contact our team before visiting for fit support or an appointment."
+        eyebrow="XI · COMPANY LOCATIONS"
+        title="Two companies,"
+        italic="one global standard."
+        dek="MOTOGRIP GEAR serves customers through our United States and United Kingdom companies. Contact our team before visiting any business location."
       />
 
       <section style={{ padding: '0 48px 96px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 0 }}>
           {SSM_STOCKISTS.map((s, i) => (
             <div key={s.name} style={{
               padding: 40,
@@ -554,7 +554,12 @@ function Stockists({ go }) {
             }}>
               {s.primary && (
                 <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginBottom: 12 }}>
-                  THE WORKSHOP
+                  UNITED STATES COMPANY
+                </div>
+              )}
+              {!s.primary && (
+                <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginBottom: 12 }}>
+                  UNITED KINGDOM COMPANY
                 </div>
               )}
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 6 }}>{s.name}</div>
@@ -562,26 +567,27 @@ function Stockists({ go }) {
                 {s.city.toUpperCase()}
               </div>
               <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.7 }}>{s.addr}</div>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 16 }}>
-                {s.hours.toUpperCase()}
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginTop: 8 }}>
+                CONTACT · {s.phone}
               </div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginTop: 8 }}>
-                {s.phone}
+                WHATSAPP · {s.whatsapp}
               </div>
-              {s.primary && (
-                <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('contact')}>
-                  Book an appointment
-                </button>
-              )}
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginTop: 8 }}>
+                {s.email}
+              </div>
+              <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('contact')}>
+                Contact our team
+              </button>
             </div>
           ))}
         </div>
       </section>
 
       <CTAStrip
-        title="Visiting the Fit Garage?"
-        body="Write ahead. The workshop is small; we open the door for one client at a time and we want yours to be unhurried."
-        primary="Request a studio visit"
+        title="Need local company details?"
+        body="Contact our team before visiting. We will direct your enquiry to the appropriate United States or United Kingdom company."
+        primary="Contact MOTOGRIP"
         ghost="Continue browsing"
         onPrimary={() => go('contact')}
         onGhost={() => go('shop')}
@@ -1052,19 +1058,25 @@ function Contact({ go }) {
           </div>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-              V · BY HAND, BY FOOT
+              V · COMPANY DETAILS
             </div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 16 }}>
-              MOTOGRIP GEAR LLC
-            </div>
-            <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
-              1172 N Main St<br/>Waterbury, CT 06704<br/>United States
-            </div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 20, lineHeight: 1.8 }}>
-              MON-FRI · 9:00 AM-5:00 PM<br/>SAT-SUN · CLOSED<br/>+1 (860) 397-3707
-            </div>
+            {SSM_STOCKISTS.map((s, i) => (
+              <div key={s.name} style={{ padding: '0 0 24px', marginBottom: 24, borderBottom: i < SSM_STOCKISTS.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.3, marginBottom: 12 }}>
+                  {s.name}
+                </div>
+                <div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.8 }}>
+                  {s.addr}
+                </div>
+                <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginTop: 14, lineHeight: 1.8 }}>
+                  CONTACT · {s.phone}<br/>
+                  WHATSAPP · {s.whatsapp}<br/>
+                  {s.email}
+                </div>
+              </div>
+            ))}
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => go('stockists')}>
-              Other locations
+              View company locations
             </button>
           </div>
         </div>
