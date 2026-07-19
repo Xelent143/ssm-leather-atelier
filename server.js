@@ -1,4 +1,5 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -14,6 +15,14 @@ const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const sessions = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+
+const stripeShippingCountries = [
+  'US', 'CA', 'GB', 'AU', 'NZ', 'IE', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE',
+  'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'PT', 'PL', 'CZ', 'GR', 'RO', 'HU',
+  'AE', 'SA', 'QA', 'BH', 'KW', 'OM', 'PK', 'IN', 'JP', 'KR', 'SG', 'MY',
+  'TH', 'ID', 'PH', 'HK', 'TW', 'ZA', 'MX', 'BR', 'AR', 'CL',
+];
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -191,6 +200,134 @@ function readBody(req) {
     });
     req.on('error', reject);
   });
+}
+
+function stripeRequest(method, requestPath, form) {
+  return new Promise((resolve, reject) => {
+    const body = form ? form.toString() : '';
+    const request = https.request({
+      hostname: 'api.stripe.com',
+      path: requestPath,
+      method,
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        ...(body ? {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(body),
+        } : {}),
+      },
+    }, (response) => {
+      let responseBody = '';
+      response.on('data', (chunk) => { responseBody += chunk; });
+      response.on('end', () => {
+        let payload;
+        try {
+          payload = JSON.parse(responseBody);
+        } catch {
+          reject(new Error('Stripe returned an invalid response'));
+          return;
+        }
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          resolve(payload);
+          return;
+        }
+
+        const error = new Error(payload.error?.message || 'Stripe request failed');
+        error.statusCode = response.statusCode;
+        reject(error);
+      });
+    });
+
+    request.on('error', reject);
+    if (body) request.write(body);
+    request.end();
+  });
+}
+
+function checkoutLineItems(rawItems) {
+  if (!Array.isArray(rawItems) || rawItems.length === 0 || rawItems.length > 20) {
+    throw new Error('Your bag must contain between 1 and 20 products.');
+  }
+
+  const store = readPublicStore();
+  return rawItems.map((rawItem) => {
+    const rawId = String(rawItem.baseId || rawItem.id || '');
+    const baseId = rawId.replace(/-\d+$/, '');
+    const product = store.products.find((candidate) => candidate.id === baseId || candidate.slug === baseId);
+    if (!product || product.status === 'archived') throw new Error('A product in your bag is no longer available.');
+
+    const quantity = Number(rawItem.qty);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+      throw new Error('Product quantities must be between 1 and 10.');
+    }
+
+    const fitMode = rawItem.fitMode === 'made-to-measure' ? 'made-to-measure' : 'standard';
+    if (fitMode === 'made-to-measure' && !product.madeToMeasureEnabled) {
+      throw new Error(`${product.title} is not available made to measure.`);
+    }
+
+    const selectedSize = String(rawItem.size || '').trim().slice(0, 40);
+    const selectedLeather = String(rawItem.leather || '').trim().slice(0, 80);
+    const stockForSize = Number(product.stock?.[selectedSize]);
+    if (fitMode === 'standard' && Number.isFinite(stockForSize) && quantity > stockForSize) {
+      throw new Error(`Only ${stockForSize} of ${product.title} in size ${selectedSize} is available.`);
+    }
+
+    const basePrice = Number(product.price);
+    const surcharge = fitMode === 'made-to-measure'
+      ? Number(product.madeToMeasureSurcharge ?? store.settings.madeToMeasureSurcharge ?? 0)
+      : 0;
+    if (!Number.isFinite(basePrice) || basePrice < 0 || !Number.isFinite(surcharge) || surcharge < 0) {
+      throw new Error('A product in your bag has an invalid price.');
+    }
+
+    const details = [
+      selectedSize ? `Size: ${selectedSize}` : '',
+      selectedLeather ? `Leather: ${selectedLeather}` : '',
+      `Fit: ${fitMode === 'made-to-measure' ? 'Made to measure' : 'Standard'}`,
+    ].filter(Boolean).join(' · ');
+
+    return {
+      quantity,
+      name: String(product.title || product.name || 'MOTOGRIP GEAR product').slice(0, 120),
+      description: details.slice(0, 200),
+      unitAmount: Math.round((basePrice + surcharge) * 100),
+    };
+  });
+}
+
+async function createStripeCheckout(req, rawItems) {
+  let items;
+  try {
+    items = checkoutLineItems(rawItems);
+  } catch (error) {
+    error.checkoutValidation = true;
+    throw error;
+  }
+  const form = new URLSearchParams();
+  form.set('mode', 'payment');
+  form.set('success_url', absoluteUrl(req, '/?payment=success&session_id={CHECKOUT_SESSION_ID}#/checkout'));
+  form.set('cancel_url', absoluteUrl(req, '/?payment=cancelled#/checkout'));
+  form.set('customer_creation', 'always');
+  form.set('billing_address_collection', 'required');
+  form.set('phone_number_collection[enabled]', 'true');
+  form.set('allow_promotion_codes', 'true');
+  form.set('submit_type', 'pay');
+
+  stripeShippingCountries.forEach((country, index) => {
+    form.set(`shipping_address_collection[allowed_countries][${index}]`, country);
+  });
+
+  items.forEach((item, index) => {
+    form.set(`line_items[${index}][price_data][currency]`, 'usd');
+    form.set(`line_items[${index}][price_data][product_data][name]`, item.name);
+    form.set(`line_items[${index}][price_data][product_data][description]`, item.description);
+    form.set(`line_items[${index}][price_data][unit_amount]`, String(item.unitAmount));
+    form.set(`line_items[${index}][quantity]`, String(item.quantity));
+  });
+
+  return stripeRequest('POST', '/v1/checkout/sessions', form);
 }
 
 function resolvePath(urlPath) {
@@ -495,6 +632,27 @@ function normalizeStore(input) {
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/catalog' && req.method === 'GET') {
     sendJson(res, 200, publicCatalog(readPublicStore()));
+    return true;
+  }
+
+  if (pathname === '/api/stripe/checkout' && req.method === 'POST') {
+    if (!stripeSecretKey) {
+      sendJson(res, 503, { error: 'Secure checkout is being configured. Please try again shortly.' });
+      return true;
+    }
+
+    try {
+      const body = await readBody(req);
+      const session = await createStripeCheckout(req, body.items);
+      if (!session.url) throw new Error('Stripe did not return a checkout URL');
+      sendJson(res, 200, { url: session.url });
+    } catch (error) {
+      const clientError = error.checkoutValidation ? error.message : '';
+      console.error('Stripe checkout error:', error.message);
+      sendJson(res, clientError ? 400 : 502, {
+        error: clientError || 'Secure checkout is temporarily unavailable. Please try again.',
+      });
+    }
     return true;
   }
 
