@@ -13,6 +13,7 @@ const SSM_ASSETS = {
   coat: A('long-coat.png'),
   atelier: A('atelier-workbench.png'),
   lookbook: A('lookbook-loft.png'),
+  shearlingBanner: A('shearling-couple-banner.png'),
   detail: A('leather-detail.png'),
   // optional (generated). Pages fall back to atelier/detail if these are missing.
   tannery: A('tannery-tuscany.png'),
@@ -224,7 +225,7 @@ const SSM_IMAGES = {
   edDetail1:  SSM_ASSETS.detail,
   edDetail2:  SSM_ASSETS.atelier,
   edPortrait: SSM_ASSETS.coat,
-  edInterior: SSM_ASSETS.lookbook,
+  edInterior: SSM_ASSETS.shearlingBanner,
   workshop:   SSM_ASSETS.atelier,
   lookOpen:   SSM_ASSETS.lookbook,
   lookA:      SSM_ASSETS.biker,
