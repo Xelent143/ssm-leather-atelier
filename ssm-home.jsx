@@ -277,7 +277,8 @@ function EditorialBlock({ go }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
         <div className="ph" data-img="1" data-label="" style={{ aspectRatio: '3/4', '--img': `url(${SSM_IMAGES.edPortrait})` }} />
-        <div className="ph grain" data-img="1" data-label="" style={{ aspectRatio: '8/3', '--img': `url(${SSM_IMAGES.edInterior})` }} />
+        <div className="ph grain" data-img="1" data-label=""
+          style={{ height: '100%', alignSelf: 'stretch', '--img': `url(${SSM_IMAGES.edInterior})` }} />
       </div>
     </section>
   );
