@@ -16,6 +16,9 @@ const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const sessions = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
+const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
+const paypalApiBase = (process.env.PAYPAL_API_BASE || 'https://api-m.paypal.com').replace(/\/+$/, '');
 
 const stripeShippingCountries = [
   'US', 'CA', 'GB', 'AU', 'NZ', 'IE', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE',
@@ -120,6 +123,14 @@ function sendJson(res, status, data, headers = {}) {
     'Cache-Control': 'no-store',
     ...headers,
   });
+}
+
+function redirect(res, location) {
+  res.writeHead(303, {
+    Location: location,
+    'Cache-Control': 'no-store',
+  });
+  res.end();
 }
 
 function escapeHtml(value = '') {
@@ -245,6 +256,67 @@ function stripeRequest(method, requestPath, form) {
   });
 }
 
+function paypalRequest(method, requestPath, { accessToken = '', body = null, basicAuth = '' } = {}) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(requestPath, paypalApiBase);
+    const requestBody = body == null
+      ? ''
+      : (typeof body === 'string' ? body : JSON.stringify(body));
+    const request = https.request({
+      hostname: url.hostname,
+      path: `${url.pathname}${url.search}`,
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(basicAuth ? { Authorization: `Basic ${basicAuth}` } : {}),
+        ...(requestBody ? {
+          'Content-Type': typeof body === 'string'
+            ? 'application/x-www-form-urlencoded'
+            : 'application/json',
+          'Content-Length': Buffer.byteLength(requestBody),
+        } : {}),
+      },
+    }, (response) => {
+      let responseBody = '';
+      response.on('data', (chunk) => { responseBody += chunk; });
+      response.on('end', () => {
+        let payload = {};
+        try {
+          payload = responseBody ? JSON.parse(responseBody) : {};
+        } catch {
+          reject(new Error('PayPal returned an invalid response'));
+          return;
+        }
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          resolve(payload);
+          return;
+        }
+
+        const detail = payload.details?.[0]?.description || payload.message || 'PayPal request failed';
+        const error = new Error(detail);
+        error.statusCode = response.statusCode;
+        reject(error);
+      });
+    });
+
+    request.on('error', reject);
+    if (requestBody) request.write(requestBody);
+    request.end();
+  });
+}
+
+async function getPayPalAccessToken() {
+  const credentials = Buffer.from(`${paypalClientId}:${paypalClientSecret}`).toString('base64');
+  const result = await paypalRequest('POST', '/v1/oauth2/token', {
+    basicAuth: credentials,
+    body: 'grant_type=client_credentials',
+  });
+  if (!result.access_token) throw new Error('PayPal did not return an access token');
+  return result.access_token;
+}
+
 function checkoutLineItems(rawItems) {
   if (!Array.isArray(rawItems) || rawItems.length === 0 || rawItems.length > 20) {
     throw new Error('Your bag must contain between 1 and 20 products.');
@@ -328,6 +400,78 @@ async function createStripeCheckout(req, rawItems) {
   });
 
   return stripeRequest('POST', '/v1/checkout/sessions', form);
+}
+
+function paypalMoney(cents) {
+  return (cents / 100).toFixed(2);
+}
+
+async function createPayPalOrder(req, rawItems) {
+  let items;
+  try {
+    items = checkoutLineItems(rawItems);
+  } catch (error) {
+    error.checkoutValidation = true;
+    throw error;
+  }
+
+  const totalCents = items.reduce((sum, item) => sum + item.unitAmount * item.quantity, 0);
+  const accessToken = await getPayPalAccessToken();
+  const order = await paypalRequest('POST', '/v2/checkout/orders', {
+    accessToken,
+    body: {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        reference_id: crypto.randomUUID(),
+        description: 'MOTOGRIP GEAR order',
+        items: items.map((item) => ({
+          name: item.name,
+          description: item.description,
+          quantity: String(item.quantity),
+          category: 'PHYSICAL_GOODS',
+          unit_amount: {
+            currency_code: 'USD',
+            value: paypalMoney(item.unitAmount),
+          },
+        })),
+        amount: {
+          currency_code: 'USD',
+          value: paypalMoney(totalCents),
+          breakdown: {
+            item_total: {
+              currency_code: 'USD',
+              value: paypalMoney(totalCents),
+            },
+          },
+        },
+      }],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            brand_name: 'MOTOGRIP GEAR',
+            landing_page: 'LOGIN',
+            shipping_preference: 'GET_FROM_FILE',
+            user_action: 'PAY_NOW',
+            return_url: absoluteUrl(req, '/api/paypal/capture'),
+            cancel_url: absoluteUrl(req, '/?payment=cancelled#/checkout'),
+          },
+        },
+      },
+    },
+  });
+
+  const approvalUrl = order.links?.find((link) => link.rel === 'payer-action' || link.rel === 'approve')?.href;
+  if (!order.id || !approvalUrl) throw new Error('PayPal did not return an approval URL');
+  return { id: order.id, url: approvalUrl };
+}
+
+async function capturePayPalOrder(orderId) {
+  if (!/^[A-Z0-9-]{8,40}$/i.test(orderId)) throw new Error('Invalid PayPal order ID');
+  const accessToken = await getPayPalAccessToken();
+  return paypalRequest('POST', `/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
+    accessToken,
+    body: {},
+  });
 }
 
 function resolvePath(urlPath) {
@@ -652,6 +796,39 @@ async function handleApi(req, res, pathname) {
       sendJson(res, clientError ? 400 : 502, {
         error: clientError || 'Secure checkout is temporarily unavailable. Please try again.',
       });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/paypal/checkout' && req.method === 'POST') {
+    if (!paypalClientId || !paypalClientSecret) {
+      sendJson(res, 503, { error: 'PayPal checkout is being configured. Please try again shortly.' });
+      return true;
+    }
+
+    try {
+      const body = await readBody(req);
+      const order = await createPayPalOrder(req, body.items);
+      sendJson(res, 200, { url: order.url });
+    } catch (error) {
+      const clientError = error.checkoutValidation ? error.message : '';
+      console.error('PayPal checkout error:', error.message);
+      sendJson(res, clientError ? 400 : 502, {
+        error: clientError || 'PayPal checkout is temporarily unavailable. Please try again.',
+      });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/paypal/capture' && req.method === 'GET') {
+    const orderId = new URL(req.url, 'http://localhost').searchParams.get('token') || '';
+    try {
+      const capture = await capturePayPalOrder(orderId);
+      if (capture.status !== 'COMPLETED') throw new Error('PayPal payment was not completed');
+      redirect(res, absoluteUrl(req, `/?payment=success&provider=paypal&order_id=${encodeURIComponent(orderId)}#/checkout`));
+    } catch (error) {
+      console.error('PayPal capture error:', error.message);
+      redirect(res, absoluteUrl(req, '/?payment=error&provider=paypal#/checkout'));
     }
     return true;
   }
