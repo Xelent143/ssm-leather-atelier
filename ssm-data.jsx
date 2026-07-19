@@ -416,7 +416,7 @@ const SSM_STOCKISTS = [
   {
     name: 'MOTOGRIP GEAR LLC', region: 'United States', city: 'Waterbury, CT',
     addr: '1172 N Main St, Waterbury, CT 06704, United States',
-    phone: '+1 860 217 7937', whatsapp: '+44 7309 114348', email: 'info@motogripgear.com', primary: true,
+    phone: '+1 860 397 3707', whatsapp: '+1 860 397 3707', email: 'info@motogripgear.com', primary: true,
   },
   {
     name: 'MOTOGRIP LIMITED', region: 'United Kingdom', city: 'Bradford',
