@@ -53,10 +53,7 @@ function PrincipleTriad({ items }) {
       maxWidth: 1240, margin: '0 auto',
     }}>
       {items.map(p => (
-        <div key={p.n}>
-          <div className="display" style={{
-            fontSize: 64, color: 'var(--accent-2)', lineHeight: 1, marginBottom: 16,
-          }}>{p.n}</div>
+        <div key={p.t}>
           <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>{p.t}</div>
           <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>{p.c}</div>
         </div>
@@ -114,7 +111,7 @@ function Journal({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="VI · JOURNAL"
+        eyebrow="JOURNAL"
         title="Sleeve"
         italic="Notes."
         dek="Long-form notes on the hide, the maker, and the wardrobe — written from the bench."
@@ -147,7 +144,7 @@ function Journal({ go }) {
       {/* Grid */}
       <section style={{ padding: '0 48px 80px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          II · ARCHIVE · MMXXVI
+          ARCHIVE · MMXXVI
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
           {rest.map(j => (
@@ -265,7 +262,7 @@ function Care({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="VII · CARE"
+        eyebrow="CARE"
         title="A small ritual,"
         italic="repeated slowly."
         dek="Five steps, written by the people who cut the leather. Read once; refer back twice a year."
@@ -276,15 +273,12 @@ function Care({ go }) {
       <section style={{ padding: '0 48px 96px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
           {SSM_CARE.map((s, i) => (
-            <div key={s.n} style={{
+            <div key={s.t} style={{
               padding: '40px 48px',
               borderTop: i < 2 ? 'none' : '1px solid var(--line)',
               borderRight: i % 2 === 0 ? '1px solid var(--line)' : 'none',
               borderBottom: '1px solid var(--line)',
             }}>
-              <div className="display" style={{
-                fontSize: 56, color: 'var(--accent-2)', lineHeight: 1, marginBottom: 12,
-              }}>{s.n}</div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 10 }}>
                 {s.t}
               </div>
@@ -332,7 +326,7 @@ function Repairs({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="VIII · REPAIRS & RESTORATION"
+        eyebrow="REPAIRS & RESTORATION"
         title="Bring it back"
         italic="at fifty."
         dek="Every piece carries a lifetime repair promise. Stitching, hardware, lining, edge burnishing, conditioning — for as long as the workshop stands."
@@ -347,7 +341,7 @@ function Repairs({ go }) {
 
       <section style={{ padding: '0 48px 96px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          IV · WHAT IS COVERED
+          WHAT IS COVERED
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
           <div>
@@ -404,7 +398,7 @@ function Concierge({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="IX · CONCIERGE & BESPOKE"
+        eyebrow="CONCIERGE & BESPOKE"
         title="A piece"
         italic="from a single conversation."
         dek="Custom is the ground-up commission: your silhouette, your hide, your hardware, fit in person at the MOTOGRIP Fit Garage. Beyond standard made-to-measure. Reserved for the builds we can execute properly."
@@ -414,7 +408,7 @@ function Concierge({ go }) {
       <section style={{ padding: '0 48px 96px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
         <div>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            II · WHAT IS BESPOKE
+            WHAT IS BESPOKE
           </div>
           <div style={{ fontFamily: 'var(--display)', fontSize: 32, marginBottom: 16, lineHeight: 1.15 }}>
             Pattern-cut to your measurements. Designed in conversation. One of one.
@@ -425,7 +419,7 @@ function Concierge({ go }) {
         </div>
         <div>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            III · HOW IT WORKS
+            HOW IT WORKS
           </div>
           {[
             { n: '01', t: 'Initial conversation', c: 'A 45-minute call or studio visit. We discuss your wardrobe, the piece you have in mind, and whether bespoke is the right answer.' },
@@ -444,7 +438,7 @@ function Concierge({ go }) {
 
       <section style={{ padding: '0 48px 96px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-          IV · ELIGIBILITY
+          ELIGIBILITY
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
           {[
@@ -478,7 +472,7 @@ function Sustainability({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="X · SUSTAINABILITY"
+        eyebrow="SUSTAINABILITY"
         title="The honest"
         italic="version."
         dek="We do not use the word lightly. Below is what we do, what we do not do, and where we are still working."
@@ -493,7 +487,7 @@ function Sustainability({ go }) {
 
       <section style={{ padding: '0 48px 96px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          IV · BY THE NUMBERS · MMXXV
+          BY THE NUMBERS · MMXXV
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
           {[
@@ -514,7 +508,7 @@ function Sustainability({ go }) {
 
       <section style={{ padding: '0 48px 96px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          V · WHERE WE ARE STILL WORKING
+          WHERE WE ARE STILL WORKING
         </div>
         <div style={{ maxWidth: 760, color: 'var(--fg-3)', fontSize: 16, lineHeight: 1.85 }}>
           <p>We are not carbon neutral. We do not buy offsets we cannot verify. We use leather, which is an animal product. We ship by sea where we can — but a Made-to-Order commission with a six-week timeline often flies, and we are honest about that.</p>
@@ -537,7 +531,7 @@ function Stockists({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XI · COMPANY LOCATIONS"
+        eyebrow="COMPANY LOCATIONS"
         title="Two companies,"
         italic="one global standard."
         dek="MOTOGRIP GEAR serves customers through our United States and United Kingdom companies. Contact our team before visiting any business location."
@@ -602,7 +596,7 @@ function Press({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XII · PRESS"
+        eyebrow="PRESS"
         title="A small"
         italic="archive."
         dek="A few of the kindest things written about the workshop, and a single email for press enquiries."
@@ -661,7 +655,7 @@ function GiftCards({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XIII · GIFT CARDS"
+        eyebrow="GIFT CARDS"
         title="A piece,"
         italic="but unchosen."
         dek="A small leather card, hand-numbered, with a handwritten note on the back. Sent in a linen envelope by post or, if you cannot wait, by email."
@@ -670,7 +664,7 @@ function GiftCards({ go }) {
       <section style={{ padding: '0 48px 96px', display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 64 }}>
         <div>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            II · DENOMINATION
+            DENOMINATION
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 32 }}>
             {denominations.map(d => (
@@ -685,7 +679,7 @@ function GiftCards({ go }) {
           </div>
 
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            III · MESSAGE
+            MESSAGE
           </div>
           <div style={{ marginBottom: 16 }}>
             <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>RECIPIENT</div>
@@ -722,7 +716,7 @@ function GiftCards({ go }) {
         {/* Live preview */}
         <aside>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            IV · PREVIEW
+            PREVIEW
           </div>
           <div style={{
             aspectRatio: '7/4',
@@ -773,7 +767,7 @@ function FAQ({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XIV · FREQUENTLY ASKED"
+        eyebrow="FREQUENTLY ASKED"
         title="The short"
         italic="answers."
         dek="The longer ones are in the journal, in the care guide, or in your inbox if you write."
@@ -869,7 +863,7 @@ function SizeGuide({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XV · SIZE GUIDE"
+        eyebrow="SIZE GUIDE"
         title="The numbers,"
         italic="and how to find them."
       />
@@ -942,7 +936,7 @@ function ShippingReturns({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XVI · SHIPPING & RETURNS"
+        eyebrow="SHIPPING & RETURNS"
         title="Worldwide,"
         italic="shipping available."
       />
@@ -999,7 +993,7 @@ function Contact({ go }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XVII · CONTACT"
+        eyebrow="CONTACT"
         title="Three pathways,"
         italic="each goes to a real human."
       />
@@ -1018,9 +1012,6 @@ function Contact({ go }) {
                 background: pathway === p.id ? 'var(--bg-2)' : 'transparent',
                 marginRight: -1, marginBottom: -1,
               }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-                {p.id === 'fit' ? 'I' : p.id === 'custom' ? 'II' : 'III'}
-              </div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 8 }}>{p.t}</div>
               <div className="mono" style={{ fontSize: 11, color: 'var(--fg-2)', marginBottom: 12 }}>{p.e}</div>
               <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7 }}>{p.c}</div>
@@ -1031,7 +1022,7 @@ function Contact({ go }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-              IV · A SHORT NOTE
+              A SHORT NOTE
             </div>
             <div style={{ marginBottom: 16 }}>
               <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>NAME</div>
@@ -1058,7 +1049,7 @@ function Contact({ go }) {
           </div>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-              V · COMPANY DETAILS
+              COMPANY DETAILS
             </div>
             {SSM_STOCKISTS.map((s, i) => (
               <div key={s.name} style={{ padding: '0 0 24px', marginBottom: 24, borderBottom: i < SSM_STOCKISTS.length - 1 ? '1px solid var(--line)' : 'none' }}>
@@ -1092,7 +1083,7 @@ function NotFound({ go }) {
     <div className="page-fade" style={{ minHeight: '60vh' }}>
       <section style={{ padding: '120px 48px', textAlign: 'center', maxWidth: 720, margin: '0 auto' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16, letterSpacing: '0.4em' }}>
-          ✦ &nbsp; XVIII · 404 &nbsp; ✦
+          ✦ &nbsp; 404 &nbsp; ✦
         </div>
         <h1 className="display" style={{
           fontSize: 'clamp(48px, 7vw, 104px)', margin: 0, lineHeight: 0.95, fontWeight: 400,
@@ -1138,7 +1129,7 @@ function SearchResults({ go, query, onQuickView }) {
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="XIX · SEARCH"
+        eyebrow="SEARCH"
         title={q ? <>Results for</> : <>Search the</>}
         italic={q ? `"${query}".` : 'gear.'}
         meta={q ? `${products.length} pieces · ${journal.length} essays` : ''}
