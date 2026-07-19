@@ -40,6 +40,20 @@ Or just open `index.html` directly — it's self-contained.
 This is a static site. Railway runs `npm start`, which serves `index.html`
 and assets through `server.js` on the required `$PORT`.
 
+### Stripe Checkout
+
+Payments use Stripe-hosted Checkout so card details never pass through the
+storefront. Configure these environment variables in Railway, never in GitHub:
+
+- `STRIPE_SECRET_KEY` — start with a Stripe test-mode secret key, then replace
+  it with the live-mode secret key after a successful test order.
+- `PUBLIC_BASE_URL` — set to `https://motogripgear.com` so Stripe returns the
+  customer to the production storefront.
+
+Checkout prices are rebuilt from `merchant-catalog.json` on the server. Values
+submitted by the browser are treated only as product selections and are never
+trusted as payment amounts.
+
 ```bash
 npm start
 ```

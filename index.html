@@ -3663,33 +3663,43 @@ function Account({ go }) {
 
 function Checkout({ go, items, setItems }) {
   const [step, setStep] = React.useState(0);
-  const [done, setDone] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const ship = 0;
-  const tax = Math.round(subtotal * 0.0875);
-  const total = subtotal + ship + tax;
+  const tax = 'Calculated by Stripe';
+  const total = subtotal + ship;
   const cs = ['Contact', 'Delivery', 'Payment'];
+  const paymentStatus = new URLSearchParams(window.location.search).get('payment');
 
-  if (done) {
-    return (
-      <div className="page-fade" style={{ padding: '120px 48px', textAlign: 'center', minHeight: '70vh' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--accent-2)', margin: '0 auto 32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="check" size={28} />
-        </div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>CONFIRMED · SSM-2026-0921</div>
-        <h1 className="display" style={{ fontSize: 'clamp(48px, 6vw, 88px)', margin: 0, lineHeight: 0.95, fontWeight: 400 }}>
-          Thank you, Iola.
-        </h1>
-        <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7, marginTop: 24, maxWidth: 520, margin: '24px auto 0' }}>
-          Your pieces leave the atelier in 2–3 working days. We'll write when they ship, and again when they arrive.
-        </div>
-        <div style={{ marginTop: 40, display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button className="btn" onClick={() => { setItems([]); go('account'); }}>Track Order</button>
-          <button className="btn btn-ghost" onClick={() => { setItems([]); go('home'); }}>Continue</button>
-        </div>
-      </div>
-    );
-  }
+  const beginSecureCheckout = async () => {
+    if (!items.length || loading) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            id: item.id,
+            baseId: item.baseId,
+            qty: item.qty,
+            size: item.size,
+            leather: item.leather,
+            fitMode: item.fitMode,
+          })),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.url) throw new Error(result.error || 'Secure checkout is unavailable.');
+      window.location.assign(result.url);
+    } catch (checkoutError) {
+      setError(checkoutError.message || 'Secure checkout is unavailable. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="page-fade" style={{ display: 'grid', gridTemplateColumns: '1fr 480px', minHeight: 'calc(100vh - 80px)' }}>
@@ -3705,6 +3715,22 @@ function Checkout({ go, items, setItems }) {
             </div>
           ))}
         </div>
+
+        {paymentStatus === 'success' && (
+          <div style={{ border: '1px solid var(--accent-2)', padding: 16, marginBottom: 24, color: 'var(--fg-2)' }}>
+            Payment completed. Stripe will email your receipt and MOTOGRIP GEAR will confirm your order.
+          </div>
+        )}
+        {paymentStatus === 'cancelled' && (
+          <div style={{ border: '1px solid var(--line-2)', padding: 16, marginBottom: 24, color: 'var(--fg-3)' }}>
+            Checkout was cancelled. Your bag is unchanged.
+          </div>
+        )}
+        {error && (
+          <div role="alert" style={{ border: '1px solid #b44', padding: 14, marginBottom: 20, color: '#b44', fontSize: 13 }}>
+            {error}
+          </div>
+        )}
 
         {step === 0 && (
           <div className="step-fade">
@@ -3747,27 +3773,19 @@ function Checkout({ go, items, setItems }) {
         )}
         {step === 2 && (
           <div className="step-fade">
-            <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-              {['Card', 'Apple Pay', 'Klarna'].map((m, i) => (
-                <span key={m} className="mono" style={{ padding: '12px 18px', fontSize: 10,
-                  border: i === 0 ? '1px solid var(--fg)' : '1px solid var(--line-2)',
-                  background: i === 0 ? 'var(--fg)' : 'transparent',
-                  color: i === 0 ? 'var(--bg)' : 'var(--fg-2)', cursor: 'pointer' }}>{m.toUpperCase()}</span>
-              ))}
-            </div>
-            <Field label="Card number" placeholder="•••• •••• •••• 4242" />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <Field label="Expiry" placeholder="08 / 28" />
-              <Field label="CVV" placeholder="•••" />
-              <Field label="ZIP" placeholder="11222" />
+            <div style={{ border: '1px solid var(--line-2)', padding: 24 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>SECURE PAYMENT · STRIPE</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>
+                Continue to Stripe to enter your payment, billing, and shipping details. MOTOGRIP GEAR never receives or stores your full card number.
+              </div>
             </div>
           </div>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 48 }}>
           <button className="btn btn-ghost" onClick={() => step === 0 ? go('home') : setStep(step - 1)}>← {step === 0 ? 'Continue Shopping' : 'Back'}</button>
-          <button className="btn" onClick={() => step < 2 ? setStep(step + 1) : setDone(true)}>
-            {step < 2 ? `Continue · ${cs[step + 1]}` : `Place Order · $${total.toLocaleString()}`} <Icon name="arrow" size={14} />
+          <button className="btn" disabled={loading || !items.length} onClick={() => step < 2 ? setStep(step + 1) : beginSecureCheckout()}>
+            {step < 2 ? `Continue · ${cs[step + 1]}` : loading ? 'Opening Stripe…' : `Continue to Stripe · $${total.toLocaleString()}`} <Icon name="arrow" size={14} />
           </button>
         </div>
       </div>
@@ -3788,7 +3806,7 @@ function Checkout({ go, items, setItems }) {
           </div>
         ))}
         <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line-2)' }}>
-          {[['Subtotal', subtotal], ['Shipping', ship === 0 ? 'Complimentary' : '$' + ship], ['Tax', '$' + tax]].map(([k, v]) => (
+          {[['Subtotal', subtotal], ['Shipping', ship === 0 ? 'Complimentary' : '$' + ship], ['Tax', tax]].map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
               <span className="mono" style={{ fontSize: 10, color: 'var(--fg-3)' }}>{k.toUpperCase()}</span>
               <span style={{ fontSize: 13 }}>{typeof v === 'number' ? '$' + v.toLocaleString() : v}</span>
