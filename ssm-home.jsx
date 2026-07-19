@@ -171,7 +171,7 @@ function CategoryStrip({ go }) {
     <section style={{ padding: '120px 48px 80px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
         <div>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>I · CATEGORIES</div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>CATEGORIES</div>
           <h2 className="display" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', margin: 0, lineHeight: 1, fontWeight: 400 }}>
             Four ways to gear up.
           </h2>
@@ -207,7 +207,7 @@ function FeaturedRow({ products, onQuickView, go }) {
     <section style={{ padding: '80px 48px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
         <div>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>II · NEW ARRIVALS</div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>NEW ARRIVALS</div>
           <h2 className="display" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', margin: 0, lineHeight: 1, fontWeight: 400 }}>
             Fresh from the road room.
           </h2>
@@ -228,7 +228,7 @@ function AtelierFeature({ go }) {
     <section style={{ padding: '120px 48px', background: 'var(--bg-2)', margin: '40px 0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
         <div>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>III · MADE TO ORDER</div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>MADE TO ORDER</div>
           <h2 className="display" style={{ fontSize: 'clamp(40px, 5.5vw, 80px)', margin: 0, lineHeight: 0.98, fontWeight: 400, marginBottom: 24 }}>
             Cut to the<br/>contour of you.
           </h2>
@@ -261,7 +261,7 @@ function EditorialBlock({ go }) {
     <section style={{ padding: '80px 48px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
         <div>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>IV · LOOKBOOK</div>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>LOOKBOOK</div>
           <h2 className="display" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', margin: 0, lineHeight: 1, fontWeight: 400 }}>
             <em>Hourwitch</em> — the winter film.
           </h2>
@@ -292,7 +292,7 @@ function TestimonialBlock() {
   ];
   return (
     <section style={{ padding: '120px 48px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>V · IN THE PRESS</div>
+      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>IN THE PRESS</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 64 }}>
         {reviews.map((r, i) => (
           <div key={i} style={{ textAlign: 'center' }}>
