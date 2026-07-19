@@ -1454,9 +1454,33 @@ Object.assign(window, {
 // a footer with real link wiring, and a small "Estimated delivery" note in
 // the bag drawer.
 
-function MotoGripLogo({ compact = false }) {
+function MotoGripLogo({ compact = false, monogram = false }) {
   const logoHeight = compact ? 34 : 52;
   const logoWidth = compact ? 154 : 250;
+
+  if (monogram) {
+    const markSize = compact ? 36 : 52;
+    const sourceSize = compact ? 83 : 120;
+    return (
+      <span style={{
+        display: 'block', position: 'relative', overflow: 'hidden',
+        width: markSize, height: markSize,
+      }}>
+        <img
+          src="/assets/motogrip-monogram.png"
+          alt="MOTOGRIP GEAR"
+          style={{
+            position: 'absolute', display: 'block', maxWidth: 'none',
+            width: sourceSize, height: sourceSize,
+            left: compact ? -27 : -39,
+            top: compact ? -12 : -18,
+            mixBlendMode: 'multiply',
+          }}
+        />
+      </span>
+    );
+  }
+
   return (
     <img
       src="/assets/motogrip-logo-transparent.png"
@@ -1546,7 +1570,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
         {/* CENTER: logo */}
         <button onClick={() => go('home')} aria-label="MOTOGRIP GEAR Home"
           style={{ cursor: 'pointer', textAlign: 'center', background: 'transparent', border: 0, padding: 0, color: 'var(--fg)' }}>
-          <MotoGripLogo compact={isMobile} />
+          <MotoGripLogo compact={isMobile} monogram />
         </button>
 
         {/* RIGHT: actions */}
@@ -1640,7 +1664,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
           background: 'var(--bg)', padding: '20px',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
-            <MotoGripLogo compact />
+            <MotoGripLogo compact monogram />
             <button onClick={() => setMobileOpen(false)} aria-label="Close menu"
               style={{ background: 'transparent', border: 0, padding: 4, color: 'var(--fg)', cursor: 'pointer' }}>
               <Icon name="close" size={20} />
