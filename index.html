@@ -3663,22 +3663,23 @@ function Account({ go }) {
 
 function Checkout({ go, items, setItems }) {
   const [step, setStep] = React.useState(0);
-  const [loading, setLoading] = React.useState(false);
+  const [paymentProvider, setPaymentProvider] = React.useState('stripe');
+  const [loading, setLoading] = React.useState('');
   const [error, setError] = React.useState('');
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const ship = 0;
-  const tax = 'Calculated by Stripe';
+  const tax = 'Confirmed during payment';
   const total = subtotal + ship;
   const cs = ['Contact', 'Delivery', 'Payment'];
   const paymentStatus = new URLSearchParams(window.location.search).get('payment');
 
   const beginSecureCheckout = async () => {
     if (!items.length || loading) return;
-    setLoading(true);
+    setLoading(paymentProvider);
     setError('');
 
     try {
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch(`/api/${paymentProvider}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3693,11 +3694,11 @@ function Checkout({ go, items, setItems }) {
         }),
       });
       const result = await response.json();
-      if (!response.ok || !result.url) throw new Error(result.error || 'Secure checkout is unavailable.');
+      if (!response.ok || !result.url) throw new Error(result.error || `${paymentProvider === 'paypal' ? 'PayPal' : 'Stripe'} checkout is unavailable.`);
       window.location.assign(result.url);
     } catch (checkoutError) {
       setError(checkoutError.message || 'Secure checkout is unavailable. Please try again.');
-      setLoading(false);
+      setLoading('');
     }
   };
 
@@ -3718,12 +3719,17 @@ function Checkout({ go, items, setItems }) {
 
         {paymentStatus === 'success' && (
           <div style={{ border: '1px solid var(--accent-2)', padding: 16, marginBottom: 24, color: 'var(--fg-2)' }}>
-            Payment completed. Stripe will email your receipt and MOTOGRIP GEAR will confirm your order.
+            Payment completed. Your payment provider will email your receipt and MOTOGRIP GEAR will confirm your order.
           </div>
         )}
         {paymentStatus === 'cancelled' && (
           <div style={{ border: '1px solid var(--line-2)', padding: 16, marginBottom: 24, color: 'var(--fg-3)' }}>
             Checkout was cancelled. Your bag is unchanged.
+          </div>
+        )}
+        {paymentStatus === 'error' && (
+          <div role="alert" style={{ border: '1px solid #b44', padding: 14, marginBottom: 20, color: '#b44', fontSize: 13 }}>
+            PayPal could not confirm this payment. Your bag is unchanged; please try again or choose Stripe.
           </div>
         )}
         {error && (
@@ -3773,10 +3779,26 @@ function Checkout({ go, items, setItems }) {
         )}
         {step === 2 && (
           <div className="step-fade">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+              {[
+                { id: 'stripe', label: 'Card · Stripe' },
+                { id: 'paypal', label: 'PayPal' },
+              ].map((provider) => (
+                <button key={provider.id} type="button" className={paymentProvider === provider.id ? 'btn' : 'btn btn-ghost'}
+                  aria-pressed={paymentProvider === provider.id}
+                  onClick={() => { setPaymentProvider(provider.id); setError(''); }}>
+                  {provider.label}
+                </button>
+              ))}
+            </div>
             <div style={{ border: '1px solid var(--line-2)', padding: 24 }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>SECURE PAYMENT · STRIPE</div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
+                SECURE PAYMENT · {paymentProvider === 'paypal' ? 'PAYPAL' : 'STRIPE'}
+              </div>
               <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>
-                Continue to Stripe to enter your payment, billing, and shipping details. MOTOGRIP GEAR never receives or stores your full card number.
+                {paymentProvider === 'paypal'
+                  ? 'Continue to PayPal to review your order, choose an eligible funding source, and confirm your delivery address.'
+                  : 'Continue to Stripe to enter your payment, billing, and shipping details. MOTOGRIP GEAR never receives or stores your full card number.'}
               </div>
             </div>
           </div>
@@ -3785,7 +3807,11 @@ function Checkout({ go, items, setItems }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 48 }}>
           <button className="btn btn-ghost" onClick={() => step === 0 ? go('home') : setStep(step - 1)}>← {step === 0 ? 'Continue Shopping' : 'Back'}</button>
           <button className="btn" disabled={loading || !items.length} onClick={() => step < 2 ? setStep(step + 1) : beginSecureCheckout()}>
-            {step < 2 ? `Continue · ${cs[step + 1]}` : loading ? 'Opening Stripe…' : `Continue to Stripe · $${total.toLocaleString()}`} <Icon name="arrow" size={14} />
+            {step < 2
+              ? `Continue · ${cs[step + 1]}`
+              : loading
+                ? `Opening ${loading === 'paypal' ? 'PayPal' : 'Stripe'}…`
+                : `Continue to ${paymentProvider === 'paypal' ? 'PayPal' : 'Stripe'} · $${total.toLocaleString()}`} <Icon name="arrow" size={14} />
           </button>
         </div>
       </div>
