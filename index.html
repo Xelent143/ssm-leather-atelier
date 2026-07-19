@@ -398,6 +398,8 @@
   }
 
   @media (max-width: 720px) {
+    .stripe-checkout { grid-template-columns: 1fr !important; }
+    .stripe-checkout > div { border-right: 0 !important; }
     /* PDP grid → single column */
     [style*="grid-template-columns: 80px 1fr 480px"],
     [style*="gridTemplateColumns: '80px 1fr 480px'"] {
@@ -3661,142 +3663,121 @@ function Account({ go }) {
   );
 }
 
-function Checkout({ go, items, setItems }) {
-  const [step, setStep] = React.useState(0);
-  const [done, setDone] = React.useState(false);
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const ship = 0;
-  const tax = Math.round(subtotal * 0.0875);
-  const total = subtotal + ship + tax;
-  const cs = ['Contact', 'Delivery', 'Payment'];
+function Checkout({ go, items }) {
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const paymentStatus = new URLSearchParams(window.location.search).get('payment');
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  if (done) {
-    return (
-      <div className="page-fade" style={{ padding: '120px 48px', textAlign: 'center', minHeight: '70vh' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--accent-2)', margin: '0 auto 32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="check" size={28} />
-        </div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>CONFIRMED · SSM-2026-0921</div>
-        <h1 className="display" style={{ fontSize: 'clamp(48px, 6vw, 88px)', margin: 0, lineHeight: 0.95, fontWeight: 400 }}>
-          Thank you, Iola.
-        </h1>
-        <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7, marginTop: 24, maxWidth: 520, margin: '24px auto 0' }}>
-          Your pieces leave the atelier in 2–3 working days. We'll write when they ship, and again when they arrive.
-        </div>
-        <div style={{ marginTop: 40, display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button className="btn" onClick={() => { setItems([]); go('account'); }}>Track Order</button>
-          <button className="btn btn-ghost" onClick={() => { setItems([]); go('home'); }}>Continue</button>
-        </div>
-      </div>
-    );
-  }
+  const beginSecureCheckout = async () => {
+    if (!items.length || loading) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            id: item.id,
+            baseId: item.baseId,
+            qty: item.qty,
+            size: item.size,
+            leather: item.leather,
+            fitMode: item.fitMode,
+          })),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.url) throw new Error(result.error || 'Secure checkout is unavailable.');
+      window.location.assign(result.url);
+    } catch (checkoutError) {
+      setError(checkoutError.message || 'Secure checkout is unavailable. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="page-fade" style={{ display: 'grid', gridTemplateColumns: '1fr 480px', minHeight: 'calc(100vh - 80px)' }}>
-      <div style={{ padding: '48px 64px', borderRight: '1px solid var(--line)' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>CHECKOUT · STEP 0{step + 1} OF 3</div>
-        <h1 className="display" style={{ fontSize: 48, margin: '0 0 32px', fontWeight: 400 }}>{cs[step]}</h1>
+    <div className="page-fade stripe-checkout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(320px, 480px)', minHeight: 'calc(100vh - 80px)' }}>
+      <div style={{ padding: 'clamp(32px, 5vw, 64px)', borderRight: '1px solid var(--line)' }}>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>SECURE CHECKOUT · POWERED BY STRIPE</div>
+        <h1 className="display" style={{ fontSize: 'clamp(42px, 6vw, 72px)', margin: '0 0 24px', fontWeight: 400 }}>Complete your order securely.</h1>
+        <p style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.75, maxWidth: 620, margin: '0 0 32px' }}>
+          You will continue to Stripe to enter your contact, delivery, and payment details. MOTOGRIP GEAR never receives or stores your full card number.
+        </p>
 
-        <div style={{ display: 'flex', gap: 16, marginBottom: 40 }}>
-          {cs.map((c, i) => (
-            <div key={c} style={{ flex: 1 }}>
-              <div style={{ height: 1, background: i <= step ? 'var(--accent-2)' : 'var(--line)', marginBottom: 8 }} />
-              <div className="mono" style={{ fontSize: 9, color: i <= step ? 'var(--accent-2)' : 'var(--fg-4)' }}>0{i+1} · {c.toUpperCase()}</div>
+        {paymentStatus === 'success' && (
+          <div style={{ border: '1px solid var(--accent-2)', padding: 18, marginBottom: 24, color: 'var(--fg-2)' }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 6 }}>PAYMENT RETURNED FROM STRIPE</div>
+            Your order confirmation and receipt will be sent to the email address used at checkout.
+          </div>
+        )}
+        {paymentStatus === 'cancelled' && (
+          <div style={{ border: '1px solid var(--line-2)', padding: 18, marginBottom: 24, color: 'var(--fg-3)' }}>
+            Checkout was cancelled. Your bag is unchanged and you can continue whenever you are ready.
+          </div>
+        )}
+        {error && (
+          <div role="alert" style={{ border: '1px solid #b44', padding: 14, marginBottom: 20, color: '#b44', fontSize: 13 }}>
+            {error}
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gap: 12, maxWidth: 620, marginBottom: 32 }}>
+          {[
+            ['Payment security', 'Card details are entered and processed on Stripe.'],
+            ['Delivery details', 'Stripe securely collects your billing, phone, and shipping address.'],
+            ['International orders', 'Complimentary shipping is shown at checkout; destination duties may still apply.'],
+          ].map(([title, detail]) => (
+            <div key={title} style={{ display: 'flex', gap: 14, padding: 16, border: '1px solid var(--line)' }}>
+              <Icon name="check" size={16} />
+              <div>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{title}</div>
+                <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.6, marginTop: 3 }}>{detail}</div>
+              </div>
             </div>
           ))}
         </div>
 
-        {step === 0 && (
-          <div className="step-fade">
-            <Field label="Email" placeholder="iola@example.com" />
-            <Field label="Phone (for delivery)" placeholder="+1 (212) 555 0143" />
-            <label style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 12, color: 'var(--fg-3)', fontSize: 12 }}>
-              <span style={{ width: 14, height: 14, border: '1px solid var(--accent-2)', background: 'var(--accent-2)' }} />
-              Send me atelier dispatches (optional)
-            </label>
-          </div>
-        )}
-        {step === 1 && (
-          <div className="step-fade">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <Field label="First name" placeholder="Iola" />
-              <Field label="Last name" placeholder="Vance" />
-            </div>
-            <Field label="Address" placeholder="143 Greenpoint Ave" />
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 16 }}>
-              <Field label="City" placeholder="Brooklyn" />
-              <Field label="State" placeholder="NY" />
-              <Field label="ZIP" placeholder="11222" />
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>DELIVERY METHOD</div>
-              {[
-                { t: 'Atelier Express', d: '2-3 days · Signed for', p: 'Complimentary' },
-                { t: 'White Glove', d: '5-7 days · By appointment', p: '+ $40' },
-              ].map((m, i) => (
-                <label key={m.t} style={{ display: 'flex', justifyContent: 'space-between', padding: 16, border: i === 0 ? '1px solid var(--accent-2)' : '1px solid var(--line)', marginBottom: 8, cursor: 'pointer' }}>
-                  <div>
-                    <div style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{m.t}</div>
-                    <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{m.d.toUpperCase()}</div>
-                  </div>
-                  <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{m.p}</div>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-        {step === 2 && (
-          <div className="step-fade">
-            <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-              {['Card', 'Apple Pay', 'Klarna'].map((m, i) => (
-                <span key={m} className="mono" style={{ padding: '12px 18px', fontSize: 10,
-                  border: i === 0 ? '1px solid var(--fg)' : '1px solid var(--line-2)',
-                  background: i === 0 ? 'var(--fg)' : 'transparent',
-                  color: i === 0 ? 'var(--bg)' : 'var(--fg-2)', cursor: 'pointer' }}>{m.toUpperCase()}</span>
-              ))}
-            </div>
-            <Field label="Card number" placeholder="•••• •••• •••• 4242" />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <Field label="Expiry" placeholder="08 / 28" />
-              <Field label="CVV" placeholder="•••" />
-              <Field label="ZIP" placeholder="11222" />
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 48 }}>
-          <button className="btn btn-ghost" onClick={() => step === 0 ? go('home') : setStep(step - 1)}>← {step === 0 ? 'Continue Shopping' : 'Back'}</button>
-          <button className="btn" onClick={() => step < 2 ? setStep(step + 1) : setDone(true)}>
-            {step < 2 ? `Continue · ${cs[step + 1]}` : `Place Order · $${total.toLocaleString()}`} <Icon name="arrow" size={14} />
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost" onClick={() => go('shop')}>← Continue shopping</button>
+          <button className="btn" disabled={!items.length || loading} onClick={beginSecureCheckout} style={{ opacity: !items.length || loading ? 0.55 : 1 }}>
+            {loading ? 'Opening Stripe…' : `Continue to secure payment · $${subtotal.toLocaleString()}`} <Icon name="arrow" size={14} />
           </button>
         </div>
       </div>
 
-      <aside style={{ padding: 48, background: 'var(--bg-2)' }}>
+      <aside style={{ padding: 'clamp(28px, 4vw, 48px)', background: 'var(--bg-2)' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 20 }}>YOUR BAG · {items.length} {items.length === 1 ? 'PIECE' : 'PIECES'}</div>
         {items.length === 0 ? (
           <div style={{ color: 'var(--fg-3)', fontSize: 14 }}>Your bag is empty.</div>
-        ) : items.map((it, i) => (
-          <div key={i} style={{ display: 'flex', gap: 14, padding: '14px 0', borderBottom: '1px solid var(--line)' }}>
-            <div className="ph tiny" data-img={it.img ? "1" : null} data-label={it.name.split(' ')[0].toUpperCase()}
-              style={{ width: 64, height: 80, flexShrink: 0, '--img': it.img ? `url(${it.img})` : null }} />
+        ) : items.map((item, index) => (
+          <div key={item.id || index} style={{ display: 'flex', gap: 14, padding: '14px 0', borderBottom: '1px solid var(--line)' }}>
+            <div className="ph tiny" data-img={item.img ? "1" : null} data-label={item.name.split(' ')[0].toUpperCase()}
+              style={{ width: 64, height: 80, flexShrink: 0, '--img': item.img ? `url(${item.img})` : null }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{item.name}</div>
+              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{item.leather} · {item.size} · QTY {item.qty}</div>
+              {item.fitMode === 'made-to-measure' && <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 4 }}>MADE TO MEASURE</div>}
             </div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>${(it.price * it.qty).toLocaleString()}</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>${(item.price * item.qty).toLocaleString()}</div>
           </div>
         ))}
         <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line-2)' }}>
-          {[['Subtotal', subtotal], ['Shipping', ship === 0 ? 'Complimentary' : '$' + ship], ['Tax', '$' + tax]].map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
-              <span className="mono" style={{ fontSize: 10, color: 'var(--fg-3)' }}>{k.toUpperCase()}</span>
-              <span style={{ fontSize: 13 }}>{typeof v === 'number' ? '$' + v.toLocaleString() : v}</span>
+          {[
+            ['Subtotal', `$${subtotal.toLocaleString()}`],
+            ['Shipping', 'Complimentary'],
+            ['Duties & taxes', 'Destination rules apply'],
+          ].map(([label, value]) => (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '6px 0' }}>
+              <span className="mono" style={{ fontSize: 10, color: 'var(--fg-3)' }}>{label.toUpperCase()}</span>
+              <span style={{ fontSize: 13, textAlign: 'right' }}>{value}</span>
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 0 0', borderTop: '1px solid var(--line-2)', marginTop: 8 }}>
-            <span className="mono" style={{ fontSize: 11 }}>TOTAL</span>
-            <span className="display" style={{ fontSize: 28 }}>${total.toLocaleString()}</span>
+            <span className="mono" style={{ fontSize: 11 }}>DUE AT STRIPE</span>
+            <span className="display" style={{ fontSize: 28 }}>${subtotal.toLocaleString()}</span>
           </div>
         </div>
       </aside>
