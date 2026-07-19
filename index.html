@@ -2240,7 +2240,7 @@ function CategoryStrip({ go }) {
         <span className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)' }}>VIEW ALL →</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-        {cats.map((c, i) => (
+        {cats.map(c => (
           <div key={c.name} className="card" style={{ cursor: 'pointer', position: 'relative' }}
             onClick={() => c.view ? go(c.view) : go('shop', { cat: c.filter })}>
             <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '3/4' }}>
@@ -2251,7 +2251,6 @@ function CategoryStrip({ go }) {
                 background: 'var(--media-caption-scrim)',
               }} />
               <div style={{ position: 'absolute', bottom: 24, left: 24, right: 24 }}>
-                <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginBottom: 8 }}>0{i+1}</div>
                 <div className="display" style={{ fontSize: 36, lineHeight: 0.95, fontWeight: 400, color: 'var(--media-caption-fg)' }}>{c.name}</div>
                 <div className="mono" style={{ fontSize: 9, color: 'var(--media-caption-muted)', marginTop: 8 }}>{c.label}</div>
               </div>
