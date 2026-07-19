@@ -69,8 +69,7 @@ function About({ go }) {
           { n: 'II', t: 'Single-maker', c: 'One craftsperson sees a piece from cut to finish. They sign the inside placket. You write to them by name.' },
           { n: 'III', t: 'Forever', c: 'Every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
         ].map(p => (
-          <div key={p.n}>
-            <div className="display" style={{ fontSize: 64, color: 'var(--accent-2)', lineHeight: 1, marginBottom: 16 }}>{p.n}</div>
+          <div key={p.t}>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>{p.t}</div>
             <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>{p.c}</div>
           </div>
