@@ -452,7 +452,7 @@ function Footer({ go }) {
       { l: 'Sustainability', go: () => go('sustain') },
     ] },
     { h: 'Support', items: [
-      { l: 'Concierge', go: () => go('concierge') },
+      { l: 'Custom Consultation Form', go: () => go('concierge') },
       { l: 'Shipping & Returns', go: () => go('ship') },
       { l: 'Size Guide', go: () => go('size') },
       { l: 'Stockists', go: () => go('stockists') },
