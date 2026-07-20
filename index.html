@@ -4866,6 +4866,26 @@ function TrackOrder({ go }) {
   const [order, setOrder] = React.useState(null);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [openFaqs, setOpenFaqs] = React.useState([0, 1, 2, 3]);
+
+  const trackingFaqs = [
+    {
+      q: 'How can I track my order?',
+      a: 'Enter your order number and checkout email above. Once your order is dispatched, the latest carrier and tracking details will appear here when they are available.',
+    },
+    {
+      q: 'My order is delayed. What should I do?',
+      a: 'Check the carrier tracking first. If there has been no movement for five business days, contact info@motogripgear.com with your order number and we will investigate.',
+    },
+    {
+      q: 'How long will my made-to-measure order take?',
+      a: 'Our current production estimate is 21–28 business days after measurements and design details are approved. Complex custom work may require additional time, which we confirm before production.',
+    },
+    {
+      q: 'How long does shipping take?',
+      a: 'Delivery time depends on the destination and courier service. We provide the latest estimate when your order is ready to dispatch; customs processing may add time to international deliveries.',
+    },
+  ];
 
   const submit = async (event) => {
     event.preventDefault();
@@ -4889,6 +4909,9 @@ function TrackOrder({ go }) {
   };
 
   const label = (value) => String(value || 'Pending').replaceAll('_', ' ').toUpperCase();
+  const toggleFaq = (index) => setOpenFaqs((current) =>
+    current.includes(index) ? current.filter((item) => item !== index) : [...current, index]
+  );
 
   return (
     <div className="page-fade">
@@ -4964,6 +4987,34 @@ function TrackOrder({ go }) {
               )}
             </div>
           )}
+        </div>
+
+        <div style={{ marginTop: 80 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>ORDER HELP</div>
+          <h2 style={{ fontFamily: 'var(--display)', fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 400, margin: '0 0 32px' }}>
+            Tracking, <em style={{ color: 'var(--accent-2)' }}>answered.</em>
+          </h2>
+
+          <div style={{ borderTop: '1px solid var(--line-2)' }}>
+            {trackingFaqs.map((faq, index) => {
+              const isOpen = openFaqs.includes(index);
+              return (
+                <div key={faq.q} style={{ borderBottom: '1px solid var(--line-2)' }}>
+                  <button type="button" onClick={() => toggleFaq(index)} aria-expanded={isOpen}
+                    style={{ width: '100%', padding: '24px 0', border: 0, background: 'transparent', color: 'var(--fg)',
+                      display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'center', textAlign: 'left', cursor: 'pointer' }}>
+                    <span style={{ fontFamily: 'var(--display)', fontSize: 24 }}>{faq.q}</span>
+                    <span className="mono" aria-hidden="true" style={{ color: 'var(--accent-2)', fontSize: 18 }}>{isOpen ? '−' : '+'}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="step-fade" style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8, maxWidth: 760, padding: '0 48px 24px 0' }}>
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
     </div>
