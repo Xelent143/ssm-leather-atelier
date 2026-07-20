@@ -14,6 +14,7 @@ const dataDir = path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const sessions = new Map();
+const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
@@ -56,6 +57,7 @@ function defaultStore() {
     },
     products: [],
     orders: [],
+    returnRequests: [],
     activity: [
       {
         id: 'act-1',
@@ -700,6 +702,7 @@ function normalizeStore(input) {
   const current = readStore();
   const products = Array.isArray(input.products) ? input.products : current.products;
   const orders = Array.isArray(input.orders) ? input.orders : current.orders;
+  const returnRequests = Array.isArray(input.returnRequests) ? input.returnRequests : (current.returnRequests || []);
   const activity = Array.isArray(input.activity) ? input.activity : current.activity;
   return {
     settings: { ...current.settings, ...(input.settings || {}) },
@@ -768,6 +771,11 @@ function normalizeStore(input) {
       id: String(order.id || crypto.randomUUID()),
       status: String(order.status || 'open'),
       total: Number(order.total || 0),
+    })),
+    returnRequests: returnRequests.map((request) => ({
+      ...request,
+      id: String(request.id || `RET-${Date.now()}`),
+      status: String(request.status || 'new'),
     })),
     activity,
   };
@@ -867,6 +875,74 @@ async function handleApi(req, res, pathname) {
         estimatedDelivery: order.estimatedDelivery || '',
       },
     });
+    return true;
+  }
+
+  if (pathname === '/api/returns' && req.method === 'POST') {
+    const forwardedIp = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    const clientIp = forwardedIp || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const recentAttempts = (returnRequestAttempts.get(clientIp) || []).filter((time) => now - time < 60 * 60 * 1000);
+    if (recentAttempts.length >= 5) {
+      sendJson(res, 429, { error: 'Too many return requests. Please try again later or email info@motogripgear.com.' });
+      return true;
+    }
+
+    const body = await readBody(req);
+    if (String(body.website || '').trim()) {
+      sendJson(res, 200, { ok: true, requestId: 'RECEIVED' });
+      return true;
+    }
+
+    const clean = (value, max = 500) => String(value || '').trim().slice(0, max);
+    const request = {
+      orderNumber: clean(body.orderNumber, 80).toUpperCase(),
+      email: clean(body.email, 160).toLowerCase(),
+      name: clean(body.name, 120),
+      item: clean(body.item, 180),
+      requestType: clean(body.requestType, 80),
+      reason: clean(body.reason, 120),
+      details: clean(body.details, 2000),
+      acceptedPolicy: body.acceptedPolicy === true,
+    };
+    const allowedTypes = ['Refund', 'Exchange', 'Store credit', 'Fit alteration'];
+
+    if (!request.orderNumber || !request.name || !request.email || !/^\S+@\S+\.\S+$/.test(request.email)) {
+      sendJson(res, 400, { error: 'Enter your name, order number, and a valid checkout email.' });
+      return true;
+    }
+    if (!allowedTypes.includes(request.requestType) || !request.reason || request.details.length < 10) {
+      sendJson(res, 400, { error: 'Select a request type and reason, then add a short description.' });
+      return true;
+    }
+    if (!request.acceptedPolicy) {
+      sendJson(res, 400, { error: 'Please confirm that you have reviewed the Returns & Refunds policy.' });
+      return true;
+    }
+
+    const store = readStore();
+    const requestId = `RET-${now.toString(36).toUpperCase()}`;
+    store.returnRequests = [
+      {
+        id: requestId,
+        ...request,
+        status: 'new',
+        submittedAt: new Date(now).toISOString(),
+      },
+      ...(store.returnRequests || []),
+    ].slice(0, 500);
+    store.activity = [
+      {
+        id: `act-${now}`,
+        at: new Date(now).toISOString(),
+        type: 'return',
+        message: `Return request ${requestId} received for ${request.orderNumber}`,
+      },
+      ...(store.activity || []),
+    ].slice(0, 50);
+    writeStore(store);
+    returnRequestAttempts.set(clientIp, [...recentAttempts, now]);
+    sendJson(res, 201, { ok: true, requestId });
     return true;
   }
 

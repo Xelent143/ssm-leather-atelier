@@ -460,6 +460,7 @@ const SSM_SEO = {
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
   ship:       { title: 'Shipping Information · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery regions, costs, tracking, and duties.' },
   returns:    { title: 'Returns & Refunds · MOTOGRIP GEAR', desc: 'Review return eligibility, made-to-order exclusions, return instructions, and refund processing.' },
+  'file-return': { title: 'File a Return · MOTOGRIP GEAR', desc: 'Submit a return, exchange, store-credit, or fit-alteration request to MOTOGRIP GEAR.' },
   track:      { title: 'Track Your Order · MOTOGRIP GEAR', desc: 'Check the current fulfillment and delivery status of your MOTOGRIP GEAR order.' },
   privacy:    { title: 'Privacy Policy · MOTOGRIP GEAR', desc: 'How MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
   terms:      { title: 'Terms of Service · MOTOGRIP GEAR', desc: 'Terms governing use of the MOTOGRIP GEAR website, products, orders, and services.' },

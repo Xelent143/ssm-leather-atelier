@@ -59,7 +59,7 @@ function App() {
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
       'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','returns','track','privacy','terms','contact','search','notfound'
+      'press','giftcard','faq','size','ship','returns','file-return','track','privacy','terms','contact','search','notfound'
     ].includes(h) ? h : 'home';
   });
   const [params, setParams] = React.useState(() => {
@@ -173,6 +173,7 @@ function App() {
       {view === 'size' && <SizeGuide go={go} />}
       {view === 'ship' && <ShippingReturns go={go} mode="shipping" />}
       {view === 'returns' && <ShippingReturns go={go} mode="returns" />}
+      {view === 'file-return' && <FileReturn go={go} />}
       {view === 'track' && <TrackOrder go={go} />}
       {view === 'privacy' && <LegalPage kind="privacy" go={go} />}
       {view === 'terms' && <LegalPage kind="terms" go={go} />}

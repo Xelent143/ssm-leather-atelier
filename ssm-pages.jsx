@@ -978,10 +978,160 @@ function ShippingReturns({ go, mode = 'shipping' }) {
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>HOW</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>One label, one note.</div>
             <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>
-              Open the order in your account or use the Contact page. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
+              File a return request using our online form. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
             </div>
+            <button className="btn btn-ghost" style={{ marginTop: 20 }} onClick={() => go('file-return')}>File a Return</button>
           </div>
         </div>}
+      </section>
+    </div>
+  );
+}
+
+// ── File a return ───────────────────────────────────────────────────────────
+
+function FileReturn({ go }) {
+  const emptyForm = {
+    name: '', orderNumber: '', email: '', item: '', requestType: '', reason: '',
+    details: '', acceptedPolicy: false, website: '',
+  };
+  const [form, setForm] = React.useState(emptyForm);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [requestId, setRequestId] = React.useState('');
+  const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  const controlStyle = {
+    width: '100%', padding: '14px 0', background: 'transparent',
+    border: 'none', borderBottom: '1px solid var(--line-2)', color: 'var(--fg)',
+    fontFamily: 'var(--sans)', fontSize: 14, outline: 'none', borderRadius: 0,
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const response = await fetch('/api/returns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to submit your return request.');
+      setRequestId(data.requestId || 'RECEIVED');
+      setForm(emptyForm);
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to submit your return request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="page-fade">
+      <PageHero
+        eyebrow="RETURN SUPPORT"
+        title="File a"
+        italic="return."
+        dek="Tell us what you would like to return or alter. Our team will review your request and email the next steps before you ship anything."
+      />
+
+      <section className="return-form-layout" style={{ padding: '0 48px 96px', maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(260px, 1fr)', gap: 72 }}>
+        <div>
+          {requestId ? (
+            <div className="step-fade" style={{ borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', padding: '48px 0' }}>
+              <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>REQUEST RECEIVED · {requestId}</div>
+              <h2 style={{ fontFamily: 'var(--display)', fontWeight: 400, fontSize: 38, margin: '0 0 16px' }}>We will review your request.</h2>
+              <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8, maxWidth: 620 }}>
+                Keep this request number for your records. Return instructions will be sent to the checkout email after eligibility is reviewed. Please do not ship the item until you receive authorization.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
+                <button className="btn" onClick={() => setRequestId('')}>File Another Request</button>
+                <button className="btn btn-ghost" onClick={() => go('track')}>Track Your Order</button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={submit} style={{ borderTop: '1px solid var(--line)', paddingTop: 36 }}>
+              <div className="return-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px 32px' }}>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>FULL NAME</span>
+                  <input value={form.name} onChange={(event) => update('name', event.target.value)} required autoComplete="name" placeholder="Your name" style={controlStyle} />
+                </label>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>ORDER NUMBER</span>
+                  <input value={form.orderNumber} onChange={(event) => update('orderNumber', event.target.value)} required autoCapitalize="characters" placeholder="MG-1001" style={controlStyle} />
+                </label>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>CHECKOUT EMAIL</span>
+                  <input type="email" value={form.email} onChange={(event) => update('email', event.target.value)} required autoComplete="email" placeholder="you@example.com" style={controlStyle} />
+                </label>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>ITEM</span>
+                  <input value={form.item} onChange={(event) => update('item', event.target.value)} placeholder="Product name" style={controlStyle} />
+                </label>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>REQUEST</span>
+                  <select value={form.requestType} onChange={(event) => update('requestType', event.target.value)} required style={controlStyle}>
+                    <option value="">Select one</option>
+                    <option value="Refund">Return for refund</option>
+                    <option value="Exchange">Exchange</option>
+                    <option value="Store credit">Store credit</option>
+                    <option value="Fit alteration">Fit alteration</option>
+                  </select>
+                </label>
+                <label>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>REASON</span>
+                  <select value={form.reason} onChange={(event) => update('reason', event.target.value)} required style={controlStyle}>
+                    <option value="">Select one</option>
+                    <option value="Fit or size">Fit or size</option>
+                    <option value="Changed mind">Changed mind</option>
+                    <option value="Damaged or defective">Damaged or defective</option>
+                    <option value="Incorrect item">Incorrect item</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label style={{ gridColumn: '1 / -1' }}>
+                  <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>DETAILS</span>
+                  <textarea value={form.details} onChange={(event) => update('details', event.target.value)} required minLength="10" rows="5" placeholder="Describe the item condition, fit issue, or reason for the request." style={{ ...controlStyle, resize: 'vertical', lineHeight: 1.7 }} />
+                </label>
+                <label aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+                  Website
+                  <input tabIndex="-1" autoComplete="off" value={form.website} onChange={(event) => update('website', event.target.value)} />
+                </label>
+                <label style={{ gridColumn: '1 / -1', display: 'flex', gap: 12, alignItems: 'flex-start', color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.7 }}>
+                  <input type="checkbox" checked={form.acceptedPolicy} onChange={(event) => update('acceptedPolicy', event.target.checked)} required style={{ marginTop: 4, accentColor: 'var(--accent-2)' }} />
+                  <span>I have reviewed the Returns & Refunds policy and understand that I must wait for return authorization before shipping the item.</span>
+                </label>
+              </div>
+
+              <div aria-live="polite">
+                {error && <div style={{ marginTop: 24, padding: 18, border: '1px solid var(--accent-2)', color: 'var(--fg-2)', fontSize: 13 }}>{error}</div>}
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
+                <button className="btn" type="submit" disabled={loading} style={{ opacity: loading ? 0.6 : 1 }}>{loading ? 'Submitting…' : 'Submit Return Request'}</button>
+                <button className="btn btn-ghost" type="button" onClick={() => go('returns')}>Read Returns Policy</button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        <aside style={{ borderTop: '1px solid var(--line)', paddingTop: 36 }}>
+          <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 18 }}>BEFORE YOU BEGIN</div>
+          {[
+            ['Stock pieces', 'Request a return within 30 days of delivery. Items must be unworn and in original condition.'],
+            ['Made to measure', 'Personalised and made-to-measure pieces are eligible for fit-alteration support rather than a standard refund.'],
+            ['Wait for approval', 'Do not ship your item until MOTOGRIP GEAR emails your return authorization and instructions.'],
+            ['Inspection', 'Refunds or exchanges are completed after the returned piece arrives and passes inspection.'],
+          ].map(([title, copy]) => (
+            <div key={title} style={{ padding: '0 0 22px', marginBottom: 22, borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 22, marginBottom: 8 }}>{title}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.75 }}>{copy}</div>
+            </div>
+          ))}
+          <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.7 }}>
+            Need help? Email <span style={{ color: 'var(--fg-2)' }}>info@motogripgear.com</span> with your order number.
+          </div>
+        </aside>
       </section>
     </div>
   );
@@ -1645,6 +1795,6 @@ function SearchResults({ go, query, onQuickView }) {
 Object.assign(window, {
   Journal, JournalArticle, Care, Repairs, Concierge, Sustainability,
   Stockists, Press, GiftCards, FAQ, SizeGuide, ShippingReturns,
-  TrackOrder, LegalPage, Contact, NotFound, SearchResults,
+  FileReturn, TrackOrder, LegalPage, Contact, NotFound, SearchResults,
   PageHero, PrincipleTriad, EditorialQuote, CTAStrip,
 });

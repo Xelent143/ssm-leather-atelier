@@ -457,6 +457,7 @@ function Footer({ go }) {
       { l: 'Shipping Information', go: () => go('ship') },
       { l: 'Returns & Refunds', go: () => go('returns') },
       { l: 'Size Guide', go: () => go('size') },
+      { l: 'File a Return', go: () => go('file-return') },
       { l: 'Stockists', go: () => go('stockists') },
       { l: 'FAQ', go: () => go('faq') },
       { l: 'Contact', go: () => go('contact') },

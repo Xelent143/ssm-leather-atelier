@@ -14,6 +14,7 @@ const state = {
 const nav = [
   ['dashboard', '⌂', 'Home'],
   ['orders', '◇', 'Orders'],
+  ['returns', '↩', 'Return Requests'],
   ['products', '□', 'Products'],
   ['mto', '◌', 'Made to Measure'],
   ['content', '✎', 'Brand & imagery'],
@@ -90,6 +91,22 @@ function filteredOrders() {
     order.status,
     order.fulfillment,
     order.fit,
+  ].join(' ').toLowerCase().includes(query));
+}
+
+function filteredReturns() {
+  const requests = state.store.returnRequests || [];
+  const query = state.query.trim().toLowerCase();
+  if (!query) return requests;
+  return requests.filter((request) => [
+    request.id,
+    request.orderNumber,
+    request.name,
+    request.email,
+    request.item,
+    request.requestType,
+    request.reason,
+    request.status,
   ].join(' ').toLowerCase().includes(query));
 }
 
@@ -437,6 +454,35 @@ function renderOrders() {
   `;
 }
 
+function renderReturns() {
+  const requests = filteredReturns();
+  return `
+    ${pageHead('Return Requests', 'Review refund, exchange, store-credit, and fit-alteration requests submitted from the storefront.')}
+    <div class="card">
+      <div class="card-head"><h2>Customer requests</h2><span class="pill">${requests.length} shown</span></div>
+      <div class="table-wrap">
+        ${requests.length ? `
+          <table>
+            <thead><tr><th>Request</th><th>Order</th><th>Customer</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead>
+            <tbody>
+              ${requests.map((request) => `
+                <tr>
+                  <td><strong>${escapeHtml(request.id)}</strong><br><span class="muted">${request.submittedAt ? new Date(request.submittedAt).toLocaleString() : ''}</span></td>
+                  <td>${escapeHtml(request.orderNumber)}<br><span class="muted">${escapeHtml(request.item || '')}</span></td>
+                  <td>${escapeHtml(request.name)}<br><span class="muted">${escapeHtml(request.email)}</span></td>
+                  <td>${escapeHtml(request.requestType)}</td>
+                  <td>${escapeHtml(request.reason)}<br><span class="muted">${escapeHtml(request.details)}</span></td>
+                  <td><span class="pill ${escapeHtml(request.status)}">${escapeHtml(request.status)}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : '<div class="empty">No return requests found.</div>'}
+      </div>
+    </div>
+  `;
+}
+
 function renderMto() {
   const enabled = state.store.products.filter((product) => product.madeToMeasureEnabled);
   return `
@@ -530,6 +576,7 @@ function render() {
     dashboard: renderDashboard,
     products: renderProducts,
     orders: renderOrders,
+    returns: renderReturns,
     mto: renderMto,
     content: renderContent,
     settings: renderSettings,
@@ -549,7 +596,7 @@ function bindShell() {
 
   document.getElementById('global-search')?.addEventListener('input', (event) => {
     state.query = event.target.value;
-    if (['products', 'orders'].includes(state.view)) render();
+    if (['products', 'orders', 'returns'].includes(state.view)) render();
   });
 
   document.getElementById('logout')?.addEventListener('click', async () => {
