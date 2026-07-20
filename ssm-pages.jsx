@@ -1392,9 +1392,8 @@ function LegalPage({ kind, go }) {
       />
 
       <section className="legal-page-section" style={{ padding: '0 48px 96px', maxWidth: 980, margin: '0 auto' }}>
-        {sections.map((section, index) => (
-          <article className="legal-row" key={section.t} style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: 32, padding: '36px 0', borderTop: '1px solid var(--line)' }}>
-            <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10 }}>{String(index + 1).padStart(2, '0')}</div>
+        {sections.map((section) => (
+          <article className="legal-row" key={section.t} style={{ padding: '36px 0', borderTop: '1px solid var(--line)' }}>
             <div>
               <h2 style={{ fontFamily: 'var(--display)', fontWeight: 400, fontSize: 30, margin: '0 0 14px' }}>{section.t}</h2>
               {section.p.map((paragraph) => (
@@ -1410,8 +1409,7 @@ function LegalPage({ kind, go }) {
           </article>
         ))}
 
-        <article className="legal-row" style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: 32, padding: '36px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-          <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10 }}>{String(sections.length + 1).padStart(2, '0')}</div>
+        <article className="legal-row" style={{ padding: '36px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
           <div>
             <h2 style={{ fontFamily: 'var(--display)', fontWeight: 400, fontSize: 30, margin: '0 0 18px' }}>Contact MOTOGRIP GEAR</h2>
             <div className="legal-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
