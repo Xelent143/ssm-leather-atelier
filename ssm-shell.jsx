@@ -451,7 +451,7 @@ function Footer({ go }) {
       { l: 'Press', go: () => go('press') },
       { l: 'Sustainability', go: () => go('sustain') },
     ] },
-    { h: 'Service', items: [
+    { h: 'Support', items: [
       { l: 'Concierge', go: () => go('concierge') },
       { l: 'Shipping & Returns', go: () => go('ship') },
       { l: 'Size Guide', go: () => go('size') },
