@@ -932,17 +932,18 @@ function SizeGuide({ go }) {
 
 // ── Shipping & Returns ──────────────────────────────────────────────────────
 
-function ShippingReturns({ go }) {
+function ShippingReturns({ go, mode = 'shipping' }) {
+  const isReturns = mode === 'returns';
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="SHIPPING & RETURNS"
-        title="Worldwide,"
-        italic="shipping available."
+        eyebrow={isReturns ? 'RETURNS & REFUNDS' : 'SHIPPING INFORMATION'}
+        title={isReturns ? 'Returns,' : 'Worldwide,'}
+        italic={isReturns ? 'handled with care.' : 'shipping available.'}
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
+        {!isReturns && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
           {[
             { region: 'United States',     time: 'At checkout', cost: 'At checkout', notes: 'Tracked delivery' },
             { region: 'European Union',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
@@ -963,9 +964,9 @@ function ShippingReturns({ go }) {
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>{r.notes}</div>
             </div>
           ))}
-        </div>
+        </div>}
 
-        <div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 64 }}>
+        {isReturns && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 64 }}>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>RETURNS</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>30 days, on stock pieces.</div>
@@ -980,7 +981,7 @@ function ShippingReturns({ go }) {
               Open the order in your account or use the Contact page. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
             </div>
           </div>
-        </div>
+        </div>}
       </section>
     </div>
   );

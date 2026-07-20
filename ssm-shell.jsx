@@ -453,7 +453,8 @@ function Footer({ go }) {
     ] },
     { h: 'Support', items: [
       { l: 'Custom Consultation Form', go: () => go('concierge') },
-      { l: 'Shipping & Returns', go: () => go('ship') },
+      { l: 'Shipping Information', go: () => go('ship') },
+      { l: 'Returns & Refunds', go: () => go('returns') },
       { l: 'Size Guide', go: () => go('size') },
       { l: 'Stockists', go: () => go('stockists') },
       { l: 'FAQ', go: () => go('faq') },

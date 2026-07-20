@@ -1435,7 +1435,8 @@ const SSM_SEO = {
   giftcard:   { title: 'Gift Cards · MOTOGRIP GEAR', desc: 'Give road-cut leather gear without guessing the size.' },
   faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
-  ship:       { title: 'Shipping & Returns · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery and return information.' },
+  ship:       { title: 'Shipping Information · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery regions, costs, tracking, and duties.' },
+  returns:    { title: 'Returns & Refunds · MOTOGRIP GEAR', desc: 'Review return eligibility, made-to-order exclusions, return instructions, and refund processing.' },
   contact:    { title: 'Contact · MOTOGRIP GEAR', desc: 'Fit support, custom orders, press, and service.' },
   account:    { title: 'Your Garage · MOTOGRIP GEAR', desc: 'Orders, custom builds, fit profile, and service notes.' },
   cart:       { title: 'Your Bag · MOTOGRIP GEAR' },
@@ -1985,7 +1986,8 @@ function Footer({ go }) {
     ] },
     { h: 'Support', items: [
       { l: 'Custom Consultation Form', go: () => go('concierge') },
-      { l: 'Shipping & Returns', go: () => go('ship') },
+      { l: 'Shipping Information', go: () => go('ship') },
+      { l: 'Returns & Refunds', go: () => go('returns') },
       { l: 'Size Guide', go: () => go('size') },
       { l: 'Stockists', go: () => go('stockists') },
       { l: 'FAQ', go: () => go('faq') },
@@ -4799,17 +4801,18 @@ function SizeGuide({ go }) {
 
 // ── Shipping & Returns ──────────────────────────────────────────────────────
 
-function ShippingReturns({ go }) {
+function ShippingReturns({ go, mode = 'shipping' }) {
+  const isReturns = mode === 'returns';
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="SHIPPING & RETURNS"
-        title="Worldwide,"
-        italic="shipping available."
+        eyebrow={isReturns ? 'RETURNS & REFUNDS' : 'SHIPPING INFORMATION'}
+        title={isReturns ? 'Returns,' : 'Worldwide,'}
+        italic={isReturns ? 'handled with care.' : 'shipping available.'}
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
+        {!isReturns && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, borderTop: '1px solid var(--line)' }}>
           {[
             { region: 'United States',     time: 'At checkout', cost: 'At checkout', notes: 'Tracked delivery' },
             { region: 'European Union',    time: 'At checkout', cost: 'At checkout', notes: 'Duties may apply' },
@@ -4830,9 +4833,9 @@ function ShippingReturns({ go }) {
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>{r.notes}</div>
             </div>
           ))}
-        </div>
+        </div>}
 
-        <div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 64 }}>
+        {isReturns && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 64 }}>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>RETURNS</div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>30 days, on stock pieces.</div>
@@ -4847,7 +4850,7 @@ function ShippingReturns({ go }) {
               Open the order in your account or use the Contact page. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
             </div>
           </div>
-        </div>
+        </div>}
       </section>
     </div>
   );
@@ -5123,7 +5126,7 @@ function App() {
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
       'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','contact','search','notfound'
+      'press','giftcard','faq','size','ship','returns','contact','search','notfound'
     ].includes(h) ? h : 'home';
   });
   const [params, setParams] = React.useState(() => {
@@ -5235,7 +5238,8 @@ function App() {
       {view === 'giftcard' && <GiftCards go={go} />}
       {view === 'faq' && <FAQ go={go} />}
       {view === 'size' && <SizeGuide go={go} />}
-      {view === 'ship' && <ShippingReturns go={go} />}
+      {view === 'ship' && <ShippingReturns go={go} mode="shipping" />}
+      {view === 'returns' && <ShippingReturns go={go} mode="returns" />}
       {view === 'contact' && <Contact go={go} />}
       {view === 'search' && <SearchResults go={go} query={searchQuery} onQuickView={setQuickView} />}
       {view === 'notfound' && <NotFound go={go} />}
