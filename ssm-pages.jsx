@@ -1150,6 +1150,258 @@ function TrackOrder({ go }) {
   );
 }
 
+// ── Legal pages ─────────────────────────────────────────────────────────────
+
+function LegalPage({ kind, go }) {
+  const isPrivacy = kind === 'privacy';
+  const sections = isPrivacy ? [
+    {
+      t: 'Who we are',
+      p: [
+        'This Privacy Policy explains how MOTOGRIP GEAR LLC and MOTOGRIP LIMITED (together, “MOTOGRIP GEAR”, “we”, “us”, or “our”) handle personal information when you visit motogripgear.com, buy from us, request custom work, contact us, or otherwise use our services.',
+        'The MOTOGRIP entity that handles your order or enquiry is responsible for the related personal information. Our United States and United Kingdom companies may share information with each other where needed to provide support, fulfil orders, and operate the business.',
+      ],
+    },
+    {
+      t: 'Information we collect',
+      p: ['Depending on how you use our services, we may collect the following information:'],
+      b: [
+        'Identity and contact details, including your name, email address, telephone number, billing address, shipping address, and WhatsApp details when you choose to provide them.',
+        'Order and transaction details, including products, size, leather, custom options, delivery information, payment confirmation, returns, refunds, and support history.',
+        'Fit and customization details, including body measurements, fit preferences, initials, design notes, and photographs you voluntarily provide for made-to-measure or repair services.',
+        'Account, enquiry, review, subscription, and communication details that you submit to us.',
+        'Technical and usage information, such as IP address, browser and device information, requested pages, server logs, and cart information stored in your browser.',
+      ],
+    },
+    {
+      t: 'How we collect information',
+      p: [
+        'We collect information directly from you, automatically when you use the website, and from service providers involved in payments, fraud prevention, hosting, fulfilment, delivery, and customer support.',
+        'If you choose Stripe or PayPal, the payment provider collects payment credentials under its own privacy notice. We receive transaction status and limited order information needed to confirm and support the purchase; MOTOGRIP GEAR does not receive or store your complete card number.',
+      ],
+    },
+    {
+      t: 'How and why we use information',
+      p: ['We use personal information to:'],
+      b: [
+        'Provide products and services, process orders, arrange delivery, support returns, and manage made-to-measure or custom work.',
+        'Authenticate order-tracking requests and respond to enquiries.',
+        'Maintain inventory, accounts, customer records, and service quality.',
+        'Detect fraud, secure the website, enforce our terms, and protect customers and our business.',
+        'Send marketing communications where you have requested them or where otherwise permitted by law; you may unsubscribe at any time.',
+        'Meet legal, tax, accounting, customs, regulatory, and dispute-resolution obligations.',
+      ],
+      n: 'Our legal reasons may include performing a contract with you, complying with law, pursuing legitimate business interests, and consent where required.',
+    },
+    {
+      t: 'Cookies and local storage',
+      p: [
+        'The website uses browser storage and similar essential technologies to remember your shopping bag and support core site functions. Our hosting and content-delivery providers may also process basic technical logs needed to serve and protect the website.',
+        'You can clear or block browser storage through your browser settings, but parts of the website may then stop working correctly. If we introduce non-essential analytics or advertising cookies, we will provide any notice or consent controls required by applicable law.',
+      ],
+    },
+    {
+      t: 'When we share information',
+      p: ['We may share relevant information with:'],
+      b: [
+        'Payment processors such as Stripe and PayPal.',
+        'Couriers, fulfilment partners, customs agents, and delivery providers.',
+        'Website hosting, infrastructure, security, communications, and customer-service providers.',
+        'Professional advisers, insurers, auditors, and authorities where reasonably necessary or legally required.',
+        'A buyer, investor, or successor in connection with a genuine business reorganisation or transaction, subject to appropriate protections.',
+      ],
+      n: 'We do not currently sell personal information for money. Service providers may use information only for their own disclosed purposes and the services they provide.',
+    },
+    {
+      t: 'International transfers',
+      p: [
+        'MOTOGRIP GEAR serves customers internationally. Information may be processed in the United States, United Kingdom, Pakistan, and other locations where our personnel or service providers operate. Where applicable law requires safeguards for an international transfer, we use an available lawful mechanism and appropriate contractual or organisational protections.',
+      ],
+    },
+    {
+      t: 'Retention and security',
+      p: [
+        'We retain information only as long as reasonably necessary for the purposes described here, including fulfilment, fit support, warranties, tax and accounting requirements, fraud prevention, legal claims, and customer-requested services. Retention periods vary by record type and jurisdiction.',
+        'We use reasonable technical and organisational safeguards. No online service or transmission method is completely secure, so please do not send payment credentials or unnecessary sensitive information through ordinary email or contact forms.',
+      ],
+    },
+    {
+      t: 'Your privacy rights',
+      p: [
+        'Depending on where you live, you may have rights to access, correct, delete, restrict, object to, or obtain a copy of personal information, and to withdraw consent. You may also have the right to appeal a decision or complain to your local privacy or data-protection authority.',
+        'To make a request, email info@motogripgear.com. We may need to verify your identity and may retain information where required or permitted by law. We will not discriminate against you for exercising an applicable privacy right.',
+      ],
+    },
+    {
+      t: 'Children',
+      p: ['Our services are not directed to children under 16, and we do not knowingly collect their personal information. A parent or guardian may contact us to request review or deletion of information submitted by a child.'],
+    },
+    {
+      t: 'Changes to this policy',
+      p: ['We may update this policy when our services, practices, or legal obligations change. The revised version will be posted here with an updated effective date.'],
+    },
+  ] : [
+    {
+      t: 'Acceptance and scope',
+      p: [
+        'These Terms of Service govern your access to motogripgear.com and your use of products and services offered by MOTOGRIP GEAR LLC and MOTOGRIP LIMITED (together, “MOTOGRIP GEAR”, “we”, “us”, or “our”). By using the website or placing an order, you agree to these Terms and the policies referenced on the website.',
+        'The MOTOGRIP entity responsible for a transaction may be identified in your order confirmation, invoice, or direct communications. Nothing in these Terms removes mandatory consumer rights that apply where you live.',
+      ],
+    },
+    {
+      t: 'Eligibility and account information',
+      p: [
+        'You must be legally capable of entering a contract in your jurisdiction. You agree to provide accurate, current information and to keep account or order-access details secure. You are responsible for activity performed using credentials under your control, except where law provides otherwise.',
+      ],
+    },
+    {
+      t: 'Products and natural materials',
+      p: [
+        'We aim to describe and photograph products accurately. Screens, lighting, leather grain, hide markings, patina, and handmade production can cause reasonable variations in colour, texture, and appearance. These natural variations are part of genuine leather and are not automatically defects.',
+        'We may change, correct, suspend, or discontinue products, specifications, images, availability, and website content. Material errors will be handled fairly and in accordance with applicable law.',
+      ],
+    },
+    {
+      t: 'Prices, taxes, and payment',
+      p: [
+        'Prices are shown in the currency displayed on the website and may change before an order is accepted. Applicable shipping charges, taxes, duties, or fees will be disclosed where available or may be charged by authorities or carriers at destination.',
+        'Payments are processed by third-party providers such as Stripe and PayPal. Their terms and privacy notices also apply to the payment service you select. You represent that you are authorised to use the chosen payment method.',
+      ],
+    },
+    {
+      t: 'Orders and acceptance',
+      p: [
+        'Submitting checkout is an offer to buy. An automated acknowledgement or payment authorisation does not necessarily mean we have accepted the order. Acceptance occurs when we confirm the order or begin fulfilment, subject to applicable law.',
+        'We may refuse or cancel an order for legitimate reasons including unavailability, obvious pricing or description errors, suspected fraud, payment failure, export restrictions, or an inability to deliver. If we cancel after receiving cleared payment, we will provide the appropriate refund.',
+      ],
+    },
+    {
+      t: 'Made-to-measure and custom orders',
+      p: [
+        'You are responsible for providing accurate measurements, preferences, and approvals. We may contact you to clarify information before cutting or production. Estimates begin after required measurements and design details are approved and may change for complex work or customer-requested revisions.',
+        'Because personalised and made-to-measure pieces are produced to your specifications, cancellation and return rights may be limited where permitted by law. Our Returns & Refunds page explains the applicable policy, including available fit-alteration support.',
+      ],
+    },
+    {
+      t: 'Shipping, customs, and delivery',
+      p: [
+        'Delivery estimates are not guarantees unless we expressly agree otherwise. Delays may occur because of production, carriers, customs, weather, strikes, address issues, or events outside reasonable control. You are responsible for providing a complete deliverable address and cooperating with reasonable delivery or customs requests.',
+        'International customers may be responsible for import duties, taxes, brokerage, or customs charges unless checkout or written confirmation expressly states otherwise. Risk and title pass as required by the law applicable to the transaction.',
+      ],
+    },
+    {
+      t: 'Returns, refunds, and alterations',
+      p: [
+        'Returns, refunds, exchanges, and alterations are governed by our Returns & Refunds page and any mandatory rights applicable to you. Returned items must meet the stated eligibility and condition requirements. Approved refunds are issued to the original payment method where reasonably possible.',
+      ],
+    },
+    {
+      t: 'Product use and safety',
+      p: [
+        'Unless a product description expressly states a tested protective certification, our leather apparel is not represented as certified impact-protective motorcycle equipment. Customers are responsible for selecting suitable protective equipment, sizing, care, and use for their activities. Follow all care instructions and inspect products before use.',
+      ],
+    },
+    {
+      t: 'Intellectual property',
+      p: [
+        'The MOTOGRIP name, logos, product designs, photography, text, graphics, website layout, and other content are owned by or licensed to us and protected by applicable intellectual-property laws. You may use the website for personal, non-commercial shopping purposes only. No content may be copied, republished, sold, scraped, or exploited without permission or another lawful basis.',
+      ],
+    },
+    {
+      t: 'Acceptable use',
+      p: ['You must not misuse the website, interfere with its security or operation, introduce malicious code, scrape or harvest information without permission, impersonate another person, submit unlawful or infringing material, commit fraud, or use the service in violation of applicable law.'],
+    },
+    {
+      t: 'Third-party services and links',
+      p: ['The website may link to or rely on independent services, including payment processors and carriers. Their services are governed by their own terms. We are not responsible for third-party content or conduct, except to the extent responsibility cannot lawfully be excluded.'],
+    },
+    {
+      t: 'Service availability and liability',
+      p: [
+        'We work to keep the website accurate, secure, and available, but do not promise uninterrupted or error-free access. To the fullest extent permitted by law, implied warranties are excluded and liability for indirect or consequential loss is limited.',
+        'Nothing in these Terms excludes or limits liability where doing so would be unlawful, including liability for fraud, fraudulent misrepresentation, death or personal injury caused by negligence where applicable, or mandatory consumer protections. Where liability may lawfully be limited, our aggregate liability relating to an order will not exceed the amount paid for that order.',
+      ],
+    },
+    {
+      t: 'Events outside our control',
+      p: ['We are not responsible for delay or failure caused by events beyond reasonable control. We will take reasonable steps to reduce disruption and communicate material effects on accepted orders.'],
+    },
+    {
+      t: 'Governing law and disputes',
+      p: [
+        'These Terms are governed by the law applicable to the MOTOGRIP entity handling the transaction, subject to mandatory consumer protections and jurisdiction rules where you live. Please contact us first so we can try to resolve any concern promptly. Nothing here prevents you from using a court, regulator, or dispute process available under applicable law.',
+      ],
+    },
+    {
+      t: 'Changes and severability',
+      p: ['We may update these Terms by posting a revised version with a new effective date. Changes apply prospectively unless law requires otherwise. If any provision is held unenforceable, the remaining provisions continue to the extent permitted by law.'],
+    },
+  ];
+
+  return (
+    <div className="page-fade">
+      <PageHero
+        eyebrow="LEGAL · MOTOGRIP GEAR"
+        title={isPrivacy ? 'Privacy' : 'Terms of'}
+        italic={isPrivacy ? 'policy.' : 'service.'}
+        dek={isPrivacy
+          ? 'How we collect, use, share, and protect personal information across our international store and services.'
+          : 'The conditions that govern use of our website, products, orders, and made-to-measure services.'}
+        meta="EFFECTIVE · 20 JULY 2026"
+      />
+
+      <section className="legal-page-section" style={{ padding: '0 48px 96px', maxWidth: 980, margin: '0 auto' }}>
+        {sections.map((section, index) => (
+          <article className="legal-row" key={section.t} style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: 32, padding: '36px 0', borderTop: '1px solid var(--line)' }}>
+            <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10 }}>{String(index + 1).padStart(2, '0')}</div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--display)', fontWeight: 400, fontSize: 30, margin: '0 0 14px' }}>{section.t}</h2>
+              {section.p.map((paragraph) => (
+                <p key={paragraph} style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.85, margin: '0 0 12px' }}>{paragraph}</p>
+              ))}
+              {section.b && (
+                <ul style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8, margin: '12px 0', paddingLeft: 20 }}>
+                  {section.b.map((item) => <li key={item} style={{ marginBottom: 8 }}>{item}</li>)}
+                </ul>
+              )}
+              {section.n && <p style={{ color: 'var(--fg-2)', fontSize: 13, lineHeight: 1.8, margin: '14px 0 0' }}>{section.n}</p>}
+            </div>
+          </article>
+        ))}
+
+        <article className="legal-row" style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: 32, padding: '36px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+          <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10 }}>{String(sections.length + 1).padStart(2, '0')}</div>
+          <div>
+            <h2 style={{ fontFamily: 'var(--display)', fontWeight: 400, fontSize: 30, margin: '0 0 18px' }}>Contact MOTOGRIP GEAR</h2>
+            <div className="legal-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+              <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.8 }}>
+                <strong style={{ color: 'var(--fg-2)' }}>MOTOGRIP GEAR LLC</strong><br/>
+                1172 N Main St, Waterbury, CT 06704, United States<br/>
+                +1 860 397 3707<br/>
+                WhatsApp: +1 860 397 3707
+              </div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.8 }}>
+                <strong style={{ color: 'var(--fg-2)' }}>MOTOGRIP LIMITED</strong><br/>
+                Unit 16, Lonsdale Works, Bradford BD3 9TF, United Kingdom<br/>
+                +44 7309 114348<br/>
+                WhatsApp: +44 7309 114348
+              </div>
+            </div>
+            <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginTop: 24 }}>INFO@MOTOGRIPGEAR.COM</div>
+          </div>
+        </article>
+
+        <div style={{ marginTop: 32, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost" onClick={() => go(isPrivacy ? 'terms' : 'privacy')}>
+            {isPrivacy ? 'Read Terms of Service' : 'Read Privacy Policy'}
+          </button>
+          <button className="btn btn-ghost" onClick={() => go('contact')}>Contact Us</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 // ── Contact ─────────────────────────────────────────────────────────────────
 
 function Contact({ go }) {
@@ -1354,6 +1606,6 @@ function SearchResults({ go, query, onQuickView }) {
 Object.assign(window, {
   Journal, JournalArticle, Care, Repairs, Concierge, Sustainability,
   Stockists, Press, GiftCards, FAQ, SizeGuide, ShippingReturns,
-  TrackOrder, Contact, NotFound, SearchResults,
+  TrackOrder, LegalPage, Contact, NotFound, SearchResults,
   PageHero, PrincipleTriad, EditorialQuote, CTAStrip,
 });

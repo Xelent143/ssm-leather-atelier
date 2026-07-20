@@ -460,6 +460,8 @@ function Footer({ go }) {
       { l: 'Stockists', go: () => go('stockists') },
       { l: 'FAQ', go: () => go('faq') },
       { l: 'Contact', go: () => go('contact') },
+      { l: 'Privacy Policy', go: () => go('privacy') },
+      { l: 'Terms of Service', go: () => go('terms') },
     ] },
   ];
 
@@ -503,8 +505,8 @@ function Footer({ go }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 32, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 16 }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>© MOTOGRIP GEAR · ROAD ARMOR · ALL RIGHTS RESERVED</div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button onClick={() => go('faq')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>PRIVACY</button>
-          <button onClick={() => go('faq')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>TERMS</button>
+          <button onClick={() => go('privacy')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>PRIVACY</button>
+          <button onClick={() => go('terms')} className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-4)', background: 'transparent', border: 0, cursor: 'pointer' }}>TERMS</button>
           <span className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>EN / USD ▾</span>
         </div>
       </div>

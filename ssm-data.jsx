@@ -461,6 +461,8 @@ const SSM_SEO = {
   ship:       { title: 'Shipping Information · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery regions, costs, tracking, and duties.' },
   returns:    { title: 'Returns & Refunds · MOTOGRIP GEAR', desc: 'Review return eligibility, made-to-order exclusions, return instructions, and refund processing.' },
   track:      { title: 'Track Your Order · MOTOGRIP GEAR', desc: 'Check the current fulfillment and delivery status of your MOTOGRIP GEAR order.' },
+  privacy:    { title: 'Privacy Policy · MOTOGRIP GEAR', desc: 'How MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
+  terms:      { title: 'Terms of Service · MOTOGRIP GEAR', desc: 'Terms governing use of the MOTOGRIP GEAR website, products, orders, and services.' },
   contact:    { title: 'Contact · MOTOGRIP GEAR', desc: 'Fit support, custom orders, press, and service.' },
   account:    { title: 'Your Garage · MOTOGRIP GEAR', desc: 'Orders, custom builds, fit profile, and service notes.' },
   cart:       { title: 'Your Bag · MOTOGRIP GEAR' },
