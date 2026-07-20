@@ -1008,7 +1008,7 @@ function TrackOrder({ go }) {
     },
     {
       q: 'How long will my made-to-measure order take?',
-      a: 'Our current production estimate is 21–28 business days after measurements and design details are approved. Complex custom work may require additional time, which we confirm before production.',
+      a: 'Our current production estimate is 2–3 weeks after measurements and design details are approved. Complex custom work may require additional time, which we confirm before production.',
     },
     {
       q: 'How long does shipping take?',
