@@ -59,7 +59,7 @@ function App() {
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
       'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','returns','contact','search','notfound'
+      'press','giftcard','faq','size','ship','returns','track','contact','search','notfound'
     ].includes(h) ? h : 'home';
   });
   const [params, setParams] = React.useState(() => {
@@ -173,6 +173,7 @@ function App() {
       {view === 'size' && <SizeGuide go={go} />}
       {view === 'ship' && <ShippingReturns go={go} mode="shipping" />}
       {view === 'returns' && <ShippingReturns go={go} mode="returns" />}
+      {view === 'track' && <TrackOrder go={go} />}
       {view === 'contact' && <Contact go={go} />}
       {view === 'search' && <SearchResults go={go} query={searchQuery} onQuickView={setQuickView} />}
       {view === 'notfound' && <NotFound go={go} />}

@@ -987,6 +987,118 @@ function ShippingReturns({ go, mode = 'shipping' }) {
   );
 }
 
+// ── Track order ─────────────────────────────────────────────────────────────
+
+function TrackOrder({ go }) {
+  const [orderNumber, setOrderNumber] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [order, setOrder] = React.useState(null);
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setOrder(null);
+    setLoading(true);
+    try {
+      const response = await fetch('/api/orders/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderNumber, email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to check this order right now.');
+      setOrder(data.order);
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to check this order right now.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const label = (value) => String(value || 'Pending').replaceAll('_', ' ').toUpperCase();
+
+  return (
+    <div className="page-fade">
+      <PageHero
+        eyebrow="ORDER SUPPORT"
+        title="Track"
+        italic="your order."
+        dek="Enter your order number and the email address used at checkout. We will show the latest fulfillment and delivery information available."
+      />
+
+      <section style={{ padding: '0 48px 96px', maxWidth: 900, margin: '0 auto' }}>
+        <form onSubmit={submit} style={{ borderTop: '1px solid var(--line)', paddingTop: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+            <label>
+              <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 8 }}>ORDER NUMBER</span>
+              <input value={orderNumber} onChange={(event) => setOrderNumber(event.target.value)}
+                placeholder="MG-1001" autoComplete="off" autoCapitalize="characters" required
+                style={{ width: '100%', padding: '15px 0', background: 'transparent', border: 'none',
+                  borderBottom: '1px solid var(--line-2)', color: 'var(--fg)', fontFamily: 'var(--sans)',
+                  fontSize: 15, outline: 'none' }} />
+            </label>
+            <label>
+              <span className="mono" style={{ display: 'block', fontSize: 9, color: 'var(--fg-4)', marginBottom: 8 }}>CHECKOUT EMAIL</span>
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com" autoComplete="email" required
+                style={{ width: '100%', padding: '15px 0', background: 'transparent', border: 'none',
+                  borderBottom: '1px solid var(--line-2)', color: 'var(--fg)', fontFamily: 'var(--sans)',
+                  fontSize: 15, outline: 'none' }} />
+            </label>
+          </div>
+
+          <button className="btn" type="submit" disabled={loading}
+            style={{ marginTop: 32, opacity: loading ? 0.6 : 1 }}>
+            {loading ? 'Checking…' : 'Track Order'}
+          </button>
+        </form>
+
+        <div aria-live="polite">
+          {error && (
+            <div style={{ marginTop: 32, padding: 24, border: '1px solid var(--accent-2)', background: 'var(--bg-2)' }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 8 }}>ORDER NOT FOUND</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>{error}</div>
+              <button className="btn btn-ghost" type="button" style={{ marginTop: 18 }} onClick={() => go('contact')}>Contact Support</button>
+            </div>
+          )}
+
+          {order && (
+            <div className="step-fade" style={{ marginTop: 48, padding: 32, border: '1px solid var(--line)', background: 'var(--bg-2)' }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>ORDER · {order.id}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 34, marginBottom: 28 }}>{label(order.fulfillment)}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+                <div>
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>ORDER DATE</div>
+                  <div style={{ color: 'var(--fg-2)' }}>{order.date || 'Available soon'}</div>
+                </div>
+                <div>
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>STATUS</div>
+                  <div style={{ color: 'var(--fg-2)' }}>{label(order.status)}</div>
+                </div>
+                <div>
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 6 }}>FIT</div>
+                  <div style={{ color: 'var(--fg-2)' }}>{order.fit || 'Standard order'}</div>
+                </div>
+              </div>
+              {(order.carrier || order.trackingNumber || order.estimatedDelivery) && (
+                <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--line)', color: 'var(--fg-3)', lineHeight: 1.8 }}>
+                  {order.carrier && <div>Carrier: {order.carrier}</div>}
+                  {order.trackingNumber && <div>Tracking number: {order.trackingNumber}</div>}
+                  {order.estimatedDelivery && <div>Estimated delivery: {order.estimatedDelivery}</div>}
+                  {order.trackingUrl && <a className="mono ulink" href={order.trackingUrl} target="_blank" rel="noreferrer"
+                    style={{ display: 'inline-block', marginTop: 12, color: 'var(--accent-2)', fontSize: 10 }}>OPEN CARRIER TRACKING →</a>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 // ── Contact ─────────────────────────────────────────────────────────────────
 
 function Contact({ go }) {
@@ -1191,6 +1303,6 @@ function SearchResults({ go, query, onQuickView }) {
 Object.assign(window, {
   Journal, JournalArticle, Care, Repairs, Concierge, Sustainability,
   Stockists, Press, GiftCards, FAQ, SizeGuide, ShippingReturns,
-  Contact, NotFound, SearchResults,
+  TrackOrder, Contact, NotFound, SearchResults,
   PageHero, PrincipleTriad, EditorialQuote, CTAStrip,
 });

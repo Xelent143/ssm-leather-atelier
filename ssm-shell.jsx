@@ -453,6 +453,7 @@ function Footer({ go }) {
     ] },
     { h: 'Support', items: [
       { l: 'Custom Consultation Form', go: () => go('concierge') },
+      { l: 'Track Your Order', go: () => go('track') },
       { l: 'Shipping Information', go: () => go('ship') },
       { l: 'Returns & Refunds', go: () => go('returns') },
       { l: 'Size Guide', go: () => go('size') },
@@ -464,7 +465,7 @@ function Footer({ go }) {
 
   return (
     <footer style={{ background: 'var(--bg)', borderTop: '1px solid var(--line)', padding: '64px 48px 32px', marginTop: 80 }}>
-      <div style={{
+      <div className="footer-grid" style={{
         display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: 48, marginBottom: 56,
       }}>
         <div>

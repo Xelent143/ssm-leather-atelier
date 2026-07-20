@@ -833,6 +833,43 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/orders/track' && req.method === 'POST') {
+    const body = await readBody(req);
+    const orderNumber = String(body.orderNumber || '').trim().toLowerCase();
+    const email = String(body.email || '').trim().toLowerCase();
+
+    if (!orderNumber || !email) {
+      sendJson(res, 400, { error: 'Enter both your order number and checkout email.' });
+      return true;
+    }
+
+    const order = (readStore().orders || []).find((item) =>
+      String(item.id || '').trim().toLowerCase() === orderNumber &&
+      String(item.email || '').trim().toLowerCase() === email
+    );
+
+    if (!order) {
+      sendJson(res, 404, { error: 'We could not find an order matching those details.' });
+      return true;
+    }
+
+    sendJson(res, 200, {
+      order: {
+        id: order.id,
+        date: order.date || '',
+        status: order.status || 'open',
+        fulfillment: order.fulfillment || 'unfulfilled',
+        items: Number(order.items || 0),
+        fit: order.fit || '',
+        carrier: order.carrier || '',
+        trackingNumber: order.trackingNumber || '',
+        trackingUrl: /^https?:\/\//i.test(String(order.trackingUrl || '')) ? order.trackingUrl : '',
+        estimatedDelivery: order.estimatedDelivery || '',
+      },
+    });
+    return true;
+  }
+
   if (pathname === '/api/admin/session' && req.method === 'GET') {
     sendJson(res, 200, {
       authenticated: Boolean(getSession(req)),
