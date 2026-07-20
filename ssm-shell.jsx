@@ -464,6 +464,7 @@ function Footer({ go }) {
       { l: 'Workshop', go: () => go('about') },
       { l: 'Lookbook', go: () => go('lookbook') },
       { l: 'Journal', go: () => go('journal') },
+      { l: 'Blog', go: () => go('journal') },
       { l: 'Press', go: () => go('press') },
       { l: 'Sustainability', go: () => go('sustain') },
     ] },
