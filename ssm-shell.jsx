@@ -427,7 +427,23 @@ function SearchOverlay({ open, onClose, onSubmit }) {
   );
 }
 
+function SocialIcon({ name }) {
+  const common = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'currentColor', 'aria-hidden': true };
+  if (name === 'Facebook') return <svg {...common}><path d="M13.5 8H16l.5-3h-3c-3 0-5 1.8-5 5v2H6v3h2.5v7H12v-7h3l.5-3H12v-1.7c0-1.4.5-2.3 1.5-2.3Z" /></svg>;
+  if (name === 'Instagram') return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>;
+  if (name === 'Pinterest') return <svg {...common}><path d="M12 2a10 10 0 0 0-3.6 19.3c-.1-1.6 0-3.6.4-5.5l1.3-5.4s-.3-.7-.3-1.6c0-1.5.9-2.7 2-2.7.9 0 1.3.7 1.3 1.6 0 .9-.6 2.3-.9 3.6-.3 1.1.5 2 1.6 2 2 0 3.5-2.1 3.5-5 0-2.7-1.9-4.5-4.6-4.5-3.1 0-5 2.4-5 4.8 0 .9.4 1.9.8 2.5.1.1.1.2.1.3l-.3 1.3c-.1.2-.2.3-.4.2-1.4-.7-2.2-2.7-2.2-4.3C5.7 5.1 8.2 2 13 2c3.8 0 6.8 2.7 6.8 6.4 0 3.8-2.4 6.8-5.7 6.8-1.1 0-2.2-.6-2.5-1.3l-.7 2.7c-.3 1-.9 2.1-1.4 2.8A10 10 0 1 0 12 2Z"/></svg>;
+  if (name === 'YouTube') return <svg {...common}><path d="M21.6 7.2c-.2-1.2-1.1-2.1-2.3-2.3C17.6 4.5 14.8 4.3 12 4.3s-5.6.2-7.3.6C3.5 5.1 2.6 6 2.4 7.2 2.1 8.6 2 10.3 2 12s.1 3.4.4 4.8c.2 1.2 1.1 2.1 2.3 2.3 1.7.4 4.5.6 7.3.6s5.6-.2 7.3-.6c1.2-.2 2.1-1.1 2.3-2.3.3-1.4.4-3.1.4-4.8s-.1-3.4-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"/></svg>;
+  return <svg {...common}><path d="M14.2 3c.4 2.4 1.8 3.8 4.3 4.3v3.1c-1.6 0-3-.5-4.3-1.4v6.2a5.3 5.3 0 1 1-4.6-5.3V13a2.2 2.2 0 1 0 1.5 2.1V3h3.1Z"/></svg>;
+}
+
 function Footer({ go }) {
+  const socials = [
+    ['Facebook', 'https://www.facebook.com/motogripgear/'],
+    ['Instagram', 'https://www.instagram.com/motogripgearllc/'],
+    ['Pinterest', 'https://www.pinterest.com/motogripgearllc/'],
+    ['YouTube', 'https://www.youtube.com/@motogripgearllc'],
+    ['TikTok', 'https://www.tiktok.com/@motogripgearllc'],
+  ];
   const cols = [
     { h: 'Fit Lab', items: [
       { l: 'Made to Measure', go: () => go('mto') },
@@ -475,6 +491,17 @@ function Footer({ go }) {
           <div style={{ marginBottom: 16 }}><MotoGripLogo /></div>
           <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7, maxWidth: 320, marginBottom: 24 }}>
             Road-cut leather gear with measured fit, reinforced hardware, and made-to-measure options for riders who notice the details.
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 12 }}>FOLLOW US</div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {socials.map(([name, href]) => (
+                <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Follow MOTOGRIP GEAR on ${name}`} title={name}
+                  style={{ width: 38, height: 38, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--fg-2)', color: 'var(--bg)', textDecoration: 'none', transition: 'transform .2s ease, background .2s ease' }}>
+                  <SocialIcon name={name} />
+                </a>
+              ))}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <input type="email" placeholder="Email for road notes"
@@ -530,4 +557,4 @@ function Marquee({ items }) {
   );
 }
 
-Object.assign(window, { Header, Footer, CartDrawer, QuickView, SearchOverlay, Marquee, Icon, MotoGripLogo });
+Object.assign(window, { Header, Footer, CartDrawer, QuickView, SearchOverlay, Marquee, Icon, MotoGripLogo, SocialIcon });
