@@ -5778,6 +5778,11 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
+const supportPageFromPath = () => ({
+  '/shipping-information': 'ship',
+  '/returns-refunds': 'returns',
+  '/custom-consultation': 'consult',
+})[window.location.pathname.replace(/\/$/, '')] || null;
 const pathProductSlug = () => {
   const match = window.location.pathname.match(/^\/products\/([a-z0-9-]+)\/?$/);
   return match ? match[1] : null;
@@ -5815,6 +5820,8 @@ function App() {
   const [view, setView] = React.useState(() => {
     const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
     if (initialSlug && productFromSlug(initialSlug)) return 'pdp';
+    const supportPage = supportPageFromPath();
+    if (supportPage) return supportPage;
     // Resume from hash on refresh.
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
