@@ -1231,6 +1231,83 @@ const SSM_LEATHERS = [
   { id: 'ink',      name: 'Midnight Ink',      swatch: '#161b2a', desc: 'Smoked navy lambskin' },
 ];
 
+// Men's jacket measurements used by the PDP and full Size Guide.
+// Source values are maintained in both inches and centimetres to avoid
+// conversion drift in the customer-facing chart.
+const SSM_JACKET_SIZE_CHART = {
+  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'],
+  inch: [
+    ['Chest (garment)', '42"', '45"', '48"', '51"', '54"', '57"', '60"', '63"', '66"'],
+    ['Chest (body)', '35.5" - 37"', '38.5" - 40"', '41.5" - 43"', '44.5" - 46"', '47.5" - 49"', '50.5" - 52"', '53.5" - 55"', '56.5" - 58"', '59.5" - 61"'],
+    ['Waist (garment)', '32"', '35"', '38"', '41"', '44"', '47"', '50"', '53"', '56"'],
+    ['Waist (body)', '33.5" - 35"', '36.5" - 38"', '39.5" - 41"', '42.5" - 44"', '45.5" - 47"', '48.5" - 50"', '51.5" - 53"', '54.5" - 56"', '57.5" - 59"'],
+    ['Center back length', '25"', '25.5"', '26"', '26.5"', '27"', '27.5"', '28"', '28.5"', '29"'],
+    ['Sleeve length', '26.65"', '26.9"', '27.25"', '27.5"', '27.9"', '28.15"', '28.5"', '28.75"', '29.15"'],
+    ['Across shoulder', '17.5"', '18.25"', '19"', '19.75"', '20.5"', '21.25"', '22"', '22.75"', '23.5"'],
+  ],
+  cm: [
+    ['Chest (garment)', '107cm', '114.3cm', '121.9cm', '129.5cm', '137.2cm', '144.8cm', '152.4cm', '160cm', '167.6cm'],
+    ['Chest (body)', '90.17cm - 94cm', '97.79cm - 102cm', '105.4cm - 109cm', '113cm - 117cm', '120.7cm - 124cm', '128.3cm - 132cm', '135.9cm - 140cm', '143.5cm - 147cm', '151.1cm - 155cm'],
+    ['Waist (garment)', '81.3cm', '88.9cm', '96.52cm', '104.1cm', '111.8cm', '119.4cm', '127cm', '134.6cm', '142.2cm'],
+    ['Waist (body)', '85.09cm - 88.9cm', '92.71cm - 96.5cm', '100.3cm - 104cm', '108cm - 112cm', '115.6cm - 119cm', '123.2cm - 127cm', '130.8cm - 135cm', '138.4cm - 142cm', '146.1cm - 150cm'],
+    ['Center back length', '63.5cm', '64.77cm', '66.04cm', '67.31cm', '68.58cm', '69.85cm', '71.12cm', '72.39cm', '73.66cm'],
+    ['Sleeve length', '67.69cm', '68.33cm', '69.22cm', '69.85cm', '70.87cm', '71.5cm', '72.39cm', '73.03cm', '74.04cm'],
+    ['Across shoulder', '44.45cm', '46.36cm', '48.3cm', '50.16cm', '52.07cm', '53.98cm', '55.9cm', '57.79cm', '59.69cm'],
+  ],
+};
+
+function JacketSizeChart({ unit, onUnitChange, selectedSize = null }) {
+  const rows = SSM_JACKET_SIZE_CHART[unit];
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'flex-end', marginBottom: 18, flexWrap: 'wrap' }}>
+        <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7, maxWidth: 720 }}>
+          Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Size up for a more relaxed fit.
+        </div>
+        <div role="group" aria-label="Jacket size chart units" style={{ display: 'flex', border: '1px solid var(--line-2)' }}>
+          {[['inch', 'INCHES'], ['cm', 'CM']].map(([id, label]) => (
+            <button key={id} type="button" onClick={() => onUnitChange(id)} aria-pressed={unit === id}
+              style={{
+                padding: '10px 16px', border: 0, borderRight: id === 'inch' ? '1px solid var(--line-2)' : 0,
+                background: unit === id ? 'var(--accent-2)' : 'transparent',
+                color: unit === id ? 'var(--bg)' : 'var(--fg-3)',
+                fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.14em', cursor: 'pointer',
+              }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ overflowX: 'auto', borderTop: '1px solid var(--line-2)', borderBottom: '1px solid var(--line-2)' }}>
+        <table style={{ width: '100%', minWidth: 1120, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <thead>
+            <tr>
+              <th className="mono" style={{ width: 190, textAlign: 'left', padding: '15px 12px', color: 'var(--accent-2)', fontSize: 9, borderBottom: '1px solid var(--line-2)' }}>POINT OF MEASUREMENT</th>
+              {SSM_JACKET_SIZE_CHART.sizes.map(sizeName => (
+                <th key={sizeName} className="mono" style={{ padding: '15px 10px', color: selectedSize === sizeName ? 'var(--accent-2)' : 'var(--fg-2)', background: selectedSize === sizeName ? 'rgba(176,138,76,0.08)' : 'transparent', fontSize: 10, borderBottom: '1px solid var(--line-2)', borderLeft: '1px solid var(--line)' }}>{sizeName}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr key={row[0]}>
+                <th scope="row" style={{ textAlign: 'left', padding: '15px 12px', color: 'var(--fg-2)', fontFamily: 'var(--display)', fontSize: 16, fontWeight: 400, borderBottom: '1px solid var(--line)' }}>{row[0]}</th>
+                {row.slice(1).map((value, index) => {
+                  const active = selectedSize === SSM_JACKET_SIZE_CHART.sizes[index];
+                  return <td key={`${row[0]}-${index}`} className="mono" style={{ padding: '15px 10px', textAlign: 'center', whiteSpace: 'nowrap', color: active ? 'var(--fg)' : 'var(--fg-3)', background: active ? 'rgba(176,138,76,0.08)' : 'transparent', fontSize: 10, borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)' }}>{value}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 12, lineHeight: 1.7 }}>
+        GARMENT MEASUREMENTS REFER TO THE FINISHED JACKET. BODY MEASUREMENTS REFER TO THE WEARER.
+      </div>
+    </div>
+  );
+}
+
 const SSM_HARDWARE = [
   { id: 'gun',  name: 'Gunmetal',     css: 'linear-gradient(145deg,#3a3a3e,#1a1a1c)' },
   { id: 'br',   name: 'Aged Brass',   css: 'linear-gradient(145deg,#b08a4c,#7a5a30)' },
@@ -2845,6 +2922,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const [notifyEmail, setNotifyEmail] = React.useState('');
   const [notifyDone, setNotifyDone] = React.useState(false);
   const [fitMode, setFitMode] = React.useState('standard');
+  const [fitChartUnit, setFitChartUnit] = React.useState('inch');
   const [measurements, setMeasurements] = React.useState({
     height: '',
     chest: '',
@@ -3222,55 +3300,18 @@ function PDP({ product, go, addToCart, onQuickView }) {
           style={{ aspectRatio: '4/5', '--img': `url(${p.alt || SSM_ASSETS.atelier})` }} />
       </section>
 
-      {/* Fit table */}
-      <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-          MEASUREMENTS · INCHES
-        </div>
-        <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>
-          Fit at a glance.
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderTop: '1px solid var(--line-2)' }}>
-          {['Size', 'Chest', 'Shoulder', 'Sleeve', 'Length', 'Stock', ''].map(c => (
-            <div key={c} className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', padding: '12px 8px', borderBottom: '1px solid var(--line-2)' }}>
-              {c.toUpperCase()}
-            </div>
-          ))}
-          {[
-            { s: 'XS', chest: '34', shoulder: '16', sleeve: '24.5', length: '23' },
-            { s: 'S',  chest: '36', shoulder: '16.5', sleeve: '25',  length: '23.5' },
-            { s: 'M',  chest: '38', shoulder: '17.5', sleeve: '25.5', length: '24' },
-            { s: 'L',  chest: '40', shoulder: '18',  sleeve: '26',  length: '24.5' },
-            { s: 'XL', chest: '42', shoulder: '18.5', sleeve: '26.5', length: '25' },
-            { s: 'XXL', chest: '44', shoulder: '19',  sleeve: '27',  length: '25.5' },
-          ].map(r => {
-            const stk = sizeStock(r.s);
-            return (
-              <React.Fragment key={r.s}>
-                <div style={{ fontFamily: 'var(--display)', fontSize: 16, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.s}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.chest}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.shoulder}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.sleeve}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--fg-2)', padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>{r.length}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: stk === 0 ? 'var(--fg-4)' : (stk <= 2 ? 'var(--accent-2)' : 'var(--fg-2)'), padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>
-                  {stk === 0 ? 'SOLD OUT' : stk <= 2 ? `${stk} REMAIN` : 'IN STOCK'}
-                </div>
-                <div style={{ padding: '14px 8px', borderBottom: '1px solid var(--line)' }}>
-                  {r.s !== size && (
-                    <button onClick={() => setSize(r.s)} className="mono ulink"
-                      style={{ fontSize: 9, color: 'var(--fg-3)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}>
-                      SELECT →
-                    </button>
-                  )}
-                </div>
-              </React.Fragment>
-            );
-          })}
-        </div>
-        <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 16 }}>
-          MODEL IS 5'10", WEARING M
-        </div>
-      </section>
+      {/* Jacket size chart */}
+      {p.cat === 'Jackets' && (
+        <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            JACKET SIZE CHART · XS–5XL
+          </div>
+          <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>
+            Fit at a glance.
+          </h2>
+          <JacketSizeChart unit={fitChartUnit} onUnitChange={setFitChartUnit} selectedSize={size} />
+        </section>
+      )}
 
       {/* Reviews */}
       <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
@@ -4851,14 +4892,7 @@ function FAQ({ go }) {
 // ── Size Guide ──────────────────────────────────────────────────────────────
 
 function SizeGuide({ go }) {
-  const jacketSizes = [
-    { s: 'XS', chest: '34', shoulder: '16', sleeve: '24.5', length: '23' },
-    { s: 'S',  chest: '36', shoulder: '16.5', sleeve: '25', length: '23.5' },
-    { s: 'M',  chest: '38', shoulder: '17.5', sleeve: '25.5', length: '24' },
-    { s: 'L',  chest: '40', shoulder: '18', sleeve: '26', length: '24.5' },
-    { s: 'XL', chest: '42', shoulder: '18.5', sleeve: '26.5', length: '25' },
-    { s: 'XXL', chest: '44', shoulder: '19', sleeve: '27', length: '25.5' },
-  ];
+  const [jacketUnit, setJacketUnit] = React.useState('inch');
   const pantSizes = [
     { s: 'XS', waist: '26', hip: '34', inseam: '32', rise: '10' },
     { s: 'S',  waist: '28', hip: '36', inseam: '32', rise: '10' },
@@ -4899,7 +4933,13 @@ function SizeGuide({ go }) {
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
-        <Table title="Jackets · inches" cols={['Size', 'Chest', 'Shoulder', 'Sleeve', 'Length']} rows={jacketSizes} />
+        <div style={{ marginBottom: 56 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            MEN'S JACKET SIZE CHART · XS–5XL
+          </div>
+          <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Jackets, measured clearly.</h2>
+          <JacketSizeChart unit={jacketUnit} onUnitChange={setJacketUnit} />
+        </div>
         <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
 
         <div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 48 }}>
