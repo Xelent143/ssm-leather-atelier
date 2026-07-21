@@ -2449,7 +2449,7 @@ function EditorialBlock({ go }) {
 }
 
 function TestimonialBlock() {
-  const reviews = p.reviews || [
+  const reviews = [
     { q: 'The Voltaire arrived. I have not taken it off in three weeks.', a: 'Vogue Paris · Editor at Large' },
     { q: 'A house that understands restraint is the truest form of luxury.', a: 'Mr Porter · Journal' },
     { q: 'You can feel the patience in the leather.', a: 'The Gentleman\'s Journal' },
@@ -2855,7 +2855,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
     ['Customization', 'Available by leather, size, measurements, and custom fit request'],
   ];
 
-  const reviews = [
+  const reviews = p.reviews || [
     { who: 'Iola V., Brooklyn',  rating: 5, date: 'March MMXXVI',  body: `My ${p.name.split(' ')[0]} arrived with a small note from ${p.maker}. Three weeks in, the placket has softened just where I hoped.` },
     { who: 'Theo M., Paris',     rating: 5, date: 'February MMXXVI', body: 'The fit is exact. The hide is heavier than I expected, in the best way. I have not taken it off.' },
     { who: 'Sigrid K., London',  rating: 4, date: 'January MMXXVI',  body: 'A real piece. Sized up over a knit, which I would recommend. The brass darkened beautifully after two weeks.' },
