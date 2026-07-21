@@ -68,8 +68,17 @@
       "sizeType": "Regular",
       "ageGroup": "Adult",
       "itemGroupId": "intrecciato-genuine-cowhide-lambskin-leather-jacket-brown",
+      "collarColors": [
+        "Black",
+        "Brown",
+        "Red",
+        "Pink",
+        "Blue"
+      ],
+      "defaultCollarColor": "Brown",
       "variantOptions": [
         "Size",
+        "Collar Color",
         "Fit"
       ],
       "shippingWeight": "4 lb",

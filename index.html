@@ -342,6 +342,13 @@
   }
   .swatch:hover { transform: scale(1.1); }
   .swatch.active { outline: 1px solid var(--fg); outline-offset: 3px; }
+  .leather-swatch {
+    width: 34px; height: 34px;
+    background-image:
+      radial-gradient(circle at 28% 22%, rgba(255,255,255,0.28), transparent 28%),
+      repeating-radial-gradient(ellipse at 40% 45%, rgba(255,255,255,0.07) 0 1px, rgba(0,0,0,0.07) 1px 3px);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 -5px 9px rgba(0,0,0,0.2);
+  }
 
   /* scroll snap helpers (for editorial sections) */
   .h-scroll {
@@ -937,6 +944,14 @@ const SSM_PRODUCTS = [
     img: SSM_ASSETS.intrecciatoBrownModelFront, alt: SSM_ASSETS.intrecciatoBrownProductFront,
     material: 'Genuine cowhide and lambskin leather', materialLocked: true,
     materialNote: 'Mixed-leather construction with an intrecciato woven finish',
+    collarColors: [
+      { id: 'black', name: 'Black', color: '#171513' },
+      { id: 'brown', name: 'Brown', color: '#633722' },
+      { id: 'red', name: 'Red', color: '#922a2f' },
+      { id: 'pink', name: 'Pink', color: '#c77d91' },
+      { id: 'blue', name: 'Blue', color: '#315b82' },
+    ],
+    defaultCollarColor: 'brown',
     maker: 'MOTOGRIP Workshop', signedSince: 2026,
     sizes: ['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],
     reviews: [],
@@ -1818,6 +1833,11 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
                   {item.leather} · SIZE {item.size}
                 </div>
+                {item.collarColor && (
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 5 }}>
+                    COLLAR · {item.collarColor.toUpperCase()}
+                  </div>
+                )}
                 {item.fitLabel && (
                   <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 5 }}>
                     {item.fitLabel.toUpperCase()}{item.surcharge ? ` · +$${item.surcharge}` : ''}
@@ -1889,9 +1909,11 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
 function QuickView({ product, onClose, addToCart, go }) {
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
+  const [collarColor, setCollarColor] = React.useState(product?.defaultCollarColor || product?.collarColors?.[0]?.id || null);
   if (!product) return null;
   const quickLeather = product.material || SSM_LEATHERS.find(l => l.id === leather)?.name;
   const quickSizes = product.sizes || ['XS','S','M','L','XL'];
+  const selectedQuickCollar = product.collarColors?.find(c => c.id === collarColor);
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div className="drawer-overlay" onClick={onClose}
@@ -1926,6 +1948,21 @@ function QuickView({ product, onClose, addToCart, go }) {
             </div>
           )}
 
+          {product.collarColors?.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
+                Collar color · {selectedQuickCollar?.name}
+              </div>
+              <div style={{ display: 'flex', gap: 14 }}>
+                {product.collarColors.map(c => (
+                  <button key={c.id} className={`swatch leather-swatch ${collarColor === c.id ? 'active' : ''}`}
+                    aria-label={`Collar color ${c.name}`} aria-pressed={collarColor === c.id} title={c.name}
+                    style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setCollarColor(c.id)} />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 10 }}>Size</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
             {quickSizes.map(s => (
@@ -1943,7 +1980,7 @@ function QuickView({ product, onClose, addToCart, go }) {
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn" style={{ flex: 1, justifyContent: 'center' }}
-              onClick={() => { addToCart(product, { leather: quickLeather, size }); onClose(); }}>
+              onClick={() => { addToCart(product, { leather: quickLeather, size, collarColor: selectedQuickCollar?.name || null }); onClose(); }}>
               Add to Bag
             </button>
             <button className="btn btn-ghost" onClick={() => { onClose(); go && go('pdp', { product }); }}>Full Details</button>
@@ -2801,6 +2838,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const p = product || SSM_PRODUCTS[0];
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
+  const [collarColor, setCollarColor] = React.useState(p.defaultCollarColor || p.collarColors?.[0]?.id || null);
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('details');
   const [notifyOpen, setNotifyOpen] = React.useState(false);
@@ -2828,6 +2866,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
 
   const lObj = SSM_LEATHERS.find(l => l.id === leather);
   const productLeather = p.material || lObj?.name || 'Selected hide';
+  const selectedCollar = p.collarColors?.find(c => c.id === collarColor);
   const productSizes = p.sizes || ['XS','S','M','L','XL','XXL'];
   const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
   const inStock = sizeStock(size) > 0;
@@ -2955,6 +2994,25 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </div>
           )}
 
+          {p.collarColors?.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+                <span>COLLAR COLOR</span>
+                <span style={{ color: 'var(--fg-2)' }}>{selectedCollar?.name.toUpperCase()}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                {p.collarColors.map(c => (
+                  <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                    <button className={`swatch leather-swatch ${collarColor === c.id ? 'active' : ''}`}
+                      aria-label={`Collar color ${c.name}`} aria-pressed={collarColor === c.id} title={c.name}
+                      style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setCollarColor(c.id)} />
+                    <span className="mono" style={{ fontSize: 8, color: collarColor === c.id ? 'var(--fg-2)' : 'var(--fg-4)' }}>{c.name.toUpperCase()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
             <span>SIZE</span>
             <button onClick={() => go('size')} className="ulink"
@@ -3052,6 +3110,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
                 surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
                 fitMode,
                 fitLabel: isMadeToMeasure ? 'Made to measure' : 'Standard size',
+                collarColor: selectedCollar?.name || null,
                 measurements: isMadeToMeasure ? measurements : null,
               })}>
               Add to Bag — ${displayPrice.toLocaleString()}
@@ -3793,6 +3852,7 @@ function Checkout({ go, items, setItems }) {
             qty: item.qty,
             size: item.size,
             leather: item.leather,
+            collarColor: item.collarColor,
             fitMode: item.fitMode,
           })),
         }),
@@ -3931,6 +3991,7 @@ function Checkout({ go, items, setItems }) {
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
               <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              {it.collarColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLLAR · {it.collarColor.toUpperCase()}</div>}
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>${(it.price * it.qty).toLocaleString()}</div>
           </div>
@@ -5913,11 +5974,11 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  // Cart merging — same product + size + leather + fit selection increments qty.
+  // Cart merging — same product + size + leather + collar + fit selection increments qty.
   const addToCart = (product, opts) => {
     setCart(prev => {
       const measurementSig = (m) => m ? Object.entries(m).map(([k, v]) => `${k}:${v || ''}`).join('|') : '';
-      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}|${it.fitMode || 'standard'}|${measurementSig(it.measurements)}`;
+      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}|${it.collarColor || ''}|${it.fitMode || 'standard'}|${measurementSig(it.measurements)}`;
       const incoming = {
         baseId: product.id,
         id: product.id + '-' + Date.now(),
@@ -5928,6 +5989,7 @@ function App() {
         qty: 1,
         img: product.img,
         leather: opts.leather, size: opts.size,
+        collarColor: opts.collarColor || null,
         fitMode: opts.fitMode || 'standard',
         fitLabel: opts.fitLabel || null,
         measurements: opts.measurements || null,

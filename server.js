@@ -343,6 +343,15 @@ function checkoutLineItems(rawItems) {
 
     const selectedSize = String(rawItem.size || '').trim().slice(0, 40);
     const selectedLeather = String(rawItem.leather || '').trim().slice(0, 80);
+    const isIntrecciatoJacket = product.id === 'p14' || product.slug === 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown';
+    const collarOptions = Array.isArray(product.collarColors)
+      ? product.collarColors
+      : (isIntrecciatoJacket ? ['Black', 'Brown', 'Red', 'Pink', 'Blue'] : []);
+    const requestedCollar = String(rawItem.collarColor || product.defaultCollarColor || (isIntrecciatoJacket ? 'Brown' : '')).trim().slice(0, 40);
+    const selectedCollar = collarOptions.find((color) => color.toLowerCase() === requestedCollar.toLowerCase()) || '';
+    if (collarOptions.length && !selectedCollar) {
+      throw new Error(`Select an available collar color for ${product.title}.`);
+    }
     const stockForSize = Number(product.stock?.[selectedSize]);
     if (fitMode === 'standard' && Number.isFinite(stockForSize) && quantity > stockForSize) {
       throw new Error(`Only ${stockForSize} of ${product.title} in size ${selectedSize} is available.`);
@@ -359,6 +368,7 @@ function checkoutLineItems(rawItems) {
     const details = [
       selectedSize ? `Size: ${selectedSize}` : '',
       selectedLeather ? `Leather: ${selectedLeather}` : '',
+      selectedCollar ? `Collar: ${selectedCollar}` : '',
       `Fit: ${fitMode === 'made-to-measure' ? 'Made to measure' : 'Standard'}`,
     ].filter(Boolean).join(' · ');
 
