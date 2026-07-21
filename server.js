@@ -946,6 +946,34 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/custom-consultations' && req.method === 'POST') {
+    const body = await readBody(req);
+    const clean = (value, max = 500) => String(value || '').trim().slice(0, max);
+    const request = {
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      productType: clean(body.productType, 80),
+      silhouette: clean(body.silhouette, 80),
+      material: clean(body.material, 80),
+      fit: clean(body.fit, 80),
+      details: clean(body.details, 3000),
+      name: clean(body.name, 160),
+      email: clean(body.email, 254).toLowerCase(),
+      phone: clean(body.phone, 80),
+      contactPreference: ['email', 'phone', 'either'].includes(body.contactPreference) ? body.contactPreference : 'email',
+    };
+    if (!request.productType || !request.silhouette || !request.material || !request.fit || !request.name || !/^\S+@\S+\.\S+$/.test(request.email)) {
+      sendJson(res, 400, { error: 'Please complete the required consultation details.' });
+      return true;
+    }
+    const store = readStore();
+    store.customConsultations = [request, ...(store.customConsultations || [])].slice(0, 250);
+    store.activity = [{ id: `act-${Date.now()}`, at: request.createdAt, type: 'consultation', message: `Custom consultation received from ${request.name}` }, ...(store.activity || []).slice(0, 24)];
+    writeStore(store);
+    sendJson(res, 201, { ok: true, id: request.id });
+    return true;
+  }
+
   if (pathname === '/api/admin/session' && req.method === 'GET') {
     sendJson(res, 200, {
       authenticated: Boolean(getSession(req)),
