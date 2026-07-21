@@ -908,6 +908,16 @@ const SSM_ASSETS = {
   hoodedVestOriginalFront: A('hooded-contrast-moto-vest-original-front.jpg'),
   hoodedVestOriginalBack: A('hooded-contrast-moto-vest-original-back.jpg'),
   hoodedVestOriginalInterior: A('hooded-contrast-moto-vest-original-interior.jpg'),
+  intrecciatoBrownModelFront: A('intrecciato-brown-model-front.png'),
+  intrecciatoBrownModelBack: A('intrecciato-brown-model-back.png'),
+  intrecciatoBrownModelSide: A('intrecciato-brown-model-side.png'),
+  intrecciatoBrownLifestyle: A('intrecciato-brown-lifestyle.png'),
+  intrecciatoBrownProductFront: A('intrecciato-brown-product-front.jpg'),
+  intrecciatoBrownProductBack: A('intrecciato-brown-product-back.jpg'),
+  intrecciatoBrownProductSide: A('intrecciato-brown-product-side.jpg'),
+  intrecciatoBrownCollarDetail: A('intrecciato-brown-collar-detail.jpg'),
+  intrecciatoBrownPocketDetail: A('intrecciato-brown-pocket-detail.jpg'),
+  intrecciatoBrownInfographic: A('intrecciato-brown-infographic.jpg'),
   // optional (generated). Pages fall back to atelier/detail if these are missing.
   tannery: A('tannery-tuscany.png'),
   care: A('leather-care-detail.png'),
@@ -919,6 +929,35 @@ const SSM_ASSETS = {
 // origin (the maker line). Stock is illustrative but realistic for a hand-house.
 
 const SSM_PRODUCTS = [
+  {
+    id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
+    name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
+    price: 1200, hue: 25, tag: 'New',
+    blurb: 'Genuine cowhide & lambskin · intrecciato woven construction · rib-knit trim',
+    img: SSM_ASSETS.intrecciatoBrownModelFront, alt: SSM_ASSETS.intrecciatoBrownProductFront,
+    material: 'Genuine cowhide and lambskin leather', materialLocked: true,
+    materialNote: 'Mixed-leather construction with an intrecciato woven finish',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    sizes: ['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],
+    gallery: [
+      { label: 'Front · on model', src: SSM_ASSETS.intrecciatoBrownModelFront },
+      { label: 'Front · original product', src: SSM_ASSETS.intrecciatoBrownProductFront },
+      { label: 'Back · on model', src: SSM_ASSETS.intrecciatoBrownModelBack },
+      { label: 'Back · original product', src: SSM_ASSETS.intrecciatoBrownProductBack },
+      { label: 'Side · on model', src: SSM_ASSETS.intrecciatoBrownModelSide },
+      { label: 'Side · original product', src: SSM_ASSETS.intrecciatoBrownProductSide },
+      { label: 'Detail · collar and weave', src: SSM_ASSETS.intrecciatoBrownCollarDetail },
+      { label: 'Detail · pocket, zip and ribbing', src: SSM_ASSETS.intrecciatoBrownPocketDetail },
+      { label: 'Features · infographic', src: SSM_ASSETS.intrecciatoBrownInfographic },
+      { label: 'Lifestyle · modern loft', src: SSM_ASSETS.intrecciatoBrownLifestyle },
+    ],
+    story: {
+      piece: "A refined brown leather blouson built around the tactile depth of intrecciato weaving. Its clean shirt collar and rib-knit trim balance the hand-worked surface with an easy, everyday silhouette.",
+      craft: "Genuine cowhide and lambskin leather in a full woven construction, finished with a smooth leather collar, heavy-duty front zipper, two vertical welt pockets, quilted inner lining, and dark rib-knit cuffs and waistband.",
+      fit: "Regular blouson fit with room for a light knit. Available in XS through 5XL, with made-to-measure ordering for a personalized fit.",
+      origin: "Produced by the MOTOGRIP GEAR workshop with close attention to weave alignment, balanced pocket placement, and clean rib-knit finishing.",
+    },
+  },
   {
     id: 'p13', slug: 'black-white-hooded-leather-moto-vest',
     name: 'Black & White Hooded Leather Moto Vest', cat: 'Vests', gender: 'Men',
