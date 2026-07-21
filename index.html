@@ -939,6 +939,7 @@ const SSM_PRODUCTS = [
     materialNote: 'Mixed-leather construction with an intrecciato woven finish',
     maker: 'MOTOGRIP Workshop', signedSince: 2026,
     sizes: ['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],
+    reviews: [],
     gallery: [
       { label: 'Front · on model', src: SSM_ASSETS.intrecciatoBrownModelFront },
       { label: 'Front · original product', src: SSM_ASSETS.intrecciatoBrownProductFront },
@@ -2448,7 +2449,7 @@ function EditorialBlock({ go }) {
 }
 
 function TestimonialBlock() {
-  const reviews = [
+  const reviews = p.reviews || [
     { q: 'The Voltaire arrived. I have not taken it off in three weeks.', a: 'Vogue Paris · Editor at Large' },
     { q: 'A house that understands restraint is the truest form of luxury.', a: 'Mr Porter · Journal' },
     { q: 'You can feel the patience in the leather.', a: 'The Gentleman\'s Journal' },
@@ -3217,15 +3218,15 @@ function PDP({ product, go, addToCart, onQuickView }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-              REVIEWS · 4.9 / 5 · {reviews.length} VOICES
+              {reviews.length ? `REVIEWS · 4.9 / 5 · ${reviews.length} VOICES` : 'REVIEWS · NEW ARRIVAL'}
             </div>
             <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400 }}>
-              From people who wear it.
+              {reviews.length ? 'From people who wear it.' : 'Be the first to review it.'}
             </h2>
           </div>
           <button className="btn btn-ghost">Write a review</button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+        {reviews.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
           {reviews.map(r => (
             <div key={r.who} style={{ padding: 24, border: '1px solid var(--line)' }}>
               <div className="mono" style={{ fontSize: 11, color: 'var(--accent-2)' }}>
@@ -3239,7 +3240,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
               </div>
             </div>
           ))}
-        </div>
+        </div>}
       </section>
 
       {/* You may also */}
