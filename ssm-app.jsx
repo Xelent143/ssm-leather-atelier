@@ -70,11 +70,13 @@ function App() {
   const [cart, setCart] = React.useState(() => {
     try {
       const raw = window.localStorage && localStorage.getItem('ssm:cart');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        const activeIds = new Set(SSM_PRODUCTS.map((product) => product.id));
+        return Array.isArray(saved) ? saved.filter((item) => activeIds.has(item.id)) : [];
+      }
     } catch (_) {}
-    return [
-      { id: 'p2', name: 'Hadley Café Racer', price: 1180, qty: 1, leather: 'Tobacco', size: 'M', img: SSM_PRODUCTS[1].img },
-    ];
+    return [];
   });
   const [cartOpen, setCartOpen] = React.useState(false);
   const [quickView, setQuickView] = React.useState(null);
