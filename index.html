@@ -1303,15 +1303,37 @@ const SSM_JACKET_SIZE_CHART = {
   ],
 };
 
-function JacketSizeChart({ unit, onUnitChange, selectedSize = null }) {
-  const rows = SSM_JACKET_SIZE_CHART[unit];
+// Women's jacket measurements, XS–5XL. Values match the published Iris
+// women's motorcycle jacket chart in both inches and centimetres.
+const SSM_WOMENS_JACKET_SIZE_CHART = {
+  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'],
+  inch: [
+    ['Chest (garment)', '37"', '39"', '41"', '44"', '47"', '50"', '53"', '56"', '59"'],
+    ['Chest (body)', '33" - 34"', '35" - 36"', '37" - 38"', '39.5" - 41"', '42.5" - 44"', '45.5" - 47"', '48.5" - 50"', '51.5" - 53"', '54.5" - 56"'],
+    ['Waist (garment)', '35"', '37"', '39"', '42"', '45"', '48"', '51"', '54"', '57"'],
+    ['Waist (body)', '31" - 32"', '33" - 34"', '35" - 36"', '37.5" - 39"', '40.5" - 42"', '43.5" - 45"', '46.5" - 48"', '49.5" - 51"', '52.5" - 54"'],
+    ['Center back length', '22"', '22.5"', '23"', '23.5"', '24"', '24.5"', '25"', '25.5"', '26"'],
+    ['Sleeve length', '24"', '24.25"', '24.5"', '24.9"', '25.25"', '25.65"', '26"', '26.4"', '26.75"'],
+  ],
+  cm: [
+    ['Chest (garment)', '93.98cm', '99.06cm', '104.1cm', '111.8cm', '119.4cm', '127cm', '134.6cm', '142.2cm', '149.9cm'],
+    ['Chest (body)', '83.8cm - 86.4cm', '88.9cm - 91.4cm', '94cm - 96.5cm', '100.3cm - 104cm', '108cm - 112cm', '115.6cm - 119cm', '123.2cm - 127cm', '130.8cm - 135cm', '138.4cm - 142cm'],
+    ['Waist (garment)', '88.9cm', '93.98cm', '99.06cm', '106.7cm', '114.3cm', '121.9cm', '129.5cm', '137.2cm', '144.8cm'],
+    ['Waist (body)', '78.7cm - 81.3cm', '83.8cm - 86.4cm', '88.9cm - 91.4cm', '95.25cm - 99.1cm', '102.9cm - 107cm', '110.5cm - 114cm', '118.1cm - 122cm', '125.7cm - 130cm', '133.3cm - 137cm'],
+    ['Center back length', '55.88cm', '57.15cm', '58.42cm', '59.69cm', '60.96cm', '62.23cm', '63.5cm', '64.77cm', '66.04cm'],
+    ['Sleeve length', '60.96cm', '61.59cm', '62.23cm', '63.25cm', '64.14cm', '65.15cm', '66.04cm', '67.06cm', '67.95cm'],
+  ],
+};
+
+function JacketSizeChart({ unit, onUnitChange, selectedSize = null, chart = SSM_JACKET_SIZE_CHART, ariaLabel = 'Jacket size chart units' }) {
+  const rows = chart[unit];
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'flex-end', marginBottom: 18, flexWrap: 'wrap' }}>
         <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7, maxWidth: 720 }}>
           Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Size up for a more relaxed fit.
         </div>
-        <div role="group" aria-label="Jacket size chart units" style={{ display: 'flex', border: '1px solid var(--line-2)' }}>
+        <div role="group" aria-label={ariaLabel} style={{ display: 'flex', border: '1px solid var(--line-2)' }}>
           {[['inch', 'INCHES'], ['cm', 'CM']].map(([id, label]) => (
             <button key={id} type="button" onClick={() => onUnitChange(id)} aria-pressed={unit === id}
               style={{
@@ -1330,7 +1352,7 @@ function JacketSizeChart({ unit, onUnitChange, selectedSize = null }) {
           <thead>
             <tr>
               <th className="mono" style={{ width: 190, textAlign: 'left', padding: '15px 12px', color: 'var(--accent-2)', fontSize: 9, borderBottom: '1px solid var(--line-2)' }}>POINT OF MEASUREMENT</th>
-              {SSM_JACKET_SIZE_CHART.sizes.map(sizeName => (
+              {chart.sizes.map(sizeName => (
                 <th key={sizeName} className="mono" style={{ padding: '15px 10px', color: selectedSize === sizeName ? 'var(--accent-2)' : 'var(--fg-2)', background: selectedSize === sizeName ? 'rgba(176,138,76,0.08)' : 'transparent', fontSize: 10, borderBottom: '1px solid var(--line-2)', borderLeft: '1px solid var(--line)' }}>{sizeName}</th>
               ))}
             </tr>
@@ -1340,7 +1362,7 @@ function JacketSizeChart({ unit, onUnitChange, selectedSize = null }) {
               <tr key={row[0]}>
                 <th scope="row" style={{ textAlign: 'left', padding: '15px 12px', color: 'var(--fg-2)', fontFamily: 'var(--display)', fontSize: 16, fontWeight: 400, borderBottom: '1px solid var(--line)' }}>{row[0]}</th>
                 {row.slice(1).map((value, index) => {
-                  const active = selectedSize === SSM_JACKET_SIZE_CHART.sizes[index];
+                  const active = selectedSize === chart.sizes[index];
                   return <td key={`${row[0]}-${index}`} className="mono" style={{ padding: '15px 10px', textAlign: 'center', whiteSpace: 'nowrap', color: active ? 'var(--fg)' : 'var(--fg-3)', background: active ? 'rgba(176,138,76,0.08)' : 'transparent', fontSize: 10, borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)' }}>{value}</td>;
                 })}
               </tr>
@@ -3393,13 +3415,19 @@ function PDP({ product, go, addToCart, onQuickView }) {
       {p.cat === 'Jackets' && (
         <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            JACKET SIZE CHART · XS–5XL
+            {p.gender === 'Women' ? "WOMEN'S JACKET SIZE CHART · XS–5XL" : "MEN'S JACKET SIZE CHART · XS–5XL"}
           </div>
           <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>
             Fit at a glance.
           </h2>
-          <JacketSizeChart unit={fitChartUnit} onUnitChange={setFitChartUnit} selectedSize={size} />
-          <MensJacketMeasureGuide />
+          <JacketSizeChart
+            unit={fitChartUnit}
+            onUnitChange={setFitChartUnit}
+            selectedSize={size}
+            chart={p.gender === 'Women' ? SSM_WOMENS_JACKET_SIZE_CHART : SSM_JACKET_SIZE_CHART}
+            ariaLabel={`${p.gender === 'Women' ? "Women's" : "Men's"} jacket size chart units`}
+          />
+          {p.gender !== 'Women' && <MensJacketMeasureGuide />}
         </section>
       )}
 
@@ -4983,6 +5011,7 @@ function FAQ({ go }) {
 
 function SizeGuide({ go }) {
   const [jacketUnit, setJacketUnit] = React.useState('inch');
+  const [womenJacketUnit, setWomenJacketUnit] = React.useState('inch');
   const pantSizes = [
     { s: 'XS', waist: '26', hip: '34', inseam: '32', rise: '10' },
     { s: 'S',  waist: '28', hip: '36', inseam: '32', rise: '10' },
@@ -5030,6 +5059,18 @@ function SizeGuide({ go }) {
           <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Jackets, measured clearly.</h2>
           <JacketSizeChart unit={jacketUnit} onUnitChange={setJacketUnit} />
           <MensJacketMeasureGuide />
+        </div>
+        <div style={{ marginBottom: 72, paddingTop: 16 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            WOMEN'S JACKET SIZE CHART · XS–5XL
+          </div>
+          <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Women’s jackets, measured clearly.</h2>
+          <JacketSizeChart
+            unit={womenJacketUnit}
+            onUnitChange={setWomenJacketUnit}
+            chart={SSM_WOMENS_JACKET_SIZE_CHART}
+            ariaLabel="Women's jacket size chart units"
+          />
         </div>
         <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
 
