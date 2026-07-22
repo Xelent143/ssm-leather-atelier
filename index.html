@@ -953,6 +953,7 @@ const SSM_ASSETS = {
   shearlingBanner: A('shearling-couple-banner.png'),
   mensJacketMeasurement: '/assets/generated/mens-jacket-measurement-guide.png',
   womensJacketMeasurement: '/assets/generated/womens-jacket-measurement-guide.png',
+  mensVestMeasurement: '/assets/generated/mens-motorcycle-vest-measurement-guide.png',
   detail: A('leather-detail.png'),
   hoodedVestFront: A('hooded-contrast-moto-vest-front.png'),
   hoodedVestBack: A('hooded-contrast-moto-vest-back.png'),
@@ -1326,13 +1327,45 @@ const SSM_WOMENS_JACKET_SIZE_CHART = {
   ],
 };
 
-function JacketSizeChart({ unit, onUnitChange, selectedSize = null, chart = SSM_JACKET_SIZE_CHART, ariaLabel = 'Jacket size chart units' }) {
+// Men's motorcycle vest measurements. S–5XL match the published Hunt Club
+// reference chart. XS and 6XL extend the same 2.5-inch body grade, 0.5-inch
+// back-length grade and alternating shoulder grade for MOTOGRIP's full range.
+const SSM_MENS_VEST_SIZE_CHART = {
+  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'],
+  inch: [
+    ['Chest (garment)', '38.5"', '41"', '43.5"', '46"', '48.5"', '51"', '53.5"', '56"', '58.5"', '61"'],
+    ['Chest (body)', '35" - 36.5"', '37.5" - 39"', '40" - 41.5"', '42.5" - 44"', '45" - 46.5"', '47.5" - 49"', '50" - 51.5"', '52.5" - 54"', '55" - 56.5"', '57.5" - 59"'],
+    ['Waist (garment)', '35.5"', '38"', '40.5"', '43"', '45.5"', '48"', '50.5"', '53"', '55.5"', '58"'],
+    ['Waist (body)', '31" - 32.5"', '33.5" - 35"', '36" - 37.5"', '38.5" - 40"', '41" - 42.5"', '43.5" - 45"', '46" - 47.5"', '48.5" - 50"', '51" - 52.5"', '53.5" - 55"'],
+    ['Center back length', '24.25"', '24.75"', '25.25"', '25.75"', '26.25"', '26.75"', '27.25"', '27.75"', '28.25"', '28.75"'],
+    ['Across shoulder', '16.4"', '17"', '17.65"', '18.25"', '18.9"', '19.5"', '20.15"', '20.75"', '21.4"', '22"'],
+  ],
+  cm: [
+    ['Chest (garment)', '97.79cm', '104.1cm', '110.5cm', '116.8cm', '123.2cm', '129.5cm', '135.9cm', '142.2cm', '148.6cm', '154.9cm'],
+    ['Chest (body)', '88.9cm - 92.71cm', '95.25cm - 99.1cm', '102cm - 105.4cm', '108cm - 112cm', '114cm - 118.1cm', '120.7cm - 124cm', '127cm - 130.8cm', '133.3cm - 137cm', '140cm - 143.5cm', '146.1cm - 149.9cm'],
+    ['Waist (garment)', '90.17cm', '96.52cm', '102.9cm', '109.2cm', '115.6cm', '121.9cm', '128.3cm', '134.6cm', '141cm', '147.3cm'],
+    ['Waist (body)', '78.74cm - 82.55cm', '85.09cm - 88.9cm', '91.4cm - 95.25cm', '97.79cm - 102cm', '104cm - 108cm', '110.5cm - 114cm', '117cm - 120.7cm', '123.2cm - 127cm', '130cm - 133.3cm', '135.9cm - 139.7cm'],
+    ['Center back length', '61.6cm', '62.87cm', '64.14cm', '65.41cm', '66.67cm', '67.95cm', '69.22cm', '70.48cm', '71.75cm', '73.03cm'],
+    ['Across shoulder', '41.66cm', '43.18cm', '44.83cm', '46.36cm', '48.01cm', '49.53cm', '51.18cm', '52.7cm', '54.36cm', '55.88cm'],
+  ],
+};
+
+function JacketSizeChart({
+  unit,
+  onUnitChange,
+  selectedSize = null,
+  chart = SSM_JACKET_SIZE_CHART,
+  ariaLabel = 'Jacket size chart units',
+  note = 'Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Size up for a more relaxed fit.',
+  footer = 'GARMENT MEASUREMENTS REFER TO THE FINISHED JACKET. BODY MEASUREMENTS REFER TO THE WEARER.',
+  sourceNote = null,
+}) {
   const rows = chart[unit];
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'flex-end', marginBottom: 18, flexWrap: 'wrap' }}>
         <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7, maxWidth: 720 }}>
-          Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Size up for a more relaxed fit.
+          {note}
         </div>
         <div role="group" aria-label={ariaLabel} style={{ display: 'flex', border: '1px solid var(--line-2)' }}>
           {[['inch', 'INCHES'], ['cm', 'CM']].map(([id, label]) => (
@@ -1372,8 +1405,9 @@ function JacketSizeChart({ unit, onUnitChange, selectedSize = null, chart = SSM_
         </table>
       </div>
       <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 12, lineHeight: 1.7 }}>
-        GARMENT MEASUREMENTS REFER TO THE FINISHED JACKET. BODY MEASUREMENTS REFER TO THE WEARER.
+        {footer}
       </div>
+      {sourceNote && <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', marginTop: 5, lineHeight: 1.7 }}>{sourceNote}</div>}
     </div>
   );
 }
@@ -1406,6 +1440,47 @@ function MensJacketMeasureGuide() {
         </h3>
         <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
           Use a soft tape over a fitted T-shirt. Stand naturally, keep the tape level, and ask someone to help with shoulder, sleeve and back measurements.
+        </p>
+        <div className="jacket-measure-guide__points">
+          {points.map(([title, instruction]) => (
+            <div className="jacket-measure-guide__point" key={title}>
+              <div className="display" style={{ fontSize: 18, color: 'var(--fg-2)' }}>{title}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.65, marginTop: 5 }}>{instruction}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MensVestMeasureGuide() {
+  const points = [
+    ['Across shoulder', 'Measure straight across the back from one shoulder point to the other.'],
+    ['Chest or stomach', 'Measure around whichever is fuller, keeping the tape level and comfortably relaxed.'],
+    ['Natural waist', 'Measure around the narrowest part of the torso without pulling the tape tight.'],
+    ['Lower waist', 'Measure around the body where the vest hem is expected to sit.'],
+    ['Center back length', 'Measure from the base of the back collar straight down to the desired vest hem.'],
+    ['Layering allowance', 'Measure over the type of shirt or light layer you expect to wear under the vest.'],
+  ];
+
+  return (
+    <section className="jacket-measure-guide" aria-labelledby="mens-vest-measure-title">
+      <img
+        className="jacket-measure-guide__image"
+        src={SSM_ASSETS.mensVestMeasurement}
+        alt="Men's motorcycle vest measurement guide showing shoulder, chest, waist, hem and back length points"
+        loading="lazy"
+      />
+      <div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 14 }}>
+          HOW TO MEASURE · MEN'S MOTORCYCLE VEST
+        </div>
+        <h3 id="mens-vest-measure-title" className="display" style={{ fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 400, lineHeight: 1.04, margin: 0 }}>
+          Measure for the layer you ride in.
+        </h3>
+        <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
+          Use a soft tape over a fitted T-shirt or your usual riding layer. Stand naturally and ask someone to help with shoulder and center-back measurements.
         </p>
         <div className="jacket-measure-guide__points">
           {points.map(([title, instruction]) => (
@@ -3474,6 +3549,29 @@ function PDP({ product, go, addToCart, onQuickView }) {
         </section>
       )}
 
+      {/* Men's motorcycle vest size chart */}
+      {p.cat === 'Vests' && p.gender === 'Men' && (
+        <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            MEN'S MOTORCYCLE LEATHER VEST SIZE CHART · XS–6XL
+          </div>
+          <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>
+            Vest fit at a glance.
+          </h2>
+          <JacketSizeChart
+            unit={fitChartUnit}
+            onUnitChange={setFitChartUnit}
+            selectedSize={size}
+            chart={SSM_MENS_VEST_SIZE_CHART}
+            ariaLabel="Men's motorcycle vest size chart units"
+            note="Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Measure over your usual riding layer and size up for a more relaxed fit."
+            footer="GARMENT MEASUREMENTS REFER TO THE FINISHED VEST. BODY MEASUREMENTS REFER TO THE WEARER."
+            sourceNote="S–5XL VALUES FOLLOW THE REFERENCE CHART. XS AND 6XL USE THE SAME ESTABLISHED SIZE GRADE."
+          />
+          <MensVestMeasureGuide />
+        </section>
+      )}
+
       {/* Reviews */}
       <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
@@ -5055,6 +5153,7 @@ function FAQ({ go }) {
 function SizeGuide({ go }) {
   const [jacketUnit, setJacketUnit] = React.useState('inch');
   const [womenJacketUnit, setWomenJacketUnit] = React.useState('inch');
+  const [vestUnit, setVestUnit] = React.useState('inch');
   const pantSizes = [
     { s: 'XS', waist: '26', hip: '34', inseam: '32', rise: '10' },
     { s: 'S',  waist: '28', hip: '36', inseam: '32', rise: '10' },
@@ -5115,6 +5214,22 @@ function SizeGuide({ go }) {
             ariaLabel="Women's jacket size chart units"
           />
           <WomensJacketMeasureGuide />
+        </div>
+        <div style={{ marginBottom: 72, paddingTop: 16 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            MEN'S MOTORCYCLE LEATHER VEST SIZE CHART · XS–6XL
+          </div>
+          <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Motorcycle vests, measured clearly.</h2>
+          <JacketSizeChart
+            unit={vestUnit}
+            onUnitChange={setVestUnit}
+            chart={SSM_MENS_VEST_SIZE_CHART}
+            ariaLabel="Men's motorcycle vest size chart units"
+            note="Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Measure over your usual riding layer and size up for a more relaxed fit."
+            footer="GARMENT MEASUREMENTS REFER TO THE FINISHED VEST. BODY MEASUREMENTS REFER TO THE WEARER."
+            sourceNote="S–5XL VALUES FOLLOW THE REFERENCE CHART. XS AND 6XL USE THE SAME ESTABLISHED SIZE GRADE."
+          />
+          <MensVestMeasureGuide />
         </div>
         <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
 
