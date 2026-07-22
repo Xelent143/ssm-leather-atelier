@@ -995,7 +995,7 @@ const PAGE_ONE_MENS_JACKET_SPECS = [
   ['Dean Brown Leather Biker Jacket',299,'Brown','Biker'],
   ['Inferno Black Leather Jacket',290,'Black','Cafe Racer'],
   ['Ionic Black Leather Jacket',290,'Black','Cafe Racer'],
-  ['Sheriff Brown Suede Jacket',395,'Brown','Suede'],
+  ['Ridgeline Brown Suede Fur-Lined Jacket',395,'Brown','Suede Field Jacket'],
   ['Legacy Black Leather Biker Jacket',299,'Black','Biker'],
   ['Allaric Alley Black Leather Biker Jacket',295,'Black','Biker'],
   ['Blain Mocha Suede Bomber Jacket',295,'Mocha','Suede Bomber'],
@@ -1121,10 +1121,41 @@ Object.assign(PAGE_ONE_MENS_JACKETS[2], {
   },
 });
 
+Object.assign(PAGE_ONE_MENS_JACKETS[3], {
+  blurb: 'Goatskin suede · full faux-fur lining · high stand collar',
+  material: 'Real goatskin suede',
+  materialNote: 'Chestnut-brown suede finish with a charcoal faux-fur lining',
+  colors: [
+    {
+      id: 'brown',
+      name: 'Brown',
+      color: '#733f22',
+      image: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-close-up.png'),
+    },
+  ],
+  defaultColor: 'brown',
+  gallery: [
+    { label: 'Front · on model', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-model-front.png') },
+    { label: 'Front · product studio', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-product-front.png') },
+    { label: 'Back · on model', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-model-back.png') },
+    { label: 'Side · on model', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-model-side.png') },
+    { label: 'Detail · suede, zipper and lining', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-close-up.png') },
+    { label: 'Features · infographic', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-infographic.png') },
+    { label: 'Lifestyle · editorial', src: A('mens-page-one/ridgeline-brown-suede-fur-lined-jacket-lifestyle.png') },
+  ],
+  story: {
+    piece: 'The Ridgeline Brown Suede Fur-Lined Jacket brings the practical field-coat silhouette into a refined leather wardrobe. Its longer cut, protected front closure, and warm high collar make it a confident layer for colder everyday wear.',
+    craft: 'Real goatskin suede is cut with a natural chestnut finish and fully backed by a charcoal faux-fur lining. A metal front zipper sits beneath a four-button storm flap, while two exterior welt pockets, two inside pockets, open-hem cuffs, and reinforced panel seams complete the construction.',
+    fit: 'Regular men\'s outerwear fit with room for light layering. Offered in XS through 5XL, with made-to-measure ordering available for a personalized fit.',
+    origin: 'Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with original imagery, fit notes, product copy, and leather swatch assets.',
+  },
+});
+
 const SSM_PRODUCTS = [
   PAGE_ONE_MENS_JACKETS[0],
   PAGE_ONE_MENS_JACKETS[1],
   PAGE_ONE_MENS_JACKETS[2],
+  PAGE_ONE_MENS_JACKETS[3],
   {
     id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
     name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
