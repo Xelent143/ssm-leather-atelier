@@ -5222,37 +5222,6 @@ function SizeGuide({ go }) {
   const [womenJacketUnit, setWomenJacketUnit] = React.useState('inch');
   const [vestUnit, setVestUnit] = React.useState('inch');
   const [chapsUnit, setChapsUnit] = React.useState('inch');
-  const pantSizes = [
-    { s: 'XS', waist: '26', hip: '34', inseam: '32', rise: '10' },
-    { s: 'S',  waist: '28', hip: '36', inseam: '32', rise: '10' },
-    { s: 'M',  waist: '30', hip: '38', inseam: '32', rise: '10.5' },
-    { s: 'L',  waist: '32', hip: '40', inseam: '32', rise: '10.5' },
-    { s: 'XL', waist: '34', hip: '42', inseam: '32', rise: '11' },
-    { s: 'XXL', waist: '36', hip: '44', inseam: '32', rise: '11' },
-  ];
-
-  const Table = ({ title, cols, rows }) => (
-    <div style={{ marginBottom: 48 }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-        {title.toUpperCase()}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols.length}, 1fr)`, borderTop: '1px solid var(--line-2)' }}>
-        {cols.map(c => (
-          <div key={c} className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', padding: '12px 0', borderBottom: '1px solid var(--line-2)' }}>
-            {c.toUpperCase()}
-          </div>
-        ))}
-        {rows.map(r => Object.values(r).map((v, i) => (
-          <div key={r.s + i} style={{
-            fontFamily: i === 0 ? 'var(--display)' : 'var(--mono)',
-            fontSize: i === 0 ? 18 : 12, color: 'var(--fg-2)',
-            padding: '14px 0', borderBottom: '1px solid var(--line)',
-          }}>{v}</div>
-        )))}
-      </div>
-    </div>
-  );
-
   return (
     <div className="page-fade">
       <PageHero
@@ -5313,52 +5282,6 @@ function SizeGuide({ go }) {
             footer="MEASUREMENTS REFER TO THE FINISHED CHAPS. CHECK EVERY POINT, ESPECIALLY THIGH AND WAIST."
           />
           <UnisexChapsMeasureGuide />
-        </div>
-        <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
-
-        <div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 48 }}>
-          <div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-              HOW TO MEASURE
-            </div>
-            {[
-              ['Chest', 'Around the fullest part of the chest, under the arms, with the tape level.'],
-              ['Shoulder', 'From one shoulder seam to the other, across the back.'],
-              ['Sleeve', 'From the shoulder seam to the wrist, with the arm slightly bent.'],
-              ['Length', 'From the base of the back collar to the desired hem.'],
-              ['Waist', 'At your natural waist, where you would normally wear trousers.'],
-              ['Inseam', 'From the crotch to the bottom of the hem on the inside leg.'],
-            ].map(([k, v]) => (
-              <div key={k} style={{ padding: '12px 0', borderBottom: '1px solid var(--line)' }}>
-                <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{k}</div>
-                <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.6, marginTop: 4 }}>{v}</div>
-              </div>
-            ))}
-          </div>
-          <div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-              CONVERSION
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', borderTop: '1px solid var(--line-2)' }}>
-              {['Size', 'US', 'UK', 'EU', 'JP'].map(c => (
-                <div key={c} className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', padding: '12px 0', borderBottom: '1px solid var(--line-2)' }}>{c.toUpperCase()}</div>
-              ))}
-              {[
-                ['XS', '0/2',  '4/6',   '32/34', '5/7'],
-                ['S',  '4',    '8',     '36',    '9'],
-                ['M',  '6/8',  '10/12', '38/40', '11/13'],
-                ['L',  '10',   '14',    '42',    '15'],
-                ['XL', '12',   '16',    '44',    '17'],
-                ['XXL','14',   '18',    '46',    '19'],
-              ].map(row => row.map((v, i) => (
-                <div key={row[0] + i} style={{
-                  fontFamily: i === 0 ? 'var(--display)' : 'var(--mono)',
-                  fontSize: i === 0 ? 18 : 12, color: 'var(--fg-2)',
-                  padding: '14px 0', borderBottom: '1px solid var(--line)',
-                }}>{v}</div>
-              )))}
-            </div>
-          </div>
         </div>
       </section>
 
