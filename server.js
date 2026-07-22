@@ -21,6 +21,40 @@ const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
 const paypalApiBase = (process.env.PAYPAL_API_BASE || 'https://api-m.paypal.com').replace(/\/+$/, '');
 
+const publicRoutes = {
+  '/': { view: 'home', title: 'MOTOGRIP GEAR — Premium Motorcycle Leather Gear', desc: 'Premium motorcycle leather jackets, vests, trousers, and made-to-measure gear built for fit, movement, and lasting road use.' },
+  '/shop': { view: 'shop', title: 'Shop Motorcycle Leather Gear | MOTOGRIP GEAR', desc: 'Shop premium leather jackets, motorcycle vests, trousers, coats, and made-to-measure gear from MOTOGRIP GEAR.' },
+  '/women': { view: 'shop', params: { gender: 'Women' }, title: "Women's Motorcycle Leather Gear | MOTOGRIP GEAR", desc: "Shop women's leather motorcycle jackets, vests, and trousers designed for movement, structure, and precise fit." },
+  '/men': { view: 'shop', params: { gender: 'Men' }, title: "Men's Motorcycle Leather Gear | MOTOGRIP GEAR", desc: "Shop men's leather motorcycle jackets, cafe racers, vests, coats, and trousers built for fit, reach, and road use." },
+  '/jackets': { view: 'shop', params: { cat: 'Jackets' }, title: 'Leather Motorcycle Jackets | MOTOGRIP GEAR', desc: 'Explore premium leather motorcycle jackets, cafe racers, bombers, and biker silhouettes with standard and made-to-measure sizing.' },
+  '/vests': { view: 'shop', params: { cat: 'Vests' }, title: 'Leather Motorcycle Vests | MOTOGRIP GEAR', desc: 'Explore premium leather motorcycle vests and biker waistcoats with functional pockets, durable hardware, and custom sizing.' },
+  '/pants': { view: 'shop', params: { cat: 'Pants' }, title: 'Leather Motorcycle Trousers | MOTOGRIP GEAR', desc: 'Shop leather motorcycle trousers and riding pants designed for durable wear, mobility, and measured fit.' },
+  '/made-to-measure': { view: 'mto', title: 'Made-to-Measure Leather Gear | MOTOGRIP GEAR', desc: 'Create made-to-measure leather jackets, vests, and trousers with guided measurements, material choices, and custom details.' },
+  '/lookbook': { view: 'lookbook', title: 'Leather Gear Lookbook | MOTOGRIP GEAR', desc: 'Explore MOTOGRIP GEAR leather jackets, vests, and riding silhouettes in premium editorial and road-inspired settings.' },
+  '/blog': { view: 'journal', title: 'Leather & Motorcycle Gear Guides | MOTOGRIP GEAR', desc: 'Read original fit, leather care, craftsmanship, product-testing, and motorcycle gear guides from MOTOGRIP GEAR.' },
+  '/brand': { view: 'about', title: 'About MOTOGRIP GEAR | Motorcycle Leather Craftsmanship', desc: 'Discover MOTOGRIP GEAR, a premium leather brand focused on authentic craftsmanship, functional design, precise fit, and lasting value.' },
+  '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
+  '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
+  '/custom-consultation': { view: 'consult', title: 'Custom Leather Consultation | MOTOGRIP GEAR', desc: 'Start a custom leather jacket, vest, or trouser consultation with MOTOGRIP GEAR fit and design guidance.' },
+  '/sustainability': { view: 'sustain', title: 'Durability & Sustainability | MOTOGRIP GEAR', desc: 'Learn how durable materials, repairable construction, and measured fit help MOTOGRIP gear stay in use longer.' },
+  '/stockists': { view: 'stockists', title: 'MOTOGRIP GEAR Stockists & Fitting Locations', desc: 'Find MOTOGRIP GEAR fitting locations, showroom appointments, stockists, and upcoming trunk shows.' },
+  '/press': { view: 'press', title: 'Press & Brand Resources | MOTOGRIP GEAR', desc: 'Access MOTOGRIP GEAR brand notes, product information, imagery guidance, and press contact details.' },
+  '/gift-cards': { view: 'giftcard', title: 'MOTOGRIP GEAR Gift Cards', desc: 'Give premium motorcycle leather gear while letting the recipient choose the style, fit, and details.' },
+  '/faq': { view: 'faq', title: 'Frequently Asked Questions | MOTOGRIP GEAR', desc: 'Answers about MOTOGRIP sizing, leather, custom orders, production, shipping, returns, repairs, and product care.' },
+  '/size-guide': { view: 'size', title: 'Leather Jacket, Vest & Trouser Size Guide | MOTOGRIP GEAR', desc: 'Use MOTOGRIP GEAR size charts and measurement guidance for men’s and women’s leather jackets, vests, trousers, and chaps.' },
+  '/shipping-information': { view: 'ship', title: 'Worldwide Shipping Information | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR delivery regions, estimated transit, tracking, costs, duties, and worldwide shipping information.' },
+  '/returns-refunds': { view: 'returns', title: 'Returns & Refunds Policy | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR return eligibility, instructions, exclusions, exchanges, and refund processing information.' },
+  '/privacy': { view: 'privacy', title: 'Privacy Policy | MOTOGRIP GEAR', desc: 'Learn how MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
+  '/terms': { view: 'terms', title: 'Terms of Service | MOTOGRIP GEAR', desc: 'Read the terms governing use of the MOTOGRIP GEAR website, products, orders, and services.' },
+  '/contact': { view: 'contact', title: 'Contact MOTOGRIP GEAR', desc: 'Contact MOTOGRIP GEAR for sizing, custom orders, product support, wholesale enquiries, press, and service.' },
+  '/account': { view: 'account', noindex: true, title: 'Your Account | MOTOGRIP GEAR', desc: 'Access your MOTOGRIP GEAR account and order information.' },
+  '/checkout': { view: 'checkout', noindex: true, title: 'Checkout | MOTOGRIP GEAR', desc: 'Complete your MOTOGRIP GEAR order securely.' },
+  '/file-a-return': { view: 'file-return', noindex: true, title: 'File a Return | MOTOGRIP GEAR', desc: 'Submit a return, exchange, store-credit, or fit-alteration request.' },
+  '/track-order': { view: 'track', noindex: true, title: 'Track Your Order | MOTOGRIP GEAR', desc: 'Check the current fulfillment and delivery status of your MOTOGRIP GEAR order.' },
+};
+
+const indexablePublicPaths = Object.entries(publicRoutes).filter(([, route]) => !route.noindex).map(([routePath]) => routePath);
+
 const stripeShippingCountries = [
   'US', 'CA', 'GB', 'AU', 'NZ', 'IE', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE',
   'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'PT', 'PL', 'CZ', 'GR', 'RO', 'HU',
@@ -518,9 +552,9 @@ function productMeta(product, store, req) {
   const image = productImageUrl(req, product.primaryImage || product.image);
   const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
   const availability = Number(product.inventory || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
-  const jsonLd = {
-    '@context': 'https://schema.org',
+  const productNode = {
     '@type': 'Product',
+    '@id': `${canonical}#product`,
     name: product.title,
     image: [...new Set(images)],
     description: product.schemaDescription || product.description,
@@ -547,6 +581,7 @@ function productMeta(product, store, req) {
     ].filter(([, value]) => value !== undefined && value !== '').map(([name, value]) => ({ '@type': 'PropertyValue', name, value: String(value) })),
     offers: {
       '@type': 'Offer',
+      '@id': `${canonical}#offer`,
       url: canonical,
       priceCurrency: currency,
       price: Number(product.price || 0).toFixed(2),
@@ -559,31 +594,58 @@ function productMeta(product, store, req) {
       },
       shippingDetails: product.shippingPolicy ? {
         '@type': 'OfferShippingDetails',
-        shippingLabel: product.shippingPolicy,
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 5,
+            maxValue: 7,
+            unitCode: 'DAY',
+          },
+        },
       } : undefined,
       hasMerchantReturnPolicy: product.returnPolicy ? {
         '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'US',
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
         merchantReturnDays: 30,
+        returnMethod: 'https://schema.org/ReturnByMail',
         returnFees: 'https://schema.org/FreeReturn',
       } : undefined,
     },
   };
   if (Number(product.ratingValue || 0) > 0 && Number(product.reviewCount || 0) > 0) {
-    jsonLd.aggregateRating = {
+    productNode.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: Number(product.ratingValue),
       reviewCount: Number(product.reviewCount),
     };
   }
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      productNode,
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonical}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl(req, '/') },
+          { '@type': 'ListItem', position: 2, name: product.category || 'Shop', item: absoluteUrl(req, '/shop') },
+          { '@type': 'ListItem', position: 3, name: product.title, item: canonical },
+        ],
+      },
+    ],
+  };
   return { title, desc, canonical, image, jsonLd };
 }
 
 function injectProductHead(html, product, store, req) {
   const meta = productMeta(product, store, req);
   const extraHead = `
-<link rel="canonical" href="${escapeHtml(meta.canonical)}" />
-<meta property="og:url" content="${escapeHtml(meta.canonical)}" />
 <meta property="product:price:amount" content="${escapeHtml(product.price)}" />
 <meta property="product:price:currency" content="${escapeHtml(store.settings.currency || 'USD')}" />
 <script type="application/ld+json">${escapeScriptJson(meta.jsonLd)}</script>
@@ -591,6 +653,8 @@ function injectProductHead(html, product, store, req) {
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(meta.desc)}" />`)
+    .replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
+    .replace(/<meta property="og:url" content=".*?" \/>/s, `<meta property="og:url" content="${escapeHtml(meta.canonical)}" />`)
     .replace(/<meta property="og:type" content=".*?" \/>/s, '<meta property="og:type" content="product" />')
     .replace(/<meta property="og:title" content=".*?" \/>/s, `<meta property="og:title" content="${escapeHtml(meta.title)}" />`)
     .replace(/<meta property="og:description" content=".*?" \/>/s, `<meta property="og:description" content="${escapeHtml(meta.desc)}" />`)
@@ -599,6 +663,34 @@ function injectProductHead(html, product, store, req) {
     .replace(/<meta name="twitter:description" content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(meta.desc)}" />`)
     .replace(/<meta name="twitter:image" content=".*?" \/>/s, `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`)
     .replace('</head>', `${extraHead}\n</head>`);
+}
+
+function injectRouteHead(html, route, req) {
+  const canonical = absoluteUrl(req, new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname.replace(/\/$/, '') || '/');
+  const robots = route.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large';
+  const initialRoute = { view: route.view, ...(route.params ? { params: route.params } : {}) };
+  return html
+    .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(route.title)}</title>`)
+    .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(route.desc)}" />`)
+    .replace(/<meta name="robots" content=".*?" \/>/s, `<meta name="robots" content="${robots}" />`)
+    .replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${escapeHtml(canonical)}" />`)
+    .replace(/<meta property="og:url" content=".*?" \/>/s, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
+    .replace(/<meta property="og:title" content=".*?" \/>/s, `<meta property="og:title" content="${escapeHtml(route.title)}" />`)
+    .replace(/<meta property="og:description" content=".*?" \/>/s, `<meta property="og:description" content="${escapeHtml(route.desc)}" />`)
+    .replace('</head>', `<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson(initialRoute)};</script>\n</head>`);
+}
+
+function servePublicRoute(req, res, route) {
+  fs.readFile(path.join(root, 'index.html'), 'utf8', (readErr, html) => {
+    if (readErr) {
+      send(res, 500, 'Site unavailable');
+      return;
+    }
+    send(res, 200, injectRouteHead(html, route, req), 'text/html; charset=utf-8', {
+      'Cache-Control': 'no-cache',
+      'X-Robots-Tag': route.noindex ? 'noindex, follow' : 'index, follow',
+    });
+  });
 }
 
 function serveProductPage(req, res, slug) {
@@ -621,12 +713,12 @@ function serveProductPage(req, res, slug) {
 function serveSitemap(req, res) {
   const store = readPublicStore();
   const urls = [
-    '/',
+    ...indexablePublicPaths,
     ...store.products.filter((product) => product.status !== 'archived').map(productPath),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((urlPath) => `  <url><loc>${escapeHtml(absoluteUrl(req, urlPath))}</loc></url>`).join('\n')}
+${urls.map((urlPath) => `  <url><loc>${escapeHtml(absoluteUrl(req, urlPath))}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}
 </urlset>
 `;
   send(res, 200, xml, 'application/xml; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
@@ -1056,7 +1148,11 @@ async function handleApi(req, res, pathname) {
 
 function serveFile(req, res, filePath) {
   fs.stat(filePath, (statErr, stat) => {
-    const finalPath = !statErr && stat.isFile() ? filePath : path.join(root, 'index.html');
+    if (statErr || !stat.isFile()) {
+      send(res, 404, '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page not found | MOTOGRIP GEAR</title></head><body><main><h1>Page not found</h1><p>The requested page does not exist.</p><a href="/">Return to MOTOGRIP GEAR</a></main></body></html>', 'text/html; charset=utf-8', { 'X-Robots-Tag': 'noindex' });
+      return;
+    }
+    const finalPath = filePath;
     fs.readFile(finalPath, (readErr, data) => {
       if (readErr) {
         send(res, 404, 'Not found');
@@ -1104,6 +1200,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (requestPath === '/sitemap_index.xml' || requestPath === '/product-sitemap1.xml') {
+      res.writeHead(301, { Location: '/sitemap.xml', 'Cache-Control': 'public, max-age=86400' });
+      res.end();
+      return;
+    }
+
     if (requestPath === '/google-merchant-feed.xml') {
       serveMerchantFeed(req, res);
       return;
@@ -1128,6 +1230,17 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const normalizedRoutePath = requestPath !== '/' ? requestPath.replace(/\/$/, '') : '/';
+    if (publicRoutes[normalizedRoutePath]) {
+      if (requestPath !== normalizedRoutePath && requestPath !== '/') {
+        res.writeHead(301, { Location: normalizedRoutePath, 'Cache-Control': 'public, max-age=86400' });
+        res.end();
+        return;
+      }
+      servePublicRoute(req, res, publicRoutes[normalizedRoutePath]);
+      return;
+    }
+
     const filePath = resolvePath(req.url || '/');
     if (!filePath) {
       send(res, 403, 'Forbidden');
@@ -1143,6 +1256,18 @@ const server = http.createServer(async (req, res) => {
 
 ensureStore();
 
-server.listen(port, host, () => {
-  console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
-});
+if (require.main === module) {
+  server.listen(port, host, () => {
+    console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
+  });
+}
+
+module.exports = {
+  server,
+  productMeta,
+  injectProductHead,
+  injectRouteHead,
+  publicRoutes,
+  indexablePublicPaths,
+  readPublicStore,
+};

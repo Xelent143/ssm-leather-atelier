@@ -22,6 +22,23 @@ const pathProductSlug = () => {
   const match = window.location.pathname.match(/^\/products\/([a-z0-9-]+)\/?$/);
   return match ? match[1] : null;
 };
+const SSM_VIEW_PATHS = {
+  home: '/', shop: '/shop', mto: '/made-to-measure', lookbook: '/lookbook', about: '/brand',
+  account: '/account', checkout: '/checkout', journal: '/blog', care: '/leather-care', repairs: '/repairs',
+  concierge: '/custom-consultation', consult: '/custom-consultation', sustain: '/sustainability', stockists: '/stockists', press: '/press',
+  giftcard: '/gift-cards', faq: '/faq', size: '/size-guide', ship: '/shipping-information',
+  returns: '/returns-refunds', 'file-return': '/file-a-return', track: '/track-order', privacy: '/privacy',
+  terms: '/terms', contact: '/contact',
+};
+const cleanPathForView = (view, params = {}) => {
+  if (view === 'pdp' && params?.product?.slug) return `/products/${params.product.slug}`;
+  if (view === 'shop' && params?.gender === 'Women') return '/women';
+  if (view === 'shop' && params?.gender === 'Men') return '/men';
+  if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
+  if (view === 'shop' && params?.cat === 'Vests') return '/vests';
+  if (view === 'shop' && params?.cat === 'Pants') return '/pants';
+  return SSM_VIEW_PATHS[view] || '/';
+};
 
 function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
@@ -48,6 +65,19 @@ function applySEO(view, params) {
     document.head.appendChild(m);
   }
   m.setAttribute('content', desc || 'Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options.');
+  const canonicalUrl = `${window.location.origin}${cleanPathForView(view, params)}`;
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute('href', canonicalUrl);
+  let ogUrl = document.querySelector('meta[property="og:url"]');
+  if (!ogUrl) {
+    ogUrl = document.createElement('meta'); ogUrl.setAttribute('property', 'og:url');
+    document.head.appendChild(ogUrl);
+  }
+  ogUrl.setAttribute('content', canonicalUrl);
 }
 
 function App() {
@@ -55,17 +85,18 @@ function App() {
   const [view, setView] = React.useState(() => {
     const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
     if (initialSlug && productFromSlug(initialSlug)) return 'pdp';
+    if (SSM_INITIAL_ROUTE?.view) return SSM_INITIAL_ROUTE.view;
     // Resume from hash on refresh.
     const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
     return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
       'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','returns','file-return','track','privacy','terms','contact','search','notfound'
+      'press','giftcard','faq','size','ship','returns','file-return','track','privacy','terms','consult','contact','search','notfound'
     ].includes(h) ? h : 'home';
   });
   const [params, setParams] = React.useState(() => {
     const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
     const product = initialSlug ? productFromSlug(initialSlug) : null;
-    return product ? { product } : {};
+    return product ? { product } : (SSM_INITIAL_ROUTE?.params || {});
   });
   const [cart, setCart] = React.useState(() => {
     try {
@@ -91,15 +122,10 @@ function App() {
   // SEO sync
   React.useEffect(() => { applySEO(view, params); }, [view, params]);
 
-  // URL sync (product pages use crawlable paths; legacy pages keep hash routes)
+  // URL sync uses one clean, crawlable path for every public page.
   React.useEffect(() => {
-    if (view === 'pdp' && params?.product?.slug) {
-      const path = `/products/${params.product.slug}`;
-      if (window.location.pathname !== path) window.history.replaceState(null, '', path);
-      return;
-    }
-    const h = '#/' + view;
-    if (window.location.hash !== h) window.history.replaceState(null, '', h);
+    const path = cleanPathForView(view, params);
+    if (window.location.pathname !== path || window.location.hash) window.history.replaceState(null, '', path);
   }, [view, params]);
 
   const go = (v, p = {}) => {
