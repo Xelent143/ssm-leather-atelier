@@ -986,7 +986,7 @@ const SSM_ASSETS = {
 // Copy blocks: piece (the narrative), craft (the making), fit (concrete),
 // origin (the maker line). Stock is illustrative but realistic for a hand-house.
 
-const PAGE_ONE_MENS_JACKET_SIZES = ['XS','S','M','L','XL','2XL','3XL','4XL'];
+const PAGE_ONE_MENS_JACKET_SIZES = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
 const PAGE_ONE_COLOR_HEX = {
   Black: '#171717', Brown: '#633722', Mocha: '#74503d', Green: '#384a38',
   Grey: '#77736d', Blue: '#324f6d', Red: '#7c2529', White: '#eee9de',
@@ -1072,14 +1072,36 @@ const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
     story: {
       piece: `The ${name} is MOTOGRIP GEAR's original interpretation of the ${style.toLowerCase()} form, developed in ${color.toLowerCase()} for a clean, versatile profile. The proportions are balanced for everyday wear without losing the character expected from a leather outerwear piece.`,
       craft: `${pageOneMaterial(name)} is cut into a ${style.toLowerCase()} construction with reinforced stress points, durable metal hardware, a smooth lining, and carefully finished internal seams.`,
-      fit: `Regular men's outerwear fit. Offered in XS through 4XL, with made-to-measure ordering available for a personalized fit.`,
+      fit: `Regular men's outerwear fit. Offered in XS through 5XL, with made-to-measure ordering available for a personalized fit.`,
       origin: `Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with independent imagery, fit notes, and product copy.`,
     },
   };
 });
 
+Object.assign(PAGE_ONE_MENS_JACKETS[1], {
+  blurb: 'Semi-aniline sheepskin · quilted viscose lining · clean shirt collar',
+  material: 'Real sheepskin leather',
+  materialNote: 'Black semi-aniline finish with a quilted viscose lining',
+  colors: [
+    { id: 'black', name: 'Black', color: '#151515' },
+    { id: 'brown', name: 'Brown', color: '#6b402d' },
+    { id: 'brown-suede', name: 'Brown Suede', color: '#87644c' },
+    { id: 'green', name: 'Green', color: '#394a3b' },
+    { id: 'matte-black', name: 'Matte Black', color: '#2a2927' },
+    { id: 'matte-brown', name: 'Matte Brown', color: '#58463b' },
+  ],
+  defaultColor: 'black',
+  story: {
+    piece: 'The Inferno Black Leather Jacket is a clean, versatile leather layer built around a restrained shirt-collar silhouette. Its uncluttered front and balanced proportions make it easy to dress up or wear casually.',
+    craft: 'Real sheepskin leather with a black semi-aniline finish, a quilted viscose lining, silver front zipper, two exterior welt pockets, two inside pockets, and neatly finished open-hem cuffs.',
+    fit: 'Regular men\'s outerwear fit. Offered in XS through 5XL, with made-to-measure ordering available for a personalized fit.',
+    origin: 'Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with independent imagery, fit notes, and product copy.',
+  },
+});
+
 const SSM_PRODUCTS = [
   PAGE_ONE_MENS_JACKETS[0],
+  PAGE_ONE_MENS_JACKETS[1],
   {
     id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
     name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
@@ -2364,6 +2386,11 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
                   {item.leather} · SIZE {item.size}
                 </div>
+                {item.productColor && (
+                  <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 5 }}>
+                    COLOR · {item.productColor.toUpperCase()}
+                  </div>
+                )}
                 {item.collarColor && (
                   <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 5 }}>
                     COLLAR · {item.collarColor.toUpperCase()}
@@ -2445,6 +2472,7 @@ function QuickView({ product, onClose, addToCart, go }) {
   if (!product) return null;
   const quickLeather = product.material || SSM_LEATHERS.find(l => l.id === leather)?.name;
   const quickSizes = product.sizes || ['XS','S','M','L','XL'];
+  const selectedQuickColor = product.colors?.find(c => c.id === productColor);
   const selectedQuickCollar = product.collarColors?.find(c => c.id === collarColor);
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
@@ -2480,6 +2508,21 @@ function QuickView({ product, onClose, addToCart, go }) {
             </div>
           )}
 
+          {product.colors?.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
+                Color · {selectedQuickColor?.name}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+                {product.colors.map(c => (
+                  <button key={c.id} className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
+                    aria-label={`Color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
+                    style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {product.collarColors?.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
@@ -2512,7 +2555,7 @@ function QuickView({ product, onClose, addToCart, go }) {
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn" style={{ flex: 1, justifyContent: 'center' }}
-              onClick={() => { addToCart(product, { leather: quickLeather, size, collarColor: selectedQuickCollar?.name || null }); onClose(); }}>
+              onClick={() => { addToCart(product, { leather: quickLeather, size, productColor: selectedQuickColor?.name || null, collarColor: selectedQuickCollar?.name || null }); onClose(); }}>
               Add to Bag
             </button>
             <button className="btn btn-ghost" onClick={() => { onClose(); go && go('pdp', { product }); }}>Full Details</button>
@@ -3665,6 +3708,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
                 surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
                 fitMode,
                 fitLabel: isMadeToMeasure ? 'Made to measure' : 'Standard size',
+                productColor: selectedProductColor?.name || null,
                 collarColor: selectedCollar?.name || null,
                 measurements: isMadeToMeasure ? measurements : null,
               })}>
@@ -4400,6 +4444,7 @@ function Checkout({ go, items, setItems }) {
             qty: item.qty,
             size: item.size,
             leather: item.leather,
+            productColor: item.productColor,
             collarColor: item.collarColor,
             fitMode: item.fitMode,
           })),
@@ -4539,6 +4584,7 @@ function Checkout({ go, items, setItems }) {
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
               <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              {it.productColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLOR · {it.productColor.toUpperCase()}</div>}
               {it.collarColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLLAR · {it.collarColor.toUpperCase()}</div>}
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>${(it.price * it.qty).toLocaleString()}</div>
@@ -6509,11 +6555,11 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  // Cart merging — same product + size + leather + collar + fit selection increments qty.
+  // Cart merging — same product + size + leather + product color + collar + fit selection increments qty.
   const addToCart = (product, opts) => {
     setCart(prev => {
       const measurementSig = (m) => m ? Object.entries(m).map(([k, v]) => `${k}:${v || ''}`).join('|') : '';
-      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}|${it.collarColor || ''}|${it.fitMode || 'standard'}|${measurementSig(it.measurements)}`;
+      const sig = (it) => `${it.baseId || it.id.split('-')[0]}|${it.size}|${it.leather}|${it.productColor || ''}|${it.collarColor || ''}|${it.fitMode || 'standard'}|${measurementSig(it.measurements)}`;
       const incoming = {
         baseId: product.id,
         id: product.id + '-' + Date.now(),
@@ -6524,6 +6570,7 @@ function App() {
         qty: 1,
         img: product.img,
         leather: opts.leather, size: opts.size,
+        productColor: opts.productColor || null,
         collarColor: opts.collarColor || null,
         fitMode: opts.fitMode || 'standard',
         fitLabel: opts.fitLabel || null,

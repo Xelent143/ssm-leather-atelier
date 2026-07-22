@@ -343,6 +343,14 @@ function checkoutLineItems(rawItems) {
 
     const selectedSize = String(rawItem.size || '').trim().slice(0, 40);
     const selectedLeather = String(rawItem.leather || '').trim().slice(0, 80);
+    const colorOptions = Array.isArray(product.availableColors) ? product.availableColors : [];
+    const requestedColor = String(rawItem.productColor || product.color || '').trim().slice(0, 40);
+    const selectedColor = colorOptions.length
+      ? colorOptions.find((color) => color.toLowerCase() === requestedColor.toLowerCase()) || ''
+      : requestedColor;
+    if (colorOptions.length && !selectedColor) {
+      throw new Error(`Select an available color for ${product.title}.`);
+    }
     const isIntrecciatoJacket = product.id === 'p14' || product.slug === 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown';
     const collarOptions = Array.isArray(product.collarColors)
       ? product.collarColors
@@ -368,6 +376,7 @@ function checkoutLineItems(rawItems) {
     const details = [
       selectedSize ? `Size: ${selectedSize}` : '',
       selectedLeather ? `Leather: ${selectedLeather}` : '',
+      selectedColor ? `Color: ${selectedColor}` : '',
       selectedCollar ? `Collar: ${selectedCollar}` : '',
       `Fit: ${fitMode === 'made-to-measure' ? 'Made to measure' : 'Standard'}`,
     ].filter(Boolean).join(' · ');
@@ -515,6 +524,7 @@ function productMeta(product, store, req) {
     name: product.title,
     image: [...new Set(images)],
     description: product.schemaDescription || product.description,
+    disambiguatingDescription: product.geoDescription || undefined,
     sku: product.sku || product.id,
     mpn: product.mpn || product.sku || product.id,
     gtin: product.gtin || undefined,
@@ -735,6 +745,8 @@ function normalizeStore(input) {
       stock: product.stock && typeof product.stock === 'object' ? product.stock : {},
       seoTitle: String(product.seoTitle || ''),
       seoDescription: String(product.seoDescription || ''),
+      geoTitle: String(product.geoTitle || ''),
+      geoDescription: String(product.geoDescription || ''),
       canonicalUrl: String(product.canonicalUrl || ''),
       schemaDescription: String(product.schemaDescription || product.description || ''),
       brand: String(product.brand || 'MOTOGRIP GEAR'),
@@ -751,6 +763,7 @@ function normalizeStore(input) {
       imageAltText: String(product.imageAltText || product.title || ''),
       material: String(product.material || ''),
       color: String(product.color || ''),
+      availableColors: Array.isArray(product.availableColors) ? product.availableColors.map(String) : [],
       sizeSystem: String(product.sizeSystem || 'US'),
       sizeType: String(product.sizeType || 'Regular'),
       ageGroup: String(product.ageGroup || 'Adult'),
