@@ -954,6 +954,7 @@ const SSM_ASSETS = {
   mensJacketMeasurement: '/assets/generated/mens-jacket-measurement-guide.png',
   womensJacketMeasurement: '/assets/generated/womens-jacket-measurement-guide.png',
   mensVestMeasurement: '/assets/generated/mens-motorcycle-vest-measurement-guide.png',
+  womensVestMeasurement: '/assets/generated/womens-motorcycle-vest-measurement-guide.png',
   unisexChapsMeasurement: '/assets/generated/unisex-leather-chaps-measurement-guide.png',
   detail: A('leather-detail.png'),
   hoodedVestFront: A('hooded-contrast-moto-vest-front.png'),
@@ -1351,6 +1352,29 @@ const SSM_MENS_VEST_SIZE_CHART = {
   ],
 };
 
+// Women's motorcycle vest measurements. XS–5XL match the published Ludlow
+// reference chart. 6XL extends the same established 3-inch body grade,
+// 0.5-inch back-length grade and 0.75-inch shoulder grade.
+const SSM_WOMENS_VEST_SIZE_CHART = {
+  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'],
+  inch: [
+    ['Chest (garment)', '34.5"', '36.5"', '38.5"', '41.5"', '44.5"', '47.5"', '50.5"', '53.5"', '56.5"', '59.5"'],
+    ['Chest (body)', '31.5" - 32.5"', '33.5" - 34.5"', '35.5" - 36.5"', '38" - 39.5"', '41" - 42.5"', '44" - 45.5"', '47" - 48.5"', '50" - 51.5"', '53" - 54.5"', '56" - 57.5"'],
+    ['Waist (garment)', '35.5"', '37.5"', '39.5"', '42.5"', '45.5"', '48.5"', '51.5"', '54.5"', '57.5"', '60.5"'],
+    ['Waist (body)', '32.5" - 33.5"', '34.5" - 35.5"', '36.5" - 37.5"', '39" - 40.5"', '42" - 43.5"', '45" - 46.5"', '48" - 49.5"', '51" - 52.5"', '54" - 55.5"', '57" - 58.5"'],
+    ['Center back length', '21"', '21.5"', '22"', '22.5"', '23"', '23.5"', '24"', '24.5"', '25"', '25.5"'],
+    ['Across shoulder', '14"', '14.5"', '15"', '15.75"', '16.5"', '17.25"', '18"', '18.75"', '19.5"', '20.25"'],
+  ],
+  cm: [
+    ['Chest (garment)', '87.63cm', '92.71cm', '97.79cm', '105.4cm', '113cm', '120.7cm', '128.3cm', '135.9cm', '143.5cm', '151.1cm'],
+    ['Chest (body)', '80.01cm - 82.55cm', '85.09cm - 87.63cm', '90.17cm - 92.71cm', '96.5cm - 100.3cm', '104cm - 108cm', '112cm - 115.6cm', '119cm - 123.2cm', '127cm - 130.8cm', '135cm - 138.4cm', '142.2cm - 146.1cm'],
+    ['Waist (garment)', '90.17cm', '95.25cm', '100.3cm', '108cm', '115.6cm', '123.2cm', '130.8cm', '138.4cm', '146.1cm', '153.7cm'],
+    ['Waist (body)', '82.55cm - 85.09cm', '87.63cm - 90.17cm', '92.71cm - 95.25cm', '99.1cm - 102.9cm', '107cm - 110.5cm', '114cm - 118.1cm', '122cm - 125.7cm', '130cm - 133.3cm', '137cm - 141cm', '144.8cm - 148.6cm'],
+    ['Center back length', '53.34cm', '54.61cm', '55.88cm', '57.15cm', '58.42cm', '59.69cm', '60.96cm', '62.23cm', '63.5cm', '64.77cm'],
+    ['Across shoulder', '35.56cm', '36.83cm', '38.1cm', '40.01cm', '41.91cm', '43.81cm', '45.72cm', '47.63cm', '49.53cm', '51.44cm'],
+  ],
+};
+
 // Unisex leather chaps measurements, XS–5XL. Values match the published
 // Patriot revised-fit chart in both inches and centimetres.
 const SSM_UNISEX_CHAPS_SIZE_CHART = {
@@ -1506,6 +1530,47 @@ function MensVestMeasureGuide() {
         </h3>
         <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
           Use a soft tape over a fitted T-shirt or your usual riding layer. Stand naturally and ask someone to help with shoulder and center-back measurements.
+        </p>
+        <div className="jacket-measure-guide__points">
+          {points.map(([title, instruction]) => (
+            <div className="jacket-measure-guide__point" key={title}>
+              <div className="display" style={{ fontSize: 18, color: 'var(--fg-2)' }}>{title}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.65, marginTop: 5 }}>{instruction}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WomensVestMeasureGuide() {
+  const points = [
+    ['Across shoulder', 'Measure straight across the back from one shoulder point to the other.'],
+    ['Bust or stomach', 'Measure around whichever is fuller, keeping the tape level and comfortably relaxed.'],
+    ['Natural waist', 'Measure around the narrowest part of the torso without pulling the tape tight.'],
+    ['Lower waist', 'Measure around the body where the vest hem is expected to sit.'],
+    ['Center back length', 'Measure from the base of the back collar straight down to the desired vest hem.'],
+    ['Layering allowance', 'Measure over the fitted top or riding layer you expect to wear under the vest.'],
+  ];
+
+  return (
+    <section className="jacket-measure-guide" aria-labelledby="womens-vest-measure-title">
+      <img
+        className="jacket-measure-guide__image"
+        src={SSM_ASSETS.womensVestMeasurement}
+        alt="Women's motorcycle vest measurement guide showing shoulder, bust, waist, hem and vest length points"
+        loading="lazy"
+      />
+      <div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 14 }}>
+          HOW TO MEASURE · WOMEN'S MOTORCYCLE VEST
+        </div>
+        <h3 id="womens-vest-measure-title" className="display" style={{ fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 400, lineHeight: 1.04, margin: 0 }}>
+          Measure for a close, comfortable fit.
+        </h3>
+        <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
+          Use a soft tape over a fitted top or your usual riding layer. Stand naturally and ask someone to help with shoulder and center-back measurements.
         </p>
         <div className="jacket-measure-guide__points">
           {points.map(([title, instruction]) => (
@@ -5221,6 +5286,7 @@ function SizeGuide({ go }) {
   const [jacketUnit, setJacketUnit] = React.useState('inch');
   const [womenJacketUnit, setWomenJacketUnit] = React.useState('inch');
   const [vestUnit, setVestUnit] = React.useState('inch');
+  const [womenVestUnit, setWomenVestUnit] = React.useState('inch');
   const [chapsUnit, setChapsUnit] = React.useState('inch');
   return (
     <div className="page-fade">
@@ -5267,6 +5333,22 @@ function SizeGuide({ go }) {
             sourceNote="S–5XL VALUES FOLLOW THE REFERENCE CHART. XS AND 6XL USE THE SAME ESTABLISHED SIZE GRADE."
           />
           <MensVestMeasureGuide />
+        </div>
+        <div style={{ marginBottom: 72, paddingTop: 16 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            WOMEN'S MOTORCYCLE LEATHER VEST SIZE CHART · XS–6XL
+          </div>
+          <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Women’s motorcycle vests, measured clearly.</h2>
+          <JacketSizeChart
+            unit={womenVestUnit}
+            onUnitChange={setWomenVestUnit}
+            chart={SSM_WOMENS_VEST_SIZE_CHART}
+            ariaLabel="Women's motorcycle vest size chart units"
+            note="Measure around the fullest part of your bust—or your stomach if it is larger—and use the larger body measurement. Measure over your usual riding layer and size up for a more relaxed fit."
+            footer="GARMENT MEASUREMENTS REFER TO THE FINISHED VEST. BODY MEASUREMENTS REFER TO THE WEARER."
+            sourceNote="XS–5XL VALUES FOLLOW THE PUBLISHED LUDLOW CHART. 6XL USES THE SAME ESTABLISHED SIZE GRADE."
+          />
+          <WomensVestMeasureGuide />
         </div>
         <div style={{ marginBottom: 72, paddingTop: 16 }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
