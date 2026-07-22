@@ -366,7 +366,7 @@
   /* smooth fade for steps */
   .step-fade { animation: fadeIn 0.5s ease; }
 
-  .mens-measure-guide {
+  .jacket-measure-guide {
     display: grid;
     grid-template-columns: minmax(280px, 0.88fr) minmax(0, 1.12fr);
     gap: 56px;
@@ -376,22 +376,22 @@
     border: 1px solid var(--line);
     background: var(--bg-2);
   }
-  .mens-measure-guide__image {
+  .jacket-measure-guide__image {
     width: 100%;
     display: block;
     aspect-ratio: 4 / 5;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     background: #eee9df;
   }
-  .mens-measure-guide__points {
+  .jacket-measure-guide__points {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 28px;
     margin-top: 28px;
     border-top: 1px solid var(--line-2);
   }
-  .mens-measure-guide__point {
+  .jacket-measure-guide__point {
     padding: 16px 0;
     border-bottom: 1px solid var(--line);
   }
@@ -439,12 +439,12 @@
     .footer-grid {
       grid-template-columns: 1fr 1fr !important;
     }
-    .mens-measure-guide {
+    .jacket-measure-guide {
       grid-template-columns: 1fr;
       gap: 34px;
       padding: 30px;
     }
-    .mens-measure-guide__image {
+    .jacket-measure-guide__image {
       max-height: 680px;
       object-fit: contain;
     }
@@ -490,11 +490,11 @@
     .return-form-layout {
       gap: 48px !important;
     }
-    .mens-measure-guide {
+    .jacket-measure-guide {
       padding: 22px;
       margin-top: 36px;
     }
-    .mens-measure-guide__points {
+    .jacket-measure-guide__points {
       grid-template-columns: 1fr;
     }
   }
@@ -952,6 +952,7 @@ const SSM_ASSETS = {
   lookbook: A('lookbook-loft.png'),
   shearlingBanner: A('shearling-couple-banner.png'),
   mensJacketMeasurement: '/assets/generated/mens-jacket-measurement-guide.png',
+  womensJacketMeasurement: '/assets/generated/womens-jacket-measurement-guide.png',
   detail: A('leather-detail.png'),
   hoodedVestFront: A('hooded-contrast-moto-vest-front.png'),
   hoodedVestBack: A('hooded-contrast-moto-vest-back.png'),
@@ -1389,9 +1390,9 @@ function MensJacketMeasureGuide() {
   ];
 
   return (
-    <section className="mens-measure-guide" aria-labelledby="mens-jacket-measure-title">
+    <section className="jacket-measure-guide" aria-labelledby="mens-jacket-measure-title">
       <img
-        className="mens-measure-guide__image"
+        className="jacket-measure-guide__image"
         src={SSM_ASSETS.mensJacketMeasurement}
         alt="Men's jacket measurement guide showing shoulder, chest, waist, hip, sleeve and back length points"
         loading="lazy"
@@ -1406,9 +1407,51 @@ function MensJacketMeasureGuide() {
         <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
           Use a soft tape over a fitted T-shirt. Stand naturally, keep the tape level, and ask someone to help with shoulder, sleeve and back measurements.
         </p>
-        <div className="mens-measure-guide__points">
+        <div className="jacket-measure-guide__points">
           {points.map(([title, instruction]) => (
-            <div className="mens-measure-guide__point" key={title}>
+            <div className="jacket-measure-guide__point" key={title}>
+              <div className="display" style={{ fontSize: 18, color: 'var(--fg-2)' }}>{title}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.65, marginTop: 5 }}>{instruction}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WomensJacketMeasureGuide() {
+  const points = [
+    ['Shoulder', 'Measure from the tip of one shoulder, across the back, to the tip of the other shoulder.'],
+    ['Bust', 'Measure around the fullest part of the bust, keeping the tape level and comfortably relaxed.'],
+    ['Natural waist', 'Measure around the narrowest part of the torso without pulling the tape tight.'],
+    ['Lower waist', 'Measure around the body where the jacket hem is expected to sit.'],
+    ['Hips', 'Measure around the fullest part of the hips, above the top of the legs.'],
+    ['Sleeve length', 'Measure from the shoulder point to the wrist with the arm slightly bent.'],
+    ['Center back length', 'Measure from the base of the back collar straight down to the desired jacket hem.'],
+  ];
+
+  return (
+    <section className="jacket-measure-guide" aria-labelledby="womens-jacket-measure-title">
+      <img
+        className="jacket-measure-guide__image"
+        src={SSM_ASSETS.womensJacketMeasurement}
+        alt="Women's jacket measurement guide showing shoulder, bust, waist, hip and sleeve measurement points"
+        loading="lazy"
+      />
+      <div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 14 }}>
+          HOW TO MEASURE · WOMEN'S JACKET
+        </div>
+        <h3 id="womens-jacket-measure-title" className="display" style={{ fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 400, lineHeight: 1.04, margin: 0 }}>
+          Measure once. Fit with confidence.
+        </h3>
+        <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
+          Use a soft tape over a fitted top. Stand naturally, keep the tape level, and ask someone to help with shoulder, sleeve and back measurements.
+        </p>
+        <div className="jacket-measure-guide__points">
+          {points.map(([title, instruction]) => (
+            <div className="jacket-measure-guide__point" key={title}>
               <div className="display" style={{ fontSize: 18, color: 'var(--fg-2)' }}>{title}</div>
               <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.65, marginTop: 5 }}>{instruction}</div>
             </div>
@@ -3427,7 +3470,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             chart={p.gender === 'Women' ? SSM_WOMENS_JACKET_SIZE_CHART : SSM_JACKET_SIZE_CHART}
             ariaLabel={`${p.gender === 'Women' ? "Women's" : "Men's"} jacket size chart units`}
           />
-          {p.gender !== 'Women' && <MensJacketMeasureGuide />}
+          {p.gender === 'Women' ? <WomensJacketMeasureGuide /> : <MensJacketMeasureGuide />}
         </section>
       )}
 
@@ -5071,6 +5114,7 @@ function SizeGuide({ go }) {
             chart={SSM_WOMENS_JACKET_SIZE_CHART}
             ariaLabel="Women's jacket size chart units"
           />
+          <WomensJacketMeasureGuide />
         </div>
         <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
 
