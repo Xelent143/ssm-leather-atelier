@@ -954,6 +954,7 @@ const SSM_ASSETS = {
   mensJacketMeasurement: '/assets/generated/mens-jacket-measurement-guide.png',
   womensJacketMeasurement: '/assets/generated/womens-jacket-measurement-guide.png',
   mensVestMeasurement: '/assets/generated/mens-motorcycle-vest-measurement-guide.png',
+  unisexChapsMeasurement: '/assets/generated/unisex-leather-chaps-measurement-guide.png',
   detail: A('leather-detail.png'),
   hoodedVestFront: A('hooded-contrast-moto-vest-front.png'),
   hoodedVestBack: A('hooded-contrast-moto-vest-back.png'),
@@ -1350,6 +1351,30 @@ const SSM_MENS_VEST_SIZE_CHART = {
   ],
 };
 
+// Unisex leather chaps measurements, XS–5XL. Values match the published
+// Patriot revised-fit chart in both inches and centimetres.
+const SSM_UNISEX_CHAPS_SIZE_CHART = {
+  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'],
+  inch: [
+    ['Inseam', '33.13"', '33.13"', '33.13"', '33.13"', '33.63"', '33.63"', '34.13"', '34.13"', '34.63"'],
+    ['Waist top belt', '34.75"', '36.75"', '38.75"', '40.75"', '42.75"', '44.75"', '46.75"', '48.75"', '50.75"'],
+    ['Thigh', '23.13"', '24.13"', '25.13"', '26.13"', '27.13"', '28.13"', '29.13"', '30.13"', '31.13"'],
+    ['Bottom opening', '16"', '16.25"', '16.5"', '16.75"', '17"', '17.25"', '17.5"', '17.75"', '18"'],
+    ['Front rise', '13.75"', '14.25"', '14.75"', '15.25"', '15.75"', '16.25"', '16.75"', '17.25"', '17.75"'],
+    ['Belt length', '8"', '8.5"', '9"', '9.75"', '10"', '10.75"', '11"', '11.75"', '12"'],
+    ['Buckle belt length', '3"', '3"', '4"', '4"', '4.75"', '5"', '6"', '6"', '6"'],
+  ],
+  cm: [
+    ['Inseam', '84.15cm', '84.15cm', '84.15cm', '84.15cm', '85.42cm', '85.42cm', '86.69cm', '86.69cm', '87.96cm'],
+    ['Waist top belt', '88.27cm', '93.34cm', '98.42cm', '103.5cm', '108.6cm', '113.7cm', '118.7cm', '123.8cm', '128.9cm'],
+    ['Thigh', '58.75cm', '61.29cm', '63.83cm', '66.37cm', '68.91cm', '71.45cm', '73.99cm', '76.53cm', '79.07cm'],
+    ['Bottom opening', '40.64cm', '41.27cm', '41.91cm', '42.55cm', '43.18cm', '43.81cm', '44.45cm', '45.09cm', '45.72cm'],
+    ['Front rise', '34.92cm', '36.2cm', '37.47cm', '38.73cm', '40.01cm', '41.27cm', '42.55cm', '43.81cm', '45.09cm'],
+    ['Belt length', '20.3cm', '21.6cm', '22.9cm', '24.8cm', '25.4cm', '27.3cm', '27.9cm', '29.84cm', '30.5cm'],
+    ['Buckle belt length', '7.62cm', '7.62cm', '10.2cm', '10.2cm', '12.1cm', '12.7cm', '15.2cm', '15.2cm', '15.2cm'],
+  ],
+};
+
 function JacketSizeChart({
   unit,
   onUnitChange,
@@ -1481,6 +1506,48 @@ function MensVestMeasureGuide() {
         </h3>
         <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
           Use a soft tape over a fitted T-shirt or your usual riding layer. Stand naturally and ask someone to help with shoulder and center-back measurements.
+        </p>
+        <div className="jacket-measure-guide__points">
+          {points.map(([title, instruction]) => (
+            <div className="jacket-measure-guide__point" key={title}>
+              <div className="display" style={{ fontSize: 18, color: 'var(--fg-2)' }}>{title}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 12, lineHeight: 1.65, marginTop: 5 }}>{instruction}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function UnisexChapsMeasureGuide() {
+  const points = [
+    ['Inseam', 'Measure from the crotch point straight down to the intended bottom edge.'],
+    ['Waist top belt', 'Measure the complete top belt from end to end while the chaps lie flat.'],
+    ['Thigh', 'Measure around the fullest part of the upper thigh over your usual riding trousers.'],
+    ['Bottom opening', 'Measure the circumference of the lower leg opening at the cuff.'],
+    ['Front rise', 'Measure from the top belt edge down to the crotch point at the front.'],
+    ['Belt length', 'Measure the adjustable belt section from its attachment point to the end.'],
+    ['Buckle belt length', 'Measure from the buckle attachment point to the end of the buckle section.'],
+  ];
+
+  return (
+    <section className="jacket-measure-guide" aria-labelledby="unisex-chaps-measure-title">
+      <img
+        className="jacket-measure-guide__image"
+        src={SSM_ASSETS.unisexChapsMeasurement}
+        alt="Unisex leather chaps measurement guide showing inseam, waist belt, thigh, cuff, rise and belt measurements"
+        loading="lazy"
+      />
+      <div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 14 }}>
+          HOW TO MEASURE · UNISEX LEATHER CHAPS
+        </div>
+        <h3 id="unisex-chaps-measure-title" className="display" style={{ fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 400, lineHeight: 1.04, margin: 0 }}>
+          Check every point before you ride.
+        </h3>
+        <p style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75, margin: '18px 0 0', maxWidth: 650 }}>
+          Use a soft tape and measure over the trousers you expect to wear underneath. Compare every point—especially thigh and waist—before choosing a size.
         </p>
         <div className="jacket-measure-guide__points">
           {points.map(([title, instruction]) => (
@@ -5154,6 +5221,7 @@ function SizeGuide({ go }) {
   const [jacketUnit, setJacketUnit] = React.useState('inch');
   const [womenJacketUnit, setWomenJacketUnit] = React.useState('inch');
   const [vestUnit, setVestUnit] = React.useState('inch');
+  const [chapsUnit, setChapsUnit] = React.useState('inch');
   const pantSizes = [
     { s: 'XS', waist: '26', hip: '34', inseam: '32', rise: '10' },
     { s: 'S',  waist: '28', hip: '36', inseam: '32', rise: '10' },
@@ -5230,6 +5298,21 @@ function SizeGuide({ go }) {
             sourceNote="S–5XL VALUES FOLLOW THE REFERENCE CHART. XS AND 6XL USE THE SAME ESTABLISHED SIZE GRADE."
           />
           <MensVestMeasureGuide />
+        </div>
+        <div style={{ marginBottom: 72, paddingTop: 16 }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            UNISEX LEATHER CHAPS SIZE CHART · XS–5XL
+          </div>
+          <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 24px' }}>Leather chaps, measured clearly.</h2>
+          <JacketSizeChart
+            unit={chapsUnit}
+            onUnitChange={setChapsUnit}
+            chart={SSM_UNISEX_CHAPS_SIZE_CHART}
+            ariaLabel="Unisex leather chaps size chart units"
+            note="Measure over the trousers you plan to wear underneath. Compare every measurement—including thigh—before selecting your chaps size."
+            footer="MEASUREMENTS REFER TO THE FINISHED CHAPS. CHECK EVERY POINT, ESPECIALLY THIGH AND WAIST."
+          />
+          <UnisexChapsMeasureGuide />
         </div>
         <Table title="Trousers · inches" cols={['Size', 'Waist', 'Hip', 'Inseam', 'Rise']} rows={pantSizes} />
 
