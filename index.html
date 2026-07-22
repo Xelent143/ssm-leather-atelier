@@ -344,9 +344,9 @@
   .swatch.active { outline: 1px solid var(--fg); outline-offset: 3px; }
   .leather-swatch {
     width: 34px; height: 34px;
-    background-image:
-      radial-gradient(circle at 28% 22%, rgba(255,255,255,0.28), transparent 28%),
-      repeating-radial-gradient(ellipse at 40% 45%, rgba(255,255,255,0.07) 0 1px, rgba(0,0,0,0.07) 1px 3px);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 -5px 9px rgba(0,0,0,0.2);
   }
 
@@ -1104,13 +1104,13 @@ Object.assign(PAGE_ONE_MENS_JACKETS[2], {
   material: 'Real sheepskin leather',
   materialNote: 'Black aniline finish with a quilted viscose lining',
   colors: [
-    { id: 'black', name: 'Black', color: '#414046' },
-    { id: 'blue', name: 'Blue', color: '#5e7995' },
-    { id: 'brown', name: 'Brown', color: '#b16d4d' },
-    { id: 'tan-brown', name: 'Tan Brown', color: '#b16d4d' },
-    { id: 'distressed-brown', name: 'Distressed Brown', color: '#514a46' },
-    { id: 'green', name: 'Green', color: '#4f554e' },
-    { id: 'red', name: 'Red', color: '#b1403f' },
+    { id: 'black', name: 'Black', color: '#414046', image: 'https://www.thejacketmaker.com/cdn/shop/files/black02-030_c645a7e6-db18-4d20-8ec1-2eb7e9757712_small.jpg?v=1693247825' },
+    { id: 'blue', name: 'Blue', color: '#5e7995', image: 'https://www.thejacketmaker.com/cdn/shop/files/blue01_small.jpg?v=1693328319' },
+    { id: 'brown', name: 'Brown', color: '#b16d4d', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown05-1555070845100_small.jpg?v=1693414657' },
+    { id: 'tan-brown', name: 'Tan Brown', color: '#b16d4d', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown05-1555070845100_small.jpg?v=1693414657' },
+    { id: 'distressed-brown', name: 'Distressed Brown', color: '#514a46', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown06-025_small.jpg?v=1693415409' },
+    { id: 'green', name: 'Green', color: '#4f554e', image: 'https://www.thejacketmaker.com/cdn/shop/files/green_small.jpg?v=1693416042' },
+    { id: 'red', name: 'Red', color: '#b1403f', image: 'https://www.thejacketmaker.com/cdn/shop/files/red_small.jpg?v=1693418572' },
   ],
   defaultColor: 'black',
   story: {
@@ -2540,7 +2540,7 @@ function QuickView({ product, onClose, addToCart, go }) {
                 {product.colors.map(c => (
                   <button key={c.id} className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
                     aria-label={`Color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
-                    style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                    style={{ backgroundColor: c.color, backgroundImage: c.image ? `url(${c.image})` : undefined, padding: 0 }} onClick={() => setProductColor(c.id)} />
                 ))}
               </div>
             </div>
@@ -3607,7 +3607,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                     <button className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
                       aria-label={`Product color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
-                      style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                      style={{ backgroundColor: c.color, backgroundImage: c.image ? `url(${c.image})` : undefined, padding: 0 }} onClick={() => setProductColor(c.id)} />
                     <span className="mono" style={{ fontSize: 8, color: productColor === c.id ? 'var(--fg-2)' : 'var(--fg-4)' }}>{c.name.toUpperCase()}</span>
                   </div>
                 ))}
