@@ -986,7 +986,100 @@ const SSM_ASSETS = {
 // Copy blocks: piece (the narrative), craft (the making), fit (concrete),
 // origin (the maker line). Stock is illustrative but realistic for a hand-house.
 
+const PAGE_ONE_MENS_JACKET_SIZES = ['XS','S','M','L','XL','2XL','3XL','4XL'];
+const PAGE_ONE_COLOR_HEX = {
+  Black: '#171717', Brown: '#633722', Mocha: '#74503d', Green: '#384a38',
+  Grey: '#77736d', Blue: '#324f6d', Red: '#7c2529', White: '#eee9de',
+};
+const PAGE_ONE_MENS_JACKET_SPECS = [
+  ['Dean Brown Leather Biker Jacket',299,'Brown','Biker'],
+  ['Inferno Black Leather Jacket',290,'Black','Cafe Racer'],
+  ['Ionic Black Leather Jacket',290,'Black','Cafe Racer'],
+  ['Sheriff Brown Suede Jacket',395,'Brown','Suede'],
+  ['Legacy Black Leather Biker Jacket',299,'Black','Biker'],
+  ['Allaric Alley Black Leather Biker Jacket',295,'Black','Biker'],
+  ['Blain Mocha Suede Bomber Jacket',295,'Mocha','Suede Bomber'],
+  ['Air Rolf Brown Leather Bomber Jacket',285,'Brown','Bomber'],
+  ['Bravado Black Hooded Leather Bomber Jacket',299,'Black','Hooded Bomber'],
+  ['Mystical Black Leather Jacket',295,'Black','Cafe Racer'],
+  ['Highschool Black Hooded Leather Jacket',194.35,'Black','Hooded',299],
+  ['Dean Black Leather Biker Jacket',299,'Black','Biker'],
+  ['Inferno Brown Leather Jacket',290,'Brown','Cafe Racer'],
+  ['Hector Black Hooded Leather Biker Jacket',299,'Black','Hooded Biker'],
+  ['Evan Hart Fur Brown Leather Jacket',127,'Brown','Fur Collar',254],
+  ['Andy Matte Black Hooded Leather Jacket',290,'Black','Hooded'],
+  ['Drakeshire Brown Leather Jacket',191.75,'Brown','Cafe Racer',295],
+  ['Sven Black Leather Bomber Jacket',191.75,'Black','Bomber',295],
+  ['Columbus Brown Leather Bomber Jacket',290,'Brown','Bomber'],
+  ['Gatsby Green Leather Biker Jacket',299,'Green','Biker'],
+  ['Air Rolf Black Leather Bomber Jacket',285,'Black','Bomber'],
+  ['Connor Black Leather Coat',385,'Black','Coat'],
+  ['Nintenzo Black Hooded Leather Bomber Jacket',315,'Black','Hooded Bomber'],
+  ['Agent Shadow Black Leather Bomber Jacket',295,'Black','Bomber'],
+  ['Furcliff Black Leather Coat',192.50,'Black','Fur Coat',385],
+  ['Lavendard Brown Leather Biker Jacket',295,'Brown','Biker'],
+  ['Henrik Grey Suede Cafe Racer Jacket',345,'Grey','Suede Cafe Racer'],
+  ['Kole Black Leather Double Rider Jacket',365,'Black','Double Rider'],
+  ['Bouncer Biz Black Leather Bomber Jacket',299,'Black','Bomber'],
+  ['Noah Black Leather Biker Jacket',275,'Black','Biker'],
+  ['Bomia Ma-1 Black Leather Bomber Jacket',325,'Black','MA-1 Bomber'],
+  ['Sven Mocha Suede Bomber Jacket',295,'Mocha','Suede Bomber'],
+  ['Ranchson Black Leather Shirt',290,'Black','Leather Shirt'],
+  ['Charcoal Mocha Suede Biker Jacket',295,'Mocha','Suede Biker'],
+  ['Inferno Matte Black Leather Jacket',290,'Black','Cafe Racer'],
+  ['Zen Matte Brown Leather Biker Jacket',299,'Brown','Biker'],
+  ['Haven Matte Brown Leather Shirt',295,'Brown','Leather Shirt'],
+  ['Bronco Tumbled Black Leather Shirt',295,'Black','Leather Shirt'],
+  ['Dallis Brown Suede Shearling Trucker Jacket',310,'Brown','Shearling Trucker'],
+  ['Travis Black Leather Puffer Jacket',336,'Black','Puffer'],
+  ['Lucas Blue Leather Puffer Bomber Jacket',332,'Blue','Puffer Bomber'],
+  ['Alfred Brown Leather Bomber Jacket',360,'Brown','Bomber'],
+  ['Lester Brown Suede Bomber Jacket',345,'Brown','Suede Bomber'],
+  ['Sean Black Snuffed Classic Jacket',345,'Black','Classic'],
+  ['Klen Brown Classic Jacket',345,'Brown','Classic'],
+  ['Alex Black Leather Biker Jacket',295,'Black','Biker'],
+  ['Bravado Brown Hooded Leather Bomber Jacket',299,'Brown','Hooded Bomber'],
+];
+const pageOneSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const pageOneMaterial = (name) => name.includes('Suede') ? 'Genuine suede leather' : 'Genuine leather';
+const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
+  const [name, price, color, style, compareAt] = spec;
+  const slug = pageOneSlug(name);
+  const base = `mens-page-one/${slug}`;
+  return {
+    id: `mj${String(index + 1).padStart(2, '0')}`, slug,
+    name, cat: 'Jackets', gender: 'Men', collection: style,
+    price, compareAt, hue: color === 'Brown' || color === 'Mocha' ? 24 : color === 'Green' ? 90 : color === 'Blue' ? 210 : 0,
+    tag: compareAt ? 'Sale' : (index >= 34 && index <= 37 ? 'New' : null),
+    blurb: `${style} silhouette · ${color.toLowerCase()} ${name.includes('Suede') ? 'suede' : 'leather'} · made to measure available`,
+    img: A(`${base}-model-front.png`), alt: A(`${base}-product-front.png`),
+    material: pageOneMaterial(name), materialLocked: true,
+    materialNote: `${color} finish · ${style.toLowerCase()} construction`,
+    colors: [{ id: color.toLowerCase(), name: color, color: PAGE_ONE_COLOR_HEX[color] || '#4a4038' }],
+    defaultColor: color.toLowerCase(),
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    sizes: PAGE_ONE_MENS_JACKET_SIZES,
+    madeToMeasureSurcharge: 50,
+    gallery: [
+      { label: 'Front · on model', src: A(`${base}-model-front.png`) },
+      { label: 'Front · product studio', src: A(`${base}-product-front.png`) },
+      { label: 'Back · product studio', src: A(`${base}-product-back.png`) },
+      { label: 'Side · product studio', src: A(`${base}-product-side.png`) },
+      { label: 'Detail · leather and hardware', src: A(`${base}-close-up.png`) },
+      { label: 'Features · infographic', src: A(`${base}-infographic.png`) },
+      { label: 'Lifestyle · editorial', src: A(`${base}-lifestyle.png`) },
+    ],
+    story: {
+      piece: `The ${name} is MOTOGRIP GEAR's original interpretation of the ${style.toLowerCase()} form, developed in ${color.toLowerCase()} for a clean, versatile profile. The proportions are balanced for everyday wear without losing the character expected from a leather outerwear piece.`,
+      craft: `${pageOneMaterial(name)} is cut into a ${style.toLowerCase()} construction with reinforced stress points, durable metal hardware, a smooth lining, and carefully finished internal seams.`,
+      fit: `Regular men's outerwear fit. Offered in XS through 4XL, with made-to-measure ordering available for a personalized fit.`,
+      origin: `Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with independent imagery, fit notes, and product copy.`,
+    },
+  };
+});
+
 const SSM_PRODUCTS = [
+  PAGE_ONE_MENS_JACKETS[0],
   {
     id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
     name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
@@ -2347,6 +2440,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
 function QuickView({ product, onClose, addToCart, go }) {
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
+  const [productColor, setProductColor] = React.useState(product?.defaultColor || product?.colors?.[0]?.id || null);
   const [collarColor, setCollarColor] = React.useState(product?.defaultCollarColor || product?.collarColors?.[0]?.id || null);
   if (!product) return null;
   const quickLeather = product.material || SSM_LEATHERS.find(l => l.id === leather)?.name;
@@ -3276,6 +3370,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const p = product || SSM_PRODUCTS[0];
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
+  const [productColor, setProductColor] = React.useState(p.defaultColor || p.colors?.[0]?.id || null);
   const [collarColor, setCollarColor] = React.useState(p.defaultCollarColor || p.collarColors?.[0]?.id || null);
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('details');
@@ -3306,6 +3401,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const lObj = SSM_LEATHERS.find(l => l.id === leather);
   const productLeather = p.material || lObj?.name || 'Selected hide';
   const selectedCollar = p.collarColors?.find(c => c.id === collarColor);
+  const selectedProductColor = p.colors?.find(c => c.id === productColor);
   const productSizes = p.sizes || ['XS','S','M','L','XL','XXL'];
   const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
   const inStock = sizeStock(size) > 0;
@@ -3402,6 +3498,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
           <div style={{ color: 'var(--fg-3)', fontSize: 14, marginTop: 12, lineHeight: 1.6 }}>{p.blurb}</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 24, marginBottom: 32 }}>
             <span className="display" style={{ fontSize: 32 }}>${displayPrice.toLocaleString()}</span>
+            {p.compareAt && <span className="mono" style={{ fontSize: 11, color: 'var(--fg-4)', textDecoration: 'line-through' }}>${p.compareAt.toLocaleString()}</span>}
             <span className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>USD · DUTIES INCLUDED</span>
           </div>
 
@@ -3430,6 +3527,25 @@ function PDP({ product, go, addToCart, onQuickView }) {
                   aria-label={l.name} title={l.name}
                   style={{ background: l.swatch, padding: 0 }} onClick={() => setLeather(l.id)} />
               ))}
+            </div>
+          )}
+
+          {p.colors?.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+                <span>COLOR</span>
+                <span style={{ color: 'var(--fg-2)' }}>{selectedProductColor?.name.toUpperCase()}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                {p.colors.map(c => (
+                  <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                    <button className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
+                      aria-label={`Product color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
+                      style={{ backgroundColor: c.color, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                    <span className="mono" style={{ fontSize: 8, color: productColor === c.id ? 'var(--fg-2)' : 'var(--fg-4)' }}>{c.name.toUpperCase()}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
