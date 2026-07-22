@@ -996,7 +996,7 @@ const PAGE_ONE_MENS_JACKET_SPECS = [
   ['Inferno Black Leather Jacket',290,'Black','Cafe Racer'],
   ['Ionic Black Leather Jacket',290,'Black','Cafe Racer'],
   ['Ridgeline Brown Suede Fur-Lined Jacket',395,'Brown','Suede Field Jacket'],
-  ['Legacy Black Leather Biker Jacket',299,'Black','Biker'],
+  ['Sentinel Black Cowhide Belt-Collar Jacket',299,'Black','Rider'],
   ['Allaric Alley Black Leather Biker Jacket',295,'Black','Biker'],
   ['Blain Mocha Suede Bomber Jacket',295,'Mocha','Suede Bomber'],
   ['Air Rolf Brown Leather Bomber Jacket',285,'Brown','Bomber'],
@@ -1151,11 +1151,42 @@ Object.assign(PAGE_ONE_MENS_JACKETS[3], {
   },
 });
 
+Object.assign(PAGE_ONE_MENS_JACKETS[4], {
+  blurb: 'Full-grain cowhide · quilted viscose lining · belted high collar',
+  material: 'Real cowhide leather',
+  materialNote: 'Black full-grain finish with a quilted viscose lining',
+  colors: [
+    {
+      id: 'black',
+      name: 'Black',
+      color: '#191919',
+      image: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-close-up.png'),
+    },
+  ],
+  defaultColor: 'black',
+  gallery: [
+    { label: 'Front · on model', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-model-front.png') },
+    { label: 'Front · product studio', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-product-front.png') },
+    { label: 'Back · on model', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-model-back.png') },
+    { label: 'Side · on model', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-model-side.png') },
+    { label: 'Detail · cowhide and hardware', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-close-up.png') },
+    { label: 'Features · infographic', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-infographic.png') },
+    { label: 'Lifestyle · editorial', src: A('mens-page-one/sentinel-black-cowhide-belt-collar-jacket-lifestyle.png') },
+  ],
+  story: {
+    piece: 'The Sentinel Black Cowhide Belt-Collar Jacket is a focused rider silhouette with a clean front, protective high collar, and structured waist. Its restrained hardware and compact proportions give it a confident motorcycle character without overpowering everyday outfits.',
+    craft: 'Real full-grain cowhide is shaped around a straight metal front zipper, adjustable collar straps, a diagonal chest pocket, two lower zip pockets, two inside pockets, button-tab cuffs, quilted waist panels, and a quilted viscose lining.',
+    fit: 'Regular men\'s rider fit with room for a light base layer. Offered in XS through 5XL, with made-to-measure ordering available for a personalized fit.',
+    origin: 'Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with original imagery, fit notes, product copy, and realistic leather swatch assets.',
+  },
+});
+
 const SSM_PRODUCTS = [
   PAGE_ONE_MENS_JACKETS[0],
   PAGE_ONE_MENS_JACKETS[1],
   PAGE_ONE_MENS_JACKETS[2],
   PAGE_ONE_MENS_JACKETS[3],
+  PAGE_ONE_MENS_JACKETS[4],
   {
     id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
     name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
