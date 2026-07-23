@@ -747,6 +747,71 @@ function merchantCondition(value) {
   return 'new';
 }
 
+function escapeCsv(value) {
+  const text = String(value ?? '').replace(/\r?\n/g, ' ').trim();
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function serveMetaCatalogFeed(req, res) {
+  const store = readPublicStore();
+  const currency = store.settings.currency || 'USD';
+  const columns = [
+    'id',
+    'title',
+    'description',
+    'availability',
+    'condition',
+    'price',
+    'link',
+    'image_link',
+    'brand',
+    'product_type',
+    'google_product_category',
+    'gender',
+    'age_group',
+    'color',
+    'material',
+  ];
+
+  const rows = store.products
+    .filter((product) => product.status === 'active')
+    .map((product) => {
+      const sku = product.sku || product.id;
+      const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
+      const image = productImageUrl(req, product.primaryImage || product.image);
+      const description = product.schemaDescription || product.description || `${product.title} by MOTOGRIP GEAR.`;
+      const inventory = Object.keys(product.stock || {}).length
+        ? Object.values(product.stock).reduce((total, quantity) => total + Number(quantity || 0), 0)
+        : Number(product.inventory || 0);
+
+      const item = {
+        id: sku,
+        title: product.title,
+        description,
+        availability: inventory > 0 ? 'in stock' : 'out of stock',
+        condition: merchantCondition(product.condition),
+        price: `${Number(product.price || 0).toFixed(2)} ${currency}`,
+        link,
+        image_link: image,
+        brand: product.brand || store.settings.storeName || 'MOTOGRIP GEAR',
+        product_type: product.productType || product.category,
+        google_product_category: product.googleProductCategory,
+        gender: merchantGender(product.gender),
+        age_group: String(product.ageGroup || 'adult').toLowerCase(),
+        color: product.color,
+        material: product.material || product.leatherType,
+      };
+
+      return columns.map((column) => escapeCsv(item[column])).join(',');
+    });
+
+  const feed = `${columns.join(',')}\n${rows.join('\n')}\n`;
+  send(res, 200, feed, 'text/csv; charset=utf-8', {
+    'Cache-Control': 'no-cache, max-age=0',
+    'Content-Disposition': 'inline; filename="motogrip-meta-catalog.csv"',
+  });
+}
+
 function serveMerchantFeed(req, res) {
   const store = readPublicStore();
   const currency = store.settings.currency || 'USD';
@@ -1208,6 +1273,11 @@ const server = http.createServer(async (req, res) => {
 
     if (requestPath === '/google-merchant-feed.xml') {
       serveMerchantFeed(req, res);
+      return;
+    }
+
+    if (requestPath === '/meta-catalog-feed.csv') {
+      serveMetaCatalogFeed(req, res);
       return;
     }
 
