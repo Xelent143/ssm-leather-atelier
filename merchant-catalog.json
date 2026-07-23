@@ -380,7 +380,7 @@
       "madeToMeasureSurcharge": 50,
       "tag": "New",
       "description": "Men's black semi-aniline cowhide double-rider jacket with an asymmetric zip, snap notch lapels, five pockets, zipper cuffs, adjustable waist belt, and quilted viscose lining.",
-      "image": "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-front.png",
+      "image": "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-front.webp",
       "maker": "MOTOGRIP Workshop",
       "stock": {
         "XS": 3,
@@ -410,14 +410,14 @@
       "condition": "NewCondition",
       "availability": "InStock",
       "priceValidUntil": "2026-12-31",
-      "primaryImage": "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-front.png",
+      "primaryImage": "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-front.webp",
       "galleryImages": [
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-product-front.png",
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-back.png",
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-side.png",
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-close-up.png",
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-infographic.png",
-        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-lifestyle.png"
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-product-front.webp",
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-back.webp",
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-side.webp",
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-close-up.webp",
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-infographic.webp",
+        "assets/generated/mens-page-one/aegis-black-cowhide-belted-biker-jacket-lifestyle.webp"
       ],
       "imageAltText": "Men's Aegis black semi-aniline cowhide belted biker jacket by MOTOGRIP GEAR",
       "material": "Real cowhide leather",
