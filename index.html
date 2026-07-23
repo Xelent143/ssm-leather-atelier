@@ -1009,7 +1009,7 @@ const PAGE_ONE_MENS_JACKET_SPECS = [
   ['Ionic Black Leather Jacket',290,'Black','Cafe Racer'],
   ['Ridgeline Brown Suede Fur-Lined Jacket',395,'Brown','Suede Field Jacket'],
   ['Sentinel Black Cowhide Belt-Collar Jacket',299,'Black','Rider'],
-  ['Allaric Alley Black Leather Biker Jacket',295,'Black','Biker'],
+  ['Aegis Black Cowhide Belted Biker Jacket',295,'Black','Double Rider'],
   ['Blain Mocha Suede Bomber Jacket',295,'Mocha','Suede Bomber'],
   ['Air Rolf Brown Leather Bomber Jacket',285,'Brown','Bomber'],
   ['Bravado Black Hooded Leather Bomber Jacket',299,'Black','Hooded Bomber'],
@@ -1193,12 +1193,72 @@ Object.assign(PAGE_ONE_MENS_JACKETS[4], {
   },
 });
 
+Object.assign(PAGE_ONE_MENS_JACKETS[5], {
+  blurb: 'Semi-aniline cowhide · quilted viscose lining · belted double-rider cut',
+  material: 'Real cowhide leather',
+  materialNote: 'Black semi-aniline finish with a quilted viscose lining',
+  colors: [
+    {
+      id: 'black',
+      name: 'Black',
+      color: '#171819',
+      image: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-swatch-strip.png'),
+      spriteIndex: 0,
+    },
+    {
+      id: 'distressed-brown',
+      name: 'Distressed Brown',
+      color: '#704522',
+      image: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-swatch-strip.png'),
+      spriteIndex: 1,
+    },
+    {
+      id: 'mocha-brown',
+      name: 'Mocha Brown',
+      color: '#3b271d',
+      image: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-swatch-strip.png'),
+      spriteIndex: 2,
+    },
+    {
+      id: 'mocha-suede',
+      name: 'Mocha Suede',
+      color: '#6d4c37',
+      image: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-swatch-strip.png'),
+      spriteIndex: 3,
+    },
+    {
+      id: 'distressed-black',
+      name: 'Distressed Black',
+      color: '#242527',
+      image: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-swatch-strip.png'),
+      spriteIndex: 4,
+    },
+  ],
+  defaultColor: 'black',
+  gallery: [
+    { label: 'Front · on model', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-front.png') },
+    { label: 'Front · product studio', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-product-front.png') },
+    { label: 'Back · on model', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-back.png') },
+    { label: 'Side · on model', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-model-side.png') },
+    { label: 'Detail · cowhide, lapel and hardware', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-close-up.png') },
+    { label: 'Features · infographic', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-infographic.png') },
+    { label: 'Lifestyle · editorial', src: A('mens-page-one/aegis-black-cowhide-belted-biker-jacket-lifestyle.png') },
+  ],
+  story: {
+    piece: 'The Aegis Black Cowhide Belted Biker Jacket refines the double-rider silhouette with balanced lapels, a structured waist belt, and precise metal hardware. It carries unmistakable motorcycle character while remaining clean enough for premium everyday wear.',
+    craft: 'Real cowhide is finished with a black semi-aniline surface and backed by a quilted viscose lining. An asymmetric front zipper, snap-fastened notch lapels, diagonal chest pocket, two lower zip pockets, two inside pockets, zipper cuffs, and an adjustable waist belt complete the construction.',
+    fit: 'Regular men\'s double-rider fit with room for a light base layer. Offered in XS through 5XL, with made-to-measure ordering available for a personalized fit.',
+    origin: 'Designed for MOTOGRIP GEAR and produced by the MOTOGRIP workshop with original imagery, fit notes, product copy, and realistic leather swatch assets.',
+  },
+});
+
 const SSM_PRODUCTS = [
   PAGE_ONE_MENS_JACKETS[0],
   PAGE_ONE_MENS_JACKETS[1],
   PAGE_ONE_MENS_JACKETS[2],
   PAGE_ONE_MENS_JACKETS[3],
   PAGE_ONE_MENS_JACKETS[4],
+  PAGE_ONE_MENS_JACKETS[5],
   {
     id: 'p14', slug: 'intrecciato-genuine-cowhide-lambskin-leather-jacket-brown',
     name: 'Intrecciato Genuine Cowhide & Lambskin Leather Jacket Brown', cat: 'Jackets', gender: 'Men',
@@ -2509,7 +2569,14 @@ function QuickView({ product, onClose, addToCart, go }) {
                 {product.colors.map(c => (
                   <button key={c.id} className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
                     aria-label={`Color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
-                    style={{ backgroundColor: c.color, backgroundImage: c.image ? `url(${c.image})` : undefined, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                    style={{
+                      backgroundColor: c.color,
+                      backgroundImage: c.image ? `url(${c.image})` : undefined,
+                      backgroundSize: c.spriteIndex != null ? '500% 100%' : 'cover',
+                      backgroundPosition: c.spriteIndex != null ? `${c.spriteIndex * 25}% center` : 'center',
+                      backgroundRepeat: 'no-repeat',
+                      padding: 0,
+                    }} onClick={() => setProductColor(c.id)} />
                 ))}
               </div>
             </div>
@@ -3576,7 +3643,14 @@ function PDP({ product, go, addToCart, onQuickView }) {
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                     <button className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
                       aria-label={`Product color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
-                      style={{ backgroundColor: c.color, backgroundImage: c.image ? `url(${c.image})` : undefined, padding: 0 }} onClick={() => setProductColor(c.id)} />
+                      style={{
+                        backgroundColor: c.color,
+                        backgroundImage: c.image ? `url(${c.image})` : undefined,
+                        backgroundSize: c.spriteIndex != null ? '500% 100%' : 'cover',
+                        backgroundPosition: c.spriteIndex != null ? `${c.spriteIndex * 25}% center` : 'center',
+                        backgroundRepeat: 'no-repeat',
+                        padding: 0,
+                      }} onClick={() => setProductColor(c.id)} />
                     <span className="mono" style={{ fontSize: 8, color: productColor === c.id ? 'var(--fg-2)' : 'var(--fg-4)' }}>{c.name.toUpperCase()}</span>
                   </div>
                 ))}
