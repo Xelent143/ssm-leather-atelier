@@ -5738,8 +5738,8 @@ function ShippingInformation({ go }) {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 0, marginTop: 64, borderTop: '1px solid var(--line)' }}>
-          {policyDetails.map(([label, body], index) => (
-            <div key={label} style={{ padding: '28px 30px 30px 0', borderBottom: '1px solid var(--line)', borderRight: index % 2 === 0 ? '1px solid var(--line)' : 'none' }}>
+          {policyDetails.map(([label, body]) => (
+            <div key={label} style={{ padding: '28px 30px 30px 0', borderBottom: '1px solid var(--line)' }}>
               <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>{label}</div>
               <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.82 }}>{body}</div>
             </div>
