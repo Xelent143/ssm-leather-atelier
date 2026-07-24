@@ -80,6 +80,53 @@ function applySEO(view, params) {
   ogUrl.setAttribute('content', canonicalUrl);
 }
 
+function metaCheckoutFromUrl() {
+  const query = new URLSearchParams(window.location.search);
+  const rawProducts = query.get('products');
+  if (!rawProducts) return { requested: false, items: [], coupon: '' };
+
+  const items = rawProducts.split(',').slice(0, 20).flatMap((entry, index) => {
+    const separator = entry.lastIndexOf(':');
+    if (separator < 1) return [];
+
+    const variantId = entry.slice(0, separator).trim().toUpperCase();
+    const quantity = Math.min(10, Math.max(1, Number.parseInt(entry.slice(separator + 1), 10) || 1));
+    const match = SSM_PRODUCTS.find((product) => {
+      const sku = `MG-${String(product.id || '').toUpperCase()}`;
+      const sizes = product.sizes || Object.keys(product.stock || {});
+      return sizes.some((size) => `${sku}-${String(size).toUpperCase()}` === variantId);
+    });
+    if (!match) return [];
+
+    const sku = `MG-${String(match.id).toUpperCase()}`;
+    const sizes = match.sizes || Object.keys(match.stock || {});
+    const size = sizes.find((candidate) => `${sku}-${String(candidate).toUpperCase()}` === variantId);
+    if (!size) return [];
+
+    const selectedColor = (match.colors || []).find((color) => color.id === match.defaultColor);
+    const selectedCollar = (match.collarColors || []).find((color) => color.id === match.defaultCollarColor);
+    return [{
+      baseId: match.id,
+      id: `${match.id}-meta-${index}`,
+      name: match.name,
+      price: match.price,
+      basePrice: match.price,
+      surcharge: 0,
+      qty: quantity,
+      img: match.img,
+      leather: match.material || 'Genuine leather',
+      size,
+      productColor: selectedColor?.name || null,
+      collarColor: selectedCollar?.name || null,
+      fitMode: 'standard',
+      fitLabel: null,
+      measurements: null,
+    }];
+  });
+
+  return { requested: true, items, coupon: (query.get('coupon') || '').trim().slice(0, 80) };
+}
+
 function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [view, setView] = React.useState(() => {
@@ -99,6 +146,8 @@ function App() {
     return product ? { product } : (SSM_INITIAL_ROUTE?.params || {});
   });
   const [cart, setCart] = React.useState(() => {
+    const metaCheckout = metaCheckoutFromUrl();
+    if (metaCheckout.requested) return metaCheckout.items;
     try {
       const raw = window.localStorage && localStorage.getItem('ssm:cart');
       if (raw) {
