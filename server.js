@@ -747,6 +747,21 @@ function merchantCondition(value) {
   return 'new';
 }
 
+function merchantDescription(product) {
+  const base = String(
+    product.schemaDescription
+      || product.description
+      || `${product.title} by MOTOGRIP GEAR.`,
+  ).trim();
+  const color = String(product.color || '').trim();
+  const material = String(product.material || product.leatherType || '').trim();
+  const details = [
+    color ? `Color: ${color}.` : '',
+    material ? `Material: ${material}.` : '',
+  ].filter(Boolean);
+  return [base, ...details].join(' ').trim();
+}
+
 function escapeCsv(value) {
   const text = String(value ?? '').replace(/\r?\n/g, ' ').trim();
   return `"${text.replace(/"/g, '""')}"`;
@@ -779,7 +794,7 @@ function serveMetaCatalogFeed(req, res) {
       const sku = product.sku || product.id;
       const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
       const image = productImageUrl(req, product.primaryImage || product.image);
-      const description = product.schemaDescription || product.description || `${product.title} by MOTOGRIP GEAR.`;
+      const description = merchantDescription(product);
       const inventory = Object.keys(product.stock || {}).length
         ? Object.values(product.stock).reduce((total, quantity) => total + Number(quantity || 0), 0)
         : Number(product.inventory || 0);
@@ -827,7 +842,7 @@ function serveMerchantFeed(req, res) {
       const groupId = product.itemGroupId || product.slug || product.id;
       const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
       const image = productImageUrl(req, product.primaryImage || product.image);
-      const description = product.schemaDescription || product.description || `${product.title} by MOTOGRIP GEAR.`;
+      const description = merchantDescription(product);
 
       variants.forEach(([size, quantity]) => {
         const variantId = `${sku}-${String(size).replace(/[^a-z0-9]+/gi, '-')}`;
