@@ -1058,13 +1058,16 @@ const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
   const [name, price, color, style, compareAt] = spec;
   const slug = pageOneSlug(name);
   const base = `mens-page-one/${slug}`;
+  const modelFront = slug === 'dean-brown-leather-biker-jacket'
+    ? A('mens-page-one/dean-brown-leather-biker-jacket-model-front-v2.webp')
+    : A(`${base}-model-front.png`);
   return {
     id: `mj${String(index + 1).padStart(2, '0')}`, slug,
     name, cat: 'Jackets', gender: 'Men', collection: style,
     price, compareAt, hue: color === 'Brown' || color === 'Mocha' ? 24 : color === 'Green' ? 90 : color === 'Blue' ? 210 : 0,
     tag: compareAt ? 'Sale' : (index >= 34 && index <= 37 ? 'New' : null),
     blurb: `${style} silhouette · ${color.toLowerCase()} ${name.includes('Suede') ? 'suede' : 'leather'} · made to measure available`,
-    img: A(`${base}-model-front.png`), alt: A(`${base}-product-front.png`),
+    img: modelFront, alt: A(`${base}-product-front.png`),
     material: pageOneMaterial(name), materialLocked: true,
     materialNote: `${color} finish · ${style.toLowerCase()} construction`,
     colors: [{ id: color.toLowerCase(), name: color, color: PAGE_ONE_COLOR_HEX[color] || '#4a4038' }],
@@ -1073,7 +1076,7 @@ const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
     sizes: PAGE_ONE_MENS_JACKET_SIZES,
     madeToMeasureSurcharge: 50,
     gallery: [
-      { label: 'Front · on model', src: A(`${base}-model-front.png`) },
+      { label: 'Front · on model', src: modelFront },
       { label: 'Front · product studio', src: A(`${base}-product-front.png`) },
       { label: 'Back · product studio', src: A(`${base}-product-back.png`) },
       { label: 'Side · product studio', src: A(`${base}-product-side.png`) },
