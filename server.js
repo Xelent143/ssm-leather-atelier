@@ -42,7 +42,7 @@ const publicRoutes = {
   '/gift-cards': { view: 'giftcard', title: 'MOTOGRIP GEAR Gift Cards', desc: 'Give premium motorcycle leather gear while letting the recipient choose the style, fit, and details.' },
   '/faq': { view: 'faq', title: 'Frequently Asked Questions | MOTOGRIP GEAR', desc: 'Answers about MOTOGRIP sizing, leather, custom orders, production, shipping, returns, repairs, and product care.' },
   '/size-guide': { view: 'size', title: 'Leather Jacket, Vest & Trouser Size Guide | MOTOGRIP GEAR', desc: 'Use MOTOGRIP GEAR size charts and measurement guidance for men’s and women’s leather jackets, vests, trousers, and chaps.' },
-  '/shipping-information': { view: 'ship', title: 'Worldwide Shipping Information | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR delivery regions, estimated transit, tracking, costs, duties, and worldwide shipping information.' },
+  '/shipping-information': { view: 'ship', title: 'Worldwide Shipping & Courier Information | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR worldwide delivery regions, Waterbury dispatch estimates, USPS, UPS, DHL and FedEx courier service, tracking, duties, and delivery guidance.' },
   '/returns-refunds': { view: 'returns', title: 'Returns & Refunds Policy | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR return eligibility, instructions, exclusions, exchanges, and refund processing information.' },
   '/privacy': { view: 'privacy', title: 'Privacy Policy | MOTOGRIP GEAR', desc: 'Learn how MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
   '/terms': { view: 'terms', title: 'Terms of Service | MOTOGRIP GEAR', desc: 'Read the terms governing use of the MOTOGRIP GEAR website, products, orders, and services.' },

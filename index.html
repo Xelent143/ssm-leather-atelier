@@ -5654,12 +5654,109 @@ function SizeGuide({ go }) {
 // ── Shipping information, returns & custom consultation ─────────────────────
 
 function ShippingInformation({ go }) {
-  const timelines = [
-    ['Stock pieces', 'Prepared in 1–2 working days', 'Express delivery follows dispatch'],
-    ['Made-to-measure', 'Fit review before cutting', 'Timeline confirmed with your fit team'],
-    ['Bespoke commissions', 'Design approval before production', 'Timeline confirmed in your consultation'],
+  const regions = [
+    ['United States', 'At checkout', 'At checkout', 'Tracked delivery'],
+    ['United Kingdom', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['Canada', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['European Union', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['Switzerland · Norway', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['Australia · New Zealand', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['Japan · East Asia', 'At checkout', 'At checkout', 'Duties may apply'],
+    ['Rest of world', 'At checkout', 'At checkout', 'Where service is available'],
   ];
-  return <div className="page-fade"><PageHero eyebrow="XVI · SHIPPING INFORMATION" title="From the fit room," italic="to your door." dek="A clear view of dispatch, tracking, delivery and the questions worth settling before your leather gear leaves the workshop." /><section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}><div style={{ borderTop: '1px solid var(--line)' }}>{timelines.map(([type, dispatch, delivery]) => <div key={type} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '22px 0', borderBottom: '1px solid var(--line)' }}><div style={{ fontFamily: 'var(--display)', fontSize: 24 }}>{type}</div><div style={{ color: 'var(--fg-2)', fontSize: 14, lineHeight: 1.65 }}>{dispatch}</div><div className="mono" style={{ color: 'var(--fg-4)', fontSize: 10, lineHeight: 1.7 }}>{delivery.toUpperCase()}</div></div>)}</div><div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }}>{[['I · BEFORE DISPATCH', 'We confirm your order details and send a dispatch email once the piece is handed to the carrier. Made-to-measure and bespoke work move only after the fit or design review is complete.'], ['II · IN TRANSIT', 'Tracking is issued when the shipment leaves the fit room. Delivery timing depends on destination, carrier service and any local customs processing.'], ['III · DUTIES + DELIVERY', 'The checkout and dispatch confirmation are the source of truth for your delivery address, selected service and any duties shown for the destination.']].map(([label, body]) => <div key={label}><div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>{label}</div><div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>{body}</div></div>)}</div></section><CTAStrip title="Need a hand with timing?" body="For a made-to-measure jacket, a destination question or a delivery detail, send the fit room a note before you place the order." primary="Contact the fit room" ghost="Returns & refunds" onPrimary={() => go('contact')} onGhost={() => go('returns')} /></div>;
+  const timelines = [
+    ['Ready-to-ship pieces', 'Usually prepared for dispatch within 1–2 business days.'],
+    ['Standard jackets, vests and outerwear', 'Allow approximately 5–10 business days when production or finishing is required.'],
+    ['Made-to-measure orders', 'Usually prepared within 2–3 weeks after measurements and design details are approved.'],
+    ['Complex bespoke work', 'The production estimate is confirmed during the consultation and before the order is placed.'],
+  ];
+  const policyDetails = [
+    ['TRACKING + DELIVERY', 'A dispatch email is sent when your parcel leaves our Waterbury location. It includes the available carrier and tracking details. Delivery timing begins after dispatch and can vary by destination, carrier capacity and customs processing.'],
+    ['CUSTOMS, DUTIES + TAXES', 'International orders may be subject to import duties, taxes or handling fees charged by the destination country. Unless checkout or your order confirmation expressly says they are prepaid, these charges are the recipient’s responsibility.'],
+    ['DELIVERY ATTEMPTS', 'Please monitor tracking and respond promptly to carrier notices. Charges caused by an incorrect address, a refused parcel or repeated missed delivery attempts may need to be paid before an order can be sent again.'],
+    ['ADDRESS CHANGES', 'Review the delivery address in your confirmation email. Contact us immediately if it is incorrect. Once a parcel has been dispatched, an address change may not be possible and remains subject to the carrier’s rules.'],
+    ['LOST OR DAMAGED PARCELS', 'If a parcel appears lost or arrives damaged, contact us within five business days and keep the product, parcel and packaging. Include your order number, photographs and tracking details so we can open a carrier investigation.'],
+    ['PO BOXES + MILITARY ADDRESSES', 'Some express services cannot deliver to PO, APO, DPO or FPO addresses. Use a complete street address whenever possible, or contact us before ordering so we can check available service.'],
+    ['ORDER CONFIRMATION', 'After checkout, we send an order confirmation to the email address provided. Please review it carefully and check your spam or promotions folder if it does not appear in your inbox.'],
+    ['COMBINED OR SPLIT SHIPMENTS', 'We may combine products from the same order when it is practical. If products become ready at different times, they may be dispatched separately and may have separate tracking numbers.'],
+  ];
+  return (
+    <div className="page-fade">
+      <PageHero
+        eyebrow="SHIPPING INFORMATION"
+        title="Worldwide,"
+        italic="shipping available."
+        dek="Online delivery only, dispatched from Waterbury, Connecticut. Shipping services, charges and destination availability are confirmed at checkout."
+      />
+
+      <section style={{ padding: '0 48px 104px', maxWidth: 1180, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 48, padding: '34px 0 54px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+          <div>
+            <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>DISPATCHED FROM WATERBURY</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 'clamp(28px, 3.4vw, 42px)', lineHeight: 1.08, marginBottom: 16 }}>From our dispatch point to your door.</div>
+          </div>
+          <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.85 }}>
+            MOTOGRIP GEAR is an online-delivery business and does not offer local pickup. We ship to destinations supported by our checkout and delivery partners. If a destination cannot be served because of carrier, regulatory or service restrictions, delivery will not be offered at checkout or our team will contact you before dispatch.
+          </div>
+        </div>
+
+        <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, margin: '54px 0 18px' }}>DELIVERY REGIONS</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', borderTop: '1px solid var(--line)' }}>
+          {regions.map(([region, timing, cost, note]) => (
+            <div key={region} style={{ padding: '22px 24px 24px 0', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 22, marginBottom: 18 }}>{region}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
+                <div><div className="mono" style={{ color: 'var(--fg-4)', fontSize: 8, marginBottom: 7 }}>ESTIMATE</div><div className="mono" style={{ color: 'var(--fg-3)', fontSize: 10 }}>{timing}</div></div>
+                <div><div className="mono" style={{ color: 'var(--fg-4)', fontSize: 8, marginBottom: 7 }}>COST</div><div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10 }}>{cost}</div></div>
+                <div><div className="mono" style={{ color: 'var(--fg-4)', fontSize: 8, marginBottom: 7 }}>NOTE</div><div className="mono" style={{ color: 'var(--fg-3)', fontSize: 10, lineHeight: 1.45 }}>{note}</div></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, margin: '64px 0 18px' }}>DISPATCH ESTIMATES</div>
+        <div style={{ borderTop: '1px solid var(--line)' }}>
+          {timelines.map(([type, estimate]) => (
+            <div key={type} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 22, padding: '24px 0', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 24 }}>{type}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.75 }}>{estimate}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mono" style={{ color: 'var(--fg-4)', fontSize: 9, lineHeight: 1.7, marginTop: 14 }}>
+          BUSINESS DAYS EXCLUDE WEEKENDS AND PUBLIC HOLIDAYS. PRODUCTION AND DELIVERY TIMES ARE ESTIMATES, NOT GUARANTEED ARRIVAL DATES.
+        </div>
+
+        <div style={{ marginTop: 64, padding: '32px 0 36px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 40 }}>
+          <div>
+            <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>COURIER SERVICE</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 'clamp(30px, 4vw, 48px)', lineHeight: 1.05 }}>Express delivery, selected with care.</div>
+          </div>
+          <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.85 }}>
+            To provide you with premium service, we use Express Delivery services such as USPS, UPS, DHL and FedEx. MOTOGRIP GEAR selects the carrier and service best suited to the destination, parcel and delivery conditions.
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 0, marginTop: 64, borderTop: '1px solid var(--line)' }}>
+          {policyDetails.map(([label, body], index) => (
+            <div key={label} style={{ padding: '28px 30px 30px 0', borderBottom: '1px solid var(--line)', borderRight: index % 2 === 0 ? '1px solid var(--line)' : 'none' }}>
+              <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>{label}</div>
+              <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.82 }}>{body}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <CTAStrip
+        title="Need a delivery check?"
+        body="For a destination, made-to-measure timeline or address question, contact us before placing the order."
+        primary="Contact MOTOGRIP GEAR"
+        ghost="Returns & refunds"
+        onPrimary={() => go('contact')}
+        onGhost={() => go('returns')}
+      />
+    </div>
+  );
 }
 
 function ReturnsRefunds({ go }) {
@@ -6760,7 +6857,7 @@ function App() {
       {view === 'giftcard' && <GiftCards go={go} />}
       {view === 'faq' && <FAQ go={go} />}
       {view === 'size' && <SizeGuide go={go} />}
-      {view === 'ship' && <ShippingReturns go={go} mode="shipping" />}
+      {view === 'ship' && <ShippingInformation go={go} />}
       {view === 'returns' && <ShippingReturns go={go} mode="returns" />}
       {view === 'file-return' && <FileReturn go={go} />}
       {view === 'track' && <TrackOrder go={go} />}
