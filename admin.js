@@ -2,7 +2,8 @@ const root = document.getElementById('admin-root');
 
 const state = {
   authed: false,
-  defaultPasswordInUse: false,
+  configured: true,
+  csrfToken: null,
   loading: true,
   view: 'dashboard',
   query: '',
@@ -40,8 +41,13 @@ function slugify(value = '') {
 }
 
 async function api(path, options = {}) {
+  const method = String(options.method || 'GET').toUpperCase();
   const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(!['GET', 'HEAD', 'OPTIONS'].includes(method) && state.csrfToken ? { 'X-CSRF-Token': state.csrfToken } : {}),
+      ...(options.headers || {}),
+    },
     credentials: 'same-origin',
     ...options,
   });
@@ -122,24 +128,25 @@ function renderLogin(error = '') {
           </div>
         </div>
         <p>Sign in to manage products, made-to-measure pricing, order workflow, and brand content.</p>
-        ${state.defaultPasswordInUse ? '<p class="pill draft">Default local password: motogrip-admin</p>' : ''}
+        ${!state.configured ? '<p class="pill archived">Admin access is not configured. Contact the site administrator.</p>' : ''}
         <div class="field">
           <label for="password">Password</label>
           <input id="password" type="password" autocomplete="current-password" autofocus>
         </div>
         ${error ? `<p class="pill archived">${escapeHtml(error)}</p>` : ''}
         <div style="height: 18px"></div>
-        <button class="btn primary" type="submit">Sign in</button>
+        <button class="btn primary" type="submit" ${!state.configured ? 'disabled' : ''}>Sign in</button>
       </form>
     </main>
   `;
   document.getElementById('login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     try {
-      await api('/api/admin/login', {
+      const login = await api('/api/admin/login', {
         method: 'POST',
         body: JSON.stringify({ password: document.getElementById('password').value }),
       });
+      state.csrfToken = login.csrfToken;
       state.authed = true;
       await loadStore();
     } catch (err) {
@@ -600,10 +607,15 @@ function bindShell() {
   });
 
   document.getElementById('logout')?.addEventListener('click', async () => {
-    await api('/api/admin/logout', { method: 'POST' });
-    state.authed = false;
-    state.store = null;
-    renderLogin();
+    try {
+      await api('/api/admin/logout', { method: 'POST' });
+      state.authed = false;
+      state.store = null;
+      state.csrfToken = null;
+      renderLogin();
+    } catch (err) {
+      toast(err.message);
+    }
   });
 
   document.getElementById('save')?.addEventListener('click', saveStore);
@@ -775,7 +787,8 @@ async function init() {
   try {
     const session = await api('/api/admin/session');
     state.authed = session.authenticated;
-    state.defaultPasswordInUse = session.defaultPasswordInUse;
+    state.configured = session.configured;
+    state.csrfToken = session.csrfToken;
     if (state.authed) await loadStore();
     else renderLogin();
   } catch (err) {

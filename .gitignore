@@ -15,3 +15,16 @@ npm-debug.log*
 .vercel
 assets/generated/_orig/
 assets/generated/atelier-workbench.jpg
+
+# Admin runtime security state and local backups
+data/admin-security.json
+data/admin-security.json.*.tmp
+data/admin-audit.ndjson
+data/admin-store.json.*.tmp
+data/*session*.json
+data/*lockout*.json
+data/*.bak
+data/*.backup
+data/backups/
+.phase1-backups/
+motogrip-phase1-backup*/

@@ -3,23 +3,26 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || '0.0.0.0';
 const assetCdnBase = (process.env.ASSET_CDN_BASE || '').replace(/\/+$/, '');
-const adminPassword = process.env.ADMIN_PASSWORD || 'motogrip-admin';
-const sessionTtlMs = 1000 * 60 * 60 * 12;
-const dataDir = path.join(root, 'data');
+const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
-const sessions = new Map();
+const adminSecurity = createAdminSecurity({ dataDir });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
 const paypalApiBase = (process.env.PAYPAL_API_BASE || 'https://api-m.paypal.com').replace(/\/+$/, '');
+
+function indexingDisabled() {
+  return String(process.env.DISABLE_INDEXING || '').toLowerCase() === 'true';
+}
 
 const publicRoutes = {
   '/': { view: 'home', title: 'MOTOGRIP GEAR — Premium Motorcycle Leather Gear', desc: 'Premium motorcycle leather jackets, vests, trousers, and made-to-measure gear built for fit, movement, and lasting road use.' },
@@ -185,11 +188,13 @@ function writeStore(store) {
 }
 
 function send(res, status, body, contentType = 'text/plain; charset=utf-8', headers = {}) {
-  res.writeHead(status, {
+  const responseHeaders = {
     'Content-Type': contentType,
     'Cache-Control': status === 200 ? 'public, max-age=300' : 'no-store',
     ...headers,
-  });
+  };
+  if (indexingDisabled()) responseHeaders['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
+  res.writeHead(status, responseHeaders);
   res.end(body);
 }
 
@@ -237,30 +242,6 @@ function productImageUrl(req, imagePath) {
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   if (assetCdnBase && cleanPath.startsWith('/assets/generated/')) return `${assetCdnBase}${cleanPath}`;
   return absoluteUrl(req, cleanPath);
-}
-
-function parseCookies(req) {
-  return Object.fromEntries((req.headers.cookie || '').split(';').filter(Boolean).map((item) => {
-    const [key, ...value] = item.trim().split('=');
-    return [decodeURIComponent(key), decodeURIComponent(value.join('='))];
-  }));
-}
-
-function getSession(req) {
-  const token = parseCookies(req).mg_admin;
-  if (!token) return null;
-  const session = sessions.get(token);
-  if (!session || session.expiresAt < Date.now()) {
-    sessions.delete(token);
-    return null;
-  }
-  return session;
-}
-
-function setSession(res) {
-  const token = crypto.randomBytes(32).toString('hex');
-  sessions.set(token, { createdAt: Date.now(), expiresAt: Date.now() + sessionTtlMs });
-  return `mg_admin=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(sessionTtlMs / 1000)}`;
 }
 
 function readBody(req) {
@@ -1232,33 +1213,74 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/admin/session' && req.method === 'GET') {
+    const session = adminSecurity.getSession(req);
     sendJson(res, 200, {
-      authenticated: Boolean(getSession(req)),
-      defaultPasswordInUse: !process.env.ADMIN_PASSWORD,
+      authenticated: Boolean(session),
+      configured: Boolean(process.env.ADMIN_PASSWORD),
+      csrfToken: session?.csrfToken || null,
     });
     return true;
   }
 
   if (pathname === '/api/admin/login' && req.method === 'POST') {
-    const body = await readBody(req);
-    if (body.password !== adminPassword) {
-      sendJson(res, 401, { error: 'Invalid password' });
+    if (!process.env.ADMIN_PASSWORD) {
+      sendJson(res, 503, { error: 'Admin access is not configured. Contact the site administrator.' });
       return true;
     }
-    sendJson(res, 200, { ok: true }, { 'Set-Cookie': setSession(res) });
+    if (!adminSecurity.validOrigin(req)) {
+      adminSecurity.audit(req, { action: 'login', result: 'rejected_origin' });
+      sendJson(res, 403, { error: 'Unable to sign in. Please try again later.' });
+      return true;
+    }
+    const loginStatus = adminSecurity.loginStatus(req);
+    if (!loginStatus.allowed) {
+      adminSecurity.audit(req, { action: loginStatus.reason === 'lockout' ? 'lockout' : 'login', result: 'blocked' });
+      sendJson(res, 429, { error: 'Unable to sign in. Please try again later.' });
+      return true;
+    }
+    adminSecurity.recordLoginAttempt(req);
+    const body = await readBody(req);
+    if (!safeEqual(body.password, process.env.ADMIN_PASSWORD)) {
+      const locked = adminSecurity.recordFailedLogin();
+      adminSecurity.audit(req, { action: locked ? 'lockout' : 'login', result: 'failed' });
+      sendJson(res, 401, { error: 'Unable to sign in. Check your credentials and try again.' });
+      return true;
+    }
+    adminSecurity.recordSuccessfulLogin();
+    const previousToken = parseCookies(req).mg_admin;
+    const session = adminSecurity.createSession(req, previousToken);
+    adminSecurity.audit(req, { action: 'login', result: 'success', session });
+    sendJson(res, 200, { ok: true, csrfToken: session.csrfToken }, {
+      'Set-Cookie': adminSecurity.cookie(session, adminSecurity.isSecureRequest(req)),
+    });
     return true;
   }
 
   if (pathname === '/api/admin/logout' && req.method === 'POST') {
+    const session = adminSecurity.getSession(req);
+    if (session && (!adminSecurity.validOrigin(req) || !adminSecurity.validCsrf(req, session))) {
+      sendJson(res, 403, { error: 'Request could not be verified.' });
+      return true;
+    }
     const token = parseCookies(req).mg_admin;
-    if (token) sessions.delete(token);
-    sendJson(res, 200, { ok: true }, { 'Set-Cookie': 'mg_admin=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0' });
+    adminSecurity.revokeSession(token);
+    adminSecurity.audit(req, { action: 'logout', result: 'success', session });
+    sendJson(res, 200, { ok: true }, {
+      'Set-Cookie': adminSecurity.clearCookie(adminSecurity.isSecureRequest(req)),
+    });
     return true;
   }
 
   if (!pathname.startsWith('/api/admin/')) return false;
-  if (!getSession(req)) {
+  const session = adminSecurity.getSession(req);
+  if (!session) {
     sendJson(res, 401, { error: 'Authentication required' });
+    return true;
+  }
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) &&
+      (!adminSecurity.validOrigin(req) || !adminSecurity.validCsrf(req, session))) {
+    adminSecurity.audit(req, { action: 'admin_mutation', result: 'csrf_rejected', session });
+    sendJson(res, 403, { error: 'Request could not be verified.' });
     return true;
   }
 
@@ -1280,6 +1302,13 @@ async function handleApi(req, res, pathname) {
       ...next.activity.slice(0, 24),
     ];
     writeStore(next);
+    adminSecurity.audit(req, {
+      action: 'store_update',
+      result: 'success',
+      session,
+      entityType: 'admin_store',
+      entityId: 'primary',
+    });
     sendJson(res, 200, readStore());
     return true;
   }
@@ -1315,6 +1344,7 @@ function serveFile(req, res, filePath) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (indexingDisabled()) res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     const requestPath = decodeURIComponent(url.pathname);
 
@@ -1359,7 +1389,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (requestPath === '/robots.txt') {
-      send(res, 200, `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl(req, '/sitemap.xml')}\n`, 'text/plain; charset=utf-8');
+      const robots = indexingDisabled()
+        ? 'User-agent: *\nDisallow: /\n'
+        : `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl(req, '/sitemap.xml')}\n`;
+      send(res, 200, robots, 'text/plain; charset=utf-8');
       return;
     }
 

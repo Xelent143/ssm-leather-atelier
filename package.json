@@ -5,7 +5,9 @@
   "description": "Static MOTOGRIP GEAR ecommerce site.",
   "scripts": {
     "dev": "PORT=5173 node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "check": "node --check server.js && node --check admin-security.js && node --check admin.js"
   },
   "engines": {
     "node": ">=20"
