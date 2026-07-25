@@ -277,9 +277,9 @@ const SSM_FAQ = [
     { q: 'Are duties included?', a: 'Applicable duties and taxes depend on the destination. Any available charges or guidance are shown during checkout.' },
   ] },
   { group: 'Returns', items: [
-    { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
-    { q: 'How do I start a return?', a: 'Open the order in your account or use the Contact page. We will send return instructions after reviewing the request.' },
-    { q: 'How long do refunds take?', a: 'Refunds process within 3 working days of receipt at the MOTOGRIP fit room.' },
+    { q: 'What is your return policy?', a: 'Eligible standard-size, non-personalized pieces may be returned or exchanged within 30 days of signed delivery when they are unworn, unused and complete. Custom, made-to-measure, personalized and final-sale pieces are not eligible for a standard return.' },
+    { q: 'How do I start a return?', a: 'Use the File a Return form with your order details before shipping anything. MOTOGRIP GEAR will review the request and send the authorized return instructions.' },
+    { q: 'How long do refunds take?', a: 'We normally inspect a return within 72 hours of delivery. If approved, the refund is initiated within 7 business days to the original payment method; your bank or card provider may take up to 10 working days to show the credit.' },
   ] },
   { group: 'Repairs', items: [
     { q: 'Do you offer lifetime repairs?', a: 'Yes — every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
@@ -354,7 +354,7 @@ const SSM_SEO = {
   faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
   ship:       { title: 'Shipping Information · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery regions, costs, tracking, and duties.' },
-  returns:    { title: 'Returns & Refunds · MOTOGRIP GEAR', desc: 'Review return eligibility, made-to-order exclusions, return instructions, and refund processing.' },
+  returns:    { title: 'Returns & Refunds Policy · MOTOGRIP GEAR', desc: 'Read MOTOGRIP GEAR return eligibility, exchanges, custom-order exclusions, cancellation terms, and refund processing timelines.' },
   'file-return': { title: 'File a Return · MOTOGRIP GEAR', desc: 'Submit a return, exchange, store-credit, or fit-alteration request to MOTOGRIP GEAR.' },
   track:      { title: 'Track Your Order · MOTOGRIP GEAR', desc: 'Check the current fulfillment and delivery status of your MOTOGRIP GEAR order.' },
   privacy:    { title: 'Privacy Policy · MOTOGRIP GEAR', desc: 'How MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
