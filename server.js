@@ -614,7 +614,7 @@ function productMeta(product, store, req) {
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
         merchantReturnDays: 30,
         returnMethod: 'https://schema.org/ReturnByMail',
-        returnFees: 'https://schema.org/FreeReturn',
+        returnFees: 'https://schema.org/ReturnShippingFees',
       } : undefined,
     },
   };
