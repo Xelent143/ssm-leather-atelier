@@ -326,10 +326,10 @@ function JournalArticle({ article, go }) {
         {a.checklist?.length > 0 && (
           <section style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', padding: '34px', margin: '0 0 56px' }}>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-              BEFORE YOU BUY
+              {a.checklistEyebrow || 'BEFORE YOU BUY'}
             </div>
             <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 22px' }}>
-              Your seven-point jacket checklist.
+              {a.checklistTitle || 'Your seven-point jacket checklist.'}
             </h2>
             <div style={{ display: 'grid', gap: 14 }}>
               {a.checklist.map(item => (
@@ -345,7 +345,7 @@ function JournalArticle({ article, go }) {
         {a.faq?.length > 0 && (
           <section style={{ marginTop: 56 }}>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-              FIRST LEATHER JACKET FAQ
+              {a.faqEyebrow || 'FIRST LEATHER JACKET FAQ'}
             </div>
             <h2 className="display" style={{ fontSize: 40, fontWeight: 400, margin: '0 0 26px' }}>
               Questions worth asking.
@@ -373,12 +373,12 @@ function JournalArticle({ article, go }) {
           display: 'grid', gap: 18, background: 'var(--bg-2)',
         }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)' }}>NEXT STEP</div>
-          <div className="display" style={{ fontSize: 34, lineHeight: 1.2 }}>Find the jacket that fits your use.</div>
+          <div className="display" style={{ fontSize: 34, lineHeight: 1.2 }}>{a.nextTitle || 'Find the jacket that fits your use.'}</div>
           <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7 }}>
-            Explore standard sizes or start a made-to-measure consultation with MOTOGRIP GEAR.
+            {a.nextBody || 'Explore standard sizes or start a made-to-measure consultation with MOTOGRIP GEAR.'}
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-dark" onClick={() => go('shop', { cat: 'Jackets' })}>Shop jackets</button>
+            <button className="btn btn-dark" onClick={() => go('shop', { cat: a.nextPrimaryCat || 'Jackets' })}>{a.nextPrimary || 'Shop jackets'}</button>
             <button className="btn btn-ghost" onClick={() => go('consult')}>Custom consultation</button>
           </div>
         </aside>
