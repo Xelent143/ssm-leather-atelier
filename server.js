@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
+const { createAdminIdentity } = require('./admin-identity');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -12,7 +13,11 @@ const assetCdnBase = (process.env.ASSET_CDN_BASE || '').replace(/\/+$/, '');
 const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
-const adminSecurity = createAdminSecurity({ dataDir });
+const adminIdentity = createAdminIdentity({ dataDir });
+const adminSecurity = createAdminSecurity({
+  dataDir,
+  validateSession: (session) => adminIdentity.sessionIsValid(session),
+});
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
@@ -1212,12 +1217,208 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  if (pathname === '/api/admin/session' && req.method === 'GET') {
+  if (pathname === '/api/admin/bootstrap/status' && req.method === 'GET') {
+    const session = adminSecurity.getSession(req);
+    if (!session) {
+      sendJson(res, 401, { error: 'Authentication required' });
+      return true;
+    }
+    sendJson(res, 200, {
+      available: session.actorType === 'legacy_owner' && adminIdentity.bootstrapAvailable(),
+      ownerExists: Boolean(adminIdentity.owner()),
+    });
+    return true;
+  }
+
+  if (pathname === '/api/admin/bootstrap/owner' && req.method === 'POST') {
+    const session = adminSecurity.getSession(req);
+    if (!session || session.actorType !== 'legacy_owner') {
+      sendJson(res, 403, { error: 'Owner bootstrap is unavailable.' });
+      return true;
+    }
+    if (!adminSecurity.validOrigin(req) || !adminSecurity.validCsrf(req, session)) {
+      adminSecurity.audit(req, { action: 'owner_bootstrap', result: 'csrf_rejected', session });
+      sendJson(res, 403, { error: 'Request could not be verified.' });
+      return true;
+    }
+    if (Date.now() - session.createdAt > 10 * 60 * 1000) {
+      sendJson(res, 403, { error: 'Sign in again before creating the named Owner account.' });
+      return true;
+    }
+    adminSecurity.audit(req, { action: 'owner_bootstrap_started', result: 'started', session });
+    try {
+      const body = await readBody(req);
+      const user = await adminIdentity.bootstrapOwner(body);
+      adminSecurity.audit(req, {
+        action: 'owner_bootstrap_succeeded',
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: user.id,
+      });
+      adminSecurity.securityEvent(req, {
+        severity: 'high',
+        action: 'owner_bootstrap_succeeded',
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: user.id,
+      });
+      sendJson(res, 201, { ok: true, user });
+    } catch (error) {
+      const duplicate = error.code === 'BOOTSTRAP_CONFLICT';
+      adminSecurity.audit(req, {
+        action: duplicate ? 'duplicate_owner_bootstrap_blocked' : 'owner_bootstrap_failed',
+        result: 'failed',
+        session,
+      });
+      if (duplicate) {
+        adminSecurity.securityEvent(req, {
+          severity: 'high',
+          action: 'duplicate_owner_bootstrap_blocked',
+          result: 'blocked',
+          session,
+        });
+      }
+      const status = duplicate ? 409 : 400;
+      const safeError = ['PASSWORD_POLICY', 'VALIDATION'].includes(error.code)
+        ? error.message
+        : 'Owner bootstrap could not be completed.';
+      sendJson(res, status, { error: safeError });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/auth/named-login' && req.method === 'POST') {
+    if (!adminSecurity.validOrigin(req)) {
+      adminSecurity.audit(req, { action: 'named_login', result: 'rejected_origin' });
+      sendJson(res, 403, { error: 'Unable to sign in. Check your credentials or try again later.' });
+      return true;
+    }
+    const body = await readBody(req);
+    const result = await adminIdentity.authenticate(body.email, body.password, req);
+    if (!result.ok) {
+      if (result.reason === 'status' && result.user) {
+        adminSecurity.revokeUserSessions(result.user.id);
+        adminSecurity.securityEvent(req, {
+          severity: 'high',
+          action: 'named_login_status_denied',
+          result: 'blocked',
+          actorId: `user:${result.user.id}`,
+          entityType: 'admin_user',
+          entityId: result.user.id,
+        });
+      }
+      adminSecurity.audit(req, {
+        action: result.reason === 'rate_limit' ? 'named_login_rate_limited' : 'named_login_failed',
+        result: 'failed',
+        actorId: result.user ? `user:${result.user.id}` : 'anonymous',
+      });
+      sendJson(res, result.reason === 'rate_limit' ? 429 : 401, {
+        error: 'Unable to sign in. Check your credentials or try again later.',
+      });
+      return true;
+    }
+    const previousToken = parseCookies(req).mg_admin;
+    const session = adminSecurity.createSession(req, previousToken, {
+      actorType: 'named_user',
+      userId: result.user.id,
+      sessionRevocationVersion: result.user.sessionRevocationVersion,
+      authMethod: 'email_password',
+    });
+    adminSecurity.audit(req, {
+      action: 'named_login_succeeded',
+      result: 'success',
+      session,
+      entityType: 'admin_user',
+      entityId: result.user.id,
+    });
+    adminSecurity.audit(req, {
+      action: 'session_created',
+      result: 'success',
+      session,
+      entityType: 'admin_session',
+      entityId: session.id,
+    });
+    sendJson(res, 200, { ok: true, csrfToken: session.csrfToken }, {
+      'Set-Cookie': adminSecurity.cookie(session, adminSecurity.isSecureRequest(req)),
+    });
+    return true;
+  }
+
+  if (pathname === '/api/admin/auth/password/forgot' && req.method === 'POST') {
+    if (!adminIdentity.allowAction(req, 'password_forgot', 5, 15 * 60 * 1000)) {
+      sendJson(res, 200, { ok: true, message: 'If the account is eligible, password-reset instructions will be sent.' });
+      return true;
+    }
+    if (!adminSecurity.validOrigin(req)) {
+      sendJson(res, 200, { ok: true, message: 'If the account is eligible, password-reset instructions will be sent.' });
+      return true;
+    }
+    const body = await readBody(req);
+    const requested = await adminIdentity.requestPasswordReset(body.email);
+    adminSecurity.audit(req, {
+      action: 'password_reset_requested',
+      result: 'accepted',
+      actorId: requested ? `user:${requested.record.userId}` : 'anonymous',
+      entityType: requested ? 'admin_user' : null,
+      entityId: requested?.record.userId || null,
+    });
+    sendJson(res, 200, { ok: true, message: 'If the account is eligible, password-reset instructions will be sent.' });
+    return true;
+  }
+
+  if (pathname === '/api/admin/auth/password/reset' && req.method === 'POST') {
+    if (!adminIdentity.allowAction(req, 'password_reset', 10, 15 * 60 * 1000)) {
+      sendJson(res, 429, { error: 'Password reset could not be completed.' });
+      return true;
+    }
+    if (!adminSecurity.validOrigin(req)) {
+      sendJson(res, 400, { error: 'Password reset could not be completed.' });
+      return true;
+    }
+    const body = await readBody(req);
+    const result = await adminIdentity.resetPassword(body.token, body.password);
+    if (!result.ok) {
+      adminSecurity.audit(req, { action: 'password_reset_failed', result: 'failed', actorId: 'anonymous' });
+      adminSecurity.securityEvent(req, {
+        severity: 'medium',
+        action: 'password_reset_failed',
+        result: 'failed',
+        actorId: 'anonymous',
+      });
+      sendJson(res, 400, {
+        error: result.reason === 'password_policy' ? result.error : 'Password reset could not be completed.',
+      });
+      return true;
+    }
+    adminSecurity.revokeUserSessions(result.user.id);
+    adminSecurity.audit(req, {
+      action: 'password_reset_completed',
+      result: 'success',
+      actorId: `user:${result.user.id}`,
+      entityType: 'admin_user',
+      entityId: result.user.id,
+    });
+    adminSecurity.securityEvent(req, {
+      severity: 'high',
+      action: 'password_reset_completed',
+      result: 'success',
+      actorId: `user:${result.user.id}`,
+      entityType: 'admin_user',
+      entityId: result.user.id,
+    });
+    sendJson(res, 200, { ok: true });
+    return true;
+  }
+
+  if ((pathname === '/api/admin/session' || pathname === '/api/admin/auth/session') && req.method === 'GET') {
     const session = adminSecurity.getSession(req);
     sendJson(res, 200, {
       authenticated: Boolean(session),
       configured: Boolean(process.env.ADMIN_PASSWORD),
       csrfToken: session?.csrfToken || null,
+      actorType: session?.actorType || null,
     });
     return true;
   }
@@ -1248,15 +1449,35 @@ async function handleApi(req, res, pathname) {
     }
     adminSecurity.recordSuccessfulLogin();
     const previousToken = parseCookies(req).mg_admin;
-    const session = adminSecurity.createSession(req, previousToken);
+    const session = adminSecurity.createSession(req, previousToken, {
+      actorType: 'legacy_owner',
+      authMethod: 'legacy_password',
+    });
     adminSecurity.audit(req, { action: 'login', result: 'success', session });
+    adminSecurity.audit(req, {
+      action: 'session_created',
+      result: 'success',
+      session,
+      entityType: 'admin_session',
+      entityId: session.id,
+    });
+    if (adminIdentity.owner()) {
+      adminSecurity.securityEvent(req, {
+        severity: 'high',
+        action: 'legacy_login_after_named_owner',
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: adminIdentity.owner().id,
+      });
+    }
     sendJson(res, 200, { ok: true, csrfToken: session.csrfToken }, {
       'Set-Cookie': adminSecurity.cookie(session, adminSecurity.isSecureRequest(req)),
     });
     return true;
   }
 
-  if (pathname === '/api/admin/logout' && req.method === 'POST') {
+  if ((pathname === '/api/admin/logout' || pathname === '/api/admin/auth/logout') && req.method === 'POST') {
     const session = adminSecurity.getSession(req);
     if (session && (!adminSecurity.validOrigin(req) || !adminSecurity.validCsrf(req, session))) {
       sendJson(res, 403, { error: 'Request could not be verified.' });
@@ -1265,6 +1486,15 @@ async function handleApi(req, res, pathname) {
     const token = parseCookies(req).mg_admin;
     adminSecurity.revokeSession(token);
     adminSecurity.audit(req, { action: 'logout', result: 'success', session });
+    if (session) {
+      adminSecurity.audit(req, {
+        action: 'session_revoked',
+        result: 'success',
+        session,
+        entityType: 'admin_session',
+        entityId: session.id,
+      });
+    }
     sendJson(res, 200, { ok: true }, {
       'Set-Cookie': adminSecurity.clearCookie(adminSecurity.isSecureRequest(req)),
     });
@@ -1286,6 +1516,25 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/admin/store' && req.method === 'GET') {
     sendJson(res, 200, readStore());
+    return true;
+  }
+
+  if (pathname === '/api/admin/me' && req.method === 'GET') {
+    const namedUser = session.actorType === 'named_user' ? adminIdentity.findById(session.userId) : null;
+    const owner = adminIdentity.owner();
+    sendJson(res, 200, {
+      actorType: session.actorType,
+      user: adminIdentity.publicUser(namedUser),
+      owner: adminIdentity.publicUser(owner),
+      activeSessionCount: namedUser
+        ? adminIdentity.countActiveSessions(namedUser.id, adminSecurity.readState())
+        : null,
+      bootstrapAvailable: session.actorType === 'legacy_owner' && !owner,
+      legacyCompatibilityEnabled: Boolean(process.env.ADMIN_PASSWORD),
+      legacyCompatibilityWarning: owner && process.env.ADMIN_PASSWORD
+        ? 'Legacy compatibility login is still enabled and must be removed only after later security phases and explicit Owner approval.'
+        : null,
+    });
     return true;
   }
 
@@ -1444,6 +1693,8 @@ if (require.main === module) {
 
 module.exports = {
   server,
+  adminIdentity,
+  adminSecurity,
   productMeta,
   injectProductHead,
   injectRouteHead,

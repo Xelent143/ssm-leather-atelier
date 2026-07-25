@@ -20,6 +20,10 @@ assets/generated/atelier-workbench.jpg
 data/admin-security.json
 data/admin-security.json.*.tmp
 data/admin-audit.ndjson
+data/admin-security-events.ndjson
+data/admin-identities.json
+data/admin-identities.json.*.tmp
+data/admin-identities.bootstrap.lock
 data/admin-store.json.*.tmp
 data/*session*.json
 data/*lockout*.json

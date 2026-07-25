@@ -4,6 +4,10 @@ const state = {
   authed: false,
   configured: true,
   csrfToken: null,
+  actorType: null,
+  loginMode: 'named',
+  identity: null,
+  bootstrapSkipped: false,
   loading: true,
   view: 'dashboard',
   query: '',
@@ -43,13 +47,13 @@ function slugify(value = '') {
 async function api(path, options = {}) {
   const method = String(options.method || 'GET').toUpperCase();
   const response = await fetch(path, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(!['GET', 'HEAD', 'OPTIONS'].includes(method) && state.csrfToken ? { 'X-CSRF-Token': state.csrfToken } : {}),
       ...(options.headers || {}),
     },
     credentials: 'same-origin',
-    ...options,
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Request failed');
@@ -117,6 +121,7 @@ function filteredReturns() {
 }
 
 function renderLogin(error = '') {
+  const named = state.loginMode === 'named';
   root.innerHTML = `
     <main class="login-shell">
       <form class="login-card" id="login-form">
@@ -128,34 +133,122 @@ function renderLogin(error = '') {
           </div>
         </div>
         <p>Sign in to manage products, made-to-measure pricing, order workflow, and brand content.</p>
-        ${!state.configured ? '<p class="pill archived">Admin access is not configured. Contact the site administrator.</p>' : ''}
+        <div class="button-row">
+          <button class="btn ${named ? 'primary' : ''}" type="button" data-login-mode="named">Named account</button>
+          <button class="btn ${!named ? 'primary' : ''}" type="button" data-login-mode="legacy">Legacy compatibility</button>
+        </div>
+        ${!named && !state.configured ? '<p class="pill archived">Legacy admin access is not configured. Contact the site administrator.</p>' : ''}
+        ${named ? `
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" autocomplete="username" autofocus>
+          </div>
+        ` : ''}
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" autofocus>
+          <input id="password" type="password" autocomplete="current-password" ${named ? '' : 'autofocus'}>
         </div>
         ${error ? `<p class="pill archived">${escapeHtml(error)}</p>` : ''}
         <div style="height: 18px"></div>
-        <button class="btn primary" type="submit" ${!state.configured ? 'disabled' : ''}>Sign in</button>
+        <button class="btn primary" type="submit" ${!named && !state.configured ? 'disabled' : ''}>Sign in</button>
       </form>
     </main>
   `;
+  document.querySelectorAll('[data-login-mode]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.loginMode = button.dataset.loginMode;
+      renderLogin();
+    });
+  });
   document.getElementById('login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     try {
-      const login = await api('/api/admin/login', {
+      const login = await api(named ? '/api/admin/auth/named-login' : '/api/admin/login', {
         method: 'POST',
-        body: JSON.stringify({ password: document.getElementById('password').value }),
+        body: JSON.stringify({
+          ...(named ? { email: document.getElementById('email').value } : {}),
+          password: document.getElementById('password').value,
+        }),
       });
       state.csrfToken = login.csrfToken;
       state.authed = true;
-      await loadStore();
+      state.bootstrapSkipped = false;
+      await loadAdmin();
     } catch (err) {
       renderLogin(err.message);
     }
   });
 }
 
+function renderBootstrap(error = '', success = false) {
+  root.innerHTML = `
+    <main class="login-shell">
+      <form class="login-card" id="bootstrap-form">
+        <div class="login-brand">
+          <div class="brand-mark wide"><img src="/assets/motogrip-logo-transparent.png" alt=""></div>
+          <div>
+            <div class="eyebrow">Phase 2A</div>
+            <h1>Named Owner account</h1>
+          </div>
+        </div>
+        ${success ? `
+          <p class="pill active">Named Owner account created successfully.</p>
+          <p>Log out, then test the new email and password using Named account login. Legacy compatibility remains enabled.</p>
+          <button class="btn primary" id="bootstrap-finish" type="button">Continue to admin</button>
+        ` : `
+          <p>Create the first named Owner account. This does not disable the legacy compatibility login.</p>
+          <div class="field">
+            <label for="owner-email">Owner email</label>
+            <input id="owner-email" type="email" autocomplete="email" required autofocus>
+          </div>
+          <div class="field">
+            <label for="owner-name">Display name</label>
+            <input id="owner-name" type="text" autocomplete="name" maxlength="120" required>
+          </div>
+          <div class="field">
+            <label for="owner-password">New named-account passphrase</label>
+            <input id="owner-password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+          </div>
+          ${error ? `<p class="pill archived">${escapeHtml(error)}</p>` : ''}
+          <div style="height: 18px"></div>
+          <div class="button-row">
+            <button class="btn primary" type="submit">Create named Owner</button>
+            <button class="btn" id="bootstrap-skip" type="button">Continue with legacy login</button>
+          </div>
+        `}
+      </form>
+    </main>
+  `;
+  document.getElementById('bootstrap-skip')?.addEventListener('click', async () => {
+    state.bootstrapSkipped = true;
+    await loadStore();
+  });
+  document.getElementById('bootstrap-finish')?.addEventListener('click', async () => {
+    state.bootstrapSkipped = true;
+    await loadAdmin();
+  });
+  document.getElementById('bootstrap-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      await api('/api/admin/bootstrap/owner', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: document.getElementById('owner-email').value,
+          displayName: document.getElementById('owner-name').value,
+          password: document.getElementById('owner-password').value,
+        }),
+      });
+      state.identity = await api('/api/admin/me');
+      renderBootstrap('', true);
+    } catch (err) {
+      renderBootstrap(err.message);
+    }
+  });
+}
+
 function shell(content) {
+  const owner = state.identity?.owner;
+  const compatibilityWarning = state.identity?.legacyCompatibilityWarning;
   return `
     <div class="admin-shell">
       <aside class="sidebar">
@@ -178,6 +271,11 @@ function shell(content) {
         <div class="sidebar-footer">
           <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
           ${state.store.products.length} products · ${state.store.orders.length} orders
+          ${owner ? `
+            <br><span class="muted">${escapeHtml(owner.displayName)} · ${escapeHtml(owner.status)}</span>
+            <br><span class="muted">Last login: ${owner.lastLoginAt ? escapeHtml(new Date(owner.lastLoginAt).toLocaleString()) : 'Not yet'}</span>
+            ${state.identity?.activeSessionCount !== null ? `<br><span class="muted">Active sessions: ${Number(state.identity.activeSessionCount || 0)}</span>` : ''}
+          ` : ''}
         </div>
       </aside>
       <main class="main">
@@ -190,7 +288,10 @@ function shell(content) {
             <button class="btn" id="logout">Log out</button>
           </div>
         </header>
-        <section class="content">${content}</section>
+        <section class="content">
+          ${compatibilityWarning ? `<p class="pill draft">${escapeHtml(compatibilityWarning)}</p><div style="height:16px"></div>` : ''}
+          ${content}
+        </section>
       </main>
       <div class="savebar">
         <span>Unsaved changes</span>
@@ -612,6 +713,8 @@ function bindShell() {
       state.authed = false;
       state.store = null;
       state.csrfToken = null;
+      state.actorType = null;
+      state.identity = null;
       renderLogin();
     } catch (err) {
       toast(err.message);
@@ -773,6 +876,16 @@ async function loadStore() {
   render();
 }
 
+async function loadAdmin() {
+  state.identity = await api('/api/admin/me');
+  state.actorType = state.identity.actorType;
+  if (state.identity.bootstrapAvailable && !state.bootstrapSkipped) {
+    renderBootstrap();
+    return;
+  }
+  await loadStore();
+}
+
 async function saveStore() {
   state.store = await api('/api/admin/store', {
     method: 'PUT',
@@ -789,7 +902,8 @@ async function init() {
     state.authed = session.authenticated;
     state.configured = session.configured;
     state.csrfToken = session.csrfToken;
-    if (state.authed) await loadStore();
+    state.actorType = session.actorType;
+    if (state.authed) await loadAdmin();
     else renderLogin();
   } catch (err) {
     root.innerHTML = `<main class="login-shell"><div class="login-card">Admin failed to load: ${escapeHtml(err.message)}</div></main>`;

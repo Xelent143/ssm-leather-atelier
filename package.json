@@ -7,9 +7,12 @@
     "dev": "PORT=5173 node server.js",
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check server.js && node --check admin-security.js && node --check admin.js"
+    "check": "node --check server.js && node --check admin-security.js && node --check admin-identity.js && node --check admin.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.0.2"
   }
 }

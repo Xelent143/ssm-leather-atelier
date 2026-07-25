@@ -30,8 +30,10 @@ function createAdminSecurity(options = {}) {
   const dataDir = options.dataDir;
   const now = options.now || (() => Date.now());
   const logger = options.logger || console;
+  const validateSession = options.validateSession || (() => true);
   const statePath = path.join(dataDir, 'admin-security.json');
   const auditPath = path.join(dataDir, 'admin-audit.ndjson');
+  const securityEventsPath = path.join(dataDir, 'admin-security-events.ndjson');
   const loginAttempts = new Map();
 
   function ensureDataDir() {
@@ -63,7 +65,9 @@ function createAdminSecurity(options = {}) {
   }
 
   function actorId(session) {
-    return session ? `owner:${session.id.slice(0, 12)}` : 'owner:anonymous';
+    if (!session) return 'anonymous';
+    if (session.actorType === 'named_user' && session.userId) return `user:${session.userId}`;
+    return 'legacy_owner';
   }
 
   function clientIp(req) {
@@ -101,10 +105,27 @@ function createAdminSecurity(options = {}) {
     return record;
   }
 
+  function securityEvent(req, event) {
+    ensureDataDir();
+    const record = {
+      timestamp: new Date(now()).toISOString(),
+      severity: String(event.severity || 'medium'),
+      action: String(event.action),
+      result: String(event.result),
+      actorId: event.actorId || actorId(event.session),
+      ip: maskedIp(req),
+      entityType: event.entityType || null,
+      entityId: event.entityId || null,
+    };
+    fs.appendFileSync(securityEventsPath, `${JSON.stringify(record)}\n`, { mode: 0o600 });
+    logger.info(`Admin security alert: ${record.severity} ${record.action} ${record.result}`);
+    return record;
+  }
+
   function cleanup(state) {
     const currentTime = now();
     for (const [hash, session] of Object.entries(state.sessions)) {
-      if (!session || session.expiresAt <= currentTime || session.revokedAt) delete state.sessions[hash];
+      if (!session || session.expiresAt <= currentTime) delete state.sessions[hash];
     }
     if (state.lockout && state.lockout.until > 0 && state.lockout.until <= currentTime) state.lockout = null;
     return state;
@@ -115,27 +136,38 @@ function createAdminSecurity(options = {}) {
     if (!token) return null;
     const state = cleanup(readState());
     const session = state.sessions[tokenHash(token)];
-    if (!session || session.expiresAt <= now() || session.revokedAt) {
+    if (!session || session.expiresAt <= now() || session.revokedAt || !validateSession(session)) {
+      if (session && !session.revokedAt) session.revokedAt = now();
       writeState(state);
       return null;
     }
+    session.lastActivityAt = now();
+    writeState(state);
     return { ...session, token };
   }
 
-  function createSession(req, previousToken) {
+  function createSession(req, previousToken, identity = {}) {
     const state = cleanup(readState());
-    if (previousToken) delete state.sessions[tokenHash(previousToken)];
+    if (previousToken && state.sessions[tokenHash(previousToken)]) {
+      state.sessions[tokenHash(previousToken)].revokedAt = now();
+    }
     const token = crypto.randomBytes(32).toString('base64url');
     const hash = tokenHash(token);
+    const actorType = identity.actorType || 'legacy_owner';
     const session = {
       id: crypto.randomUUID(),
-      provider: 'single-owner',
-      subject: 'owner',
-      roles: ['owner'],
-      permissions: ['admin:*'],
+      actorType,
+      userId: identity.userId || null,
+      provider: actorType === 'named_user' ? 'named-user' : 'legacy-compatibility',
+      subject: identity.userId || 'legacy_owner',
+      sessionRevocationVersion: Number(identity.sessionRevocationVersion || 0),
+      authMethod: identity.authMethod || (actorType === 'named_user' ? 'email_password' : 'legacy_password'),
       csrfToken: crypto.randomBytes(32).toString('base64url'),
       createdAt: now(),
+      lastActivityAt: now(),
+      absoluteExpiresAt: now() + SESSION_TTL_MS,
       expiresAt: now() + SESSION_TTL_MS,
+      revokedAt: null,
     };
     state.sessions[hash] = session;
     writeState(state);
@@ -146,10 +178,23 @@ function createAdminSecurity(options = {}) {
     if (!token) return false;
     const state = cleanup(readState());
     const hash = tokenHash(token);
-    const existed = Boolean(state.sessions[hash]);
-    delete state.sessions[hash];
+    const existed = Boolean(state.sessions[hash] && !state.sessions[hash].revokedAt);
+    if (state.sessions[hash]) state.sessions[hash].revokedAt = now();
     writeState(state);
     return existed;
+  }
+
+  function revokeUserSessions(userId) {
+    const state = cleanup(readState());
+    let revoked = 0;
+    for (const session of Object.values(state.sessions)) {
+      if (session.userId === userId && !session.revokedAt) {
+        session.revokedAt = now();
+        revoked += 1;
+      }
+    }
+    writeState(state);
+    return revoked;
   }
 
   function cookie(session, secure) {
@@ -230,11 +275,14 @@ function createAdminSecurity(options = {}) {
     recordLoginAttempt,
     recordSuccessfulLogin,
     revokeSession,
+    revokeUserSessions,
+    securityEvent,
     validCsrf,
     validOrigin,
     actorId,
     parseCookies,
-    paths: { statePath, auditPath },
+    readState,
+    paths: { statePath, auditPath, securityEventsPath },
   };
 }
 
