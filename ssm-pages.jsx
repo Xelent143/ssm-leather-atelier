@@ -106,24 +106,59 @@ function CTAStrip({ title, body, primary, ghost, onPrimary, onGhost }) {
 
 // ── Journal grid ────────────────────────────────────────────────────────────
 
+function BrandedEditorialImage({ src, alt, caption, eager = false, ratio = '3 / 2' }) {
+  return (
+    <figure className="journal-media" style={{ margin: 0 }}>
+      <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: ratio, background: 'var(--bg-2)' }}>
+        <img
+          src={src}
+          alt={alt}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <img
+          src="/assets/motogrip-logo-transparent-v2.png"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute', left: 22, top: 18, width: 'clamp(108px, 15vw, 190px)',
+            height: 'auto', opacity: .92, filter: 'drop-shadow(0 2px 6px rgba(245,241,232,.55))',
+            pointerEvents: 'none',
+          }}
+        />
+      </div>
+      {caption && (
+        <figcaption className="mono" style={{ fontSize: 9, lineHeight: 1.6, color: 'var(--fg-4)', marginTop: 10 }}>
+          {caption.toUpperCase()}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
 function Journal({ go }) {
   const [feature, ...rest] = SSM_JOURNAL;
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="JOURNAL"
-        title="Sleeve"
-        italic="Notes."
-        dek="Long-form notes on the hide, the maker, and the wardrobe — written from the bench."
-        meta={`${SSM_JOURNAL.length} entries · MMXXVI`}
+        eyebrow="MOTOGRIP JOURNAL"
+        title="Leather,"
+        italic="properly explained."
+        dek="Original buying, fit, care and craftsmanship guidance from MOTOGRIP GEAR."
+        meta={`${SSM_JOURNAL.length} guide · 2026`}
       />
 
       {/* Featured entry */}
-      <section style={{ padding: '0 48px 80px' }}>
+      <section className="journal-page-pad" style={{ padding: '0 48px 80px' }}>
         <div onClick={() => go('article', { article: feature })}
+          className="journal-feature-grid"
           style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40, cursor: 'pointer' }}>
-          <div className="ph grain card-img" data-img="1" data-label=""
-            style={{ aspectRatio: '4/3', '--img': `url(${feature.hero})` }} />
+          <BrandedEditorialImage
+            src={feature.hero}
+            alt="Man wearing a fitted espresso leather cafe racer jacket in the MOTOGRIP GEAR studio"
+            eager={true}
+          />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
               {feature.cat.toUpperCase()} · {feature.duration.toUpperCase()}
@@ -135,46 +170,44 @@ function Journal({ go }) {
               {feature.dek}
             </div>
             <div className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)', marginTop: 28 }}>
-              READ THE ESSAY →
+              READ THE GUIDE →
             </div>
           </div>
         </div>
       </section>
 
       {/* Grid */}
-      <section style={{ padding: '0 48px 80px' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          ARCHIVE · MMXXVI
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
-          {rest.map(j => (
-            <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
-              <div className="ph grain card-img" data-img="1" data-label=""
-                style={{ aspectRatio: '3/4', '--img': `url(${j.hero})` }} />
-              <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 16 }}>
-                {j.cat.toUpperCase()} · {j.duration.toUpperCase()}
+      {rest.length > 0 && (
+        <section className="journal-page-pad" style={{ padding: '0 48px 80px' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
+            MORE GUIDES
+          </div>
+          <div className="journal-archive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+            {rest.map(j => (
+              <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
+                <BrandedEditorialImage src={j.hero} alt={j.title} ratio="4 / 5" />
+                <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 16 }}>
+                  {j.cat.toUpperCase()} · {j.duration.toUpperCase()}
+                </div>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.15, marginTop: 8 }}>
+                  {j.title}
+                </div>
+                <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
+                  {j.dek}
+                </div>
               </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.15, marginTop: 8 }}>
-                {j.title}
-              </div>
-              <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
-                {j.dek}
-              </div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 14 }}>
-                {j.byline.toUpperCase()} · {j.date.toUpperCase()}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <CTAStrip
-        title="The first viewing of every chapter."
-        body="Subscribe to road notes - we send a short note when a journal entry, lookbook chapter, or small batch of gear leaves the fit room. No discounts, no surveys, no other people's products."
-        primary="Subscribe"
-        ghost="Continue to the shop"
-        onPrimary={() => {}}
-        onGhost={() => go('shop')}
+        title="Ready to find your jacket?"
+        body="Use the guide, compare the details, then explore MOTOGRIP GEAR leather jackets and made-to-measure options."
+        primary="Shop leather jackets"
+        ghost="Custom consultation"
+        onPrimary={() => go('shop', { cat: 'Jackets' })}
+        onGhost={() => go('consult')}
       />
     </div>
   );
@@ -186,7 +219,7 @@ function JournalArticle({ article, go }) {
   const a = article || SSM_JOURNAL[0];
   return (
     <div className="page-fade">
-      <section style={{ padding: '64px 48px 0', maxWidth: 920, margin: '0 auto' }}>
+      <section className="article-heading" style={{ padding: '64px 48px 0', maxWidth: 1040, margin: '0 auto' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 16, display: 'flex', gap: 8 }}>
           <span onClick={() => go('home')} className="ulink" style={{ cursor: 'pointer' }}>HOUSE</span>
           <span>/</span>
@@ -208,10 +241,29 @@ function JournalArticle({ article, go }) {
         </div>
       </section>
 
-      <div className="ph grain" data-img="1" data-label=""
-        style={{ height: 540, margin: '48px 48px', '--img': `url(${a.hero})` }} />
+      <div className="article-hero-wrap" style={{ margin: '48px' }}>
+        <BrandedEditorialImage
+          src={a.hero}
+          alt="Man wearing a fitted espresso leather cafe racer jacket in a warm MOTOGRIP GEAR studio"
+          eager={true}
+        />
+      </div>
 
-      <article style={{ padding: '0 48px 64px', maxWidth: 760, margin: '0 auto' }}>
+      <article className="article-copy" style={{ padding: '0 48px 80px', maxWidth: 820, margin: '0 auto' }}>
+        {a.quickAnswer && (
+          <aside style={{
+            borderTop: '2px solid var(--accent-2)', borderBottom: '1px solid var(--line)',
+            padding: '24px 0', marginBottom: 40,
+          }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
+              QUICK ANSWER
+            </div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.45, color: 'var(--fg-2)' }}>
+              {a.quickAnswer}
+            </div>
+          </aside>
+        )}
+
         {a.body.map((p, i) => (
           <p key={i} style={{
             fontFamily: i === 0 ? 'var(--display)' : 'var(--sans)',
@@ -221,9 +273,48 @@ function JournalArticle({ article, go }) {
             margin: '0 0 24px',
           }}>{p}</p>
         ))}
+
+        {a.sections?.map((section, index) => (
+          <React.Fragment key={section.title}>
+            <section style={{ marginTop: 56 }}>
+              <h2 className="display" style={{
+                fontSize: 'clamp(30px, 4vw, 44px)', lineHeight: 1.12, fontWeight: 400,
+                margin: '0 0 22px', color: 'var(--fg)',
+              }}>
+                {section.title}
+              </h2>
+              {section.paragraphs?.map((paragraph, paragraphIndex) => (
+                <p key={paragraphIndex} style={{
+                  fontSize: 16, lineHeight: 1.85, color: 'var(--fg-3)', margin: '0 0 22px',
+                }}>
+                  {paragraph}
+                </p>
+              ))}
+              {section.bullets?.length > 0 && (
+                <ul style={{
+                  margin: '10px 0 28px', paddingLeft: 22, color: 'var(--fg-3)',
+                  fontSize: 15, lineHeight: 1.8,
+                }}>
+                  {section.bullets.map(item => <li key={item} style={{ marginBottom: 8 }}>{item}</li>)}
+                </ul>
+              )}
+            </section>
+            {section.image && (
+              <div style={{ margin: '36px 0 56px' }}>
+                <BrandedEditorialImage
+                  src={section.image}
+                  alt={section.imageAlt}
+                  caption={section.imageCaption}
+                  ratio={index === 1 ? '4 / 3' : '3 / 2'}
+                />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+
         {a.pull && (
           <div style={{
-            margin: '48px 0', padding: '32px 0',
+            margin: '56px 0', padding: '34px 0',
             borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)',
           }}>
             <div className="display" style={{
@@ -231,27 +322,69 @@ function JournalArticle({ article, go }) {
             }}>&ldquo;{a.pull}&rdquo;</div>
           </div>
         )}
+
+        {a.checklist?.length > 0 && (
+          <section style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', padding: '34px', margin: '0 0 56px' }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
+              BEFORE YOU BUY
+            </div>
+            <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 22px' }}>
+              Your seven-point jacket checklist.
+            </h2>
+            <div style={{ display: 'grid', gap: 14 }}>
+              {a.checklist.map(item => (
+                <div key={item} style={{ display: 'grid', gridTemplateColumns: '22px 1fr', gap: 12, alignItems: 'start' }}>
+                  <span aria-hidden="true" style={{ color: 'var(--accent-2)', fontSize: 17 }}>✓</span>
+                  <span style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.65 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {a.faq?.length > 0 && (
+          <section style={{ marginTop: 56 }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
+              FIRST LEATHER JACKET FAQ
+            </div>
+            <h2 className="display" style={{ fontSize: 40, fontWeight: 400, margin: '0 0 26px' }}>
+              Questions worth asking.
+            </h2>
+            <div style={{ borderTop: '1px solid var(--line)' }}>
+              {a.faq.map(item => (
+                <details key={item.q} style={{ borderBottom: '1px solid var(--line)', padding: '20px 0' }}>
+                  <summary style={{
+                    cursor: 'pointer', fontFamily: 'var(--display)', fontSize: 23, lineHeight: 1.3,
+                    color: 'var(--fg)', paddingRight: 24,
+                  }}>
+                    {item.q}
+                  </summary>
+                  <p style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.8, margin: '16px 0 0', maxWidth: 720 }}>
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <aside style={{
+          marginTop: 64, padding: '34px', border: '1px solid var(--line)',
+          display: 'grid', gap: 18, background: 'var(--bg-2)',
+        }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)' }}>NEXT STEP</div>
+          <div className="display" style={{ fontSize: 34, lineHeight: 1.2 }}>Find the jacket that fits your use.</div>
+          <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7 }}>
+            Explore standard sizes or start a made-to-measure consultation with MOTOGRIP GEAR.
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn btn-dark" onClick={() => go('shop', { cat: 'Jackets' })}>Shop jackets</button>
+            <button className="btn btn-ghost" onClick={() => go('consult')}>Custom consultation</button>
+          </div>
+        </aside>
       </article>
 
-      <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-          CONTINUE READING
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
-          {SSM_JOURNAL.filter(j => j.id !== a.id).slice(0, 3).map(j => (
-            <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
-              <div className="ph card-img" data-img="1" data-label=""
-                style={{ aspectRatio: '4/5', '--img': `url(${j.hero})` }} />
-              <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 14 }}>
-                {j.cat.toUpperCase()}
-              </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 22, marginTop: 6, lineHeight: 1.2 }}>
-                {j.title}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div style={{ borderTop: '1px solid var(--line)' }} />
     </div>
   );
 }

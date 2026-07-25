@@ -32,6 +32,19 @@ const publicRoutes = {
   '/made-to-measure': { view: 'mto', title: 'Made-to-Measure Leather Gear | MOTOGRIP GEAR', desc: 'Create made-to-measure leather jackets, vests, and trousers with guided measurements, material choices, and custom details.' },
   '/lookbook': { view: 'lookbook', title: 'Leather Gear Lookbook | MOTOGRIP GEAR', desc: 'Explore MOTOGRIP GEAR leather jackets, vests, and riding silhouettes in premium editorial and road-inspired settings.' },
   '/blog': { view: 'journal', title: 'Leather & Motorcycle Gear Guides | MOTOGRIP GEAR', desc: 'Read original fit, leather care, craftsmanship, product-testing, and motorcycle gear guides from MOTOGRIP GEAR.' },
+  '/blog/how-to-buy-your-first-leather-jacket': {
+    view: 'article',
+    params: { articleId: 'how-to-buy-your-first-leather-jacket' },
+    title: 'How to Buy Your First Leather Jacket | MOTOGRIP GEAR',
+    desc: 'Learn how to choose leather type, fit, lining, hardware and construction before buying your first leather jacket with this practical MOTOGRIP GEAR guide.',
+    image: '/assets/generated/blog/first-leather-jacket-hero.jpg',
+    article: {
+      headline: 'How to Buy Your First Leather Jacket',
+      datePublished: '2026-07-25',
+      dateModified: '2026-07-25',
+      author: 'MOTOGRIP GEAR Editorial',
+    },
+  },
   '/brand': { view: 'about', title: 'About MOTOGRIP GEAR | Motorcycle Leather Craftsmanship', desc: 'Discover MOTOGRIP GEAR, a premium leather brand focused on authentic craftsmanship, functional design, precise fit, and lasting value.' },
   '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
   '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
@@ -669,6 +682,24 @@ function injectRouteHead(html, route, req) {
   const canonical = absoluteUrl(req, new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname.replace(/\/$/, '') || '/');
   const robots = route.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large';
   const initialRoute = { view: route.view, ...(route.params ? { params: route.params } : {}) };
+  const image = route.image ? absoluteUrl(req, route.image) : '';
+  const articleJsonLd = route.article ? `
+<script type="application/ld+json">${escapeScriptJson({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: route.article.headline,
+    description: route.desc,
+    image: [image],
+    datePublished: route.article.datePublished,
+    dateModified: route.article.dateModified,
+    author: { '@type': 'Organization', name: route.article.author, url: absoluteUrl(req, '/') },
+    publisher: {
+      '@type': 'Organization',
+      name: 'MOTOGRIP GEAR',
+      logo: { '@type': 'ImageObject', url: absoluteUrl(req, '/assets/motogrip-logo-transparent-v2.png') },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  })}</script>` : '';
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(route.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(route.desc)}" />`)
@@ -677,7 +708,12 @@ function injectRouteHead(html, route, req) {
     .replace(/<meta property="og:url" content=".*?" \/>/s, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:title" content=".*?" \/>/s, `<meta property="og:title" content="${escapeHtml(route.title)}" />`)
     .replace(/<meta property="og:description" content=".*?" \/>/s, `<meta property="og:description" content="${escapeHtml(route.desc)}" />`)
-    .replace('</head>', `<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson(initialRoute)};</script>\n</head>`);
+    .replace(/<meta property="og:type" content=".*?" \/>/s, `<meta property="og:type" content="${route.article ? 'article' : 'website'}" />`)
+    .replace(/<meta property="og:image" content=".*?" \/>/s, image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : '$&')
+    .replace(/<meta name="twitter:title" content=".*?" \/>/s, `<meta name="twitter:title" content="${escapeHtml(route.title)}" />`)
+    .replace(/<meta name="twitter:description" content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(route.desc)}" />`)
+    .replace(/<meta name="twitter:image" content=".*?" \/>/s, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '$&')
+    .replace('</head>', `${articleJsonLd}\n<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson(initialRoute)};</script>\n</head>`);
 }
 
 function servePublicRoute(req, res, route) {

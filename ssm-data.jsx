@@ -180,73 +180,141 @@ const SSM_NAV = [
 
 const SSM_JOURNAL = [
   {
-    id: 'why-we-tan-twelve-months',
-    cat: 'The Hide',
-    title: 'Why we tan for twelve months.',
-    dek: 'A short essay on patience, pits, and the smell of oak bark.',
-    duration: '4 min',
-    date: 'April 12, MMXXVI',
-    byline: 'The Founder',
-    hero: SSM_ASSETS.detail,
+    id: 'how-to-buy-your-first-leather-jacket',
+    cat: 'Buying Guide',
+    title: 'How to buy your first leather jacket.',
+    seoTitle: 'How to Buy Your First Leather Jacket | MOTOGRIP GEAR',
+    metaDescription: 'Learn how to choose leather type, fit, lining, hardware and construction before buying your first leather jacket with this practical MOTOGRIP GEAR guide.',
+    dek: 'A practical guide to leather type, construction, fit and value—so your first jacket becomes one you will keep wearing.',
+    duration: '12 min',
+    date: 'July 25, 2026',
+    isoDate: '2026-07-25',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/first-leather-jacket-hero.jpg',
+    quickAnswer: 'Choose the jacket for its intended use first, then compare the hide, construction, hardware, lining and fit. A good leather jacket should sit cleanly at the shoulders, allow comfortable movement, use dependable components and make its material details clear.',
     body: [
-      "There is a faster way. Most of the leather sold under the word 'luxury' is chrome-tanned in twelve hours. It is consistent, it is cheap, it is dead. We do not use it.",
-      "Our hides come from a single tannery in the hills outside Pisa, where they sit in oak-bark and chestnut-bark pits for between ten and fourteen months. The tannins do their work slowly. The leather is not finished by the time it leaves the pit; it is barely beginning. What you receive in a Voltaire or a Hadley is leather that has had a slow life and now begins a new one with you.",
-      "We are sometimes asked whether twelve months is necessary. The honest answer is that we have tried six and we have tried eighteen, and twelve is the number at which the hide is supple enough to cut and dense enough to age. There is no science here we did not learn from the people in Pisa. We are guests on a road they have been walking since the seventeenth century.",
-      "The other answer, less honest, is that we wanted a number we could put on a page that would make us slow down. Twelve months is a long time. We needed to be the kind of house that would wait."
+      'A leather jacket is one of the few garments expected to improve as it is worn. That only happens when the material, pattern and construction suit the way you will actually use it. The right first jacket is not automatically the heaviest, softest or most expensive one; it is the jacket whose purpose, feel and fit are right for you.',
+      'Use this guide as a product-page checklist. Good brands should explain what the jacket is made from, how it fits and what features are included. If important details are missing, ask before you buy.'
     ],
-    pull: "We needed to be the kind of house that would wait.",
-  },
-  {
-    id: 'breaking-in-a-voltaire',
-    cat: 'The Wardrobe',
-    title: 'How to break in a Voltaire.',
-    dek: 'Three weeks of small attentions, with notes from Sigrid.',
-    duration: '5 min',
-    date: 'March 04, MMXXVI',
-    byline: 'Sigrid K.',
-    hero: SSM_ASSETS.biker,
-    body: [
-      "A Voltaire arrives stiff. This is intentional. A jacket that is soft on day one will be slack by year three. The first three weeks are the work of breaking it in.",
-      "Week one. Wear it. Not over a coat, not in a closet — wear it. The shoulder seam softens against the back of your neck. The asymmetric placket learns where your hip falls. Do not condition it. Do not press it. Do nothing.",
-      "Week two. Wear it again. By now the cuffs will have softened slightly; the placket will no longer fight the zip. If you wear a watch on the left, you will notice a small dent forming at the cuff. Good. The leather is taking your shape.",
-      "Week three. Now condition. A small amount of neatsfoot oil on a soft cloth, rubbed gently into the placket, the cuff, the seat of the back panel where the jacket meets your jeans. Wait twenty-four hours before wearing. The leather will look slightly darker for a day; this is the oil settling.",
-      "After that — wear. Wear it through one winter. By spring the leather will be yours and not ours. That is the whole point."
+    sections: [
+      {
+        title: '1. Start with how you will wear it',
+        paragraphs: [
+          'Begin with use, not colour. A jacket for everyday city wear can prioritize softness, light weight and easy layering. A cold-weather jacket may need insulation or shearling. A jacket sold for motorcycle use should be assessed for its intended riding function, secure closures, coverage, movement and any clearly stated protective features.',
+          'Do not assume every leather jacket is protective motorcycle equipment. Fashion styling and road use are different briefs. For riding, verify the manufacturer’s intended-use claims and whether armour, impact protection or relevant certification is included or supported.'
+        ],
+        bullets: [
+          'Daily wear: comfort, versatility and manageable weight.',
+          'Motorcycle use: secure fit, reach, coverage and verified protective features.',
+          'Cold weather: room for layers, wind control and suitable insulation.',
+          'Occasional dress wear: clean lines, refined grain and minimal bulk.'
+        ]
+      },
+      {
+        title: '2. Choose the hide by feel and purpose',
+        paragraphs: [
+          'Animal species influences weight, grain and hand-feel. Lambskin is usually supple, smooth and lighter, which suits refined everyday jackets. Cowhide is generally firmer and more substantial, making it a common choice for structured and motorcycle-inspired styles. Goatskin often has a more visible pebbled grain with a useful balance of softness and resilience. Shearling combines the hide and fleece for natural insulation.',
+          'These are tendencies rather than guarantees. Thickness, tanning, finishing and garment construction can change how any hide behaves. The product description should name the leather species instead of relying only on the broad phrase “genuine leather.”'
+        ],
+        image: '/assets/generated/blog/leather-materials-construction.jpg',
+        imageAlt: 'Cowhide, lambskin, goatskin and shearling samples with jacket hardware and stitching',
+        imageCaption: 'Species, finish and thickness work together. Judge the actual specification, not one marketing word.'
+      },
+      {
+        title: '3. Understand grain and finish without getting lost in labels',
+        paragraphs: [
+          'Full-grain leather retains the natural outer surface and can show pores, scars and variation. Top-grain leather has been lightly corrected or refined for a more uniform appearance. Corrected-grain leather is altered more heavily and then finished for consistency. None of these labels alone tells you whether the pattern, stitching or hardware is good.',
+          'Finish matters too. Aniline finishes reveal more natural character but can be more sensitive to marks. Semi-aniline finishes add a light protective layer while preserving much of the grain. More heavily pigmented finishes offer colour consistency and easier maintenance. Choose the balance that fits your lifestyle.'
+        ]
+      },
+      {
+        title: '4. Read the construction, not only the surface',
+        paragraphs: [
+          'Look at the number and placement of panels. Fewer large panels can create a cleaner visual line, but well-designed multi-panel construction may improve shaping and movement. The important questions are whether the panels are symmetrical, the grain is matched thoughtfully and the seams lie flat without puckering.',
+          'Check stress areas such as shoulders, pocket openings, cuffs, armholes and the base of the main zipper. Neat reinforcement and consistent seam allowance are better quality signals than decorative claims.'
+        ]
+      },
+      {
+        title: '5. Inspect stitching, hardware and lining',
+        paragraphs: [
+          'Stitches should run evenly with no loose thread, skipped sections or accidental double lines. Edge finishing should be tidy, and pocket corners should feel secure. Operate every zipper, snap and buckle. Hardware should move smoothly, align correctly and feel appropriate for the jacket’s weight.',
+          'The lining affects comfort and service life. Breathable woven linings are useful for general wear; quilted or insulated linings add warmth. Check that the lining sits cleanly inside the sleeves, allows movement and is attached without pulling at the hem.'
+        ],
+        bullets: [
+          'Zip the jacket fully and check that the front hangs straight.',
+          'Open and close every pocket with one hand.',
+          'Look for reinforcement at pocket ends and major stress points.',
+          'Check that the lining does not twist, sag or protrude past the leather.'
+        ]
+      },
+      {
+        title: '6. Get the fit right at the shoulders first',
+        paragraphs: [
+          'The shoulder seam should finish close to the edge of your shoulder unless the design intentionally drops lower. The chest should close without strain, but excess folds can indicate too much room. Armholes should allow you to reach forward comfortably without lifting the whole jacket.',
+          'Sleeves normally finish around the wrist bone for fashion wear; riding designs may run slightly longer to maintain coverage when the arms are extended. Jacket length depends on the silhouette, but the hem should look balanced with your torso and should not bunch heavily when you sit.'
+        ],
+        image: '/assets/generated/blog/leather-jacket-fit-men-women.jpg',
+        imageAlt: 'Man and woman wearing correctly fitted brown and black leather jackets',
+        imageCaption: 'Check the shoulder, chest, armhole, sleeve and hem together—not as separate measurements.'
+      },
+      {
+        title: '7. Choose a silhouette you can repeat',
+        paragraphs: [
+          'A cafe racer has a clean front and band collar, making it one of the easiest first jackets to combine with casual or smart-casual clothing. A classic biker jacket brings an asymmetric zip, lapels and stronger visual attitude. Bombers offer a relaxed shape with ribbed edges, while trucker and blazer-inspired jackets feel familiar and versatile.',
+          'The best style is the one you will reach for regularly. Start with a colour that works with most of your wardrobe—black and deep brown are dependable—then use cut, collar and hardware to express your preference.'
+        ]
+      },
+      {
+        title: '8. Compare value, not just the ticket price',
+        paragraphs: [
+          'A higher price can reflect better hides, stronger components, more careful pattern work, lower-volume production or after-sales support—but price is not proof by itself. Compare the specification, construction details, size guidance, return terms and repair options.',
+          'Before ordering, confirm the leather species, lining, hardware, fit notes, available sizes, care instructions, delivery estimate and return eligibility. For made-to-measure pieces, confirm which measurements and design choices become final once production begins.'
+        ]
+      },
+      {
+        title: '9. Plan for care from the first wear',
+        paragraphs: [
+          'Let a new jacket settle through normal wear. Store it on a broad hanger in a cool, dry place and avoid plastic garment bags for long-term storage. If it becomes wet, blot gently and let it dry naturally away from direct heat.',
+          'Use only a cleaner or conditioner suitable for the specific finish, test it on a hidden area and apply sparingly. Over-conditioning can change colour and soften the structure more than intended.'
+        ]
+      }
     ],
-    pull: "After that — wear. Wear it through one winter.",
-  },
-  {
-    id: 'first-sleeve-note-from-sigrid',
-    cat: 'The Maker',
-    title: "First sleeve note from Sigrid.",
-    dek: "On cutting the first hide of the season.",
-    duration: '3 min',
-    date: 'February 08, MMXXVI',
-    byline: 'Sigrid K.',
-    hero: SSM_ASSETS.atelier,
-    body: [
-      "The first hide of the season arrived on Tuesday. I had been waiting since November. Antonio sent it himself, wrapped in paper and string, with a small note that read only: 'this one is good.'",
-      "I left it on the bench overnight. A leather that has travelled wants a night to settle. The grain is tighter than last year's; the colour, deeper. I cut a strip from the corner and held it to the light. There is a small scar at the shoulder that will become someone's favourite spot.",
-      "The Voltaire that comes from this hide will be number two hundred and thirty. I will sign it Sigrid K., MMXXVI, by hand, on the inside of the placket. Whoever wears it will read my handwriting some day, perhaps in fifty years, perhaps in five.",
-      "I think about that often. I do not think it is sentimental. I think it is the most honest thing about the work."
+    checklist: [
+      'Purpose is clear: daily wear, cold weather, dress wear or verified motorcycle use.',
+      'Leather species, finish and lining are stated.',
+      'Seams, grain matching and reinforcement look clean.',
+      'Zippers, snaps and pockets operate smoothly.',
+      'Shoulders sit correctly and the closed jacket allows comfortable movement.',
+      'Sleeve and body length suit how you will wear it.',
+      'Size chart, delivery timing, care and return terms are clear.'
     ],
-    pull: "Whoever wears it will read my handwriting some day.",
-  },
-  {
-    id: 'ten-years-one-tannery',
-    cat: 'From the Bench',
-    title: 'Ten years, one Tuscan tannery.',
-    dek: 'A note on the people we have stayed with since the beginning.',
-    duration: '6 min',
-    date: 'January 18, MMXXVI',
-    byline: 'The Founder',
-    hero: SSM_ASSETS.detail,
-    body: [
-      "We met Antonio in 2014, three months before we opened. He was sixty-one. His tannery, then as now, sat in a stone building outside Pisa. We were three friends from Brooklyn with a sketchbook, a half-formed plan, and no track record. He gave us a tour, fed us lunch, and offered us a credit line we had not asked for.",
-      "Twelve years on, every hide we have ever cut has come from his pits. We have been offered cheaper. We have been offered larger. We have not switched.",
-      "There is a story we tell about the Ridgemont — that Bayard cut the first one from the first hide Antonio sent. It is true. The hide was the second-grade he had on the bench that week; he sent it because he did not have a first-grade ready. That second-grade hide became the founders' jackets. We still have one of them, in the workshop, on a hook above Bayard's bench.",
-      "Antonio is seventy-three now. His son, Marco, has taken on the day-to-day. We will be with them for as long as they will have us."
+    faq: [
+      {
+        q: 'Should I size up when buying a leather jacket?',
+        a: 'Not automatically. Compare your body measurements with the brand’s chart and consider what you will wear underneath. Size up only when the chart, layering plan or fit notes support it.'
+      },
+      {
+        q: 'Does a leather jacket stretch?',
+        a: 'Leather can soften and mould slightly with wear, especially at movement points, but it will not correct a jacket that is substantially too small. Start with a sound shoulder and chest fit.'
+      },
+      {
+        q: 'Is cowhide or lambskin better for a first jacket?',
+        a: 'Choose cowhide when you prefer a firmer, more structured feel; choose lambskin when lightness and softness matter more. Construction and intended use remain just as important as species.'
+      },
+      {
+        q: 'Is full-grain leather always the best choice?',
+        a: 'Full-grain preserves more natural surface character, but the best choice depends on appearance, maintenance and use. A well-made top-grain jacket may suit someone who prefers a more uniform finish.'
+      },
+      {
+        q: 'What is the most versatile first leather jacket style?',
+        a: 'A clean cafe racer or bomber is easy to wear across many settings. A classic biker jacket is equally valid if its stronger hardware and asymmetric shape fit your wardrobe.'
+      },
+      {
+        q: 'How long should a good leather jacket last?',
+        a: 'With suitable materials, sound construction, appropriate use and regular care, a quality leather jacket can remain wearable for many years. Service life depends on wear, climate, storage and maintenance.'
+      }
     ],
-    pull: "We have been offered cheaper. We have not switched.",
+    pull: 'Buy the jacket whose material, pattern and purpose fit your life—not the one with the loudest label.',
   },
 ];
 

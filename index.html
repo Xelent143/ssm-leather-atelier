@@ -509,6 +509,22 @@
     .jacket-measure-guide__points {
       grid-template-columns: 1fr;
     }
+    .journal-page-pad,
+    .article-heading,
+    .article-copy {
+      padding-left: 22px !important;
+      padding-right: 22px !important;
+    }
+    .journal-feature-grid,
+    .journal-archive-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .article-hero-wrap {
+      margin: 34px 14px !important;
+    }
+    .journal-media figcaption {
+      padding: 0 4px;
+    }
   }
 </style>
 </head>
@@ -1988,73 +2004,141 @@ const SSM_MEGA_MENUS = {
 
 const SSM_JOURNAL = [
   {
-    id: 'why-we-tan-twelve-months',
-    cat: 'The Hide',
-    title: 'Why we tan for twelve months.',
-    dek: 'A short essay on patience, pits, and the smell of oak bark.',
-    duration: '4 min',
-    date: 'April 12, MMXXVI',
-    byline: 'The Founder',
-    hero: SSM_ASSETS.detail,
+    id: 'how-to-buy-your-first-leather-jacket',
+    cat: 'Buying Guide',
+    title: 'How to buy your first leather jacket.',
+    seoTitle: 'How to Buy Your First Leather Jacket | MOTOGRIP GEAR',
+    metaDescription: 'Learn how to choose leather type, fit, lining, hardware and construction before buying your first leather jacket with this practical MOTOGRIP GEAR guide.',
+    dek: 'A practical guide to leather type, construction, fit and value—so your first jacket becomes one you will keep wearing.',
+    duration: '12 min',
+    date: 'July 25, 2026',
+    isoDate: '2026-07-25',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/first-leather-jacket-hero.jpg',
+    quickAnswer: 'Choose the jacket for its intended use first, then compare the hide, construction, hardware, lining and fit. A good leather jacket should sit cleanly at the shoulders, allow comfortable movement, use dependable components and make its material details clear.',
     body: [
-      "There is a faster way. Most of the leather sold under the word 'luxury' is chrome-tanned in twelve hours. It is consistent, it is cheap, it is dead. We do not use it.",
-      "Our hides come from a single tannery in the hills outside Pisa, where they sit in oak-bark and chestnut-bark pits for between ten and fourteen months. The tannins do their work slowly. The leather is not finished by the time it leaves the pit; it is barely beginning. What you receive in a Voltaire or a Hadley is leather that has had a slow life and now begins a new one with you.",
-      "We are sometimes asked whether twelve months is necessary. The honest answer is that we have tried six and we have tried eighteen, and twelve is the number at which the hide is supple enough to cut and dense enough to age. There is no science here we did not learn from the people in Pisa. We are guests on a road they have been walking since the seventeenth century.",
-      "The other answer, less honest, is that we wanted a number we could put on a page that would make us slow down. Twelve months is a long time. We needed to be the kind of house that would wait."
+      'A leather jacket is one of the few garments expected to improve as it is worn. That only happens when the material, pattern and construction suit the way you will actually use it. The right first jacket is not automatically the heaviest, softest or most expensive one; it is the jacket whose purpose, feel and fit are right for you.',
+      'Use this guide as a product-page checklist. Good brands should explain what the jacket is made from, how it fits and what features are included. If important details are missing, ask before you buy.'
     ],
-    pull: "We needed to be the kind of house that would wait.",
-  },
-  {
-    id: 'breaking-in-a-voltaire',
-    cat: 'The Wardrobe',
-    title: 'How to break in a Voltaire.',
-    dek: 'Three weeks of small attentions, with notes from Sigrid.',
-    duration: '5 min',
-    date: 'March 04, MMXXVI',
-    byline: 'Sigrid K.',
-    hero: SSM_ASSETS.biker,
-    body: [
-      "A Voltaire arrives stiff. This is intentional. A jacket that is soft on day one will be slack by year three. The first three weeks are the work of breaking it in.",
-      "Week one. Wear it. Not over a coat, not in a closet — wear it. The shoulder seam softens against the back of your neck. The asymmetric placket learns where your hip falls. Do not condition it. Do not press it. Do nothing.",
-      "Week two. Wear it again. By now the cuffs will have softened slightly; the placket will no longer fight the zip. If you wear a watch on the left, you will notice a small dent forming at the cuff. Good. The leather is taking your shape.",
-      "Week three. Now condition. A small amount of neatsfoot oil on a soft cloth, rubbed gently into the placket, the cuff, the seat of the back panel where the jacket meets your jeans. Wait twenty-four hours before wearing. The leather will look slightly darker for a day; this is the oil settling.",
-      "After that — wear. Wear it through one winter. By spring the leather will be yours and not ours. That is the whole point."
+    sections: [
+      {
+        title: '1. Start with how you will wear it',
+        paragraphs: [
+          'Begin with use, not colour. A jacket for everyday city wear can prioritize softness, light weight and easy layering. A cold-weather jacket may need insulation or shearling. A jacket sold for motorcycle use should be assessed for its intended riding function, secure closures, coverage, movement and any clearly stated protective features.',
+          'Do not assume every leather jacket is protective motorcycle equipment. Fashion styling and road use are different briefs. For riding, verify the manufacturer’s intended-use claims and whether armour, impact protection or relevant certification is included or supported.'
+        ],
+        bullets: [
+          'Daily wear: comfort, versatility and manageable weight.',
+          'Motorcycle use: secure fit, reach, coverage and verified protective features.',
+          'Cold weather: room for layers, wind control and suitable insulation.',
+          'Occasional dress wear: clean lines, refined grain and minimal bulk.'
+        ]
+      },
+      {
+        title: '2. Choose the hide by feel and purpose',
+        paragraphs: [
+          'Animal species influences weight, grain and hand-feel. Lambskin is usually supple, smooth and lighter, which suits refined everyday jackets. Cowhide is generally firmer and more substantial, making it a common choice for structured and motorcycle-inspired styles. Goatskin often has a more visible pebbled grain with a useful balance of softness and resilience. Shearling combines the hide and fleece for natural insulation.',
+          'These are tendencies rather than guarantees. Thickness, tanning, finishing and garment construction can change how any hide behaves. The product description should name the leather species instead of relying only on the broad phrase “genuine leather.”'
+        ],
+        image: '/assets/generated/blog/leather-materials-construction.jpg',
+        imageAlt: 'Cowhide, lambskin, goatskin and shearling samples with jacket hardware and stitching',
+        imageCaption: 'Species, finish and thickness work together. Judge the actual specification, not one marketing word.'
+      },
+      {
+        title: '3. Understand grain and finish without getting lost in labels',
+        paragraphs: [
+          'Full-grain leather retains the natural outer surface and can show pores, scars and variation. Top-grain leather has been lightly corrected or refined for a more uniform appearance. Corrected-grain leather is altered more heavily and then finished for consistency. None of these labels alone tells you whether the pattern, stitching or hardware is good.',
+          'Finish matters too. Aniline finishes reveal more natural character but can be more sensitive to marks. Semi-aniline finishes add a light protective layer while preserving much of the grain. More heavily pigmented finishes offer colour consistency and easier maintenance. Choose the balance that fits your lifestyle.'
+        ]
+      },
+      {
+        title: '4. Read the construction, not only the surface',
+        paragraphs: [
+          'Look at the number and placement of panels. Fewer large panels can create a cleaner visual line, but well-designed multi-panel construction may improve shaping and movement. The important questions are whether the panels are symmetrical, the grain is matched thoughtfully and the seams lie flat without puckering.',
+          'Check stress areas such as shoulders, pocket openings, cuffs, armholes and the base of the main zipper. Neat reinforcement and consistent seam allowance are better quality signals than decorative claims.'
+        ]
+      },
+      {
+        title: '5. Inspect stitching, hardware and lining',
+        paragraphs: [
+          'Stitches should run evenly with no loose thread, skipped sections or accidental double lines. Edge finishing should be tidy, and pocket corners should feel secure. Operate every zipper, snap and buckle. Hardware should move smoothly, align correctly and feel appropriate for the jacket’s weight.',
+          'The lining affects comfort and service life. Breathable woven linings are useful for general wear; quilted or insulated linings add warmth. Check that the lining sits cleanly inside the sleeves, allows movement and is attached without pulling at the hem.'
+        ],
+        bullets: [
+          'Zip the jacket fully and check that the front hangs straight.',
+          'Open and close every pocket with one hand.',
+          'Look for reinforcement at pocket ends and major stress points.',
+          'Check that the lining does not twist, sag or protrude past the leather.'
+        ]
+      },
+      {
+        title: '6. Get the fit right at the shoulders first',
+        paragraphs: [
+          'The shoulder seam should finish close to the edge of your shoulder unless the design intentionally drops lower. The chest should close without strain, but excess folds can indicate too much room. Armholes should allow you to reach forward comfortably without lifting the whole jacket.',
+          'Sleeves normally finish around the wrist bone for fashion wear; riding designs may run slightly longer to maintain coverage when the arms are extended. Jacket length depends on the silhouette, but the hem should look balanced with your torso and should not bunch heavily when you sit.'
+        ],
+        image: '/assets/generated/blog/leather-jacket-fit-men-women.jpg',
+        imageAlt: 'Man and woman wearing correctly fitted brown and black leather jackets',
+        imageCaption: 'Check the shoulder, chest, armhole, sleeve and hem together—not as separate measurements.'
+      },
+      {
+        title: '7. Choose a silhouette you can repeat',
+        paragraphs: [
+          'A cafe racer has a clean front and band collar, making it one of the easiest first jackets to combine with casual or smart-casual clothing. A classic biker jacket brings an asymmetric zip, lapels and stronger visual attitude. Bombers offer a relaxed shape with ribbed edges, while trucker and blazer-inspired jackets feel familiar and versatile.',
+          'The best style is the one you will reach for regularly. Start with a colour that works with most of your wardrobe—black and deep brown are dependable—then use cut, collar and hardware to express your preference.'
+        ]
+      },
+      {
+        title: '8. Compare value, not just the ticket price',
+        paragraphs: [
+          'A higher price can reflect better hides, stronger components, more careful pattern work, lower-volume production or after-sales support—but price is not proof by itself. Compare the specification, construction details, size guidance, return terms and repair options.',
+          'Before ordering, confirm the leather species, lining, hardware, fit notes, available sizes, care instructions, delivery estimate and return eligibility. For made-to-measure pieces, confirm which measurements and design choices become final once production begins.'
+        ]
+      },
+      {
+        title: '9. Plan for care from the first wear',
+        paragraphs: [
+          'Let a new jacket settle through normal wear. Store it on a broad hanger in a cool, dry place and avoid plastic garment bags for long-term storage. If it becomes wet, blot gently and let it dry naturally away from direct heat.',
+          'Use only a cleaner or conditioner suitable for the specific finish, test it on a hidden area and apply sparingly. Over-conditioning can change colour and soften the structure more than intended.'
+        ]
+      }
     ],
-    pull: "After that — wear. Wear it through one winter.",
-  },
-  {
-    id: 'first-sleeve-note-from-sigrid',
-    cat: 'The Maker',
-    title: "First sleeve note from Sigrid.",
-    dek: "On cutting the first hide of the season.",
-    duration: '3 min',
-    date: 'February 08, MMXXVI',
-    byline: 'Sigrid K.',
-    hero: SSM_ASSETS.atelier,
-    body: [
-      "The first hide of the season arrived on Tuesday. I had been waiting since November. Antonio sent it himself, wrapped in paper and string, with a small note that read only: 'this one is good.'",
-      "I left it on the bench overnight. A leather that has travelled wants a night to settle. The grain is tighter than last year's; the colour, deeper. I cut a strip from the corner and held it to the light. There is a small scar at the shoulder that will become someone's favourite spot.",
-      "The Voltaire that comes from this hide will be number two hundred and thirty. I will sign it Sigrid K., MMXXVI, by hand, on the inside of the placket. Whoever wears it will read my handwriting some day, perhaps in fifty years, perhaps in five.",
-      "I think about that often. I do not think it is sentimental. I think it is the most honest thing about the work."
+    checklist: [
+      'Purpose is clear: daily wear, cold weather, dress wear or verified motorcycle use.',
+      'Leather species, finish and lining are stated.',
+      'Seams, grain matching and reinforcement look clean.',
+      'Zippers, snaps and pockets operate smoothly.',
+      'Shoulders sit correctly and the closed jacket allows comfortable movement.',
+      'Sleeve and body length suit how you will wear it.',
+      'Size chart, delivery timing, care and return terms are clear.'
     ],
-    pull: "Whoever wears it will read my handwriting some day.",
-  },
-  {
-    id: 'ten-years-one-tannery',
-    cat: 'From the Bench',
-    title: 'Ten years, one Tuscan tannery.',
-    dek: 'A note on the people we have stayed with since the beginning.',
-    duration: '6 min',
-    date: 'January 18, MMXXVI',
-    byline: 'The Founder',
-    hero: SSM_ASSETS.detail,
-    body: [
-      "We met Antonio in 2014, three months before we opened. He was sixty-one. His tannery, then as now, sat in a stone building outside Pisa. We were three friends from Brooklyn with a sketchbook, a half-formed plan, and no track record. He gave us a tour, fed us lunch, and offered us a credit line we had not asked for.",
-      "Twelve years on, every hide we have ever cut has come from his pits. We have been offered cheaper. We have been offered larger. We have not switched.",
-      "There is a story we tell about the Ridgemont — that Bayard cut the first one from the first hide Antonio sent. It is true. The hide was the second-grade he had on the bench that week; he sent it because he did not have a first-grade ready. That second-grade hide became the founders' jackets. We still have one of them, in the workshop, on a hook above Bayard's bench.",
-      "Antonio is seventy-three now. His son, Marco, has taken on the day-to-day. We will be with them for as long as they will have us."
+    faq: [
+      {
+        q: 'Should I size up when buying a leather jacket?',
+        a: 'Not automatically. Compare your body measurements with the brand’s chart and consider what you will wear underneath. Size up only when the chart, layering plan or fit notes support it.'
+      },
+      {
+        q: 'Does a leather jacket stretch?',
+        a: 'Leather can soften and mould slightly with wear, especially at movement points, but it will not correct a jacket that is substantially too small. Start with a sound shoulder and chest fit.'
+      },
+      {
+        q: 'Is cowhide or lambskin better for a first jacket?',
+        a: 'Choose cowhide when you prefer a firmer, more structured feel; choose lambskin when lightness and softness matter more. Construction and intended use remain just as important as species.'
+      },
+      {
+        q: 'Is full-grain leather always the best choice?',
+        a: 'Full-grain preserves more natural surface character, but the best choice depends on appearance, maintenance and use. A well-made top-grain jacket may suit someone who prefers a more uniform finish.'
+      },
+      {
+        q: 'What is the most versatile first leather jacket style?',
+        a: 'A clean cafe racer or bomber is easy to wear across many settings. A classic biker jacket is equally valid if its stronger hardware and asymmetric shape fit your wardrobe.'
+      },
+      {
+        q: 'How long should a good leather jacket last?',
+        a: 'With suitable materials, sound construction, appropriate use and regular care, a quality leather jacket can remain wearable for many years. Service life depends on wear, climate, storage and maintenance.'
+      }
     ],
-    pull: "We have been offered cheaper. We have not switched.",
+    pull: 'Buy the jacket whose material, pattern and purpose fit your life—not the one with the loudest label.',
   },
 ];
 
@@ -4848,24 +4932,59 @@ function CTAStrip({ title, body, primary, ghost, onPrimary, onGhost }) {
 
 // ── Journal grid ────────────────────────────────────────────────────────────
 
+function BrandedEditorialImage({ src, alt, caption, eager = false, ratio = '3 / 2' }) {
+  return (
+    <figure className="journal-media" style={{ margin: 0 }}>
+      <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: ratio, background: 'var(--bg-2)' }}>
+        <img
+          src={src}
+          alt={alt}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <img
+          src="/assets/motogrip-logo-transparent-v2.png"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute', left: 22, top: 18, width: 'clamp(108px, 15vw, 190px)',
+            height: 'auto', opacity: .92, filter: 'drop-shadow(0 2px 6px rgba(245,241,232,.55))',
+            pointerEvents: 'none',
+          }}
+        />
+      </div>
+      {caption && (
+        <figcaption className="mono" style={{ fontSize: 9, lineHeight: 1.6, color: 'var(--fg-4)', marginTop: 10 }}>
+          {caption.toUpperCase()}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
 function Journal({ go }) {
   const [feature, ...rest] = SSM_JOURNAL;
   return (
     <div className="page-fade">
       <PageHero
-        eyebrow="JOURNAL"
-        title="Sleeve"
-        italic="Notes."
-        dek="Long-form notes on the hide, the maker, and the wardrobe — written from the bench."
-        meta={`${SSM_JOURNAL.length} entries · MMXXVI`}
+        eyebrow="MOTOGRIP JOURNAL"
+        title="Leather,"
+        italic="properly explained."
+        dek="Original buying, fit, care and craftsmanship guidance from MOTOGRIP GEAR."
+        meta={`${SSM_JOURNAL.length} guide · 2026`}
       />
 
       {/* Featured entry */}
-      <section style={{ padding: '0 48px 80px' }}>
+      <section className="journal-page-pad" style={{ padding: '0 48px 80px' }}>
         <div onClick={() => go('article', { article: feature })}
+          className="journal-feature-grid"
           style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40, cursor: 'pointer' }}>
-          <div className="ph grain card-img" data-img="1" data-label=""
-            style={{ aspectRatio: '4/3', '--img': `url(${feature.hero})` }} />
+          <BrandedEditorialImage
+            src={feature.hero}
+            alt="Man wearing a fitted espresso leather cafe racer jacket in the MOTOGRIP GEAR studio"
+            eager={true}
+          />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
               {feature.cat.toUpperCase()} · {feature.duration.toUpperCase()}
@@ -4877,46 +4996,44 @@ function Journal({ go }) {
               {feature.dek}
             </div>
             <div className="mono ulink" style={{ fontSize: 10, color: 'var(--fg-2)', marginTop: 28 }}>
-              READ THE ESSAY →
+              READ THE GUIDE →
             </div>
           </div>
         </div>
       </section>
 
       {/* Grid */}
-      <section style={{ padding: '0 48px 80px' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
-          ARCHIVE · MMXXVI
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
-          {rest.map(j => (
-            <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
-              <div className="ph grain card-img" data-img="1" data-label=""
-                style={{ aspectRatio: '3/4', '--img': `url(${j.hero})` }} />
-              <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 16 }}>
-                {j.cat.toUpperCase()} · {j.duration.toUpperCase()}
+      {rest.length > 0 && (
+        <section className="journal-page-pad" style={{ padding: '0 48px 80px' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 24 }}>
+            MORE GUIDES
+          </div>
+          <div className="journal-archive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+            {rest.map(j => (
+              <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
+                <BrandedEditorialImage src={j.hero} alt={j.title} ratio="4 / 5" />
+                <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 16 }}>
+                  {j.cat.toUpperCase()} · {j.duration.toUpperCase()}
+                </div>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.15, marginTop: 8 }}>
+                  {j.title}
+                </div>
+                <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
+                  {j.dek}
+                </div>
               </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.15, marginTop: 8 }}>
-                {j.title}
-              </div>
-              <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
-                {j.dek}
-              </div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 14 }}>
-                {j.byline.toUpperCase()} · {j.date.toUpperCase()}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <CTAStrip
-        title="The first viewing of every chapter."
-        body="Subscribe to road notes - we send a short note when a journal entry, lookbook chapter, or small batch of gear leaves the fit room. No discounts, no surveys, no other people's products."
-        primary="Subscribe"
-        ghost="Continue to the shop"
-        onPrimary={() => {}}
-        onGhost={() => go('shop')}
+        title="Ready to find your jacket?"
+        body="Use the guide, compare the details, then explore MOTOGRIP GEAR leather jackets and made-to-measure options."
+        primary="Shop leather jackets"
+        ghost="Custom consultation"
+        onPrimary={() => go('shop', { cat: 'Jackets' })}
+        onGhost={() => go('consult')}
       />
     </div>
   );
@@ -4928,7 +5045,7 @@ function JournalArticle({ article, go }) {
   const a = article || SSM_JOURNAL[0];
   return (
     <div className="page-fade">
-      <section style={{ padding: '64px 48px 0', maxWidth: 920, margin: '0 auto' }}>
+      <section className="article-heading" style={{ padding: '64px 48px 0', maxWidth: 1040, margin: '0 auto' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginBottom: 16, display: 'flex', gap: 8 }}>
           <span onClick={() => go('home')} className="ulink" style={{ cursor: 'pointer' }}>HOUSE</span>
           <span>/</span>
@@ -4950,10 +5067,29 @@ function JournalArticle({ article, go }) {
         </div>
       </section>
 
-      <div className="ph grain" data-img="1" data-label=""
-        style={{ height: 540, margin: '48px 48px', '--img': `url(${a.hero})` }} />
+      <div className="article-hero-wrap" style={{ margin: '48px' }}>
+        <BrandedEditorialImage
+          src={a.hero}
+          alt="Man wearing a fitted espresso leather cafe racer jacket in a warm MOTOGRIP GEAR studio"
+          eager={true}
+        />
+      </div>
 
-      <article style={{ padding: '0 48px 64px', maxWidth: 760, margin: '0 auto' }}>
+      <article className="article-copy" style={{ padding: '0 48px 80px', maxWidth: 820, margin: '0 auto' }}>
+        {a.quickAnswer && (
+          <aside style={{
+            borderTop: '2px solid var(--accent-2)', borderBottom: '1px solid var(--line)',
+            padding: '24px 0', marginBottom: 40,
+          }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
+              QUICK ANSWER
+            </div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 24, lineHeight: 1.45, color: 'var(--fg-2)' }}>
+              {a.quickAnswer}
+            </div>
+          </aside>
+        )}
+
         {a.body.map((p, i) => (
           <p key={i} style={{
             fontFamily: i === 0 ? 'var(--display)' : 'var(--sans)',
@@ -4963,9 +5099,48 @@ function JournalArticle({ article, go }) {
             margin: '0 0 24px',
           }}>{p}</p>
         ))}
+
+        {a.sections?.map((section, index) => (
+          <React.Fragment key={section.title}>
+            <section style={{ marginTop: 56 }}>
+              <h2 className="display" style={{
+                fontSize: 'clamp(30px, 4vw, 44px)', lineHeight: 1.12, fontWeight: 400,
+                margin: '0 0 22px', color: 'var(--fg)',
+              }}>
+                {section.title}
+              </h2>
+              {section.paragraphs?.map((paragraph, paragraphIndex) => (
+                <p key={paragraphIndex} style={{
+                  fontSize: 16, lineHeight: 1.85, color: 'var(--fg-3)', margin: '0 0 22px',
+                }}>
+                  {paragraph}
+                </p>
+              ))}
+              {section.bullets?.length > 0 && (
+                <ul style={{
+                  margin: '10px 0 28px', paddingLeft: 22, color: 'var(--fg-3)',
+                  fontSize: 15, lineHeight: 1.8,
+                }}>
+                  {section.bullets.map(item => <li key={item} style={{ marginBottom: 8 }}>{item}</li>)}
+                </ul>
+              )}
+            </section>
+            {section.image && (
+              <div style={{ margin: '36px 0 56px' }}>
+                <BrandedEditorialImage
+                  src={section.image}
+                  alt={section.imageAlt}
+                  caption={section.imageCaption}
+                  ratio={index === 1 ? '4 / 3' : '3 / 2'}
+                />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+
         {a.pull && (
           <div style={{
-            margin: '48px 0', padding: '32px 0',
+            margin: '56px 0', padding: '34px 0',
             borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)',
           }}>
             <div className="display" style={{
@@ -4973,27 +5148,69 @@ function JournalArticle({ article, go }) {
             }}>&ldquo;{a.pull}&rdquo;</div>
           </div>
         )}
+
+        {a.checklist?.length > 0 && (
+          <section style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', padding: '34px', margin: '0 0 56px' }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
+              BEFORE YOU BUY
+            </div>
+            <h2 className="display" style={{ fontSize: 36, fontWeight: 400, margin: '0 0 22px' }}>
+              Your seven-point jacket checklist.
+            </h2>
+            <div style={{ display: 'grid', gap: 14 }}>
+              {a.checklist.map(item => (
+                <div key={item} style={{ display: 'grid', gridTemplateColumns: '22px 1fr', gap: 12, alignItems: 'start' }}>
+                  <span aria-hidden="true" style={{ color: 'var(--accent-2)', fontSize: 17 }}>✓</span>
+                  <span style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.65 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {a.faq?.length > 0 && (
+          <section style={{ marginTop: 56 }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
+              FIRST LEATHER JACKET FAQ
+            </div>
+            <h2 className="display" style={{ fontSize: 40, fontWeight: 400, margin: '0 0 26px' }}>
+              Questions worth asking.
+            </h2>
+            <div style={{ borderTop: '1px solid var(--line)' }}>
+              {a.faq.map(item => (
+                <details key={item.q} style={{ borderBottom: '1px solid var(--line)', padding: '20px 0' }}>
+                  <summary style={{
+                    cursor: 'pointer', fontFamily: 'var(--display)', fontSize: 23, lineHeight: 1.3,
+                    color: 'var(--fg)', paddingRight: 24,
+                  }}>
+                    {item.q}
+                  </summary>
+                  <p style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.8, margin: '16px 0 0', maxWidth: 720 }}>
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <aside style={{
+          marginTop: 64, padding: '34px', border: '1px solid var(--line)',
+          display: 'grid', gap: 18, background: 'var(--bg-2)',
+        }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)' }}>NEXT STEP</div>
+          <div className="display" style={{ fontSize: 34, lineHeight: 1.2 }}>Find the jacket that fits your use.</div>
+          <div style={{ color: 'var(--fg-3)', fontSize: 15, lineHeight: 1.7 }}>
+            Explore standard sizes or start a made-to-measure consultation with MOTOGRIP GEAR.
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn btn-dark" onClick={() => go('shop', { cat: 'Jackets' })}>Shop jackets</button>
+            <button className="btn btn-ghost" onClick={() => go('consult')}>Custom consultation</button>
+          </div>
+        </aside>
       </article>
 
-      <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-          CONTINUE READING
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
-          {SSM_JOURNAL.filter(j => j.id !== a.id).slice(0, 3).map(j => (
-            <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
-              <div className="ph card-img" data-img="1" data-label=""
-                style={{ aspectRatio: '4/5', '--img': `url(${j.hero})` }} />
-              <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 14 }}>
-                {j.cat.toUpperCase()}
-              </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 22, marginTop: 6, lineHeight: 1.2 }}>
-                {j.title}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div style={{ borderTop: '1px solid var(--line)' }} />
     </div>
   );
 }
@@ -6772,11 +6989,9 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
-const supportPageFromPath = () => ({
-  '/shipping-information': 'ship',
-  '/returns-refunds': 'returns',
-  '/custom-consultation': 'consult',
-})[window.location.pathname.replace(/\/$/, '')] || null;
+const articleFromParams = (params = {}) => params.article
+  || SSM_JOURNAL.find(article => article.id === params.articleId)
+  || null;
 const pathProductSlug = () => {
   const match = window.location.pathname.match(/^\/products\/([a-z0-9-]+)\/?$/);
   return match ? match[1] : null;
@@ -6791,6 +7006,10 @@ const SSM_VIEW_PATHS = {
 };
 const cleanPathForView = (view, params = {}) => {
   if (view === 'pdp' && params?.product?.slug) return `/products/${params.product.slug}`;
+  if (view === 'article') {
+    const article = articleFromParams(params);
+    if (article?.id) return `/blog/${article.id}`;
+  }
   if (view === 'shop' && params?.gender === 'Women') return '/women';
   if (view === 'shop' && params?.gender === 'Men') return '/men';
   if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
@@ -6813,9 +7032,12 @@ function applySEO(view, params) {
       .replace('%gender%', p.gender);
     desc = (p.story?.piece || p.blurb || '').slice(0, 158);
   }
-  if (view === 'article' && params?.article) {
-    title = `${params.article.title} · MOTOGRIP Road Notes`;
-    desc = params.article.dek || '';
+  if (view === 'article') {
+    const article = articleFromParams(params);
+    if (article) {
+      title = article.seoTitle || `${article.title} | MOTOGRIP GEAR`;
+      desc = article.metaDescription || article.dek || '';
+    }
   }
   document.title = title;
   let m = document.querySelector('meta[name="description"]');
@@ -7001,7 +7223,7 @@ function App() {
       {view === 'account' && <Account go={go} />}
       {view === 'checkout' && <Checkout go={go} items={cart} setItems={setCart} />}
       {view === 'journal' && <Journal go={go} />}
-      {view === 'article' && <JournalArticle go={go} article={params.article} />}
+      {view === 'article' && <JournalArticle go={go} article={articleFromParams(params)} />}
       {view === 'care' && <Care go={go} />}
       {view === 'repairs' && <Repairs go={go} />}
       {view === 'concierge' && <Concierge go={go} />}

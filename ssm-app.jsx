@@ -18,6 +18,9 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
+const articleFromParams = (params = {}) => params.article
+  || SSM_JOURNAL.find(article => article.id === params.articleId)
+  || null;
 const pathProductSlug = () => {
   const match = window.location.pathname.match(/^\/products\/([a-z0-9-]+)\/?$/);
   return match ? match[1] : null;
@@ -32,6 +35,10 @@ const SSM_VIEW_PATHS = {
 };
 const cleanPathForView = (view, params = {}) => {
   if (view === 'pdp' && params?.product?.slug) return `/products/${params.product.slug}`;
+  if (view === 'article') {
+    const article = articleFromParams(params);
+    if (article?.id) return `/blog/${article.id}`;
+  }
   if (view === 'shop' && params?.gender === 'Women') return '/women';
   if (view === 'shop' && params?.gender === 'Men') return '/men';
   if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
@@ -54,9 +61,12 @@ function applySEO(view, params) {
       .replace('%gender%', p.gender);
     desc = (p.story?.piece || p.blurb || '').slice(0, 158);
   }
-  if (view === 'article' && params?.article) {
-    title = `${params.article.title} · MOTOGRIP Road Notes`;
-    desc = params.article.dek || '';
+  if (view === 'article') {
+    const article = articleFromParams(params);
+    if (article) {
+      title = article.seoTitle || `${article.title} | MOTOGRIP GEAR`;
+      desc = article.metaDescription || article.dek || '';
+    }
   }
   document.title = title;
   let m = document.querySelector('meta[name="description"]');
@@ -238,7 +248,7 @@ function App() {
       {view === 'account' && <Account go={go} />}
       {view === 'checkout' && <Checkout go={go} items={cart} setItems={setCart} />}
       {view === 'journal' && <Journal go={go} />}
-      {view === 'article' && <JournalArticle go={go} article={params.article} />}
+      {view === 'article' && <JournalArticle go={go} article={articleFromParams(params)} />}
       {view === 'care' && <Care go={go} />}
       {view === 'repairs' && <Repairs go={go} />}
       {view === 'concierge' && <Concierge go={go} />}
