@@ -244,7 +244,7 @@ function JournalArticle({ article, go }) {
       <div className="article-hero-wrap" style={{ margin: '48px' }}>
         <BrandedEditorialImage
           src={a.hero}
-          alt="Man wearing a fitted espresso leather cafe racer jacket in a warm MOTOGRIP GEAR studio"
+          alt={a.heroAlt || a.title}
           eager={true}
         />
       </div>
