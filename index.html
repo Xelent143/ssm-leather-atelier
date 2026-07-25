@@ -69,7 +69,7 @@
         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
         "merchantReturnDays": 30,
         "returnMethod": "https://schema.org/ReturnByMail",
-        "returnFees": "https://schema.org/FreeReturn"
+        "returnFees": "https://schema.org/ReturnShippingFees"
       },
       "areaServed": "Worldwide"
     },
@@ -2085,9 +2085,9 @@ const SSM_FAQ = [
     { q: 'Are duties included?', a: 'Applicable duties and taxes depend on the destination. Any available charges or guidance are shown during checkout.' },
   ] },
   { group: 'Returns', items: [
-    { q: 'What is your return policy?', a: '30 days from receipt on stock pieces, in original condition with the placket monogram intact. Made-to-Order pieces are final sale (with the alteration window above). Final pieces are sold as-is.' },
-    { q: 'How do I start a return?', a: 'Open the order in your account or use the Contact page. We will send return instructions after reviewing the request.' },
-    { q: 'How long do refunds take?', a: 'Refunds process within 3 working days of receipt at the MOTOGRIP fit room.' },
+    { q: 'What is your return policy?', a: 'Eligible standard-size, non-personalized pieces may be returned or exchanged within 30 days of signed delivery when they are unworn, unused and complete. Custom, made-to-measure, personalized and final-sale pieces are not eligible for a standard return.' },
+    { q: 'How do I start a return?', a: 'Use the File a Return form with your order details before shipping anything. MOTOGRIP GEAR will review the request and send the authorized return instructions.' },
+    { q: 'How long do refunds take?', a: 'We normally inspect a return within 72 hours of delivery. If approved, the refund is initiated within 7 business days to the original payment method; your bank or card provider may take up to 10 working days to show the credit.' },
   ] },
   { group: 'Repairs', items: [
     { q: 'Do you offer lifetime repairs?', a: 'Yes — every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
@@ -2162,7 +2162,7 @@ const SSM_SEO = {
   faq:        { title: 'Frequently Asked · MOTOGRIP GEAR', desc: 'Sizing, leather, made-to-measure, shipping, returns, repairs.' },
   size:       { title: 'Size Guide · MOTOGRIP GEAR', desc: 'How to measure for jackets, vests, and leather trousers.' },
   ship:       { title: 'Shipping Information · MOTOGRIP GEAR', desc: 'Worldwide shipping is available. Review delivery regions, costs, tracking, and duties.' },
-  returns:    { title: 'Returns & Refunds · MOTOGRIP GEAR', desc: 'Review return eligibility, made-to-order exclusions, return instructions, and refund processing.' },
+  returns:    { title: 'Returns & Refunds Policy · MOTOGRIP GEAR', desc: 'Read MOTOGRIP GEAR return eligibility, exchanges, custom-order exclusions, cancellation terms, and refund processing timelines.' },
   'file-return': { title: 'File a Return · MOTOGRIP GEAR', desc: 'Submit a return, exchange, store-credit, or fit-alteration request to MOTOGRIP GEAR.' },
   track:      { title: 'Track Your Order · MOTOGRIP GEAR', desc: 'Check the current fulfillment and delivery status of your MOTOGRIP GEAR order.' },
   privacy:    { title: 'Privacy Policy · MOTOGRIP GEAR', desc: 'How MOTOGRIP GEAR collects, uses, shares, and protects personal information.' },
@@ -5807,12 +5807,72 @@ function CustomConsultation() {
 
 function ShippingReturns({ go, mode = 'shipping' }) {
   const isReturns = mode === 'returns';
+  const returnHighlights = [
+    ['30 DAYS', 'Standard-piece returns', 'Request a return or exchange within 30 days of signed delivery.'],
+    ['2 WORKING DAYS', 'Incorrect or faulty items', 'Tell us promptly and include clear photographs so we can review the issue.'],
+    ['7 BUSINESS DAYS', 'Approved refunds', 'After inspection, an approved refund is initiated to the original payment method.'],
+  ];
+  const returnSections = [
+    {
+      label: 'STANDARD RETURNS & EXCHANGES',
+      title: 'A clear 30-day window.',
+      paragraphs: [
+        'Eligible standard-size, non-personalized pieces may be returned or exchanged within 30 days of the date the parcel is signed for. Submit a return request before sending anything back; unauthorized parcels may be refused.',
+        'Once a return reaches MOTOGRIP GEAR, we normally inspect it within 72 hours. If approved, we initiate the refund within 7 business days to the original payment method. Your bank or card provider may take up to 10 working days to show the credit.',
+      ],
+    },
+    {
+      label: 'ELIGIBILITY & CONDITION',
+      title: 'Return it as received.',
+      items: [
+        ['Original condition', 'The piece must be unworn, unused, unwashed, unaltered and undamaged, with all original tags, accessories and packaging included. Please enclose the order details or packing slip.'],
+        ['Personalized and custom pieces', 'Made-to-measure, bespoke, monogrammed, engraved or otherwise personalized products are created specifically for you and are not eligible for a standard return or refund.'],
+        ['Final-sale items', 'Gift cards, factory seconds and products clearly marked final sale cannot be returned or exchanged. Promotional items follow the terms displayed when the order is placed.'],
+        ['Incorrect or faulty item', 'Contact us within 2 working days of delivery with the order number and photographs. We will review the concern and confirm the appropriate remedy.'],
+      ],
+    },
+    {
+      label: 'RETURN SHIPPING',
+      title: 'Authorization comes first.',
+      paragraphs: [
+        'The customer is responsible for return postage, insurance and any carrier charges unless MOTOGRIP GEAR confirms that the item supplied was incorrect or faulty. Original delivery charges and import duties are not refundable except where required by law.',
+        'Use a tracked service and retain the receipt until the return is complete. MOTOGRIP GEAR cannot accept responsibility for a return parcel until it is delivered to the authorized return address.',
+      ],
+    },
+    {
+      label: 'CUSTOM & MADE-TO-MEASURE',
+      title: 'Built for you, supported by us.',
+      paragraphs: [
+        'Before production, we may confirm measurements, design details and reference images with you. After those details are approved and cutting begins, the order cannot be treated as a standard return.',
+        'If a custom piece needs a fit correction, the first fit alteration is complimentary when requested within 60 days of receipt. Alteration support is assessed against the measurements and specifications approved for the order. Return shipping or later alterations may be chargeable.',
+        'Custom and made-to-measure orders are not refundable. This does not limit any remedy that the law requires for a product that is faulty or not made to the agreed specification.',
+      ],
+    },
+    {
+      label: 'CANCELLATIONS',
+      title: 'Tell us before work begins.',
+      paragraphs: [
+        'A cancellation request must be submitted within 2 days of placing the order. We cannot guarantee cancellation after production has started, an order has entered customs clearance or a parcel has been dispatched.',
+        'Rush or time-sensitive orders may enter production immediately and cannot be cancelled once work begins. If we can stop an eligible order, we will confirm the cancellation and any applicable refund in writing.',
+      ],
+    },
+    {
+      label: 'ORDER ACCEPTANCE & PRICING',
+      title: 'Accurate, fair and transparent.',
+      paragraphs: [
+        'An order confirmation acknowledges your request; final acceptance occurs when MOTOGRIP GEAR confirms or dispatches the order. We may decline an order for availability, payment, suspected fraud, shipping restrictions, legal requirements or an obvious pricing or description error.',
+        'If a genuine pricing error is found before acceptance, we will contact you with the correct price and let you continue or cancel. If payment has already been captured for an order we cannot accept, the applicable amount will be returned to the original payment method.',
+        'Nothing in this policy removes statutory consumer rights that apply in the customer’s country or state.',
+      ],
+    },
+  ];
   return (
     <div className="page-fade">
       <PageHero
         eyebrow={isReturns ? 'RETURNS & REFUNDS' : 'SHIPPING INFORMATION'}
         title={isReturns ? 'Returns,' : 'Worldwide,'}
-        italic={isReturns ? 'handled with care.' : 'shipping available.'}
+        italic={isReturns ? 'made clear.' : 'shipping available.'}
+        dek={isReturns ? 'Straightforward terms for standard pieces, custom work, exchanges, alterations, refunds and cancellations.' : undefined}
       />
 
       <section style={{ padding: '0 48px 96px', maxWidth: 1080, margin: '0 auto' }}>
@@ -5839,23 +5899,42 @@ function ShippingReturns({ go, mode = 'shipping' }) {
           ))}
         </div>}
 
-        {isReturns && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 64 }}>
-          <div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>RETURNS</div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>30 days, on stock pieces.</div>
-            <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>
-              From the day your piece is signed for, you have thirty days to return it. The piece must be in original condition, with the placket monogram intact. Made-to-Order pieces are final sale, with complimentary fit alterations within 60 days of receipt. Final pieces are sold as-is.
-            </div>
+        {isReturns && <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', borderTop: '1px solid var(--line)', marginBottom: 18 }}>
+            {returnHighlights.map(([number, title, body]) => (
+              <div key={title} style={{ padding: '28px 24px', borderBottom: '1px solid var(--line)' }}>
+                <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 14 }}>{number}</div>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 25, marginBottom: 10 }}>{title}</div>
+                <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.72 }}>{body}</div>
+              </div>
+            ))}
           </div>
-          <div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>HOW</div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>One label, one note.</div>
-            <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.8 }}>
-              File a return request using our online form. We send return instructions after reviewing the request. Approved refunds are processed after the piece arrives and passes inspection.
+
+          {returnSections.map((section) => (
+            <div key={section.label} style={{ padding: '54px 0', borderBottom: '1px solid var(--line)' }}>
+              <div className="mono" style={{ color: 'var(--accent-2)', fontSize: 10, marginBottom: 16 }}>{section.label}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 48 }}>
+                <div style={{ fontFamily: 'var(--display)', fontSize: 'clamp(28px, 3.6vw, 44px)', lineHeight: 1.08 }}>{section.title}</div>
+                <div>
+                  {section.paragraphs && section.paragraphs.map((paragraph) => (
+                    <p key={paragraph} style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.82, margin: '0 0 16px' }}>{paragraph}</p>
+                  ))}
+                  {section.items && section.items.map(([title, body]) => (
+                    <div key={title} style={{ paddingBottom: 20, marginBottom: 20, borderBottom: '1px solid var(--line)' }}>
+                      <div style={{ fontFamily: 'var(--display)', fontSize: 22, marginBottom: 8 }}>{title}</div>
+                      <div style={{ color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.82 }}>{body}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <button className="btn btn-ghost" style={{ marginTop: 20 }} onClick={() => go('file-return')}>File a Return</button>
+          ))}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, paddingTop: 36 }}>
+            <button className="btn" onClick={() => go('file-return')}>File a Return</button>
+            <button className="btn btn-ghost" onClick={() => go('contact')}>Contact MOTOGRIP GEAR</button>
           </div>
-        </div>}
+        </>}
       </section>
     </div>
   );
