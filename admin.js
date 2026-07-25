@@ -14,17 +14,80 @@ const state = {
   store: null,
   selectedProductId: null,
   dirty: false,
+  sidebarCollapsed: false,
 };
 
-const nav = [
-  ['dashboard', '⌂', 'Home'],
-  ['orders', '◇', 'Orders'],
-  ['returns', '↩', 'Return Requests'],
-  ['products', '□', 'Products'],
-  ['mto', '◌', 'Made to Measure'],
-  ['content', '✎', 'Brand & imagery'],
-  ['settings', '⚙', 'Settings'],
+const navigationGroups = [
+  ['Workspace', [
+    ['dashboard', '⌂', 'Dashboard', '/admin', 'active'],
+    ['my-work', '✓', 'My Work', '/admin/my-work', 'planned'],
+    ['approvals', '◎', 'Approvals', '/admin/approvals', 'planned'],
+    ['activity', '↻', 'Activity', '/admin/activity', 'planned'],
+  ]],
+  ['Commerce', [
+    ['products', '□', 'Products', '/admin/products', 'existing'],
+    ['categories', '▦', 'Categories', '/admin/categories', 'planned'],
+    ['collections', '◇', 'Collections', '/admin/collections', 'planned'],
+    ['inventory', '▤', 'Inventory', '/admin/inventory', 'planned'],
+    ['orders', '◫', 'Orders', '/admin/orders', 'planned'],
+    ['customers', '♙', 'Customers', '/admin/customers', 'planned'],
+    ['reviews', '☆', 'Reviews', '/admin/reviews', 'planned'],
+    ['coupons', '%', 'Coupons', '/admin/coupons', 'planned'],
+  ]],
+  ['Growth', [
+    ['marketing', '⌁', 'Marketing Center', '/admin/marketing', 'planned'],
+    ['social', '◉', 'Social Media', '/admin/social', 'planned'],
+    ['seo', '⌕', 'SEO Center', '/admin/seo', 'planned'],
+    ['merchant', 'G', 'Google Merchant', '/admin/google-merchant', 'planned'],
+    ['email', '✉', 'Email Marketing', '/admin/email-marketing', 'planned'],
+    ['wholesale', 'W', 'Wholesale CRM', '/admin/wholesale', 'planned'],
+  ]],
+  ['AI Studio', [
+    ['ai-product', '✦', 'AI Product Studio', '/admin/ai-product-studio', 'planned'],
+    ['media', '▧', 'Media Library', '/admin/media-library', 'planned'],
+    ['ai-settings', '⚙', 'AI Settings', '/admin/ai-settings', 'planned'],
+  ]],
+  ['Operations', [
+    ['factory', '⌂', 'Factory Management', '/admin/factory', 'planned'],
+    ['production', '◌', 'Production Tracking', '/admin/production', 'planned'],
+    ['team', '♧', 'Team Management', '/admin/team', 'restricted'],
+  ]],
+  ['Insights', [
+    ['reports', '▥', 'Reports & Analytics', '/admin/reports', 'planned'],
+    ['finance', '$', 'Financial Overview', '/admin/financials', 'restricted'],
+  ]],
+  ['Configuration', [
+    ['website', '⌘', 'Website Settings', '/admin/website-settings', 'planned'],
+    ['system', '⚙', 'System Settings', '/admin/system-settings', 'planned'],
+  ]],
 ];
+
+const routeEntries = navigationGroups.flatMap(([, items]) => items);
+routeEntries.push(['current-products', '□', 'Current Product Manager', '/admin/products/current', 'existing']);
+
+const moduleDetails = {
+  'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
+  approvals: ['Approvals', 'Review sensitive publishing and operational decisions before they take effect.', ['Approval queue', 'Decision notes', 'Escalations'], 'Roles and approval workflow', 'Phase 2B'],
+  activity: ['Activity', 'A human-readable view of administrative events across MOTOGRIP OS.', ['Event timeline', 'Actor filters', 'Entity links'], 'Audit query service', 'Phase 2B'],
+  categories: ['Categories', 'Organize products into durable storefront taxonomies.', ['Category hierarchy', 'Metadata', 'Sort order'], 'Catalog taxonomy model', 'Commerce phase'],
+  collections: ['Collections', 'Curate merchandising groups for campaigns and customer journeys.', ['Manual collections', 'Rules', 'Scheduling'], 'Collection rules engine', 'Commerce phase'],
+  inventory: ['Inventory', 'Coordinate stock visibility without changing the current catalog source.', ['Stock overview', 'Locations', 'Alerts'], 'Inventory ledger', 'Operations phase'],
+  orders: ['Orders', 'Provide a unified order-management workspace in a future commerce phase.', ['Order list', 'Fulfillment status', 'Returns links'], 'Order service and payment-safe adapters', 'Commerce phase'],
+  customers: ['Customers', 'Build customer relationships with privacy-conscious profiles and history.', ['Profiles', 'Segments', 'Consent'], 'Customer data model and privacy controls', 'CRM phase'],
+  reviews: ['Reviews', 'Moderate verified customer feedback and surface product insights.', ['Moderation queue', 'Product ratings', 'Responses'], 'Review verification service', 'Growth phase'],
+  coupons: ['Coupons', 'Manage controlled promotional rules without discount-led positioning.', ['Codes', 'Eligibility', 'Usage limits'], 'Promotion rules engine', 'Commerce phase'],
+  seo: ['SEO Center', 'Coordinate technical and editorial search quality across the catalog.', ['Issue queue', 'Metadata coverage', 'Content briefs'], 'SEO crawler and publishing approvals', 'Growth phase'],
+  merchant: ['Google Merchant', 'Monitor feed readiness and Merchant Center diagnostics.', ['Feed status', 'Policy issues', 'Attribute coverage'], 'Merchant API integration', 'Growth phase'],
+  email: ['Email Marketing', 'Plan consent-based lifecycle and campaign communication.', ['Campaigns', 'Automations', 'Segments'], 'Email provider and consent model', 'Growth phase'],
+  wholesale: ['Wholesale CRM', 'Manage qualified B2B, OEM, private-label, and retailer opportunities.', ['Pipeline', 'Accounts', 'Quotes'], 'Wholesale account model', 'CRM phase'],
+  media: ['Media Library', 'Create a governed source of product and campaign assets.', ['Asset browser', 'Usage rights', 'Variants'], 'Object storage and media metadata', 'AI Studio phase'],
+  'ai-settings': ['AI Settings', 'Govern future models, prompts, brand rules, and approval boundaries.', ['Providers', 'Prompt policies', 'Usage controls'], 'AI governance and secrets service', 'AI Studio phase'],
+  team: ['Team Management', 'Manage named users, roles, access, and account lifecycle.', ['Users', 'Roles', 'Access reviews'], 'Phase 2B identity and RBAC', 'Phase 2B'],
+  reports: ['Reports & Analytics', 'Turn operational and commerce data into decision-ready reporting.', ['Executive overview', 'Channel performance', 'Exports'], 'Analytics warehouse', 'Insights phase'],
+  finance: ['Financial Overview', 'Summarize business performance without replacing accounting controls.', ['Revenue view', 'Costs', 'Margins'], 'Approved finance integrations', 'Insights phase'],
+  website: ['Website Settings', 'Control approved storefront presentation and operational preferences.', ['Brand settings', 'Navigation', 'Policies'], 'Versioned publishing service', 'Configuration phase'],
+  system: ['System Settings', 'Configure MOTOGRIP OS platform-level behavior and integrations.', ['Environment status', 'Integrations', 'Data retention'], 'Platform configuration service', 'Platform phase'],
+};
 
 function money(value) {
   const currency = state.store?.settings?.currency || 'USD';
@@ -246,49 +309,85 @@ function renderBootstrap(error = '', success = false) {
   });
 }
 
-function shell(content) {
+function statusBadge(status, label = '') {
+  return `<span class="status-badge ${escapeHtml(status)}">${escapeHtml(label || status.replace('-', ' '))}</span>`;
+}
+
+function breadcrumbs() {
+  const route = routeEntries.find(([id]) => id === state.view);
+  const group = navigationGroups.find(([, items]) => items.some(([id]) => id === state.view));
+  const title = route?.[2] || 'Dashboard';
+  return `<nav class="breadcrumbs" aria-label="Breadcrumb"><a data-route="dashboard" href="/admin">MOTOGRIP OS</a><span>/</span>${group ? `<span>${escapeHtml(group[0])}</span><span>/</span>` : ''}<strong>${escapeHtml(title)}</strong></nav>`;
+}
+
+function Sidebar() {
+  return `
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="sidebar-brand">
+        <div class="brand-mark wide"><img src="/assets/motogrip-logo-transparent.png" alt=""></div>
+        <div class="brand-copy"><div class="eyebrow">Operating system</div><div>MOTOGRIP GEAR</div></div>
+        <button class="icon-btn collapse-toggle" id="sidebar-toggle" aria-label="${state.sidebarCollapsed ? 'Expand' : 'Collapse'} sidebar">${state.sidebarCollapsed ? '→' : '←'}</button>
+      </div>
+      <div class="nav-scroll">
+        ${navigationGroups.map(([group, items]) => `
+          <div class="nav-group">
+            <div class="nav-label">${escapeHtml(group)}</div>
+            ${items.map(([id, icon, label, path, status]) => `
+              <a class="nav-item ${state.view === id ? 'active' : ''}" data-route="${id}" href="${path}" ${state.view === id ? 'aria-current="page"' : ''}>
+                <span class="nav-icon" aria-hidden="true">${icon}</span>
+                <span class="nav-copy">${escapeHtml(label)}</span>
+                ${status === 'restricted' ? '<span class="nav-dot restricted" title="Restricted"></span>' : ''}
+              </a>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+      <div class="sidebar-footer">
+        <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
+        <span class="nav-copy">${state.store.products.length} products · ${state.store.orders.length} orders</span>
+      </div>
+    </aside>
+  `;
+}
+
+function Topbar() {
+  const owner = state.identity?.owner;
+  const profileName = owner?.displayName || (state.actorType === 'legacy' ? 'Legacy owner' : 'Owner');
+  return `
+    <header class="topbar">
+      <button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Open navigation">☰</button>
+      <label class="search">
+        <span class="sr-only">Global search</span>
+        <input id="global-search" value="${escapeHtml(state.query)}" placeholder="Search MOTOGRIP OS" autocomplete="off">
+      </label>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" disabled title="Notifications are coming soon" aria-label="Notifications, coming soon">♢</button>
+        <button class="icon-btn" type="button" disabled title="Approvals are coming soon" aria-label="Approvals, coming soon">◎</button>
+        <button class="btn quick-create" type="button" disabled title="Quick create is coming soon">＋ Quick create</button>
+        <button class="profile-chip" id="profile-toggle" type="button" aria-expanded="false">
+          <span class="avatar">${escapeHtml(profileName.slice(0, 1).toUpperCase())}</span>
+          <span class="profile-copy"><strong>${escapeHtml(profileName)}</strong><small>${escapeHtml(state.actorType === 'named_user' ? 'Named owner' : 'Compatibility access')}</small></span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+        <div class="profile-menu" id="profile-menu">
+          <a href="/" target="_blank" rel="noreferrer">View storefront</a>
+          <button id="logout" type="button">Log out</button>
+        </div>
+      </div>
+    </header>
+  `;
+}
+
+function AdminLayout(content) {
   const owner = state.identity?.owner;
   const compatibilityWarning = state.identity?.legacyCompatibilityWarning;
   return `
-    <div class="admin-shell">
-      <aside class="sidebar">
-        <div class="sidebar-brand">
-          <div class="brand-mark wide"><img src="/assets/motogrip-logo-transparent.png" alt=""></div>
-          <div>
-            <div class="eyebrow">Admin</div>
-            <div>MOTOGRIP GEAR</div>
-          </div>
-        </div>
-        <div class="nav-group">
-          <div class="nav-label">Store</div>
-          ${nav.map(([id, icon, label]) => `
-            <button class="nav-item ${state.view === id ? 'active' : ''}" data-view="${id}">
-              <span class="nav-icon">${icon}</span>
-              <span>${label}</span>
-            </button>
-          `).join('')}
-        </div>
-        <div class="sidebar-footer">
-          <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
-          ${state.store.products.length} products · ${state.store.orders.length} orders
-          ${owner ? `
-            <br><span class="muted">${escapeHtml(owner.displayName)} · ${escapeHtml(owner.status)}</span>
-            <br><span class="muted">Last login: ${owner.lastLoginAt ? escapeHtml(new Date(owner.lastLoginAt).toLocaleString()) : 'Not yet'}</span>
-            ${state.identity?.activeSessionCount !== null ? `<br><span class="muted">Active sessions: ${Number(state.identity.activeSessionCount || 0)}</span>` : ''}
-          ` : ''}
-        </div>
-      </aside>
+    <div class="admin-shell ${state.sidebarCollapsed ? 'sidebar-collapsed' : ''}">
+      ${Sidebar()}
       <main class="main">
-        <header class="topbar">
-          <div class="search">
-            <input id="global-search" value="${escapeHtml(state.query)}" placeholder="Search products, orders, customers">
-          </div>
-          <div class="button-row">
-            <a class="btn" href="/" target="_blank" rel="noreferrer">View store</a>
-            <button class="btn" id="logout">Log out</button>
-          </div>
-        </header>
+        ${Topbar()}
         <section class="content">
+          ${breadcrumbs()}
           ${compatibilityWarning ? `<p class="pill draft">${escapeHtml(compatibilityWarning)}</p><div style="height:16px"></div>` : ''}
           ${content}
         </section>
@@ -303,51 +402,112 @@ function shell(content) {
   `;
 }
 
-function pageHead(title, subtitle, actions = '') {
+function PageHeader(title, subtitle, actions = '', status = '') {
   return `
     <div class="page-head">
       <div>
-        <h1>${title}</h1>
-        <p>${subtitle}</p>
+        <div class="title-line"><h1>${escapeHtml(title)}</h1>${status ? statusBadge(status) : ''}</div>
+        <p>${escapeHtml(subtitle)}</p>
       </div>
       <div class="button-row">${actions}</div>
     </div>
   `;
 }
 
+function pageHead(title, subtitle, actions = '') {
+  return PageHeader(title, subtitle, actions);
+}
+
+function StatCard(label, value, note, demo = false) {
+  return `<article class="card metric"><div class="metric-label"><span>${escapeHtml(label)}</span>${demo ? statusBadge('demo', 'Demo') : ''}</div><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;
+}
+
+function QuickActionCard(title, description, route, enabled = false) {
+  return `<article class="quick-action"><div class="quick-icon" aria-hidden="true">＋</div><div><strong>${escapeHtml(title)}</strong><p>${escapeHtml(description)}</p></div><${enabled ? 'a' : 'button'} class="btn" ${enabled ? `data-route="${route}" href="${routeEntries.find(([id]) => id === route)?.[3] || '#'}"` : 'type="button" disabled'}>${enabled ? 'Open' : 'Coming soon'}</${enabled ? 'a' : 'button'}></article>`;
+}
+
+function AlertPanel(title, message, tone = 'info') {
+  return `<article class="alert-panel ${tone}"><strong>${escapeHtml(title)}</strong><p>${escapeHtml(message)}</p></article>`;
+}
+
+function ModuleStatusCard(title, status, note) {
+  return `<article class="module-status"><div><strong>${escapeHtml(title)}</strong><p>${escapeHtml(note)}</p></div>${statusBadge(status)}</article>`;
+}
+
+function EmptyState(title, description) {
+  return `<div class="empty-state"><div class="empty-icon" aria-hidden="true">◇</div><h2>${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p></div>`;
+}
+
+function ComingSoonPanel(title, description, dependencies, phase, status = 'planned') {
+  return `<div class="card coming-soon"><div class="coming-illustration" aria-hidden="true">MG</div><div><div class="button-row">${statusBadge(status)} ${statusBadge('coming-soon', 'Coming Soon')}</div><h2>${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p><dl><div><dt>Dependency</dt><dd>${escapeHtml(dependencies)}</dd></div><div><dt>Target</dt><dd>${escapeHtml(phase)}</dd></div></dl></div></div>`;
+}
+
+function LoadingSkeleton() {
+  return `<div class="loading-shell" aria-label="Loading admin"><div class="skeleton wide"></div><div class="grid stats">${Array.from({ length: 4 }, () => '<div class="skeleton card-shape"></div>').join('')}</div></div>`;
+}
+
 function renderDashboard() {
   const products = state.store.products;
   const orders = state.store.orders;
-  const revenue = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const lowStock = products.filter((product) => Number(product.inventory) <= 5).length;
-  const mto = products.filter((product) => product.madeToMeasureEnabled).length;
+  const openOrders = orders.filter((order) => order.status !== 'fulfilled').length;
   return `
-    ${pageHead('Home', 'A concise operating view for catalog, orders, and fit-lab workflow.')}
+    ${PageHeader('Dashboard', 'One premium operating view for commerce, growth, AI, and factory execution.', '', 'active')}
     <div class="grid stats">
-      <div class="card metric"><span>Revenue</span><strong>${money(revenue)}</strong></div>
-      <div class="card metric"><span>Open orders</span><strong>${orders.filter((o) => o.status !== 'fulfilled').length}</strong></div>
-      <div class="card metric"><span>Low stock</span><strong>${lowStock}</strong></div>
-      <div class="card metric"><span>MTO products</span><strong>${mto}</strong></div>
+      ${StatCard('Revenue today', '—', 'Analytics connection required', true)}
+      ${StatCard('Revenue this month', '—', 'Analytics connection required', true)}
+      ${StatCard('Orders', String(openOrders), 'Open records in the current store')}
+      ${StatCard('Products', String(products.length), 'Current catalog records')}
+      ${StatCard('Low stock', String(lowStock), 'Products with five units or fewer')}
+      ${StatCard('Pending approvals', '4', 'Illustrative workflow preview', true)}
+      ${StatCard('AI drafts', '7', 'Illustrative studio preview', true)}
+      ${StatCard('Merchant issues', '2', 'Illustrative feed preview', true)}
+      ${StatCard('Social posts', '6', 'Illustrative calendar preview', true)}
+      ${StatCard('Wholesale leads', '3', 'Illustrative CRM preview', true)}
+      ${StatCard('Production jobs', '8', 'Illustrative factory preview', true)}
+      ${StatCard('System health', 'Stable', 'Admin foundation available')}
     </div>
-    <div style="height:16px"></div>
-    <div class="grid two-col">
+    <section class="dashboard-section">
+      <div class="section-head"><div><h2>Quick actions</h2><p>Only the current product manager is operational in this shell.</p></div></div>
+      <div class="grid quick-grid">
+        ${QuickActionCard('Open product manager', 'Use the existing catalog editor without changing its behavior.', 'current-products', true)}
+        ${QuickActionCard('Create AI listing', 'Start a governed product-generation workflow.', 'ai-product')}
+        ${QuickActionCard('Review approvals', 'Check content and publishing decisions.', 'approvals')}
+        ${QuickActionCard('Add wholesale lead', 'Capture a qualified B2B opportunity.', 'wholesale')}
+      </div>
+    </section>
+    <div class="grid dashboard-two">
       <div class="card">
-        <div class="card-head"><h2>Orders needing attention</h2><button class="btn" data-view="orders">View all</button></div>
-        <div class="table-wrap">${ordersTable(orders.filter((order) => order.status !== 'fulfilled').slice(0, 5))}</div>
+        <div class="card-head"><h2>Recent products</h2><a class="btn" data-route="products" href="/admin/products">View catalog</a></div>
+        <div class="table-wrap">${productTable(products.slice(0, 5), false)}</div>
       </div>
       <div class="card">
-        <div class="card-head"><h2>Recent activity</h2><span class="pill">Live JSON store</span></div>
+        <div class="card-head"><h2>Recent activity</h2>${statusBadge('existing')}</div>
         <div class="card-pad">
-          ${state.store.activity.slice(0, 5).map((item) => `
+          ${(state.store.activity || []).slice(0, 5).map((item) => `
             <p><strong>${escapeHtml(item.message)}</strong><br><span class="muted">${new Date(item.at).toLocaleString()}</span></p>
-          `).join('')}
+          `).join('') || '<p>No recent catalog activity.</p>'}
         </div>
       </div>
     </div>
+    <div class="grid dashboard-three">
+      <div><div class="section-head"><h2>Approval queue</h2>${statusBadge('demo', 'Demo')}</div>${AlertPanel('Four items await review', 'Sample queue only. Approval actions remain disabled until roles and workflows exist.', 'warning')}</div>
+      <div><div class="section-head"><h2>Business alerts</h2></div>${AlertPanel(lowStock ? `${lowStock} low-stock products` : 'Inventory looks steady', 'Calculated from the current compatible admin store.', lowStock ? 'warning' : 'success')}</div>
+      <div><div class="section-head"><h2>Setup progress</h2></div><div class="card card-pad"><div class="progress-row"><span>Secure admin foundation</span><strong>Complete</strong></div><div class="progress"><span style="width:100%"></span></div><div class="progress-row"><span>MOTOGRIP OS modules</span><strong>Shell only</strong></div><div class="progress"><span style="width:18%"></span></div></div></div>
+    </div>
+    <section class="dashboard-section">
+      <div class="section-head"><div><h2>Module status</h2><p>Clear boundaries prevent prototype screens from being mistaken for live workflows.</p></div></div>
+      <div class="grid module-grid">
+        ${ModuleStatusCard('Admin foundation', 'active', 'Authentication and compatible store access')}
+        ${ModuleStatusCard('Product manager', 'existing', 'Current editor remains available')}
+        ${ModuleStatusCard('AI & Growth', 'planned', 'Interfaces only; no integrations')}
+        ${ModuleStatusCard('Factory & Finance', 'restricted', 'Requires scoped data and permissions')}
+      </div>
+    </section>
   `;
 }
 
-function productTable(products) {
+function productTable(products, interactive = true) {
   if (!products.length) return '<div class="empty">No products match this search.</div>';
   return `
     <table>
@@ -362,7 +522,7 @@ function productTable(products) {
       </thead>
       <tbody>
         ${products.map((product) => `
-          <tr class="clickable" data-product="${product.id}">
+          <tr class="${interactive ? 'clickable' : ''}" ${interactive ? `data-product="${product.id}"` : ''}>
             <td>
               <div class="resource">
                 <div class="thumb"><img src="/${escapeHtml(product.image)}" alt=""></div>
@@ -383,12 +543,12 @@ function productTable(products) {
   `;
 }
 
-function renderProducts() {
+function renderCurrentProductManager() {
   const products = filteredProducts();
   if (!state.selectedProductId && products[0]) state.selectedProductId = products[0].id;
   const product = productById();
   return `
-    ${pageHead('Products', 'Create, edit, publish, archive, and tune product-level made-to-measure pricing.', '<button class="btn primary" id="new-product">Add product</button>')}
+    ${PageHeader('Current Product Manager', 'The existing catalog editor is preserved here with its original read/write behavior.', '<a class="btn" data-route="products" href="/admin/products">Back to product shell</a><button class="btn primary" id="new-product">Add product</button>', 'existing')}
     <div class="grid two-col">
       <div class="card">
         <div class="card-head"><h2>Catalog</h2><span class="pill">${products.length} shown</span></div>
@@ -396,6 +556,76 @@ function renderProducts() {
       </div>
       ${product ? productEditor(product) : '<div class="card empty">Select a product to edit.</div>'}
     </div>
+  `;
+}
+
+function FilterBar() {
+  return `<div class="filter-bar"><label class="filter-search"><span class="sr-only">Filter products</span><input id="product-shell-filter" value="${escapeHtml(state.query)}" placeholder="Filter current products"></label><button class="btn" type="button" disabled>Category</button><button class="btn" type="button" disabled>Status</button><span class="filter-spacer"></span><button class="btn" type="button" disabled>Import</button><button class="btn" type="button" disabled>Export</button><button class="btn" type="button" disabled>Bulk actions</button></div>`;
+}
+
+function DataTableShell(products) {
+  return `<div class="card"><div class="card-head"><div><h2>Current catalog</h2><p>${products.length} compatible product records</p></div>${statusBadge('existing')}</div><div class="table-wrap">${productTable(products, false)}</div></div>`;
+}
+
+function renderProductsShell() {
+  const products = filteredProducts();
+  return `
+    ${PageHeader('Products', 'A scalable catalog workspace layered safely over the existing product store.', '<button class="btn" type="button" disabled title="Requires a future catalog workflow">Import</button><button class="btn" type="button" disabled>Export</button><a class="btn primary" data-route="current-products" href="/admin/products/current">Open Current Product Manager</a>', 'existing')}
+    ${AlertPanel('Existing workflow preserved', 'This overview is read-only. Product creation and editing continue only inside the Current Product Manager.', 'info')}
+    <div class="shell-gap"></div>
+    ${FilterBar()}
+    ${DataTableShell(products)}
+  `;
+}
+
+function renderGenericModule() {
+  const detail = moduleDetails[state.view] || ['Planned module', 'This operating area is defined in the MOTOGRIP OS blueprint.', ['Overview', 'Workflow', 'Reporting'], 'Approved data model and services', 'Future phase'];
+  const [title, purpose, capabilities, dependency, phase] = detail;
+  const status = routeEntries.find(([id]) => id === state.view)?.[4] || 'planned';
+  return `
+    ${PageHeader(title, purpose, '<button class="btn primary" type="button" disabled>New item</button>', status)}
+    <div class="grid placeholder-layout">
+      ${ComingSoonPanel(title, purpose, dependency, phase, status)}
+      <div class="card card-pad">
+        <div class="section-head"><div><h2>Planned capabilities</h2><p>These labels define information architecture, not available actions.</p></div></div>
+        <ul class="capability-list">${capabilities.map((item) => `<li><span aria-hidden="true">○</span>${escapeHtml(item)}${statusBadge('planned')}</li>`).join('')}</ul>
+      </div>
+    </div>
+  `;
+}
+
+function renderAIProductStudio() {
+  const steps = ['Image upload', 'AI analysis', 'Listing generation', 'SEO', 'Publishing', 'Social media', 'Google Merchant', 'Analytics'];
+  return `
+    ${PageHeader('AI Product Studio', 'A governed future workflow for turning approved product imagery into channel-ready content.', '<button class="btn primary" type="button" disabled>Upload images</button>', 'planned')}
+    ${AlertPanel('Interface preview only', 'No images are uploaded, analyzed, generated, or published from this screen.', 'info')}
+    <div class="workflow-rail">${steps.map((step, index) => `<div class="workflow-step"><span>${index + 1}</span><strong>${escapeHtml(step)}</strong>${statusBadge('planned')}</div>`).join('')}</div>
+    ${ComingSoonPanel('AI Product Studio', 'Future AI assistance will remain subject to human review and channel-specific approvals.', 'Media library, AI governance, approvals, and publishing adapters', 'AI Studio phase')}
+  `;
+}
+
+function renderMarketingCenter() {
+  return `
+    ${PageHeader('Marketing Center', 'Plan campaigns across owned channels with approvals and measurable outcomes.', '<button class="btn primary" type="button" disabled>Create campaign</button>', 'planned')}
+    <div class="grid module-grid">${['Campaign calendar', 'Audience strategy', 'Content approvals', 'Performance'].map((title) => ModuleStatusCard(title, 'planned', 'Defined shell; integration not connected')).join('')}</div>
+    <div class="shell-gap"></div>${ComingSoonPanel('Marketing orchestration', 'Campaign actions will become available only after channel, consent, and approval services are implemented.', 'Email, social, analytics, and approval services', 'Growth phase')}
+  `;
+}
+
+function renderSocialCenter() {
+  return `
+    ${PageHeader('Social Media Center', 'Coordinate premium brand content without publishing from this prototype.', '<button class="btn primary" type="button" disabled>Schedule post</button>', 'planned')}
+    <div class="social-preview"><div class="card card-pad"><h2>Content queue</h2>${EmptyState('No connected channels', 'Future channel connections and permissions will be configured here.')}</div><div class="card card-pad"><h2>Calendar preview</h2><div class="calendar-shell">${Array.from({ length: 14 }, (_, index) => `<span>${index + 1}</span>`).join('')}</div></div></div>
+  `;
+}
+
+function renderFactoryShell() {
+  const production = state.view === 'production';
+  const title = production ? 'Production Tracking' : 'Factory Management';
+  return `
+    ${PageHeader(title, production ? 'A future job-level view from approved order handoff through quality control.' : 'A future operating view for capacity, work centers, quality, and manufacturing accountability.', '<button class="btn primary" type="button" disabled>Create job</button>', 'planned')}
+    <div class="grid stats">${StatCard('Open jobs', '8', 'Illustrative factory preview', true)}${StatCard('Due this week', '5', 'Illustrative factory preview', true)}${StatCard('Quality holds', '1', 'Illustrative factory preview', true)}${StatCard('Capacity', '72%', 'Illustrative factory preview', true)}</div>
+    <div class="shell-gap"></div>${ComingSoonPanel(title, 'No production or order data is created or modified by this shell.', 'Production data model, factory roles, and approved order handoff', 'Operations phase')}
   `;
 }
 
@@ -677,34 +907,55 @@ function render() {
     return;
   }
   if (!state.store) {
-    root.innerHTML = '<main class="login-shell"><div class="login-card">Loading admin...</div></main>';
+    root.innerHTML = `<main class="login-shell">${LoadingSkeleton()}</main>`;
     return;
   }
   const views = {
     dashboard: renderDashboard,
-    products: renderProducts,
-    orders: renderOrders,
-    returns: renderReturns,
-    mto: renderMto,
-    content: renderContent,
-    settings: renderSettings,
+    products: renderProductsShell,
+    'current-products': renderCurrentProductManager,
+    'ai-product': renderAIProductStudio,
+    marketing: renderMarketingCenter,
+    social: renderSocialCenter,
+    factory: renderFactoryShell,
+    production: renderFactoryShell,
   };
-  root.innerHTML = shell((views[state.view] || renderDashboard)());
+  root.innerHTML = AdminLayout((views[state.view] || renderGenericModule)());
   bindShell();
   if (state.dirty) document.querySelector('.savebar')?.classList.add('visible');
 }
 
 function bindShell() {
-  document.querySelectorAll('[data-view]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.view = button.dataset.view;
-      render();
+  document.querySelectorAll('[data-route]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      navigate(link.dataset.route);
     });
   });
 
   document.getElementById('global-search')?.addEventListener('input', (event) => {
     state.query = event.target.value;
-    if (['products', 'orders', 'returns'].includes(state.view)) render();
+    if (state.view === 'products') render();
+  });
+  document.getElementById('product-shell-filter')?.addEventListener('input', (event) => {
+    state.query = event.target.value;
+    render();
+  });
+
+  document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+    state.sidebarCollapsed = !state.sidebarCollapsed;
+    try {
+      window.localStorage.setItem('motogrip-sidebar-collapsed', String(state.sidebarCollapsed));
+    } catch {}
+    render();
+  });
+  document.getElementById('mobile-menu')?.addEventListener('click', () => {
+    document.querySelector('.sidebar')?.classList.toggle('mobile-open');
+  });
+  document.getElementById('profile-toggle')?.addEventListener('click', (event) => {
+    const menu = document.getElementById('profile-menu');
+    const open = menu?.classList.toggle('visible');
+    event.currentTarget.setAttribute('aria-expanded', String(Boolean(open)));
   });
 
   document.getElementById('logout')?.addEventListener('click', async () => {
@@ -869,6 +1120,21 @@ function bindShell() {
   });
 }
 
+function viewFromPath(pathname = window.location.pathname) {
+  const normalized = pathname.replace(/\/+$/, '') || '/admin';
+  const route = routeEntries.find(([, , , path]) => path === normalized);
+  return route?.[0] || 'dashboard';
+}
+
+function navigate(view, replace = false) {
+  const route = routeEntries.find(([id]) => id === view) || routeEntries[0];
+  state.view = route[0];
+  state.query = '';
+  window.history[replace ? 'replaceState' : 'pushState']({}, '', route[3]);
+  render();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
 async function loadStore() {
   state.store = await api('/api/admin/store');
   state.selectedProductId = state.store.products[0]?.id || null;
@@ -898,6 +1164,14 @@ async function saveStore() {
 
 async function init() {
   try {
+    state.view = viewFromPath();
+    try {
+      state.sidebarCollapsed = window.localStorage.getItem('motogrip-sidebar-collapsed') === 'true';
+    } catch {}
+    window.addEventListener('popstate', () => {
+      state.view = viewFromPath();
+      render();
+    });
     const session = await api('/api/admin/session');
     state.authed = session.authenticated;
     state.configured = session.configured;
