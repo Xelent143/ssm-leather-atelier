@@ -194,6 +194,42 @@ test('staging password synchronization rejects an unexpected Owner identity', as
   fs.rmSync(current.dataDir, { recursive: true, force: true });
 });
 
+test('explicit staging recovery clears persisted failed-login state without changing identity', async () => {
+  const current = fixture();
+  await current.bootstrap.ensure();
+  const before = current.identity.owner();
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await current.identity.authenticate(STAGING_OWNER_EMAIL, 'Incorrect recovery phrase', {
+      headers: { 'x-forwarded-for': `192.0.2.${60 + attempt}` },
+      socket: {},
+    });
+  }
+  const locked = current.identity.readStore().users[0];
+  assert.equal(locked.failedLoginCount, 5);
+  assert.ok(locked.lockedUntil);
+
+  const recovery = createAdminStagingBootstrap({
+    dataDir: current.dataDir,
+    env: enabledEnvironment({ STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true' }),
+    identity: current.identity,
+    logger: { error() {}, info() {} },
+  });
+  const result = await recovery.ensure();
+  const after = current.identity.readStore().users[0];
+  assert.equal(result.action, 'password_synchronized');
+  assert.equal(after.id, before.id);
+  assert.equal(current.identity.readStore().users.length, 1);
+  assert.equal(after.failedLoginCount, 0);
+  assert.equal(after.lockedUntil, null);
+  assert.equal(after.sessionRevocationVersion, before.sessionRevocationVersion + 1);
+  const login = await current.identity.authenticate(STAGING_OWNER_EMAIL, stagingPassword, {
+    headers: { 'x-forwarded-for': '192.0.2.70' },
+    socket: {},
+  });
+  assert.equal(login.ok, true);
+  fs.rmSync(current.dataDir, { recursive: true, force: true });
+});
+
 test('enabled staging fails closed when the protected password is absent', async () => {
   const current = fixture(enabledEnvironment({ STAGING_OWNER_PASSWORD: '' }));
   await assert.rejects(current.bootstrap.ensure(), (error) =>

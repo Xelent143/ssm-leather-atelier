@@ -66,7 +66,10 @@ function createAdminStagingBootstrap(options = {}) {
         mismatch.code = 'STAGING_BOOTSTRAP_IDENTITY_MISMATCH';
         throw mismatch;
       }
-      if (await identity.passwordMatches(existingOwner.id, password)) {
+      const ownerRecord = identity.readStore().users.find((item) => item.id === existingOwner.id);
+      const loginStateNeedsReset = Number(ownerRecord?.failedLoginCount || 0) > 0 ||
+        Boolean(ownerRecord?.lockedUntil);
+      if (await identity.passwordMatches(existingOwner.id, password) && !loginStateNeedsReset) {
         return { ...status(), action: 'owner_exists' };
       }
       const requested = await identity.requestPasswordReset(existingOwner.email);
