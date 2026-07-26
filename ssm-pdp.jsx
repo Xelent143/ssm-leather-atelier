@@ -309,7 +309,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
 
           {/* Accordions — uses real per-product stories */}
           {[
-            { id: 'details', t: 'The Piece', content: p.story?.piece || p.blurb },
+            { id: 'details', t: 'The Piece', content: p.publicDescription || p.story?.piece || p.blurb },
             { id: 'craft',   t: 'The Craft', content: p.story?.craft || 'Twelve months in our vegetable-tanning pit, cut by hand from the central panels.' },
             { id: 'fit',     t: 'Fit & Care', content: p.story?.fit || 'Slim-regular fit through chest and shoulder. Wipe with a soft cloth; condition twice yearly.' },
             { id: 'specs',   t: 'Specifications', content: productSpecs },

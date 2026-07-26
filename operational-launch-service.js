@@ -95,6 +95,7 @@ function createOperationalLaunchService(options = {}) {
       throw Object.assign(new Error('Named Owner access is required.'), { code: 'FORBIDDEN' });
     }
     const targetStates = {
+      revise: 'Draft',
       start: 'In Progress',
       submit: 'Submitted for Review',
       request_changes: 'Changes Requested',
@@ -107,6 +108,7 @@ function createOperationalLaunchService(options = {}) {
     const result = await store.mutate((state) => {
       const prior = currentWorkflow(state, input.productUuid);
       const allowed = {
+        revise: ['Live'],
         start: [null, 'Draft', 'Changes Requested', 'In Progress'],
         submit: [null, 'Draft', 'In Progress', 'Changes Requested'],
         request_changes: ['Submitted for Review'],
@@ -115,6 +117,28 @@ function createOperationalLaunchService(options = {}) {
       if (!allowed[action].includes(prior?.status || null)) {
         throw Object.assign(new Error('Workflow transition is not allowed from the current state.'), {
           code: 'WORKFLOW_CONFLICT',
+        });
+      }
+      const requestedDraftId = input.draftId || prior?.draftId;
+      const draft = listingStore.read().drafts.find((item) =>
+        item.id === requestedDraftId && item.productUuid === input.productUuid);
+      if (['revise', 'submit', 'request_changes', 'approve'].includes(action) && !draft) {
+        throw Object.assign(new Error('Listing draft was not found.'), { code: 'VALIDATION' });
+      }
+      if (action === 'revise' && prior?.draftId === draft?.id) {
+        throw Object.assign(new Error('Create a new listing draft before starting a revision.'), {
+          code: 'WORKFLOW_CONFLICT',
+        });
+      }
+      if (['approve', 'request_changes'].includes(action) && prior?.draftId !== draft?.id) {
+        throw Object.assign(new Error('A newer submitted draft is available. Open it before review.'), {
+          code: 'REVISION_CONFLICT',
+        });
+      }
+      if (action === 'submit' && ['Draft', 'In Progress'].includes(prior?.status) &&
+          prior?.draftId && prior.draftId !== draft?.id) {
+        throw Object.assign(new Error('Open the current revision draft before submitting it.'), {
+          code: 'REVISION_CONFLICT',
         });
       }
       const record = {
@@ -325,6 +349,7 @@ function createOperationalLaunchService(options = {}) {
     requestChanges: (session, input) => transition(session, input, 'request_changes', input.note),
     start: (session, input) => transition(session, input, 'start'),
     submit: (session, input) => transition(session, input, 'submit'),
+    revise: (session, input) => transition(session, input, 'revise'),
     publish,
     subscribe,
     workflow,

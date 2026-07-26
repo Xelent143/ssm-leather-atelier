@@ -763,7 +763,12 @@ function injectProductHead(html, product, store, req) {
 <meta property="product:price:amount" content="${escapeHtml(product.price)}" />
 <meta property="product:price:currency" content="${escapeHtml(store.settings.currency || 'USD')}" />
 <script type="application/ld+json">${escapeScriptJson(meta.jsonLd)}</script>
-<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: product.slug })};</script>`;
+<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: product.slug })};
+window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
+    slug: product.slug,
+    title: product.title,
+    description: product.description,
+  })};</script>`;
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(meta.desc)}" />`)
@@ -1771,7 +1776,7 @@ async function handleApi(req, res, pathname) {
   }
 
   const operationalMatch = pathname.match(
-    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/operational(?:\/(start|submit|request-changes|approve|publish))?$/i,
+    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/operational(?:\/(revise|start|submit|request-changes|approve|publish))?$/i,
   );
   if (operationalMatch) {
     try {
@@ -1783,6 +1788,7 @@ async function handleApi(req, res, pathname) {
         const body = await readBody(req);
         const input = { ...body, productUuid };
         const actions = {
+          revise: () => operationalLaunchService.revise(session, input),
           start: () => operationalLaunchService.start(session, input),
           submit: () => operationalLaunchService.submit(session, input),
           'request-changes': () => operationalLaunchService.requestChanges(session, input),
@@ -2101,7 +2107,11 @@ async function handleApi(req, res, pathname) {
           approve: () => listingStudioService.approve(session, input),
           export: () => listingStudioService.exportPackage(session, input),
         };
-        sendJson(res, operation === 'export' ? 200 : 201, await operations[operation]());
+        const result = await operations[operation]();
+        if (['generate', 'edit', 'restore'].includes(operation)) {
+          operationalLaunchService.announce({ type: 'draft.updated', productUuid });
+        }
+        sendJson(res, operation === 'export' ? 200 : 201, result);
       } else if (req.method === 'GET') {
         sendJson(res, 200, listingStudioService.workspace(session, productUuid));
       } else {

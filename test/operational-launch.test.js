@@ -98,11 +98,12 @@ function operationalFixture() {
       },
     },
   };
+  const listingDrafts = [listingDraft];
   const store = createOperationalLaunchStore({ dataDir });
   const service = createOperationalLaunchService({
     store,
     identity: { findById: (id) => Object.values(users).find((user) => user.id === id) },
-    listingStore: { read: () => ({ drafts: [listingDraft] }) },
+    listingStore: { read: () => ({ drafts: listingDrafts }) },
     listingService: { workspace: () => listingWorkspace },
     productIdentityService: { view: () => ({ identity: { state: 'locked' } }) },
     catalogLinkService: { catalog: () => ({ products: [catalogProduct] }) },
@@ -111,6 +112,16 @@ function operationalFixture() {
   return {
     adapter, catalogId, draftId, editorSession, ownerSession, productUuid,
     service, store, website: () => websiteStore,
+    addDraft: (overrides = {}) => {
+      const draft = {
+        ...structuredClone(listingDraft),
+        ...overrides,
+        id: overrides.id || crypto.randomUUID(),
+        content: overrides.content || structuredClone(listingDraft.content),
+      };
+      listingDrafts.push(draft);
+      return draft;
+    },
   };
 }
 
@@ -180,6 +191,93 @@ test('publishing is revision checked, idempotent and updates the website atomica
     idempotencyKey,
   });
   assert.equal(repeated.publicationHistory.length, 1);
+});
+
+test('a Live product can enter a new governed revision and republish without duplicates', async () => {
+  const current = operationalFixture();
+  let result = await current.service.submit(current.editorSession, {
+    productUuid: current.productUuid,
+    catalogId: current.catalogId,
+    draftId: current.draftId,
+    expectedRevision: 0,
+  });
+  result = await current.service.approve(current.ownerSession, {
+    productUuid: current.productUuid,
+    draftId: current.draftId,
+    expectedRevision: result.storeRevision,
+  });
+  result = await current.service.publish(current.ownerSession, {
+    productUuid: current.productUuid,
+    draftId: current.draftId,
+    expectedOperationalRevision: result.storeRevision,
+    expectedWebsiteRevision: result.websiteRevision,
+    idempotencyKey: crypto.randomUUID(),
+  });
+  const revised = current.addDraft({
+    content: {
+      shopify: {
+        title: 'Dean Brown Leather Biker Jacket Revised',
+        shortDescription: 'Revised factual short description.',
+        fullDescription: 'Revised factual website description.',
+        features: ['Cowhide leather'],
+        specifications: [['Material', 'Cowhide leather']],
+        perfectFor: 'Motorcycle style customers.',
+        whyYouWillLoveIt: 'Factual construction.',
+        faq: [],
+        buyingGuide: 'Check sizing.',
+        seoTitle: 'Dean Brown Leather Biker Jacket Revised',
+        metaDescription: 'Revised factual product information.',
+        tags: ['brown leather jacket'],
+        urlHandle: 'dean-brown-leather-biker-jacket',
+      },
+    },
+  });
+  result = await current.service.revise(current.editorSession, {
+    productUuid: current.productUuid,
+    catalogId: current.catalogId,
+    draftId: revised.id,
+    expectedRevision: result.storeRevision,
+  });
+  assert.equal(result.workflow.status, 'Draft');
+  result = await current.service.submit(current.editorSession, {
+    productUuid: current.productUuid,
+    draftId: revised.id,
+    expectedRevision: result.storeRevision,
+  });
+  result = await current.service.approve(current.ownerSession, {
+    productUuid: current.productUuid,
+    draftId: revised.id,
+    expectedRevision: result.storeRevision,
+  });
+  result = await current.service.publish(current.ownerSession, {
+    productUuid: current.productUuid,
+    draftId: revised.id,
+    expectedOperationalRevision: result.storeRevision,
+    expectedWebsiteRevision: result.websiteRevision,
+    idempotencyKey: crypto.randomUUID(),
+  });
+  assert.equal(result.workflow.status, 'Live');
+  assert.equal(current.website().products.length, 1);
+  assert.equal(current.website().products[0].title, 'Dean Brown Leather Biker Jacket Revised');
+  assert.equal(current.website().products[0].description, 'Revised factual website description.');
+  assert.equal(current.store.read().publications.length, 2);
+});
+
+test('Owner review rejects a stale draft after a newer draft is submitted', async () => {
+  const current = operationalFixture();
+  const newer = current.addDraft();
+  let result = await current.service.submit(current.editorSession, {
+    productUuid: current.productUuid,
+    catalogId: current.catalogId,
+    draftId: newer.id,
+    expectedRevision: 0,
+  });
+  await assert.rejects(() => current.service.approve(current.ownerSession, {
+    productUuid: current.productUuid,
+    draftId: current.draftId,
+    expectedRevision: result.storeRevision,
+  }), (error) => error.code === 'REVISION_CONFLICT');
+  assert.equal(current.service.workflow(current.ownerSession, current.productUuid).workflow.status, 'Submitted for Review');
 });
 
 test('stale website revision is rejected without overwriting current content', async () => {
@@ -274,4 +372,14 @@ test('failed website sync rolls back, records Failed, and can be retried safely'
   });
   assert.equal(result.workflow.status, 'Live');
   assert.equal(result.publicationHistory.length, 1);
+});
+
+test('Listing Studio exposes repeat revisions and safe newer-draft controls', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'admin.js'), 'utf8');
+  assert.match(source, /Create New Revision/);
+  assert.match(source, /A newer draft is available\./);
+  assert.match(source, /Open Latest Draft/);
+  assert.match(source, /Continue Current Draft/);
+  assert.match(source, /draft\.updated/);
+  assert.match(source, /operational\/revise/);
 });

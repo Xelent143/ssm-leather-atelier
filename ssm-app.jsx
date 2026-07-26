@@ -17,7 +17,16 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
-const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
+const SSM_PRODUCT_OVERRIDE = window.__SSM_PRODUCT_OVERRIDE__ || null;
+const productFromSlug = (slug) => {
+  const product = SSM_PRODUCTS.find(p => p.slug === slug) || null;
+  if (!product || SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
+  return {
+    ...product,
+    name: SSM_PRODUCT_OVERRIDE.title || product.name,
+    publicDescription: SSM_PRODUCT_OVERRIDE.description || product.publicDescription || '',
+  };
+};
 const articleFromParams = (params = {}) => params.article
   || SSM_JOURNAL.find(article => article.id === params.articleId)
   || null;

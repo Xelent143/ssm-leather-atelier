@@ -29,6 +29,7 @@ const state = {
   listingInputDirty: false,
   listingContentDirty: false,
   listingEditContent: null,
+  latestDraftAvailableId: null,
   catalog: null,
   catalogSyncing: false,
   catalogError: '',
@@ -1353,9 +1354,18 @@ function renderListingStudio() {
     ['seo', 'SEO'], ['faq', 'FAQ'], ['buyingGuide', 'Buying Guide'],
   ];
   const activeChannel = state.listingTab || 'shopify';
-  const actions = `<button class="btn" type="button" id="back-to-product">Back to Product</button><button class="btn primary" type="button" data-generate-listing>${drafts.length ? 'Regenerate Listing' : 'Generate Listing'}</button>`;
+  const workflowStatus = state.operationalWorkflow?.workflow?.status || 'Draft';
+  const generateLabel = workflowStatus === 'Live'
+    ? 'Create New Revision'
+    : drafts.length ? 'Regenerate Listing' : 'Generate Listing';
+  const latestDraft = drafts.find((item) => item.id === state.latestDraftAvailableId);
+  const actions = `<button class="btn" type="button" id="back-to-product">Back to Product</button><button class="btn primary" type="button" data-generate-listing>${generateLabel}</button>`;
   return `
     ${PageHeader('Listing Studio', `${product.title} · Trusted release content only`, actions, 'active')}
+    ${latestDraft && latestDraft.id !== selected?.id ? `<section class="governance-note warning-note newer-draft-notice" role="status">
+      <div><strong>A newer draft is available.</strong><p>Draft Version ${latestDraft.draftVersion} was created by another editor. Open it before review or continue your current draft without approving it.</p></div>
+      <div class="button-row"><button class="btn primary" type="button" id="open-latest-draft">Open Latest Draft</button><button class="btn" type="button" id="continue-current-draft">Continue Current Draft</button></div>
+    </section>` : ''}
     ${renderListingInputWorkspace(workspace)}
     ${selected ? `
       <section class="listing-status-row">
@@ -1427,7 +1437,7 @@ function renderListingStudio() {
       <details class="card advanced-details"><summary>Advanced provenance details</summary><dl class="definition-grid compact">${definitionRow('Product Version hash', selected.productVersionHash, true)}${definitionRow('Release manifest hash', selected.releaseManifestHash, true)}${definitionRow('Knowledge Lock hash', selected.knowledgeLockHash, true)}${definitionRow('Draft content hash', selected.contentHash, true)}</dl></details>
       <section class="card export-panel"><div><strong>Review, copy or export</strong><span>Exports remain Owner-only and do not publish.</span></div><div class="button-row">${selected.approvalState !== 'owner_approved' && workspace.permissions?.canApprove ? '<button class="btn" type="button" id="approve-listing-draft">Approve draft package</button>' : ''}<button class="btn" type="button" data-export-listing="json" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download JSON</button><button class="btn" type="button" data-export-listing="text" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download text package</button>${compared ? '<button class="btn" type="button" id="restore-listing-version">Restore compared version</button>' : ''}</div></section>
       ${renderOperationalWorkflow(selected)}
-      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>${escapeHtml(state.operationalWorkflow?.workflow?.status || 'Draft')} · Website is the primary destination.</span></div><button class="btn primary" type="button" data-generate-listing>Regenerate as New Version</button></div>
+      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>${escapeHtml(workflowStatus)} · Website is the primary destination.</span></div><button class="btn primary" type="button" data-generate-listing>${workflowStatus === 'Live' ? 'Create New Revision' : 'Regenerate as New Version'}</button></div>
     ` : `<section class="card">${EmptyState('No listing drafts', 'Generate from the active Approved Product Release and valid Knowledge Lock.')}</section>`}
   `;
 }
@@ -1437,15 +1447,17 @@ function renderOperationalWorkflow(selected) {
   const workflow = data.workflow;
   const status = workflow?.status || 'Draft';
   const owner = state.identity?.user?.accountType === 'owner';
+  const workflowDraftIsSelected = !workflow?.draftId || workflow.draftId === selected.id;
   const actions = [];
-  if (['Draft', 'In Progress', 'Changes Requested'].includes(status)) {
+  if (status === 'Changes Requested' ||
+      (['Draft', 'In Progress'].includes(status) && workflowDraftIsSelected)) {
     actions.push(`<button class="btn primary" data-workflow-action="submit">Submit for Review</button>`);
   }
-  if (owner && status === 'Submitted for Review') {
+  if (owner && status === 'Submitted for Review' && workflowDraftIsSelected) {
     actions.push('<button class="btn" data-workflow-action="request-changes">Request Changes</button>');
     actions.push('<button class="btn primary" data-workflow-action="approve">Approve</button>');
   }
-  if (owner && status === 'Approved') {
+  if (owner && status === 'Approved' && workflowDraftIsSelected) {
     actions.push('<button class="btn primary" data-workflow-action="publish">Approve &amp; Publish Website</button>');
   }
   if (owner && status === 'Failed') {
@@ -1453,6 +1465,8 @@ function renderOperationalWorkflow(selected) {
   }
   return `<section class="card card-pad operational-workflow">
     <div class="card-head"><div><span class="eyebrow">Website workflow</span><h2>${escapeHtml(status)}</h2><p>Governed review and revision-checked website publishing.</p></div>${statusBadge(status === 'Live' ? 'active' : 'existing', status)}</div>
+    ${!workflowDraftIsSelected && ['Submitted for Review', 'Approved'].includes(status) ? `<div class="governance-note warning-note"><strong>A newer submitted draft is available.</strong><p>Open the submitted draft before reviewing or publishing. Stale content cannot be approved.</p><button class="btn primary" type="button" id="open-workflow-draft">Open Submitted Draft</button></div>` : ''}
+    ${status === 'Live' ? '<div class="governance-note"><strong>Published website listing</strong><p>Create New Revision to start another governed Draft → Review → Publish cycle without creating another website product.</p></div>' : ''}
     <div class="button-row">${actions.join('') || '<span class="muted">No action is available for the current role and state.</span>'}</div>
     ${workflow?.note ? `<div class="governance-note warning-note"><strong>Review note</strong><p>${escapeHtml(workflow.note)}</p></div>` : ''}
     <details class="advanced-details"><summary>Publication history and activity</summary>
@@ -2257,6 +2271,7 @@ function bindShell() {
         return;
       }
       try {
+        const wasLive = state.operationalWorkflow?.workflow?.status === 'Live';
         state.listingWorkspace = await api(
           `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/generate`,
           {
@@ -2265,12 +2280,48 @@ function bindShell() {
           },
         );
         state.selectedDraftId = state.listingWorkspace.draft.id;
+        state.latestDraftAvailableId = null;
+        if (wasLive) {
+          state.operationalWorkflow = await api(
+            `/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational/revise`,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                draftId: state.selectedDraftId,
+                catalogId: state.catalogProduct?.catalogProductId || null,
+                expectedRevision: state.operationalWorkflow.storeRevision,
+              }),
+            },
+          );
+        }
         render();
-        toast(`Draft Version ${state.listingWorkspace.draft.draftVersion} created`);
+        toast(wasLive
+          ? `Draft Version ${state.listingWorkspace.draft.draftVersion} revision created`
+          : `Draft Version ${state.listingWorkspace.draft.draftVersion} created`);
       } catch (error) {
         toast(error.message);
       }
     });
+  });
+  document.getElementById('open-latest-draft')?.addEventListener('click', () => {
+    state.selectedDraftId = state.latestDraftAvailableId;
+    state.latestDraftAvailableId = null;
+    state.compareDraftId = null;
+    state.listingContentDirty = false;
+    state.listingEditContent = null;
+    render();
+  });
+  document.getElementById('continue-current-draft')?.addEventListener('click', () => {
+    state.latestDraftAvailableId = null;
+    render();
+  });
+  document.getElementById('open-workflow-draft')?.addEventListener('click', () => {
+    state.selectedDraftId = state.operationalWorkflow?.workflow?.draftId || state.selectedDraftId;
+    state.latestDraftAvailableId = null;
+    state.compareDraftId = null;
+    state.listingContentDirty = false;
+    state.listingEditContent = null;
+    render();
   });
   document.getElementById('draft-select')?.addEventListener('change', (event) => {
     state.selectedDraftId = event.target.value;
@@ -2687,6 +2738,7 @@ async function navigateListingStudio(recordKey, replace = false) {
       api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational`),
     ]);
     state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
+    state.latestDraftAvailableId = null;
   } catch (error) {
     state.mvpError = error.message;
   }
@@ -2744,6 +2796,7 @@ async function loadMvpWorkspace() {
         api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational`),
       ]);
       state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
+      state.latestDraftAvailableId = null;
     } else if (state.view === 'catalog-detail') {
       const catalogProductId = decodeURIComponent(window.location.pathname.split('/').pop() || '');
       const detail = await api(`/api/admin/catalog/products/${encodeURIComponent(catalogProductId)}`);
@@ -2784,11 +2837,23 @@ function startActivityStream() {
   activityStream.addEventListener('message', async (event) => {
     try {
       const message = JSON.parse(event.data);
-      if (!['workflow.updated', 'website.published'].includes(message.type)) return;
+      if (!['draft.updated', 'workflow.updated', 'website.published'].includes(message.type)) return;
       if (state.mvpProduct?.productUuid === message.productUuid) {
-        state.operationalWorkflow = await api(
-          `/api/admin/mvp/products/${message.productUuid}/operational`,
-        );
+        const previousDraftId = state.selectedDraftId;
+        const [workflow, workspace] = await Promise.all([
+          api(`/api/admin/mvp/products/${message.productUuid}/operational`),
+          api(`/api/admin/mvp/products/${message.productUuid}/listing-studio`),
+        ]);
+        state.operationalWorkflow = workflow;
+        state.listingWorkspace = workspace;
+        const latest = workspace.drafts.at(-1);
+        if (latest && latest.id !== previousDraftId) {
+          if (!state.listingContentDirty && !previousDraftId) {
+            state.selectedDraftId = latest.id;
+          } else {
+            state.latestDraftAvailableId = latest.id;
+          }
+        }
       }
       if (message.type === 'website.published') {
         state.catalog = await api('/api/admin/catalog');

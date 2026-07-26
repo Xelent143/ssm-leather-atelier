@@ -110,3 +110,30 @@ test('MVP routes do not accept mutations', async () => {
   assert.ok([403, 404].includes(rejected.response.status));
   assert.equal(hashFile(adminStorePath), beforeHash);
 });
+
+test('public PDP receives the published website title and description override', async () => {
+  const store = JSON.parse(fs.readFileSync(adminStorePath, 'utf8'));
+  store.products.push({
+    id: 'mj01',
+    slug: 'dean-brown-leather-biker-jacket',
+    title: 'Dean Brown Leather Biker Jacket Revised',
+    category: 'Jackets',
+    gender: 'Men',
+    price: 299,
+    status: 'active',
+    inventory: 900,
+    description: 'Owner-approved public website description.',
+    stock: { M: 100 },
+  });
+  fs.writeFileSync(adminStorePath, `${JSON.stringify(store, null, 2)}\n`);
+
+  const response = await fetch(`${baseUrl}/products/dean-brown-leather-biker-jacket`);
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /window\.__SSM_PRODUCT_OVERRIDE__/);
+  assert.match(html, /Dean Brown Leather Biker Jacket Revised/);
+  assert.match(html, /Owner-approved public website description/);
+
+  const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(source, /p\.publicDescription \|\| p\.story\?\.piece/);
+});
