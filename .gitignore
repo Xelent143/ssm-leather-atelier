@@ -32,6 +32,8 @@ data/ai-product-studio.json
 data/ai-product-studio.json.*.tmp
 data/listing-studio.json
 data/listing-studio.json.*.tmp
+data/catalog-sync.json
+data/catalog-sync.json.*.tmp
 data/ai-product-studio-audit.ndjson
 data/ai-product-studio-jobs/
 data/ai-product-studio-artifacts/

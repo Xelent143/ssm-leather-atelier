@@ -63,6 +63,8 @@ test('read model keeps every existing admin product visible without migration', 
 test('MVP APIs require authentication and expose read-only product projections', async () => {
   const unauthorized = await request('/api/admin/mvp/dashboard');
   assert.equal(unauthorized.response.status, 401);
+  const unauthorizedCatalog = await request('/api/admin/catalog');
+  assert.equal(unauthorizedCatalog.response.status, 401);
 
   const beforeHash = hashFile(adminStorePath);
   const dashboard = await request('/api/admin/mvp/dashboard', {
@@ -83,6 +85,17 @@ test('MVP APIs require authentication and expose read-only product projections',
   );
   assert.equal(detail.response.status, 200);
   assert.equal(detail.data.recordKey, products.data.products[0].recordKey);
+
+  const catalog = await request('/api/admin/catalog', {
+    headers: { Cookie: cookie },
+  });
+  assert.equal(catalog.response.status, 200);
+  assert.equal(catalog.data.productCount, 14);
+  assert.equal(catalog.data.products.length, 14);
+  assert.equal(new Set(catalog.data.products.map((product) =>
+    product.catalogProductId)).size, 14);
+  assert.ok(catalog.data.products.every((product) =>
+    product.source.system === 'motogrip_website'));
   assert.equal(hashFile(adminStorePath), beforeHash);
   assert.equal(fs.existsSync(path.join(tempDir, 'product-plm.json')), false);
 });

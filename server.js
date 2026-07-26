@@ -13,6 +13,8 @@ const { createProductMvpReadModel } = require('./product-mvp-read-model');
 const { createProductGovernanceService } = require('./product-governance-service');
 const { createListingStudioStore } = require('./listing-studio-store');
 const { createListingStudioService } = require('./listing-studio-service');
+const { createCatalogSyncStore } = require('./catalog-sync-store');
+const { createCatalogSyncService } = require('./catalog-sync-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -49,6 +51,12 @@ const listingStudioService = createListingStudioService({
   plmStore: productPlmStore,
   listingStore: listingStudioStore,
   identity: adminIdentity,
+});
+const catalogSyncStore = createCatalogSyncStore({ dataDir });
+const catalogSyncService = createCatalogSyncService({
+  store: catalogSyncStore,
+  readWebsiteCatalog: readPublicStore,
+  readPlmStore: () => productPlmStore.read(),
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -1615,6 +1623,42 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/catalog' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, catalogSyncService.catalog());
+    } catch {
+      sendJson(res, 503, { error: 'Catalog import is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/catalog/sync' && req.method === 'POST') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const result = catalogSyncService.sync();
+      adminSecurity.audit(req, {
+        action: 'catalog_read_only_sync',
+        result: 'success',
+        session,
+        entityType: 'catalog',
+        entityId: result.sourceRevision,
+      });
+      sendJson(res, 200, result);
+    } catch {
+      adminSecurity.audit(req, {
+        action: 'catalog_read_only_sync',
+        result: 'failure',
+        session,
+        entityType: 'catalog',
+      });
+      sendJson(res, 503, { error: 'Catalog import is temporarily unavailable.' });
+    }
+    return true;
+  }
+
   const mvpProductMatch = pathname.match(/^\/api\/admin\/mvp\/products\/([^/]+)$/);
   if (mvpProductMatch && req.method === 'GET') {
     try {
@@ -2006,6 +2050,8 @@ module.exports = {
   adminIdentity,
   adminStagingBootstrap,
   adminSecurity,
+  catalogSyncService,
+  catalogSyncStore,
   productPlmStore,
   productPlmService,
   productMvpReadModel,

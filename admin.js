@@ -25,6 +25,9 @@ const state = {
   productDetailTab: 'overview',
   listingTab: 'shopify',
   copiedListingKey: null,
+  catalog: null,
+  catalogSyncing: false,
+  catalogError: '',
   mvpError: '',
 };
 
@@ -36,6 +39,7 @@ const navigationGroups = [
     ['activity', '↻', 'Activity', '/admin/activity', 'planned'],
   ]],
   ['Commerce', [
+    ['catalog', '▦', 'Catalog', '/admin/catalog', 'active'],
     ['products', '□', 'Products', '/admin/products', 'active'],
     ['categories', '▦', 'Categories', '/admin/categories', 'planned'],
     ['collections', '◇', 'Collections', '/admin/collections', 'planned'],
@@ -178,6 +182,22 @@ function filteredMvpProducts() {
     product.sku,
     product.legacyId,
     product.governance?.label,
+  ].join(' ').toLowerCase().includes(query));
+}
+
+function filteredCatalogProducts() {
+  const products = state.catalog?.products || [];
+  const query = state.query.trim().toLowerCase();
+  if (!query) return products;
+  return products.filter((product) => [
+    product.title,
+    product.sku,
+    product.brand,
+    product.productType,
+    product.productStatus,
+    product.syncStatus,
+    product.productUrl,
+    ...(product.availableSizes || []),
   ].join(' ').toLowerCase().includes(query));
 }
 
@@ -704,6 +724,145 @@ function renderMvpProducts() {
     </div>
     <section class="card">
       ${mvpProductRows(products)}
+    </section>
+  `;
+}
+
+function catalogImage(value = '') {
+  const source = String(value || 'assets/generated/leather-detail.png');
+  return source.startsWith('/') ? source : `/${source}`;
+}
+
+function formatTimestamp(value) {
+  if (!value) return 'Not synced';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'Unknown';
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(parsed);
+}
+
+function catalogStatusBadge(status) {
+  const tone = status === 'Synced'
+    ? 'active'
+    : status === 'Import Error'
+      ? 'restricted'
+      : 'planned';
+  return statusBadge(tone, status);
+}
+
+function renderCatalogVariants(product) {
+  if (!product.variants.length) return '<span class="muted">No variant quantities</span>';
+  return `
+    <details class="catalog-variants">
+      <summary>${product.variantCount} variants</summary>
+      <div>
+        ${product.variants.map((variant) => `
+          <span><strong>${escapeHtml(variant.value)}</strong><small>${Number(variant.quantity)} available</small></span>
+        `).join('')}
+      </div>
+    </details>
+  `;
+}
+
+function renderCatalog() {
+  const catalog = state.catalog;
+  if (state.catalogError) {
+    return `${PageHeader('Catalog', 'Read-only website catalog synchronization.', '', 'active')}${AlertPanel('Catalog unavailable', state.catalogError, 'warning')}`;
+  }
+  if (!catalog) return LoadingSkeleton();
+  const products = filteredCatalogProducts();
+  return `
+    ${PageHeader(
+      'Catalog',
+      'A read-only identity and inventory projection of the products currently displayed by the MOTOGRIP website.',
+      `<button class="btn primary" id="catalog-sync" type="button" ${state.catalogSyncing ? 'disabled' : ''}>${state.catalogSyncing ? 'Syncing…' : 'Sync website catalog'}</button>`,
+      'active',
+    )}
+    ${AlertPanel('Read-only connection', 'Sync reads the existing website catalog and updates only MOTOGRIP OS catalog metadata. It cannot edit, publish, archive, price, or overwrite a website product.', 'info')}
+    <div class="grid stats catalog-stats">
+      ${StatCard('Products', String(catalog.productCount), 'Unique website products')}
+      ${StatCard('Variants', String(catalog.variantCount), 'Size-level quantity records')}
+      ${StatCard('Total inventory', String(catalog.totalInventory), 'Website inventory projection')}
+      ${StatCard('Needs review', String(catalog.needsReviewCount), 'Identity or data checks')}
+    </div>
+    <section class="card catalog-summary">
+      <div>
+        <span class="eyebrow">Last sync</span>
+        <strong>${escapeHtml(formatTimestamp(catalog.lastSyncAt))}</strong>
+      </div>
+      <div>
+        <span class="eyebrow">Connection</span>
+        <strong>Website → Dashboard</strong>
+      </div>
+      <div>
+        <span class="eyebrow">Mode</span>
+        <strong>Read only</strong>
+      </div>
+      <div>
+        <span class="eyebrow">Store revision</span>
+        <strong>${Number(catalog.storeRevision)}</strong>
+      </div>
+    </section>
+    <div class="filter-bar catalog-filter">
+      <label class="filter-search"><span class="sr-only">Search catalog</span><input id="catalog-filter" value="${escapeHtml(state.query)}" placeholder="Search title, SKU, brand, type, size, or sync status"></label>
+      <span class="filter-spacer"></span>
+      <span class="muted">${products.length} of ${catalog.productCount} products</span>
+    </div>
+    <section class="card catalog-table-card">
+      <div class="table-wrap">
+        <table class="catalog-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>SKU / identity</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Variants & sizes</th>
+              <th>Inventory</th>
+              <th>Status</th>
+              <th>Last updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products.map((product) => `
+              <tr>
+                <td data-label="Product">
+                  <div class="resource catalog-product">
+                    <div class="thumb catalog-thumb"><img src="${escapeHtml(catalogImage(product.image))}" alt=""></div>
+                    <div>
+                      <strong>${escapeHtml(product.title)}</strong>
+                      <small>${escapeHtml(product.brand)}</small>
+                      ${product.productUrl ? `<a href="${escapeHtml(product.productUrl)}" target="_blank" rel="noreferrer">View website product ↗</a>` : '<span class="muted">Website URL unavailable</span>'}
+                    </div>
+                  </div>
+                </td>
+                <td data-label="SKU / identity">
+                  <strong class="mono">${escapeHtml(product.sku || 'Missing SKU')}</strong>
+                  <small class="catalog-id mono">${escapeHtml(product.catalogProductId)}</small>
+                </td>
+                <td data-label="Type">${escapeHtml(formatProductType(product.productType))}</td>
+                <td data-label="Price">${money(product.price)}</td>
+                <td data-label="Variants & sizes">
+                  ${renderCatalogVariants(product)}
+                  <small>${escapeHtml(product.availableSizes.join(', ') || 'No available sizes')}</small>
+                </td>
+                <td data-label="Inventory"><strong>${Number(product.totalInventory)}</strong></td>
+                <td data-label="Status">
+                  <div class="catalog-statuses">
+                    ${statusBadge(product.productStatus === 'active' ? 'active' : 'planned', product.productStatus)}
+                    ${catalogStatusBadge(product.syncStatus)}
+                  </div>
+                  ${product.reviewReason ? `<small class="catalog-review">${escapeHtml(product.reviewReason)}</small>` : ''}
+                </td>
+                <td data-label="Last updated">${escapeHtml(formatTimestamp(product.lastUpdated))}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${products.length ? '' : EmptyState('No catalog products found', 'Adjust the search or run a manual website sync.')}
     </section>
   `;
 }
@@ -1301,6 +1460,7 @@ function render() {
   }
   const views = {
     dashboard: renderMvpDashboard,
+    catalog: renderCatalog,
     products: renderMvpProducts,
     'product-detail': renderMvpProductDetail,
     'listing-studio': renderListingStudio,
@@ -1335,6 +1495,28 @@ function bindShell() {
   document.getElementById('mvp-product-filter')?.addEventListener('input', (event) => {
     state.query = event.target.value;
     render();
+  });
+  document.getElementById('catalog-filter')?.addEventListener('input', (event) => {
+    state.query = event.target.value;
+    render();
+  });
+  document.getElementById('catalog-sync')?.addEventListener('click', async () => {
+    state.catalogSyncing = true;
+    render();
+    try {
+      state.catalog = await api('/api/admin/catalog/sync', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      state.catalogError = '';
+      toast(`Catalog synced: ${state.catalog.productCount} products`);
+    } catch (error) {
+      state.catalogError = error.message;
+      toast(error.message);
+    } finally {
+      state.catalogSyncing = false;
+      render();
+    }
   });
 
   document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
@@ -1737,6 +1919,12 @@ async function loadMvpWorkspace() {
     }
   } catch (error) {
     state.mvpError = error.message;
+  }
+  try {
+    state.catalog = await api('/api/admin/catalog');
+    state.catalogError = '';
+  } catch (error) {
+    state.catalogError = error.message;
   }
 }
 
