@@ -28,6 +28,13 @@ data/admin-store.json.*.tmp
 data/product-plm.json
 data/product-plm.json.*.tmp
 data/product-audit.ndjson
+data/ai-product-studio.json
+data/ai-product-studio.json.*.tmp
+data/ai-product-studio-audit.ndjson
+data/ai-product-studio-jobs/
+data/ai-product-studio-artifacts/
+data/ai-product-studio-quarantine/
+data/ai-product-studio-backups/
 data/*session*.json
 data/*lockout*.json
 data/*.bak
