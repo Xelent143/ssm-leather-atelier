@@ -191,7 +191,7 @@ test('first schema v4 mutation preserves a restricted v3 rollback backup', async
   delete v3.marketplaceIdentities;
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(v3, null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 4);
+  assert.equal(fixture.store.read().schemaVersion, 5);
   assert.equal(fs.existsSync(fixture.store.paths.v3BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v3BackupPath)).schemaVersion, 3);
   assert.equal(fs.statSync(fixture.store.paths.v3BackupPath).mode & 0o777, 0o600);

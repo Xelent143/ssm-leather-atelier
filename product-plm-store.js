@@ -6,6 +6,7 @@ const {
   upgradeStore,
   validateStore,
 } = require('./product-plm-schema');
+const { validateAppendOnlyTransition } = require('./product-plm-history');
 
 function atomicWriteJson(filePath, value) {
   const tmp = `${filePath}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
@@ -42,6 +43,10 @@ function createProductPlmStore(options = {}) {
       styleOptionAssignments: [],
       sellableItems: [],
       marketplaceIdentities: [],
+      productVersions: [],
+      evidenceRecords: [],
+      evidenceLinks: [],
+      productHistoryEvents: [],
       legacyMappings: [],
       migrationPreviews: [],
       migrationBatches: [],
@@ -75,6 +80,7 @@ function createProductPlmStore(options = {}) {
       createdAt: current.createdAt,
       updatedAt: new Date(now()).toISOString(),
     });
+    validateAppendOnlyTransition(current, next);
     try {
       const onDisk = JSON.parse(fs.readFileSync(storePath, 'utf8'));
       const backupPath = `${storePath}.v${onDisk.schemaVersion}.backup`;
@@ -113,6 +119,7 @@ function createProductPlmStore(options = {}) {
       v1BackupPath: `${storePath}.v1.backup`,
       v2BackupPath: `${storePath}.v2.backup`,
       v3BackupPath: `${storePath}.v3.backup`,
+      v4BackupPath: `${storePath}.v4.backup`,
     },
     read,
     write,

@@ -41,13 +41,16 @@ function createFixture() {
 test('empty PLM store is versioned without writing until the first mutation', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal(current.schemaVersion, 4);
+  assert.equal(current.schemaVersion, 5);
   assert.equal(current.storeRevision, 0);
   assert.deepEqual(current.productIdentities, []);
   assert.deepEqual(current.productFamilies, []);
   assert.deepEqual(current.productStyles, []);
   assert.deepEqual(current.optionDefinitions, []);
   assert.deepEqual(current.sellableItems, []);
+  assert.deepEqual(current.productVersions, []);
+  assert.deepEqual(current.evidenceRecords, []);
+  assert.deepEqual(current.productHistoryEvents, []);
   assert.equal(fs.existsSync(fixture.store.paths.storePath), false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });

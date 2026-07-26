@@ -4,8 +4,11 @@ const { validateMarketplaceIdentities } = require('./product-plm-marketplace-ide
 const { validateProductOptions } = require('./product-plm-options');
 const { validateProductRelationships } = require('./product-plm-relationships');
 const { validateSellableItems } = require('./product-plm-sellables');
+const { validateEvidenceRegistry } = require('./product-plm-evidence');
+const { validateProductHistory } = require('./product-plm-history');
+const { validateProductVersions } = require('./product-plm-versions');
 
-const PRODUCT_PLM_SCHEMA_VERSION = 4;
+const PRODUCT_PLM_SCHEMA_VERSION = 5;
 const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'brands',
   'legalEntities',
@@ -19,6 +22,10 @@ const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'styleOptionAssignments',
   'sellableItems',
   'marketplaceIdentities',
+  'productVersions',
+  'evidenceRecords',
+  'evidenceLinks',
+  'productHistoryEvents',
   'legacyMappings',
   'migrationPreviews',
   'migrationBatches',
@@ -122,7 +129,7 @@ function legacySourceKey(record) {
 function upgradeStore(store) {
   if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
   if (store.schemaVersion === PRODUCT_PLM_SCHEMA_VERSION) return store;
-  if (![1, 2, 3].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
+  if (![1, 2, 3, 4].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
   const upgraded = { ...store };
   if (store.schemaVersion === 1) {
     upgraded.productFamilies = [];
@@ -132,11 +139,17 @@ function upgradeStore(store) {
     upgraded.productComponents = [];
     upgraded.productRelationships = [];
   }
-  upgraded.optionDefinitions = [];
-  upgraded.optionValues = [];
-  upgraded.styleOptionAssignments = [];
-  upgraded.sellableItems = [];
-  upgraded.marketplaceIdentities = [];
+  if (store.schemaVersion < 4) {
+    upgraded.optionDefinitions = [];
+    upgraded.optionValues = [];
+    upgraded.styleOptionAssignments = [];
+    upgraded.sellableItems = [];
+    upgraded.marketplaceIdentities = [];
+  }
+  upgraded.productVersions = [];
+  upgraded.evidenceRecords = [];
+  upgraded.evidenceLinks = [];
+  upgraded.productHistoryEvents = [];
   upgraded.schemaVersion = PRODUCT_PLM_SCHEMA_VERSION;
   return upgraded;
 }
@@ -221,6 +234,9 @@ function validateStore(store) {
   validateProductOptions(store);
   validateSellableItems(store);
   validateMarketplaceIdentities(store);
+  validateEvidenceRegistry(store);
+  validateProductVersions(store);
+  validateProductHistory(store);
   return store;
 }
 

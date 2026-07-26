@@ -48,10 +48,14 @@ function createProductPlmService(options = {}) {
       styleOptionAssignmentCount: current.styleOptionAssignments.length,
       sellableItemCount: current.sellableItems.length,
       marketplaceIdentityCount: current.marketplaceIdentities.length,
+      productVersionCount: current.productVersions.length,
+      evidenceRecordCount: current.evidenceRecords.length,
+      evidenceLinkCount: current.evidenceLinks.length,
+      productHistoryEventCount: current.productHistoryEvents.length,
       legacyMappingCount: current.legacyMappings.length,
       migrationPreviewCount: current.migrationPreviews.length,
       migrationBatchCount: current.migrationBatches.length,
-      phase: '3B.2C',
+      phase: '3B.3A',
     };
   }
 
