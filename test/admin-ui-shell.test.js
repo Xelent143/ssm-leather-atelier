@@ -45,3 +45,15 @@ test('responsive and accessibility foundations are present', () => {
   assert.match(adminJs, /aria-current="page"/);
   assert.match(adminJs, /aria-label="Primary navigation"/);
 });
+
+test('Business MVP read-only workspace exposes dashboard, products, and detail screens', () => {
+  assert.match(adminJs, /function renderMvpDashboard\(\)/);
+  assert.match(adminJs, /function renderMvpProducts\(\)/);
+  assert.match(adminJs, /function renderMvpProductDetail\(\)/);
+  assert.match(adminJs, /\/api\/admin\/mvp\/dashboard/);
+  assert.match(adminJs, /\/api\/admin\/mvp\/products/);
+  assert.match(adminJs, /Read-only workspace/);
+  assert.doesNotMatch(adminJs, /fetch\(['"]\/api\/admin\/mvp\/[^'"]*['"],\s*\{\s*method:\s*['"](POST|PUT|PATCH|DELETE)/);
+  assert.match(adminCss, /\.product-detail-grid/);
+  assert.match(adminCss, /\.mvp-task/);
+});

@@ -15,6 +15,10 @@ const state = {
   selectedProductId: null,
   dirty: false,
   sidebarCollapsed: false,
+  mvpDashboard: null,
+  mvpProducts: [],
+  mvpProduct: null,
+  mvpError: '',
 };
 
 const navigationGroups = [
@@ -25,7 +29,7 @@ const navigationGroups = [
     ['activity', '↻', 'Activity', '/admin/activity', 'planned'],
   ]],
   ['Commerce', [
-    ['products', '□', 'Products', '/admin/products', 'existing'],
+    ['products', '□', 'Products', '/admin/products', 'active'],
     ['categories', '▦', 'Categories', '/admin/categories', 'planned'],
     ['collections', '◇', 'Collections', '/admin/collections', 'planned'],
     ['inventory', '▤', 'Inventory', '/admin/inventory', 'planned'],
@@ -64,6 +68,7 @@ const navigationGroups = [
 
 const routeEntries = navigationGroups.flatMap(([, items]) => items);
 routeEntries.push(['current-products', '□', 'Current Product Manager', '/admin/products/current', 'existing']);
+routeEntries.push(['product-detail', '□', 'Product Detail', '/admin/products/:recordKey', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -151,6 +156,20 @@ function filteredProducts() {
     product.gender,
     product.status,
     product.tag,
+  ].join(' ').toLowerCase().includes(query));
+}
+
+function filteredMvpProducts() {
+  const query = state.query.trim().toLowerCase();
+  if (!query) return state.mvpProducts;
+  return state.mvpProducts.filter((product) => [
+    product.title,
+    product.brand,
+    product.productType,
+    product.styleCode,
+    product.sku,
+    product.legacyId,
+    product.governance?.label,
   ].join(' ').toLowerCase().includes(query));
 }
 
@@ -284,7 +303,7 @@ function renderBootstrap(error = '', success = false) {
   `;
   document.getElementById('bootstrap-skip')?.addEventListener('click', async () => {
     state.bootstrapSkipped = true;
-    await loadStore();
+    await loadAdmin();
   });
   document.getElementById('bootstrap-finish')?.addEventListener('click', async () => {
     state.bootstrapSkipped = true;
@@ -314,6 +333,9 @@ function statusBadge(status, label = '') {
 }
 
 function breadcrumbs() {
+  if (state.view === 'product-detail') {
+    return `<nav class="breadcrumbs" aria-label="Breadcrumb"><a data-route="dashboard" href="/admin">MOTOGRIP OS</a><span>/</span><a data-route="products" href="/admin/products">Products</a><span>/</span><strong>${escapeHtml(state.mvpProduct?.title || 'Product Detail')}</strong></nav>`;
+  }
   const route = routeEntries.find(([id]) => id === state.view);
   const group = navigationGroups.find(([, items]) => items.some(([id]) => id === state.view));
   const title = route?.[2] || 'Dashboard';
@@ -344,7 +366,7 @@ function Sidebar() {
       </div>
       <div class="sidebar-footer">
         <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
-        <span class="nav-copy">${state.store.products.length} products · ${state.store.orders.length} orders</span>
+        <span class="nav-copy">${state.mvpProducts.length || state.store.products.length} products · Owner workspace</span>
       </div>
     </aside>
   `;
@@ -575,6 +597,173 @@ function renderProductsShell() {
     <div class="shell-gap"></div>
     ${FilterBar()}
     ${DataTableShell(products)}
+  `;
+}
+
+function governanceBadge(governance) {
+  const tone = governance?.state === 'governed'
+    ? 'active'
+    : governance?.state === 'not_migrated'
+      ? 'planned'
+      : 'restricted';
+  return statusBadge(tone, governance?.label || 'Unknown');
+}
+
+function formatProductType(value = '') {
+  return String(value || 'Unclassified')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function mvpProductRows(products) {
+  if (!products.length) {
+    return EmptyState('No products found', 'Adjust your search or open the Current Product Manager.');
+  }
+  return `
+    <div class="table-wrap">
+      <table class="mvp-products-table">
+        <thead><tr><th>Product</th><th>Brand</th><th>Type</th><th>Governance</th><th>Inventory</th></tr></thead>
+        <tbody>
+          ${products.map((product) => `
+            <tr class="clickable" data-mvp-product="${escapeHtml(product.recordKey)}" tabindex="0" aria-label="Open ${escapeHtml(product.title)}">
+              <td><div class="resource"><div class="thumb product-thumb"><img src="${escapeHtml(product.image)}" alt=""></div><div><strong>${escapeHtml(product.title)}</strong><br><span class="muted">${escapeHtml(product.sku)}${product.legacyId ? ` · ${escapeHtml(product.legacyId)}` : ''}</span></div></div></td>
+              <td>${escapeHtml(product.brand)}</td>
+              <td>${escapeHtml(formatProductType(product.productType))}</td>
+              <td>${governanceBadge(product.governance)}</td>
+              <td>${Number(product.inventory || 0)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderMvpDashboard() {
+  const dashboard = state.mvpDashboard;
+  if (state.mvpError) {
+    return `${PageHeader('Dashboard', 'Your read-only product operating view.', '', 'active')}${AlertPanel('Workspace unavailable', state.mvpError, 'warning')}`;
+  }
+  if (!dashboard) return LoadingSkeleton();
+  return `
+    ${PageHeader('Dashboard', 'A focused read-only view of product governance and the work that needs attention.', '<a class="btn primary" data-route="products" href="/admin/products">View products</a>', 'active')}
+    <div class="grid stats mvp-stats">
+      ${StatCard('Products', String(dashboard.productCount), 'Current internal product records')}
+      ${StatCard('Governed', String(dashboard.governedCount), 'Approved release and Knowledge Lock')}
+      ${StatCard('Action required', String(dashboard.actionRequiredCount), 'Products not yet fully governed')}
+      ${StatCard('Not migrated', String(dashboard.notMigratedCount), 'Still available through legacy compatibility')}
+    </div>
+    <div class="grid dashboard-two mvp-dashboard-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>Product work queue</h2><p>Read-only guidance for Micro Sprint 1</p></div>${statusBadge('existing', 'Live data')}</div>
+        <div class="mvp-task-list">
+          ${dashboard.actionQueue.length ? dashboard.actionQueue.map((item) => `
+            <button class="mvp-task" type="button" data-mvp-product="${escapeHtml(item.recordKey)}">
+              <span class="mvp-task-icon" aria-hidden="true">→</span>
+              <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.nextAction)}</small></span>
+              ${governanceBadge({ state: item.state, label: item.label })}
+            </button>
+          `).join('') : EmptyState('Everything is governed', 'No product-governance work is currently waiting.')}
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2>Governance readiness</h2></div>
+        <div class="card-pad governance-summary">
+          <div><span>Version required</span><strong>${dashboard.versionRequiredCount}</strong></div>
+          <div><span>Approval or release required</span><strong>${dashboard.releaseRequiredCount}</strong></div>
+          <div><span>Knowledge Lock required</span><strong>${dashboard.knowledgeLockRequiredCount}</strong></div>
+          <p class="muted">Micro Sprint 1 is read-only. Governed write actions arrive only after Micro Sprint 2 approval.</p>
+        </div>
+      </section>
+    </div>
+    <section class="card">
+      <div class="card-head"><div><h2>Products</h2><p>Open any product to review its identity and governance state.</p></div><a class="btn" data-route="products" href="/admin/products">View all</a></div>
+      ${mvpProductRows(dashboard.recentProducts)}
+    </section>
+  `;
+}
+
+function renderMvpProducts() {
+  const products = filteredMvpProducts();
+  return `
+    ${PageHeader('Products', 'Browse current product records and inspect their governed PLM readiness.', '<a class="btn" data-route="current-products" href="/admin/products/current">Open Current Product Manager</a>', 'active')}
+    ${AlertPanel('Read-only workspace', 'No product, storefront, inventory, pricing, or governance data can be changed from this screen.', 'info')}
+    <div class="shell-gap"></div>
+    <div class="filter-bar mvp-filter-bar">
+      <label class="filter-search"><span class="sr-only">Search products</span><input id="mvp-product-filter" value="${escapeHtml(state.query)}" placeholder="Search products, SKU, type, or governance status"></label>
+      <span class="filter-spacer"></span>
+      <span class="muted">${products.length} of ${state.mvpProducts.length} products</span>
+    </div>
+    <section class="card">
+      ${mvpProductRows(products)}
+    </section>
+  `;
+}
+
+function definitionRow(label, value, mono = false) {
+  return `<div><dt>${escapeHtml(label)}</dt><dd class="${mono ? 'mono' : ''}">${escapeHtml(value || 'Not assigned')}</dd></div>`;
+}
+
+function governanceStep(label, complete, value) {
+  return `<li class="${complete ? 'complete' : ''}"><span aria-hidden="true">${complete ? '✓' : '○'}</span><div><strong>${escapeHtml(label)}</strong><small>${escapeHtml(value)}</small></div></li>`;
+}
+
+function renderMvpProductDetail() {
+  const product = state.mvpProduct;
+  if (!product) {
+    return `${PageHeader('Product Detail', 'Read-only governed product view.', '<a class="btn" data-route="products" href="/admin/products">Back to products</a>')}${state.mvpError ? AlertPanel('Product unavailable', state.mvpError, 'warning') : LoadingSkeleton()}`;
+  }
+  const governance = product.governance;
+  const actions = `
+    <a class="btn" data-route="current-products" href="/admin/products/current">Current Product Manager</a>
+    ${product.storefrontPath ? `<a class="btn" href="${escapeHtml(product.storefrontPath)}" target="_blank" rel="noreferrer">View storefront</a>` : ''}
+  `;
+  return `
+    ${PageHeader(product.title, `${product.brand} · ${formatProductType(product.productType)} · ${product.styleCode}`, actions, governance.state === 'governed' ? 'active' : 'existing')}
+    <div class="product-hero card">
+      <div class="product-hero-media"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}"></div>
+      <div class="product-hero-copy">
+        <div class="button-row">${governanceBadge(governance)} ${statusBadge(product.source === 'plm_linked' ? 'active' : 'planned', product.source === 'plm_linked' ? 'PLM linked' : 'Legacy source')}</div>
+        <h2>${escapeHtml(product.title)}</h2>
+        <p>${escapeHtml(governance.nextAction)}</p>
+        <div class="product-facts-inline"><span><small>SKU</small><strong>${escapeHtml(product.sku)}</strong></span><span><small>Inventory</small><strong>${Number(product.inventory || 0)}</strong></span><span><small>Price</small><strong>${money(product.price)}</strong></span></div>
+      </div>
+    </div>
+    <div class="grid product-detail-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>Product identity</h2><p>Durable identifiers and ownership</p></div>${statusBadge('existing', 'Read only')}</div>
+        <dl class="definition-grid">
+          ${definitionRow('Product UUID', product.productUuid || 'Not migrated', true)}
+          ${definitionRow('Legacy ID', product.legacyId, true)}
+          ${definitionRow('Brand', product.brand)}
+          ${definitionRow('Legal entity', product.legalEntity)}
+          ${definitionRow('Product family', product.family)}
+          ${definitionRow('Product type', formatProductType(product.productType))}
+          ${definitionRow('Style code', product.styleCode, true)}
+          ${definitionRow('Sellable items', String(product.sellableItemCount))}
+        </dl>
+      </section>
+      <aside class="card">
+        <div class="card-head"><h2>Governance checklist</h2></div>
+        <ol class="governance-checklist">
+          ${governanceStep('Product identity', Boolean(product.productUuid), product.productUuid ? 'Durable UUID assigned' : 'PLM migration required')}
+          ${governanceStep('Product hierarchy', product.family !== 'Not assigned' && product.styleCode !== 'Not assigned', `${product.family} · ${product.styleCode}`)}
+          ${governanceStep('Product Version', governance.versionCount > 0, governance.latestVersionNumber ? `Version ${governance.latestVersionNumber}` : 'No immutable version')}
+          ${governanceStep('Approval Request', governance.approvalRequestCount > 0, governance.approvalRequestCount ? `${governance.approvalRequestCount} request(s)` : 'No approval request')}
+          ${governanceStep('Approved Release', ['approved', 'active'].includes(governance.releaseState), governance.latestReleaseNumber ? `Release ${governance.latestReleaseNumber} · ${governance.releaseState}` : 'No release')}
+          ${governanceStep('Knowledge Lock', governance.knowledgeLockValid, governance.knowledgeLockValid ? 'Integrity validated on read' : 'No valid lock')}
+        </ol>
+        <div class="card-pad governance-note"><strong>Micro Sprint 1</strong><p>No actions are available here yet. This screen cannot change product or governance data.</p></div>
+      </aside>
+    </div>
+    <section class="card">
+      <div class="card-head"><div><h2>Media references</h2><p>Original media metadata only</p></div><span class="muted">${product.originalMediaReferences.length} reference(s)</span></div>
+      <div class="media-reference-grid">
+        ${product.originalMediaReferences.length ? product.originalMediaReferences.map((media) => `
+          <article><span class="media-reference-icon" aria-hidden="true">▧</span><div><strong>${escapeHtml(media.role || 'Source media')}</strong><p>${escapeHtml(media.reference || 'Reference unavailable')}</p><small>${escapeHtml(media.sourceSystem || 'PLM')}</small></div></article>
+        `).join('') : EmptyState('No governed media references', 'Existing legacy product imagery remains visible above without being copied into PLM.')}
+      </div>
+    </section>
   `;
 }
 
@@ -911,8 +1100,9 @@ function render() {
     return;
   }
   const views = {
-    dashboard: renderDashboard,
-    products: renderProductsShell,
+    dashboard: renderMvpDashboard,
+    products: renderMvpProducts,
+    'product-detail': renderMvpProductDetail,
     'current-products': renderCurrentProductManager,
     'ai-product': renderAIProductStudio,
     marketing: renderMarketingCenter,
@@ -938,6 +1128,10 @@ function bindShell() {
     if (state.view === 'products') render();
   });
   document.getElementById('product-shell-filter')?.addEventListener('input', (event) => {
+    state.query = event.target.value;
+    render();
+  });
+  document.getElementById('mvp-product-filter')?.addEventListener('input', (event) => {
     state.query = event.target.value;
     render();
   });
@@ -979,6 +1173,17 @@ function bindShell() {
     row.addEventListener('click', () => {
       state.selectedProductId = row.dataset.product;
       render();
+    });
+  });
+
+  document.querySelectorAll('[data-mvp-product]').forEach((row) => {
+    const openProduct = () => navigateProduct(row.dataset.mvpProduct);
+    row.addEventListener('click', openProduct);
+    row.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openProduct();
+      }
     });
   });
 
@@ -1122,8 +1327,29 @@ function bindShell() {
 
 function viewFromPath(pathname = window.location.pathname) {
   const normalized = pathname.replace(/\/+$/, '') || '/admin';
+  if (/^\/admin\/products\/(?!current$)[^/]+$/.test(normalized)) return 'product-detail';
   const route = routeEntries.find(([, , , path]) => path === normalized);
   return route?.[0] || 'dashboard';
+}
+
+async function navigateProduct(recordKey, replace = false) {
+  state.view = 'product-detail';
+  state.query = '';
+  state.mvpProduct = null;
+  state.mvpError = '';
+  window.history[replace ? 'replaceState' : 'pushState'](
+    {},
+    '',
+    `/admin/products/${encodeURIComponent(recordKey)}`,
+  );
+  render();
+  try {
+    state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+  } catch (error) {
+    state.mvpError = error.message;
+  }
+  render();
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 function navigate(view, replace = false) {
@@ -1142,6 +1368,24 @@ async function loadStore() {
   render();
 }
 
+async function loadMvpWorkspace() {
+  try {
+    const [dashboard, productResponse] = await Promise.all([
+      api('/api/admin/mvp/dashboard'),
+      api('/api/admin/mvp/products'),
+    ]);
+    state.mvpDashboard = dashboard;
+    state.mvpProducts = productResponse.products || [];
+    state.mvpError = '';
+    if (state.view === 'product-detail') {
+      const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+      state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+    }
+  } catch (error) {
+    state.mvpError = error.message;
+  }
+}
+
 async function loadAdmin() {
   state.identity = await api('/api/admin/me');
   state.actorType = state.identity.actorType;
@@ -1150,6 +1394,8 @@ async function loadAdmin() {
     return;
   }
   await loadStore();
+  await loadMvpWorkspace();
+  render();
 }
 
 async function saveStore() {
@@ -1170,7 +1416,26 @@ async function init() {
     } catch {}
     window.addEventListener('popstate', () => {
       state.view = viewFromPath();
-      render();
+      if (state.view === 'product-detail') {
+        const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+        navigateProduct(recordKey, true);
+      } else {
+        render();
+      }
+    });
+    window.addEventListener('keydown', (event) => {
+      const target = event.target;
+      const typing = target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement;
+      if (event.key === '/' && !typing) {
+        event.preventDefault();
+        document.getElementById(state.view === 'products' ? 'mvp-product-filter' : 'global-search')?.focus();
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        document.getElementById('global-search')?.focus();
+      }
     });
     const session = await api('/api/admin/session');
     state.authed = session.authenticated;

@@ -8,6 +8,7 @@ const { createAdminIdentity } = require('./admin-identity');
 const { createProductPlmAudit } = require('./product-plm-audit');
 const { createProductPlmService } = require('./product-plm-service');
 const { createProductPlmStore } = require('./product-plm-store');
+const { createProductMvpReadModel } = require('./product-mvp-read-model');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -26,6 +27,10 @@ const productPlmAudit = createProductPlmAudit({ dataDir });
 const productPlmService = createProductPlmService({
   store: productPlmStore,
   audit: productPlmAudit,
+});
+const productMvpReadModel = createProductMvpReadModel({
+  plmStore: productPlmStore,
+  readLegacyStore: readStore,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -1567,6 +1572,36 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/mvp/dashboard' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productMvpReadModel.dashboard());
+    } catch {
+      sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/mvp/products' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, { products: productMvpReadModel.products() });
+    } catch {
+      sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  const mvpProductMatch = pathname.match(/^\/api\/admin\/mvp\/products\/([^/]+)$/);
+  if (mvpProductMatch && req.method === 'GET') {
+    try {
+      const product = productMvpReadModel.product(decodeURIComponent(mvpProductMatch[1]));
+      if (!product) sendJson(res, 404, { error: 'Product was not found.' });
+      else sendJson(res, 200, product);
+    } catch {
+      sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
   const productDnaMatch = pathname.match(/^\/api\/admin\/plm\/products\/([0-9a-f-]+)\/dna$/i);
   if (productDnaMatch && req.method === 'GET') {
     try {
@@ -1803,6 +1838,7 @@ module.exports = {
   adminSecurity,
   productPlmStore,
   productPlmService,
+  productMvpReadModel,
   productMeta,
   injectProductHead,
   injectRouteHead,
