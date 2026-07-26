@@ -7,7 +7,7 @@
     "dev": "PORT=5173 node server.js",
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check server.js && node --check admin-security.js && node --check admin-identity.js && node --check product-plm-schema.js && node --check product-plm-store.js && node --check product-plm-audit.js && node --check product-plm-hierarchy.js && node --check product-plm-components.js && node --check product-plm-relationships.js && node --check product-plm-options.js && node --check product-plm-sellables.js && node --check product-plm-marketplace-identities.js && node --check product-plm-intelligence-references.js && node --check product-plm-versions.js && node --check product-plm-evidence.js && node --check product-plm-history.js && node --check product-plm-migration.js && node --check product-plm-service.js && node --check admin.js"
+    "check": "node --check server.js && node --check admin-security.js && node --check admin-identity.js && node --check product-plm-schema.js && node --check product-plm-store.js && node --check product-plm-audit.js && node --check product-plm-hierarchy.js && node --check product-plm-components.js && node --check product-plm-relationships.js && node --check product-plm-options.js && node --check product-plm-sellables.js && node --check product-plm-marketplace-identities.js && node --check product-plm-intelligence-references.js && node --check product-plm-versions.js && node --check product-plm-evidence.js && node --check product-plm-history.js && node --check product-plm-approval-policies.js && node --check product-plm-approvals.js && node --check product-plm-migration.js && node --check product-plm-service.js && node --check admin.js"
   },
   "engines": {
     "node": ">=20"

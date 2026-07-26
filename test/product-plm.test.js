@@ -8,6 +8,7 @@ const { createProductPlmAudit } = require('../product-plm-audit');
 const { buildMigrationPreview } = require('../product-plm-migration');
 const {
   PRODUCT_BRAIN_REFERENCE_TYPES,
+  PRODUCT_PLM_SCHEMA_VERSION,
   isUuid,
 } = require('../product-plm-schema');
 const { createProductPlmService } = require('../product-plm-service');
@@ -41,7 +42,7 @@ function createFixture() {
 test('empty PLM store is versioned without writing until the first mutation', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal(current.schemaVersion, 5);
+  assert.equal(current.schemaVersion, PRODUCT_PLM_SCHEMA_VERSION);
   assert.equal(current.storeRevision, 0);
   assert.deepEqual(current.productIdentities, []);
   assert.deepEqual(current.productFamilies, []);
@@ -51,6 +52,9 @@ test('empty PLM store is versioned without writing until the first mutation', ()
   assert.deepEqual(current.productVersions, []);
   assert.deepEqual(current.evidenceRecords, []);
   assert.deepEqual(current.productHistoryEvents, []);
+  assert.deepEqual(current.approvalPolicies, []);
+  assert.deepEqual(current.approvalRequests, []);
+  assert.deepEqual(current.approvalDecisions, []);
   assert.equal(fs.existsSync(fixture.store.paths.storePath), false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });

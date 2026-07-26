@@ -5,6 +5,7 @@ const HISTORY_KEYS = new Set([
   'action', 'result', 'actorId', 'sessionId', 'timestamp', 'previousEventHash',
   'eventHash', 'relatedVersionId', 'relatedEvidenceId', 'changedFields',
   'beforeHash', 'afterHash', 'dataClassification',
+  'relatedApprovalPolicyId', 'relatedApprovalRequestId', 'relatedApprovalDecisionId',
 ]);
 
 function isUuid(value) {
@@ -30,6 +31,9 @@ function validateProductHistory(store) {
     product_version: new Set(store.productVersions.map((item) => item.id)),
     evidence_record: new Set(store.evidenceRecords.map((item) => item.id)),
     evidence_link: new Set(store.evidenceLinks.map((item) => item.id)),
+    approval_policy: new Set(store.approvalPolicies.map((item) => item.id)),
+    approval_request: new Set(store.approvalRequests.map((item) => item.id)),
+    approval_decision: new Set(store.approvalDecisions.map((item) => item.id)),
   };
   const versionIds = aggregates.product_version;
   const evidenceIds = aggregates.evidence_record;
@@ -48,6 +52,12 @@ function validateProductHistory(store) {
         !Number.isFinite(Date.parse(event.timestamp)) ||
         (event.relatedVersionId !== null && !versionIds.has(event.relatedVersionId)) ||
         (event.relatedEvidenceId !== null && !evidenceIds.has(event.relatedEvidenceId)) ||
+        (event.relatedApprovalPolicyId != null &&
+          !aggregates.approval_policy.has(event.relatedApprovalPolicyId)) ||
+        (event.relatedApprovalRequestId != null &&
+          !aggregates.approval_request.has(event.relatedApprovalRequestId)) ||
+        (event.relatedApprovalDecisionId != null &&
+          !aggregates.approval_decision.has(event.relatedApprovalDecisionId)) ||
         !Array.isArray(event.changedFields) || event.changedFields.length > 100 ||
         event.changedFields.some((field) => typeof field !== 'string' || field.length > 160) ||
         (event.beforeHash !== null && !isHash(event.beforeHash)) ||
@@ -81,6 +91,9 @@ function validateAppendOnlyTransition(current, next) {
     'evidenceRecords',
     'evidenceLinks',
     'productHistoryEvents',
+    'approvalPolicies',
+    'approvalRequests',
+    'approvalDecisions',
   ]) {
     if (next[collection].length < current[collection].length) {
       throw new Error(`Product PLM ${collection} is append-only.`);

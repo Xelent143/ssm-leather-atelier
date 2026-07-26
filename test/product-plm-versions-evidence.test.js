@@ -251,7 +251,7 @@ test('first schema v5 mutation preserves a restricted v4 rollback backup', async
   delete v4.productHistoryEvents;
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(v4, null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 5);
+  assert.equal(fixture.store.read().schemaVersion, PRODUCT_PLM_SCHEMA_VERSION);
   assert.equal(fs.existsSync(fixture.store.paths.v4BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v4BackupPath)).schemaVersion, 4);
   assert.equal(fs.statSync(fixture.store.paths.v4BackupPath).mode & 0o777, 0o600);
@@ -378,11 +378,12 @@ test('versions reject embedded AI payloads and unrecognized reference fields', a
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
 
-test('Phase 3B.3A does not introduce approvals releases or Knowledge Locks', () => {
+test('Phase 3B.3B introduces approval primitives without releases or Knowledge Locks', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal('approvalRequests' in current, false);
-  assert.equal('approvalDecisions' in current, false);
+  assert.deepEqual(current.approvalPolicies, []);
+  assert.deepEqual(current.approvalRequests, []);
+  assert.deepEqual(current.approvalDecisions, []);
   assert.equal('productReleases' in current, false);
   assert.equal('knowledgeLocks' in current, false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });

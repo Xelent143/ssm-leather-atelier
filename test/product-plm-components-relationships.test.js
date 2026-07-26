@@ -170,7 +170,7 @@ test('first schema v3 mutation preserves a restricted v2 rollback backup', async
   delete v2.productRelationships;
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(v2, null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 5);
+  assert.equal(fixture.store.read().schemaVersion, PRODUCT_PLM_SCHEMA_VERSION);
   assert.equal(fs.existsSync(fixture.store.paths.v2BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v2BackupPath)).schemaVersion, 2);
   assert.equal(fs.statSync(fixture.store.paths.v2BackupPath).mode & 0o777, 0o600);
