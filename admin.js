@@ -2271,7 +2271,9 @@ function bindShell() {
         return;
       }
       try {
-        const wasLive = state.operationalWorkflow?.workflow?.status === 'Live';
+        const workflowStatus = state.operationalWorkflow?.workflow?.status;
+        const wasLive = workflowStatus === 'Live';
+        const shouldRevise = ['Live', 'Draft', 'In Progress', 'Changes Requested'].includes(workflowStatus);
         state.listingWorkspace = await api(
           `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/generate`,
           {
@@ -2281,7 +2283,7 @@ function bindShell() {
         );
         state.selectedDraftId = state.listingWorkspace.draft.id;
         state.latestDraftAvailableId = null;
-        if (wasLive) {
+        if (shouldRevise) {
           state.operationalWorkflow = await api(
             `/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational/revise`,
             {

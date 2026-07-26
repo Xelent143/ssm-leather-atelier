@@ -263,6 +263,26 @@ test('a Live product can enter a new governed revision and republish without dup
   assert.equal(current.store.read().publications.length, 2);
 });
 
+test('a newer generated draft can replace the active Draft revision before submission', async () => {
+  const current = operationalFixture();
+  const firstRevision = current.addDraft();
+  const secondRevision = current.addDraft();
+  let result = await current.service.start(current.editorSession, {
+    productUuid: current.productUuid,
+    catalogId: current.catalogId,
+    draftId: firstRevision.id,
+    expectedRevision: 0,
+  });
+  result = await current.service.revise(current.editorSession, {
+    productUuid: current.productUuid,
+    catalogId: current.catalogId,
+    draftId: secondRevision.id,
+    expectedRevision: result.storeRevision,
+  });
+  assert.equal(result.workflow.status, 'Draft');
+  assert.equal(result.workflow.draftId, secondRevision.id);
+});
+
 test('Owner review rejects a stale draft after a newer draft is submitted', async () => {
   const current = operationalFixture();
   const newer = current.addDraft();

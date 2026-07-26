@@ -108,7 +108,7 @@ function createOperationalLaunchService(options = {}) {
     const result = await store.mutate((state) => {
       const prior = currentWorkflow(state, input.productUuid);
       const allowed = {
-        revise: ['Live'],
+        revise: ['Live', 'Draft', 'In Progress', 'Changes Requested'],
         start: [null, 'Draft', 'Changes Requested', 'In Progress'],
         submit: [null, 'Draft', 'In Progress', 'Changes Requested'],
         request_changes: ['Submitted for Review'],
