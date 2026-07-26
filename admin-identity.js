@@ -114,6 +114,7 @@ function createAdminIdentity(options = {}) {
     return {
       version: 1,
       users: [],
+      bootstrapMetadata: null,
       passwordResetTokens: [],
       invitationTokens: [],
       updatedAt: new Date(now()).toISOString(),
@@ -162,7 +163,7 @@ function createAdminIdentity(options = {}) {
     return readStore().users.find((user) => user.id === id) || null;
   }
 
-  async function bootstrapOwner(input) {
+  async function bootstrapOwner(input, options = {}) {
     return serializeMutation(async () => {
     ensureDataDir();
     let lock;
@@ -228,6 +229,14 @@ function createAdminIdentity(options = {}) {
         recoveryMethods: [],
       };
       store.users.push(user);
+      if (options.bootstrapMetadata) {
+        store.bootstrapMetadata = {
+          bootstrapVersion: Number(options.bootstrapMetadata.bootstrapVersion) || null,
+          bootstrapTimestamp: String(options.bootstrapMetadata.bootstrapTimestamp || ''),
+          bootstrapReason: String(options.bootstrapMetadata.bootstrapReason || ''),
+          bootstrapSource: String(options.bootstrapMetadata.bootstrapSource || ''),
+        };
+      }
       writeStore(store);
       return publicUser(user);
     } finally {

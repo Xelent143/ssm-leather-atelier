@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 const { createAdminIdentity } = require('./admin-identity');
+const { createAdminStagingBootstrap } = require('./admin-staging-bootstrap');
 const { createProductPlmAudit } = require('./product-plm-audit');
 const { createProductPlmService } = require('./product-plm-service');
 const { createProductPlmStore } = require('./product-plm-store');
@@ -18,6 +19,10 @@ const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const adminIdentity = createAdminIdentity({ dataDir });
+const adminStagingBootstrap = createAdminStagingBootstrap({
+  dataDir,
+  identity: adminIdentity,
+});
 const adminSecurity = createAdminSecurity({
   dataDir,
   validateSession: (session) => adminIdentity.sessionIsValid(session),
@@ -1738,6 +1743,24 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     const requestPath = decodeURIComponent(url.pathname);
 
+    if (requestPath === '/admin/system/bootstrap-status') {
+      if (req.method !== 'GET') {
+        send(res, 405, 'Method not allowed');
+        return;
+      }
+      const session = adminSecurity.getSession(req);
+      if (!session) {
+        sendJson(res, 401, { error: 'Authentication required' });
+        return;
+      }
+      if (!namedOwnerForSession(session)) {
+        sendJson(res, 403, { error: 'Named Owner access required' });
+        return;
+      }
+      sendJson(res, 200, adminStagingBootstrap.status());
+      return;
+    }
+
     if (requestPath.startsWith('/api/')) {
       const handled = await handleApi(req, res, requestPath);
       if (handled) return;
@@ -1827,14 +1850,22 @@ const server = http.createServer(async (req, res) => {
 ensureStore();
 
 if (require.main === module) {
-  server.listen(port, host, () => {
-    console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
-  });
+  adminStagingBootstrap.ensure()
+    .then(() => {
+      server.listen(port, host, () => {
+        console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
+      });
+    })
+    .catch(() => {
+      console.error('Admin startup configuration failed');
+      process.exitCode = 1;
+    });
 }
 
 module.exports = {
   server,
   adminIdentity,
+  adminStagingBootstrap,
   adminSecurity,
   productPlmStore,
   productPlmService,

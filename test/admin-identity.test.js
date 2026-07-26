@@ -141,6 +141,31 @@ test('named login succeeds and session is associated with named user', async () 
   assert.match(me.data.legacyCompatibilityWarning, /Legacy compatibility login is still enabled/);
 });
 
+test('staging bootstrap diagnostics require an active Named Owner', async () => {
+  const unauthorized = await request('/admin/system/bootstrap-status', { origin: false });
+  assert.equal(unauthorized.response.status, 401);
+
+  const legacy = await request('/admin/system/bootstrap-status', {
+    headers: { Cookie: legacyCookie },
+    origin: false,
+  });
+  assert.equal(legacy.response.status, 403);
+
+  const named = await request('/admin/system/bootstrap-status', {
+    headers: { Cookie: namedCookie },
+    origin: false,
+  });
+  assert.equal(named.response.status, 200);
+  assert.deepEqual(Object.keys(named.data).sort(), [
+    'bootstrapEnabled',
+    'bootstrapVersion',
+    'lastBootstrapTime',
+    'ownerExists',
+  ]);
+  assert.equal(named.data.ownerExists, true);
+  assert.equal(named.data.bootstrapEnabled, false);
+});
+
 test('wrong email and wrong password produce enumeration-resistant responses', async () => {
   const wrongEmail = await request('/api/admin/auth/named-login', {
     method: 'POST',
