@@ -893,6 +893,26 @@ p {
   margin-bottom: 0;
 }
 
+.governance-note .btn { margin-top: 14px; width: 100%; }
+.success-note { background: #eef8f1; }
+.listing-studio-grid { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.listing-side { display: grid; gap: 16px; position: sticky; top: 84px; }
+.listing-main { display: grid; gap: 16px; min-width: 0; }
+.warning-list { display: grid; gap: 8px; list-style: none; padding: 0; margin: 16px 0 0; }
+.warning-list li { display: flex; gap: 9px; align-items: center; font-size: 13px; }
+.warning-list li span { display: grid; place-items: center; width: 21px; height: 21px; border-radius: 50%; font-weight: 800; }
+.warning-list .missing span { background: #fff1d6; color: #8a5200; }
+.warning-list .complete span { background: #dff3e5; color: #176636; }
+.quality-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.quality-grid > div { padding: 14px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface-2); }
+.quality-grid strong { display: block; font-size: 26px; }
+.quality-grid span { display: block; min-height: 36px; margin: 4px 0 8px; font-size: 12px; color: var(--muted); }
+.quality-grid progress { width: 100%; accent-color: var(--accent); }
+.copy-panel { display: flex; flex-wrap: wrap; gap: 8px; }
+.listing-output pre { margin: 0; padding: 16px; border-radius: 10px; background: var(--surface-2); white-space: pre-wrap; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); }
+.comparison { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line-2); }
+.comparison strong { display: block; margin-bottom: 8px; }
+
 .media-reference-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1372,6 +1392,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .listing-studio-grid { grid-template-columns: 1fr; }
+  .listing-side { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quality-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   .workflow-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1382,6 +1406,9 @@ textarea {
 }
 
 @media (max-width: 680px) {
+  .listing-side,
+  .quality-grid { grid-template-columns: 1fr; }
+  .copy-panel .btn { flex: 1 1 calc(50% - 8px); }
   .topbar {
     padding: 10px 14px;
   }

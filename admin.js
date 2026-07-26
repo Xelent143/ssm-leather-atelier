@@ -18,6 +18,10 @@ const state = {
   mvpDashboard: null,
   mvpProducts: [],
   mvpProduct: null,
+  governance: null,
+  listingWorkspace: null,
+  selectedDraftId: null,
+  compareDraftId: null,
   mvpError: '',
 };
 
@@ -69,6 +73,7 @@ const navigationGroups = [
 const routeEntries = navigationGroups.flatMap(([, items]) => items);
 routeEntries.push(['current-products', '□', 'Current Product Manager', '/admin/products/current', 'existing']);
 routeEntries.push(['product-detail', '□', 'Product Detail', '/admin/products/:recordKey', 'active']);
+routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:recordKey/listing-studio', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -333,7 +338,7 @@ function statusBadge(status, label = '') {
 }
 
 function breadcrumbs() {
-  if (state.view === 'product-detail') {
+  if (['product-detail', 'listing-studio'].includes(state.view)) {
     return `<nav class="breadcrumbs" aria-label="Breadcrumb"><a data-route="dashboard" href="/admin">MOTOGRIP OS</a><span>/</span><a data-route="products" href="/admin/products">Products</a><span>/</span><strong>${escapeHtml(state.mvpProduct?.title || 'Product Detail')}</strong></nav>`;
   }
   const route = routeEntries.find(([id]) => id === state.view);
@@ -655,7 +660,7 @@ function renderMvpDashboard() {
     </div>
     <div class="grid dashboard-two mvp-dashboard-grid">
       <section class="card">
-        <div class="card-head"><div><h2>Product work queue</h2><p>Read-only guidance for Micro Sprint 1</p></div>${statusBadge('existing', 'Live data')}</div>
+        <div class="card-head"><div><h2>Product work queue</h2><p>Owner governance actions for current products</p></div>${statusBadge('existing', 'Live data')}</div>
         <div class="mvp-task-list">
           ${dashboard.actionQueue.length ? dashboard.actionQueue.map((item) => `
             <button class="mvp-task" type="button" data-mvp-product="${escapeHtml(item.recordKey)}">
@@ -672,7 +677,7 @@ function renderMvpDashboard() {
           <div><span>Version required</span><strong>${dashboard.versionRequiredCount}</strong></div>
           <div><span>Approval or release required</span><strong>${dashboard.releaseRequiredCount}</strong></div>
           <div><span>Knowledge Lock required</span><strong>${dashboard.knowledgeLockRequiredCount}</strong></div>
-          <p class="muted">Micro Sprint 1 is read-only. Governed write actions arrive only after Micro Sprint 2 approval.</p>
+          <p class="muted">Open a product to complete its immutable Owner approval and release workflow.</p>
         </div>
       </section>
     </div>
@@ -717,6 +722,7 @@ function renderMvpProductDetail() {
   const actions = `
     <a class="btn" data-route="current-products" href="/admin/products/current">Current Product Manager</a>
     ${product.storefrontPath ? `<a class="btn" href="${escapeHtml(product.storefrontPath)}" target="_blank" rel="noreferrer">View storefront</a>` : ''}
+    ${governance.knowledgeLockValid ? `<button class="btn primary" type="button" id="open-listing-studio">Open Listing Studio</button>` : ''}
   `;
   return `
     ${PageHeader(product.title, `${product.brand} · ${formatProductType(product.productType)} · ${product.styleCode}`, actions, governance.state === 'governed' ? 'active' : 'existing')}
@@ -753,7 +759,7 @@ function renderMvpProductDetail() {
           ${governanceStep('Approved Release', ['approved', 'active'].includes(governance.releaseState), governance.latestReleaseNumber ? `Release ${governance.latestReleaseNumber} · ${governance.releaseState}` : 'No release')}
           ${governanceStep('Knowledge Lock', governance.knowledgeLockValid, governance.knowledgeLockValid ? 'Integrity validated on read' : 'No valid lock')}
         </ol>
-        <div class="card-pad governance-note"><strong>Micro Sprint 1</strong><p>No actions are available here yet. This screen cannot change product or governance data.</p></div>
+        ${renderGovernanceAction(product)}
       </aside>
     </div>
     <section class="card">
@@ -764,6 +770,95 @@ function renderMvpProductDetail() {
         `).join('') : EmptyState('No governed media references', 'Existing legacy product imagery remains visible above without being copied into PLM.')}
       </div>
     </section>
+  `;
+}
+
+function renderGovernanceAction(product) {
+  const governance = state.governance || {};
+  if (state.actorType !== 'named_user') {
+    return '<div class="card-pad governance-note"><strong>Named Owner required</strong><p>Legacy compatibility login remains read-only for governed operations.</p></div>';
+  }
+  let id = 'create-version';
+  let label = product.productUuid ? 'Create Product Version' : 'Create identity & Product Version';
+  if (governance.latestVersion && !governance.latestApprovalRequest) {
+    id = 'request-approval'; label = 'Request Owner Approval';
+  } else if (governance.latestApprovalRequest && !governance.latestApprovalDecision) {
+    id = 'approve-version'; label = 'Approve Product Version';
+  } else if (governance.latestApprovalDecision && !governance.latestRelease) {
+    id = 'create-release'; label = 'Create Approved Release';
+  } else if (governance.latestRelease && !governance.knowledgeLock) {
+    id = 'create-knowledge-lock'; label = 'Create Knowledge Lock';
+  } else if (governance.knowledgeLock) {
+    return '<div class="card-pad governance-note success-note"><strong>Trusted knowledge ready</strong><p>This active release has a valid Knowledge Lock and may enter Listing Studio.</p></div>';
+  }
+  return `<div class="card-pad governance-note"><strong>Next governed action</strong><p>Each step is immutable and recorded in Product history.</p><button class="btn primary" type="button" id="${id}">${label}</button></div>`;
+}
+
+function listingText(section, content) {
+  if (section === 'seo') {
+    return `SEO Title\n${content.title}\n\nMeta Description\n${content.metaDescription}\n\nKeywords\n${content.keywords.join(', ')}\n\nTags\n${content.tags.join(', ')}`;
+  }
+  if (section === 'faq') {
+    return content.map((item) => `${item.question}\n${item.answer}`).join('\n\n');
+  }
+  if (section === 'buyingGuide') return content;
+  return `${content.title}\n\n${content.description}`;
+}
+
+function renderListingStudio() {
+  const product = state.mvpProduct;
+  const workspace = state.listingWorkspace;
+  if (!product || !workspace) return LoadingSkeleton();
+  const drafts = workspace.drafts || [];
+  const selected = drafts.find((item) => item.id === state.selectedDraftId) || drafts.at(-1);
+  const compared = drafts.find((item) => item.id === state.compareDraftId) || null;
+  const warnings = selected?.warnings || [
+    { label: 'Missing measurements', missing: true },
+    { label: 'Missing images', missing: !product.originalMediaReferences.length },
+    { label: 'Missing leather specifications', missing: true },
+    { label: 'Missing evidence', missing: true },
+  ];
+  const actions = `<button class="btn" type="button" id="back-to-product">Back to Product</button><button class="btn primary" type="button" id="generate-listing">${drafts.length ? 'Regenerate Listing' : 'Generate Listing'}</button>`;
+  return `
+    ${PageHeader('Listing Studio', `${product.title} · Trusted release content only`, actions, 'active')}
+    <div class="listing-studio-grid">
+      <aside class="listing-side">
+        <section class="card card-pad">
+          <h2>Missing information</h2>
+          <p class="muted">Generation may continue. Warnings remain visible until governed facts exist.</p>
+          <ul class="warning-list">${warnings.map((item) => `<li class="${item.missing ? 'missing' : 'complete'}"><span>${item.missing ? '!' : '✓'}</span>${escapeHtml(item.label)}</li>`).join('')}</ul>
+        </section>
+        <section class="card card-pad">
+          <h2>Draft history</h2>
+          ${drafts.length ? `
+            <label class="field"><span>Review draft</span><select id="draft-select">${drafts.map((item) => `<option value="${item.id}" ${selected?.id === item.id ? 'selected' : ''}>Draft Version ${item.draftVersion}</option>`).join('')}</select></label>
+            <label class="field"><span>Compare with</span><select id="compare-select"><option value="">No comparison</option>${drafts.filter((item) => item.id !== selected?.id).map((item) => `<option value="${item.id}" ${compared?.id === item.id ? 'selected' : ''}>Draft Version ${item.draftVersion}</option>`).join('')}</select></label>
+          ` : '<p>No drafts yet. Generate the first immutable draft.</p>'}
+        </section>
+      </aside>
+      <main class="listing-main">
+        ${selected ? `
+          <section class="card card-pad">
+            <div class="card-head"><div><h2>Listing quality</h2><p>Rule-based readiness indicators</p></div><strong>Draft Version ${selected.draftVersion}</strong></div>
+            <div class="quality-grid">${[
+              ['SEO Score', selected.quality.seoScore],
+              ['GEO Readiness', selected.quality.geoReadiness],
+              ['AEO Readiness', selected.quality.aeoReadiness],
+              ['Marketplace Completeness', selected.quality.marketplaceCompleteness],
+            ].map(([label, score]) => `<div><strong>${score}</strong><span>${label}</span><progress max="100" value="${score}"></progress></div>`).join('')}</div>
+          </section>
+          <section class="card card-pad">
+            <div class="card-head"><h2>One-click copy</h2></div>
+            <div class="copy-panel">${['ebay', 'etsy', 'shopify', 'seo', 'faq', 'all'].map((item) => `<button class="btn ${item === 'all' ? 'primary' : ''}" type="button" data-copy-listing="${item}">Copy ${item === 'all' ? 'All' : item[0].toUpperCase() + item.slice(1)}</button>`).join('')}</div>
+          </section>
+          ${['shopify', 'ebay', 'etsy', 'seo', 'faq', 'buyingGuide'].map((section) => {
+            const currentText = listingText(section, selected.content[section]);
+            const comparisonText = compared ? listingText(section, compared.content[section]) : '';
+            return `<section class="card card-pad listing-output"><div class="card-head"><h2>${escapeHtml(section === 'buyingGuide' ? 'Buying Guide' : section.toUpperCase())}</h2><button class="btn" data-copy-listing="${section}">Copy</button></div><pre>${escapeHtml(currentText)}</pre>${compared ? `<div class="comparison"><strong>Compared with Draft Version ${compared.draftVersion}</strong><pre>${escapeHtml(comparisonText)}</pre></div>` : ''}</section>`;
+          }).join('')}
+        ` : EmptyState('No listing drafts', 'Generate from the active Approved Product Release and valid Knowledge Lock.')}
+      </main>
+    </div>
   `;
 }
 
@@ -1103,6 +1198,7 @@ function render() {
     dashboard: renderMvpDashboard,
     products: renderMvpProducts,
     'product-detail': renderMvpProductDetail,
+    'listing-studio': renderListingStudio,
     'current-products': renderCurrentProductManager,
     'ai-product': renderAIProductStudio,
     marketing: renderMarketingCenter,
@@ -1183,6 +1279,100 @@ function bindShell() {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         openProduct();
+      }
+    });
+  });
+
+  const governanceAction = async (action, body = {}) => {
+    const recordKey = state.mvpProduct.recordKey;
+    try {
+      const result = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}/governance/${action}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      await loadMvpWorkspace();
+      state.mvpProduct = result.product || await api(
+        `/api/admin/mvp/products/${encodeURIComponent(recordKey)}`,
+      );
+      window.history.replaceState(
+        {},
+        '',
+        `/admin/products/${encodeURIComponent(state.mvpProduct.recordKey)}`,
+      );
+      state.governance = await api(`/api/admin/mvp/products/${encodeURIComponent(
+        state.mvpProduct.recordKey,
+      )}/governance`);
+      render();
+      toast('Governance step completed');
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+  document.getElementById('create-version')?.addEventListener('click', () =>
+    governanceAction('version'));
+  document.getElementById('request-approval')?.addEventListener('click', () =>
+    governanceAction('approval-request', {
+      productVersionId: state.governance.latestVersion.id,
+      expectedRevision: state.governance.storeRevision,
+    }));
+  document.getElementById('approve-version')?.addEventListener('click', () =>
+    governanceAction('approve', {
+      approvalRequestId: state.governance.latestApprovalRequest.id,
+      expectedRevision: state.governance.storeRevision,
+    }));
+  document.getElementById('create-release')?.addEventListener('click', () =>
+    governanceAction('release', {
+      approvalRequestId: state.governance.latestApprovalRequest.id,
+      expectedRevision: state.governance.storeRevision,
+    }));
+  document.getElementById('create-knowledge-lock')?.addEventListener('click', () =>
+    governanceAction('knowledge-lock', {
+      releaseId: state.governance.latestRelease.id,
+      expectedRevision: state.governance.storeRevision,
+    }));
+  document.getElementById('open-listing-studio')?.addEventListener('click', () =>
+    navigateListingStudio(state.mvpProduct.recordKey));
+  document.getElementById('back-to-product')?.addEventListener('click', () =>
+    navigateProduct(state.mvpProduct.recordKey));
+  document.getElementById('generate-listing')?.addEventListener('click', async () => {
+    try {
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/generate`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ expectedRevision: state.listingWorkspace.storeRevision }),
+        },
+      );
+      state.selectedDraftId = state.listingWorkspace.draft.id;
+      render();
+      toast(`Draft Version ${state.listingWorkspace.draft.draftVersion} created`);
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.getElementById('draft-select')?.addEventListener('change', (event) => {
+    state.selectedDraftId = event.target.value;
+    state.compareDraftId = null;
+    render();
+  });
+  document.getElementById('compare-select')?.addEventListener('change', (event) => {
+    state.compareDraftId = event.target.value || null;
+    render();
+  });
+  document.querySelectorAll('[data-copy-listing]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const draft = state.listingWorkspace.drafts.find((item) =>
+        item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+      const section = button.dataset.copyListing;
+      const sections = ['shopify', 'ebay', 'etsy', 'seo', 'faq', 'buyingGuide'];
+      const text = section === 'all'
+        ? sections.map((item) => `${item.toUpperCase()}\n${listingText(item, draft.content[item])}`).join('\n\n')
+        : listingText(section, draft.content[section]);
+      try {
+        await navigator.clipboard.writeText(text);
+        toast(`${section === 'all' ? 'All listings' : section} copied`);
+      } catch {
+        toast('Clipboard access was unavailable');
       }
     });
   });
@@ -1327,6 +1517,7 @@ function bindShell() {
 
 function viewFromPath(pathname = window.location.pathname) {
   const normalized = pathname.replace(/\/+$/, '') || '/admin';
+  if (/^\/admin\/products\/[^/]+\/listing-studio$/.test(normalized)) return 'listing-studio';
   if (/^\/admin\/products\/(?!current$)[^/]+$/.test(normalized)) return 'product-detail';
   const route = routeEntries.find(([, , , path]) => path === normalized);
   return route?.[0] || 'dashboard';
@@ -1345,11 +1536,35 @@ async function navigateProduct(recordKey, replace = false) {
   render();
   try {
     state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+    state.governance = await api(
+      `/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`,
+    );
   } catch (error) {
     state.mvpError = error.message;
   }
   render();
   window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+async function navigateListingStudio(recordKey, replace = false) {
+  state.view = 'listing-studio';
+  state.listingWorkspace = null;
+  window.history[replace ? 'replaceState' : 'pushState'](
+    {},
+    '',
+    `/admin/products/${encodeURIComponent(recordKey)}/listing-studio`,
+  );
+  render();
+  try {
+    state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+    state.listingWorkspace = await api(
+      `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`,
+    );
+    state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
+  } catch (error) {
+    state.mvpError = error.message;
+  }
+  render();
 }
 
 function navigate(view, replace = false) {
@@ -1380,6 +1595,17 @@ async function loadMvpWorkspace() {
     if (state.view === 'product-detail') {
       const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
       state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+      state.governance = await api(
+        `/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`,
+      );
+    } else if (state.view === 'listing-studio') {
+      const parts = window.location.pathname.split('/');
+      const recordKey = decodeURIComponent(parts.at(-2) || '');
+      state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`,
+      );
+      state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
     }
   } catch (error) {
     state.mvpError = error.message;
@@ -1419,6 +1645,9 @@ async function init() {
       if (state.view === 'product-detail') {
         const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
         navigateProduct(recordKey, true);
+      } else if (state.view === 'listing-studio') {
+        const parts = window.location.pathname.split('/');
+        navigateListingStudio(decodeURIComponent(parts.at(-2) || ''), true);
       } else {
         render();
       }

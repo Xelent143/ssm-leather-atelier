@@ -72,7 +72,7 @@ function governanceProjection(plm, productUuid) {
     state = 'governed';
     label = 'Governed';
     readiness = 'ready';
-    nextAction = 'Product is governed and ready for the future Listing Studio.';
+    nextAction = 'Product is governed and ready for Listing Studio.';
   }
   return {
     state,

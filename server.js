@@ -10,6 +10,9 @@ const { createProductPlmAudit } = require('./product-plm-audit');
 const { createProductPlmService } = require('./product-plm-service');
 const { createProductPlmStore } = require('./product-plm-store');
 const { createProductMvpReadModel } = require('./product-mvp-read-model');
+const { createProductGovernanceService } = require('./product-governance-service');
+const { createListingStudioStore } = require('./listing-studio-store');
+const { createListingStudioService } = require('./listing-studio-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -36,6 +39,16 @@ const productPlmService = createProductPlmService({
 const productMvpReadModel = createProductMvpReadModel({
   plmStore: productPlmStore,
   readLegacyStore: readStore,
+});
+const productGovernanceService = createProductGovernanceService({
+  store: productPlmStore,
+  identity: adminIdentity,
+});
+const listingStudioStore = createListingStudioStore({ dataDir });
+const listingStudioService = createListingStudioService({
+  plmStore: productPlmStore,
+  listingStore: listingStudioStore,
+  identity: adminIdentity,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -1070,6 +1083,13 @@ function safePlmError(error) {
     PLM_SOURCE_UNAVAILABLE: 503,
     PLM_MAPPING_CONFLICT: 409,
     PLM_STORE_UNAVAILABLE: 503,
+    OWNER_REQUIRED: 403,
+    NOT_FOUND: 404,
+    VALIDATION: 400,
+    CONFLICT: 409,
+    UNTRUSTED_RELEASE: 409,
+    REVISION_CONFLICT: 409,
+    LISTING_STORE_UNAVAILABLE: 503,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1603,6 +1623,125 @@ async function handleApi(req, res, pathname) {
       else sendJson(res, 200, product);
     } catch {
       sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  const governanceMatch = pathname.match(
+    /^\/api\/admin\/mvp\/products\/([^/]+)\/governance(?:\/(version|approval-request|approve|release|knowledge-lock))?$/,
+  );
+  if (governanceMatch) {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const recordKey = decodeURIComponent(governanceMatch[1]);
+      let currentProduct = productMvpReadModel.product(recordKey);
+      if (!currentProduct) {
+        sendJson(res, 404, { error: 'Product was not found.' });
+        return true;
+      }
+      if (req.method === 'GET' && !governanceMatch[2]) {
+        if (!currentProduct.productUuid) {
+          sendJson(res, 200, {
+            storeRevision: productPlmStore.read().storeRevision,
+            requiresIdentity: true,
+          });
+        } else {
+          sendJson(res, 200, productGovernanceService.status(currentProduct.productUuid));
+        }
+        return true;
+      }
+      if (req.method !== 'POST' || !governanceMatch[2]) {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+        return true;
+      }
+      const body = await readBody(req);
+      if (!currentProduct.productUuid && governanceMatch[2] === 'version') {
+        const sources = {
+          adminProducts: readStore().products || [],
+          merchantProducts: readMerchantCatalog().products || [],
+        };
+        const preview = await productPlmService.createPreview(
+          req,
+          session,
+          sources,
+          productPlmStore.read().storeRevision,
+        );
+        await productPlmService.applyMigration(req, session, {
+          previewId: preview.preview.id,
+          expectedRevision: preview.storeRevision,
+          merchantOnlyLegacyIds: [],
+          confirmMerchantOnly: false,
+        }, sources);
+        currentProduct = productMvpReadModel.products().find((item) =>
+          item.legacyId === currentProduct.legacyId);
+      }
+      const productUuid = currentProduct.productUuid;
+      if (!productUuid) throw Object.assign(new Error('Product identity is required.'), {
+        code: 'VALIDATION',
+      });
+      const operation = governanceMatch[2];
+      const operations = {
+        version: () => productGovernanceService.createVersion(session, {
+          productUuid,
+          expectedRevision: productPlmStore.read().storeRevision,
+        }),
+        'approval-request': () => productGovernanceService.requestApproval(session, {
+          productUuid,
+          productVersionId: body.productVersionId,
+          expectedRevision: body.expectedRevision,
+        }),
+        approve: () => productGovernanceService.approve(session, {
+          productUuid,
+          approvalRequestId: body.approvalRequestId,
+          expectedRevision: body.expectedRevision,
+        }),
+        release: () => productGovernanceService.createRelease(session, {
+          productUuid,
+          approvalRequestId: body.approvalRequestId,
+          expectedRevision: body.expectedRevision,
+        }),
+        'knowledge-lock': () => productGovernanceService.createKnowledgeLock(session, {
+          productUuid,
+          releaseId: body.releaseId,
+          expectedRevision: body.expectedRevision,
+        }),
+      };
+      const result = await operations[operation]();
+      sendJson(res, 201, { ...result, product: productMvpReadModel.product(productUuid) });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const listingMatch = pathname.match(
+    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/listing-studio(?:\/generate)?$/i,
+  );
+  if (listingMatch) {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const productUuid = listingMatch[1];
+      if (pathname.endsWith('/generate') && req.method === 'POST') {
+        const body = await readBody(req);
+        sendJson(res, 201, await listingStudioService.generate(session, {
+          productUuid,
+          expectedRevision: body.expectedRevision,
+        }));
+      } else if (req.method === 'GET') {
+        sendJson(res, 200, listingStudioService.workspace(productUuid));
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
     }
     return true;
   }
