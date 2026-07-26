@@ -325,3 +325,90 @@ test('named logout revokes its session', async () => {
   const session = await request('/api/admin/auth/session', { headers: { Cookie: namedCookie }, origin: false });
   assert.equal(session.data.authenticated, false);
 });
+
+test('Named Owner can manage sessions and change password without affecting Listing Editors', async () => {
+  const ownerA = await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: ownerInput.email, password: ownerInput.password }),
+  });
+  const ownerB = await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: ownerInput.email, password: ownerInput.password }),
+  });
+  const ownerACookie = cookieValue(ownerA.response.headers.get('set-cookie'));
+  const ownerBCookie = cookieValue(ownerB.response.headers.get('set-cookie'));
+  const editorPassword = 'A unique listing editor phrase 2026';
+  const editor = await adminIdentity.createManagedUser({
+    displayName: 'Profile Test Editor',
+    email: 'profile-editor@example.com',
+    password: editorPassword,
+  }, 'test');
+  const editorLogin = await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: editor.email, password: editorPassword }),
+  });
+  const editorCookie = cookieValue(editorLogin.response.headers.get('set-cookie'));
+
+  const profile = await request('/api/admin/profile', {
+    headers: { Cookie: ownerACookie },
+    origin: false,
+  });
+  assert.equal(profile.response.status, 200);
+  assert.equal(profile.data.user.accountType, 'owner');
+  assert.ok(profile.data.sessions.some((item) => item.current));
+  assert.doesNotMatch(JSON.stringify(profile.data), /passwordHash|csrfToken|mg_admin/);
+
+  const loggedOut = await request('/api/admin/profile/sessions/logout-others', {
+    method: 'POST',
+    headers: { Cookie: ownerACookie, 'X-CSRF-Token': ownerA.data.csrfToken },
+  });
+  assert.equal(loggedOut.response.status, 200);
+  assert.ok(loggedOut.data.revokedSessions >= 1);
+  assert.equal((await request('/api/admin/me', { headers: { Cookie: ownerBCookie }, origin: false })).response.status, 401);
+  assert.equal((await request('/api/admin/me', { headers: { Cookie: editorCookie }, origin: false })).response.status, 200);
+
+  const ownerBAgain = await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: ownerInput.email, password: ownerInput.password }),
+  });
+  const ownerBAgainCookie = cookieValue(ownerBAgain.response.headers.get('set-cookie'));
+  const incorrect = await request('/api/admin/profile/password', {
+    method: 'POST',
+    headers: { Cookie: ownerACookie, 'X-CSRF-Token': ownerA.data.csrfToken },
+    body: JSON.stringify({
+      currentPassword: 'An incorrect owner phrase 2026',
+      newPassword: 'A newly changed owner workshop phrase 2026',
+      confirmNewPassword: 'A newly changed owner workshop phrase 2026',
+    }),
+  });
+  assert.equal(incorrect.response.status, 400);
+  assert.doesNotMatch(JSON.stringify(incorrect.data), /incorrect owner phrase/i);
+
+  const newPassword = 'A newly changed owner workshop phrase 2026';
+  const changed = await request('/api/admin/profile/password', {
+    method: 'POST',
+    headers: { Cookie: ownerACookie, 'X-CSRF-Token': ownerA.data.csrfToken },
+    body: JSON.stringify({
+      currentPassword: ownerInput.password,
+      newPassword,
+      confirmNewPassword: newPassword,
+    }),
+  });
+  assert.equal(changed.response.status, 200);
+  assert.ok(changed.data.passwordChangedAt);
+  assert.ok(changed.data.revokedSessions >= 1);
+  assert.doesNotMatch(JSON.stringify(changed.data), /passwordHash|argon2|csrf|cookie|currentPassword|newPassword/i);
+  assert.equal((await request('/api/admin/me', { headers: { Cookie: ownerACookie }, origin: false })).response.status, 200);
+  assert.equal((await request('/api/admin/me', { headers: { Cookie: ownerBAgainCookie }, origin: false })).response.status, 401);
+  assert.equal((await request('/api/admin/me', { headers: { Cookie: editorCookie }, origin: false })).response.status, 200);
+
+  assert.equal((await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: ownerInput.email, password: ownerInput.password }),
+  })).response.status, 401);
+  assert.equal((await request('/api/admin/auth/named-login', {
+    method: 'POST',
+    body: JSON.stringify({ email: ownerInput.email, password: newPassword }),
+  })).response.status, 200);
+  assert.match(adminIdentity.readStore().users.find((user) => user.id === profile.data.user.id).passwordHash, /^\$argon2id\$/);
+});

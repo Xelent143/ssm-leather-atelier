@@ -1158,6 +1158,7 @@ function safePlmError(error) {
     SYNC_FAILED: 503,
     IDENTITY_CONFLICT: 409,
     PASSWORD_POLICY: 400,
+    CURRENT_PASSWORD_INVALID: 400,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1692,6 +1693,99 @@ async function handleApi(req, res, pathname) {
     } catch {
       sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
     }
+    return true;
+  }
+
+  if (pathname === '/api/admin/profile' && req.method === 'GET') {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    sendJson(res, 200, {
+      user: adminIdentity.publicUser(owner),
+      sessions: adminSecurity.activeUserSessions(owner.id, session.token),
+    });
+    return true;
+  }
+
+  if (pathname === '/api/admin/profile/password' && req.method === 'POST') {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      if (String(body.newPassword || '') !== String(body.confirmNewPassword || '')) {
+        throw Object.assign(new Error('New password confirmation does not match.'), {
+          code: 'PASSWORD_POLICY',
+        });
+      }
+      const user = await adminIdentity.changeOwnPassword(
+        owner.id,
+        body.currentPassword,
+        body.newPassword,
+      );
+      const preserved = adminSecurity.preserveCurrentUserSession(
+        owner.id,
+        session.token,
+        user.sessionRevocationVersion,
+      );
+      if (!preserved) {
+        throw Object.assign(new Error('Current session could not be preserved.'), {
+          code: 'CONFLICT',
+        });
+      }
+      adminSecurity.audit(req, {
+        action: 'owner_password_changed',
+        result: 'success',
+        session: preserved,
+        entityType: 'admin_user',
+        entityId: owner.id,
+      });
+      adminSecurity.securityEvent(req, {
+        severity: 'high',
+        action: 'owner_password_changed',
+        result: 'success',
+        actorId: `user:${owner.id}`,
+        entityType: 'admin_user',
+        entityId: owner.id,
+      });
+      sendJson(res, 200, {
+        ok: true,
+        passwordChangedAt: user.passwordChangedAt,
+        revokedSessions: preserved.revokedSessions,
+      });
+    } catch (error) {
+      const safe = safePlmError(error);
+      adminSecurity.audit(req, {
+        action: 'owner_password_change_failed',
+        result: 'failed',
+        session,
+        entityType: 'admin_user',
+        entityId: owner.id,
+      });
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/profile/sessions/logout-others' && req.method === 'POST') {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    const revokedSessions = adminSecurity.revokeOtherUserSessions(owner.id, session.token);
+    adminSecurity.audit(req, {
+      action: 'owner_other_sessions_revoked',
+      result: 'success',
+      session,
+      entityType: 'admin_user',
+      entityId: owner.id,
+    });
+    sendJson(res, 200, { ok: true, revokedSessions });
     return true;
   }
 

@@ -429,6 +429,44 @@ function createAdminIdentity(options = {}) {
     });
   }
 
+  async function changeOwnPassword(userId, currentPassword, newPassword) {
+    return serializeMutation(async () => {
+      const store = readStore();
+      const index = store.users.findIndex((user) =>
+        user.id === userId && user.accountType === 'owner' && user.status === 'active');
+      if (index < 0) {
+        throw Object.assign(new Error('Named Owner access is required.'), { code: 'OWNER_REQUIRED' });
+      }
+      const user = store.users[index];
+      const currentMatches = await verify(user.passwordHash, String(currentPassword || '')).catch(() => false);
+      if (!currentMatches) {
+        throw Object.assign(new Error('Current password is incorrect.'), {
+          code: 'CURRENT_PASSWORD_INVALID',
+        });
+      }
+      if (String(currentPassword || '') === String(newPassword || '')) {
+        throw Object.assign(new Error('Choose a new password that differs from the current password.'), {
+          code: 'PASSWORD_POLICY',
+        });
+      }
+      const validation = validatePassword(newPassword, user);
+      if (!validation.valid) {
+        throw Object.assign(new Error(validation.error), { code: 'PASSWORD_POLICY' });
+      }
+      const timestamp = new Date(now()).toISOString();
+      user.passwordHash = await hash(String(newPassword), ARGON2_OPTIONS);
+      user.passwordChangedAt = timestamp;
+      user.updatedAt = timestamp;
+      user.failedLoginCount = 0;
+      user.lockedUntil = null;
+      user.mustChangePassword = false;
+      user.sessionRevocationVersion = Number(user.sessionRevocationVersion || 0) + 1;
+      store.users[index] = user;
+      writeStore(store);
+      return publicUser(user);
+    });
+  }
+
   function managedUsers() {
     return readStore().users
       .filter((user) => user.accountType === 'listing_editor')
@@ -543,6 +581,7 @@ function createAdminIdentity(options = {}) {
     allowAction,
     bootstrapAvailable,
     bootstrapOwner,
+    changeOwnPassword,
     countActiveSessions,
     createManagedUser,
     consumeInvitationToken,

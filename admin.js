@@ -39,6 +39,8 @@ const state = {
   catalogReviewFilter: 'all',
   operationalWorkflow: null,
   teamUsers: [],
+  profile: null,
+  profileTab: 'profile',
   mvpError: '',
 };
 
@@ -94,6 +96,7 @@ routeEntries.push(['product-detail', '□', 'Product Detail', '/admin/products/:
 routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:recordKey/listing-studio', 'active']);
 routeEntries.push(['catalog-review', '▦', 'Catalog Review', '/admin/catalog/review', 'active']);
 routeEntries.push(['catalog-detail', '▦', 'Catalog Product Detail', '/admin/catalog/:catalogProductId', 'active']);
+routeEntries.push(['profile', '♙', 'My Profile', '/admin/profile', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -436,6 +439,7 @@ function Topbar() {
           <span aria-hidden="true">⌄</span>
         </button>
         <div class="profile-menu" id="profile-menu">
+          ${state.identity?.user?.accountType === 'owner' ? '<a data-route="profile" href="/admin/profile">My Profile</a>' : ''}
           <a href="/" target="_blank" rel="noreferrer">View storefront</a>
           <button id="logout" type="button">Log out</button>
         </div>
@@ -1500,6 +1504,62 @@ function renderTeamManagement() {
     </div>`;
 }
 
+function renderOwnerProfile() {
+  if (state.identity?.user?.accountType !== 'owner') {
+    return `${PageHeader('My Profile', 'Owner account and security settings.', '', 'restricted')}${AlertPanel('Access restricted', 'Named Owner access is required.', 'warning')}`;
+  }
+  const profile = state.profile?.user || state.identity.user;
+  const sessions = state.profile?.sessions || [];
+  const activeTab = state.profileTab === 'security' ? 'security' : 'profile';
+  const formatDate = (value) => value ? new Date(value).toLocaleString() : 'Not available';
+  const content = activeTab === 'security' ? `
+    <div class="grid two">
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Change password</h2><p>Changing your password signs out every other Owner session while keeping this session active.</p></div></div>
+        <form id="owner-password-form" class="form-grid">
+          <div class="field full"><label for="current-password">Current password</label><input id="current-password" name="currentPassword" type="password" required autocomplete="current-password"></div>
+          <div class="field full"><label for="new-password">New password</label><input id="new-password" name="newPassword" type="password" required minlength="15" maxlength="128" autocomplete="new-password" aria-describedby="password-policy"><small id="password-policy">Use 15–128 characters and avoid account, company, or predictable password terms.</small></div>
+          <div class="field full"><label for="confirm-new-password">Confirm new password</label><input id="confirm-new-password" name="confirmNewPassword" type="password" required minlength="15" maxlength="128" autocomplete="new-password"></div>
+          <div class="field full"><button class="btn primary" type="submit">Change password</button></div>
+        </form>
+      </section>
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Active sessions</h2><p>Review Owner sessions without exposing cookies, tokens, or network identifiers.</p></div><span class="pill">${sessions.length}</span></div>
+        <div class="activity-list">${sessions.map((item) => `<article>
+          <div><strong>${item.current ? 'Current session' : 'Owner session'}</strong><span>Last active: ${escapeHtml(formatDate(item.lastActivityAt))}</span><small>Started ${escapeHtml(formatDate(item.createdAt))} · Expires ${escapeHtml(formatDate(item.expiresAt))}</small></div>
+          ${item.current ? statusBadge('active', 'Current') : ''}
+        </article>`).join('') || '<p class="muted">No active sessions found.</p>'}</div>
+        <div class="button-row"><button class="btn" id="logout-other-sessions" type="button" ${sessions.filter((item) => !item.current).length ? '' : 'disabled'}>Log out other sessions</button></div>
+      </section>
+    </div>` : `
+    <div class="grid two">
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Owner profile</h2><p>Your permanent named identity for MOTOGRIP OS governance.</p></div>${statusBadge('active', 'Named Owner')}</div>
+        <dl class="detail-list">
+          <div><dt>Display name</dt><dd>${escapeHtml(profile.displayName)}</dd></div>
+          <div><dt>Email</dt><dd>${escapeHtml(profile.email)}</dd></div>
+          <div><dt>Role</dt><dd>Named Owner</dd></div>
+          <div><dt>Account status</dt><dd>${escapeHtml(profile.status)}</dd></div>
+        </dl>
+      </section>
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Security summary</h2><p>Authentication activity for this Owner account.</p></div></div>
+        <dl class="detail-list">
+          <div><dt>Last password change</dt><dd>${escapeHtml(formatDate(profile.passwordChangedAt))}</dd></div>
+          <div><dt>Last login</dt><dd>${escapeHtml(formatDate(profile.lastLoginAt))}</dd></div>
+          <div><dt>Active sessions</dt><dd>${sessions.length}</dd></div>
+          <div><dt>Password protection</dt><dd>Argon2id</dd></div>
+        </dl>
+      </section>
+    </div>`;
+  return `${PageHeader('My Profile', 'Manage the permanent Named Owner identity and account security.', '', 'active')}
+    <nav class="workspace-tabs" aria-label="Profile sections">
+      <button type="button" class="workspace-tab ${activeTab === 'profile' ? 'active' : ''}" data-profile-tab="profile" aria-selected="${activeTab === 'profile'}">Profile</button>
+      <button type="button" class="workspace-tab ${activeTab === 'security' ? 'active' : ''}" data-profile-tab="security" aria-selected="${activeTab === 'security'}">Security</button>
+    </nav>
+    ${content}`;
+}
+
 function renderGenericModule() {
   const detail = moduleDetails[state.view] || ['Planned module', 'This operating area is defined in the MOTOGRIP OS blueprint.', ['Overview', 'Workflow', 'Reporting'], 'Approved data model and services', 'Future phase'];
   const [title, purpose, capabilities, dependency, phase] = detail;
@@ -1847,6 +1907,7 @@ function render() {
     factory: renderFactoryShell,
     production: renderFactoryShell,
     team: renderTeamManagement,
+    profile: renderOwnerProfile,
   };
   root.innerHTML = AdminLayout((views[state.view] || renderGenericModule)());
   bindShell();
@@ -1986,6 +2047,49 @@ function bindShell() {
     const menu = document.getElementById('profile-menu');
     const open = menu?.classList.toggle('visible');
     event.currentTarget.setAttribute('aria-expanded', String(Boolean(open)));
+  });
+  document.querySelectorAll('[data-profile-tab]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.profileTab = button.dataset.profileTab;
+      render();
+    });
+  });
+
+  document.getElementById('owner-password-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const currentPassword = String(form.get('currentPassword') || '');
+    const newPassword = String(form.get('newPassword') || '');
+    const confirmNewPassword = String(form.get('confirmNewPassword') || '');
+    if (newPassword !== confirmNewPassword) {
+      toast('New password confirmation does not match');
+      return;
+    }
+    try {
+      await api('/api/admin/profile/password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword }),
+      });
+      event.currentTarget.reset();
+      await loadProfile();
+      state.identity = await api('/api/admin/me');
+      render();
+      toast('Password changed. Other Owner sessions were signed out.');
+    } catch (error) {
+      event.currentTarget.reset();
+      toast(error.message);
+    }
+  });
+
+  document.getElementById('logout-other-sessions')?.addEventListener('click', async () => {
+    try {
+      const result = await api('/api/admin/profile/sessions/logout-others', { method: 'POST' });
+      await loadProfile();
+      render();
+      toast(`${result.revokedSessions} other session(s) signed out`);
+    } catch (error) {
+      toast(error.message);
+    }
   });
 
   document.getElementById('logout')?.addEventListener('click', async () => {
@@ -2754,6 +2858,7 @@ function navigate(view, replace = false) {
   window.history[replace ? 'replaceState' : 'pushState']({}, '', route[3]);
   render();
   if (view === 'team') loadTeamUsers().then(render).catch((error) => toast(error.message));
+  if (view === 'profile') loadProfile().then(render).catch((error) => toast(error.message));
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
@@ -2764,6 +2869,14 @@ async function loadTeamUsers() {
   }
   const response = await api('/api/admin/team/users');
   state.teamUsers = response.users || [];
+}
+
+async function loadProfile() {
+  if (state.identity?.user?.accountType !== 'owner') {
+    state.profile = null;
+    return;
+  }
+  state.profile = await api('/api/admin/profile');
 }
 
 async function loadStore() {
@@ -2810,6 +2923,9 @@ async function loadMvpWorkspace() {
   }
   if (state.view === 'team') {
     try { await loadTeamUsers(); } catch {}
+  }
+  if (state.view === 'profile') {
+    try { await loadProfile(); } catch {}
   }
   try {
     state.catalog = await api('/api/admin/catalog');
@@ -2894,6 +3010,8 @@ async function init() {
       } else if (state.view === 'listing-studio') {
         const parts = window.location.pathname.split('/');
         navigateListingStudio(decodeURIComponent(parts.at(-2) || ''), true);
+      } else if (state.view === 'profile') {
+        loadProfile().then(render).catch((error) => toast(error.message));
       } else {
         render();
       }

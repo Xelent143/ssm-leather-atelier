@@ -197,6 +197,58 @@ function createAdminSecurity(options = {}) {
     return revoked;
   }
 
+  function activeUserSessions(userId, currentToken) {
+    const state = cleanup(readState());
+    const currentHash = currentToken ? tokenHash(currentToken) : null;
+    return Object.entries(state.sessions)
+      .filter(([, session]) =>
+        session.actorType === 'named_user' &&
+        session.userId === userId &&
+        !session.revokedAt &&
+        session.expiresAt > now())
+      .map(([hash, session]) => ({
+        id: session.id,
+        authMethod: session.authMethod,
+        createdAt: session.createdAt,
+        lastActivityAt: session.lastActivityAt,
+        expiresAt: session.expiresAt,
+        current: hash === currentHash,
+      }))
+      .sort((left, right) => right.lastActivityAt - left.lastActivityAt);
+  }
+
+  function preserveCurrentUserSession(userId, currentToken, sessionRevocationVersion) {
+    const state = cleanup(readState());
+    const currentHash = tokenHash(currentToken);
+    const current = state.sessions[currentHash];
+    if (!current || current.userId !== userId || current.revokedAt) return null;
+    let revokedSessions = 0;
+    for (const [hash, session] of Object.entries(state.sessions)) {
+      if (hash !== currentHash && session.userId === userId && !session.revokedAt) {
+        session.revokedAt = now();
+        revokedSessions += 1;
+      }
+    }
+    current.sessionRevocationVersion = Number(sessionRevocationVersion || 0);
+    current.lastActivityAt = now();
+    writeState(state);
+    return { ...current, token: currentToken, revokedSessions };
+  }
+
+  function revokeOtherUserSessions(userId, currentToken) {
+    const state = cleanup(readState());
+    const currentHash = tokenHash(currentToken);
+    let revokedSessions = 0;
+    for (const [hash, session] of Object.entries(state.sessions)) {
+      if (hash !== currentHash && session.userId === userId && !session.revokedAt) {
+        session.revokedAt = now();
+        revokedSessions += 1;
+      }
+    }
+    writeState(state);
+    return revokedSessions;
+  }
+
   function cookie(session, secure) {
     const expires = new Date(session.expiresAt).toUTCString();
     return `${COOKIE_NAME}=${encodeURIComponent(session.token)}; HttpOnly; ${secure ? 'Secure; ' : ''}SameSite=Lax; Path=/; Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}; Expires=${expires}`;
@@ -265,6 +317,7 @@ function createAdminSecurity(options = {}) {
 
   return {
     audit,
+    activeUserSessions,
     clearCookie,
     cookie,
     createSession,
@@ -275,7 +328,9 @@ function createAdminSecurity(options = {}) {
     recordLoginAttempt,
     recordSuccessfulLogin,
     revokeSession,
+    revokeOtherUserSessions,
     revokeUserSessions,
+    preserveCurrentUserSession,
     securityEvent,
     validCsrf,
     validOrigin,

@@ -57,3 +57,13 @@ test('Business MVP read-only workspace exposes dashboard, products, and detail s
   assert.match(adminCss, /\.product-detail-grid/);
   assert.match(adminCss, /\.mvp-task/);
 });
+
+test('Owner profile and security controls are present without password exposure', () => {
+  assert.match(adminJs, />My Profile</);
+  assert.match(adminJs, /data-profile-tab="security"/);
+  assert.match(adminJs, /id="owner-password-form"/);
+  assert.match(adminJs, /autocomplete="current-password"/);
+  assert.match(adminJs, /autocomplete="new-password"/);
+  assert.match(adminJs, /id="logout-other-sessions"/);
+  assert.match(adminJs, /\/api\/admin\/profile\/password/);
+});
