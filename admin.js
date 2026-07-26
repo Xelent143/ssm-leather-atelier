@@ -25,6 +25,9 @@ const state = {
   productDetailTab: 'overview',
   listingTab: 'shopify',
   copiedListingKey: null,
+  listingInputDirty: false,
+  listingContentDirty: false,
+  listingEditContent: null,
   catalog: null,
   catalogSyncing: false,
   catalogError: '',
@@ -656,7 +659,7 @@ function mvpProductRows(products) {
   return `
     <div class="table-wrap">
       <table class="mvp-products-table">
-        <thead><tr><th>Product</th><th>Brand</th><th>Type</th><th>Governance</th><th>Inventory</th></tr></thead>
+        <thead><tr><th>Product</th><th>Brand</th><th>Type</th><th>Governance</th><th>Inventory</th><th>Listing</th></tr></thead>
         <tbody>
           ${products.map((product) => `
             <tr class="clickable" data-mvp-product="${escapeHtml(product.recordKey)}" tabindex="0" aria-label="Open ${escapeHtml(product.title)}">
@@ -665,6 +668,9 @@ function mvpProductRows(products) {
               <td>${escapeHtml(formatProductType(product.productType))}</td>
               <td>${governanceBadge(product.governance)}</td>
               <td>${Number(product.inventory || 0)}</td>
+              <td>${product.governance?.knowledgeLockValid
+                ? `<button class="btn compact-btn" type="button" data-open-listing="${escapeHtml(product.recordKey)}">Create / continue listing</button>`
+                : '<span class="muted">Governance required</span>'}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -972,7 +978,7 @@ function renderCatalogProductDetail() {
   const suggestions = product.suggestions || [];
   const actions = `<a class="btn" data-route="catalog-review" href="/admin/catalog/review">Back to review</a>
     ${mvpProduct ? `<button class="btn" type="button" id="open-linked-product-dna">Open Product DNA</button>` : ''}
-    ${eligible ? '<button class="btn primary" type="button" id="open-linked-listing-studio">Open Listing Studio</button>' : ''}`;
+    ${eligible ? '<button class="btn primary" type="button" id="open-linked-listing-studio">Create / Continue Listing</button>' : ''}`;
   return `
     ${PageHeader('Catalog Product Detail', 'Review and confirm the relationship to governed Product DNA.', actions, product.linkStatus === 'Linked' ? 'active' : 'planned')}
     <section class="product-summary card catalog-detail-summary">
@@ -1079,7 +1085,7 @@ function renderMvpProductDetail() {
     return `${PageHeader('Product Detail', 'Read-only governed product view.', '<a class="btn" data-route="products" href="/admin/products">Back to products</a>')}${state.mvpError ? AlertPanel('Product unavailable', state.mvpError, 'warning') : LoadingSkeleton()}`;
   }
   const governance = product.governance;
-  const actions = `<a class="btn" data-route="current-products" href="/admin/products/current">Current Product Manager</a>${governance.knowledgeLockValid ? `<button class="btn primary" type="button" id="open-listing-studio">Open Listing Studio</button>` : ''}`;
+  const actions = `<a class="btn" data-route="current-products" href="/admin/products/current">Current Product Manager</a>${governance.knowledgeLockValid ? `<button class="btn primary" type="button" id="open-listing-studio">Create / Continue Listing</button>` : ''}`;
   const productTabs = [
     ['overview', 'Overview'], ['media', 'Media'], ['dna', 'Product DNA'],
     ['evidence', 'Evidence'], ['versions', 'Versions'], ['releases', 'Releases'],
@@ -1175,7 +1181,8 @@ function renderProductPlannedTab(product, tab) {
     history: ['History', 'Immutable PLM history is recorded. A dedicated human-readable history view is planned.'],
   };
   const [title, description] = labels[tab] || ['Planned', 'This view is safely reserved for a later phase.'];
-  return `<section class="card planned-tab-panel">${EmptyState(title, description)}${['ai-studio', 'listings'].includes(tab) && product.governance.knowledgeLockValid ? '<button class="btn primary" type="button" id="open-listing-studio">Open Listing Studio</button>' : ''}</section>`;
+  const listingLabel = tab === 'listings' ? 'View Existing Drafts' : 'Create Listing';
+  return `<section class="card planned-tab-panel">${EmptyState(title, description)}${['ai-studio', 'listings'].includes(tab) && product.governance.knowledgeLockValid ? `<button class="btn primary" type="button" id="open-listing-studio">${listingLabel}</button>` : ''}</section>`;
 }
 
 function renderGovernancePrimaryButton(product) {
@@ -1211,6 +1218,7 @@ function renderGovernanceAction(product) {
 }
 
 function listingText(section, content) {
+  if (content?.manualText) return content.manualText;
   if (section === 'seo') {
     return `SEO Title\n${content.title}\n\nMeta Description\n${content.metaDescription}\n\nKeywords\n${content.keywords.join(', ')}\n\nTags\n${content.tags.join(', ')}`;
   }
@@ -1218,7 +1226,23 @@ function listingText(section, content) {
     return content.map((item) => `${item.question}\n${item.answer}`).join('\n\n');
   }
   if (section === 'buyingGuide') return content;
-  return `${content.title}\n\n${content.description}`;
+  if (section === 'shopify') {
+    return [
+      content.title, content.shortDescription, content.fullDescription,
+      `Perfect For\n${content.perfectFor}`, `Why You’ll Love It\n${content.whyYouWillLoveIt}`,
+      `URL handle: ${content.urlHandle}`, `Tags: ${(content.tags || []).join(', ')}`,
+    ].filter(Boolean).join('\n\n');
+  }
+  if (section === 'ebay' || section === 'etsy') {
+    return [
+      content.title, content.shortDescription, content.fullDescription,
+      content.perfectFor && `Perfect For\n${content.perfectFor}`,
+      content.whyYouWillLoveIt && `Why You’ll Love It\n${content.whyYouWillLoveIt}`,
+      content.personalizationInstructions && `Personalization\n${content.personalizationInstructions}`,
+      content.tags && `Tags\n${content.tags.join(', ')}`,
+    ].filter(Boolean).join('\n\n');
+  }
+  return `${content.title || ''}\n\n${content.description || content.fullDescription || ''}`;
 }
 
 function qualityLabel(score) {
@@ -1242,17 +1266,57 @@ function renderListingChannel(section, draft) {
   const warningText = warnings.length
     ? `${warnings.length} product-information warning${warnings.length === 1 ? '' : 's'} remain.`
     : '';
-  if (['shopify', 'ebay', 'etsy'].includes(section)) {
-    const limits = section === 'ebay' ? [80, null] : section === 'etsy' ? [140, null] : [255, null];
-    return `${listingField('Generated title', content.title, limits[0])}${listingField('Description', content.description, limits[1], warningText)}`;
-  }
-  if (section === 'seo') {
-    return `${listingField('SEO title', content.title, 60)}${listingField('Meta description', content.metaDescription, 160)}${listingField('Keywords', content.keywords)}${listingField('Tags', content.tags)}`;
-  }
-  if (section === 'faq') {
-    return content.map((item, index) => `${listingField(`Question ${index + 1}`, item.question)}${listingField('Answer', item.answer, null, warningText)}`).join('');
-  }
-  return listingField('Buying guide', content, null, warningText);
+  const value = listingText(section, content);
+  const limit = section === 'ebay' ? 80 : section === 'etsy' ? 140 : section === 'seo' ? 160 : null;
+  return `
+    ${section === 'ebay' || section === 'etsy' ? listingField('Marketplace title', content.title, limit, warningText) : ''}
+    ${section === 'seo' ? `${listingField('SEO title', content.title, 60)}${listingField('Meta description', content.metaDescription, 160)}` : ''}
+    <div class="listing-field listing-edit-field">
+      <div class="listing-field-head"><label for="listing-content-editor">Editable ${escapeHtml(section === 'buyingGuide' ? 'buying guide' : section)} package</label><span>${value.length} characters</span></div>
+      <textarea id="listing-content-editor" rows="18" data-listing-content-editor>${escapeHtml(value)}</textarea>
+      <p class="field-warning">${escapeHtml(warningText || 'Edits are saved as a new immutable draft version.')}</p>
+    </div>`;
+}
+
+const listingInputGroups = [
+  ['Core identity', ['productTitle', 'productType', 'brand', 'sku', 'leatherType', 'leatherColor', 'gender', 'style', 'fit', 'condition']],
+  ['Construction', ['outerMaterial', 'liningMaterial', 'closure', 'hardware', 'pocketCount', 'insidePockets', 'concealedCarryPockets', 'stitching', 'collar', 'sleeves', 'adjustments', 'armorCompatibility']],
+  ['Commerce', ['price', 'availableSizes', 'customSizingAvailable', 'quantity', 'processingTime', 'shippingTime', 'returns', 'personalization', 'targetMarket']],
+  ['Measurements', ['sizeRange', 'productLength', 'chestWaistMeasurements', 'customMeasurementInstructions']],
+  ['References', ['imageReferenceIds', 'evidenceReferenceIds']],
+];
+
+function inputFieldLabel(field) {
+  return field.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function renderListingInputWorkspace(workspace) {
+  const input = workspace.inputDraft || { values: {}, notApplicable: {}, inputVersion: 0 };
+  const missing = workspace.missingInformation || [];
+  return `<section class="card listing-input-workspace">
+    <div class="card-head">
+      <div><span class="eyebrow">Listing Input Draft ${input.inputVersion || 0}</span><h2>Real product information</h2><p>Complete factual listing information without changing the website product or Product DNA.</p></div>
+      <button class="btn primary" id="save-listing-input" type="button">Save progress</button>
+    </div>
+    <div class="listing-input-groups">${listingInputGroups.map(([group, fields]) => `
+      <details class="listing-input-group" ${group === 'Core identity' || group === 'Commerce' ? 'open' : ''}>
+        <summary>${escapeHtml(group)} <span>${fields.filter((field) => missing.some((item) => item.field === field && item.missing)).length} missing</span></summary>
+        <div class="listing-input-grid">${fields.map((field) => {
+          const info = missing.find((item) => item.field === field) || {};
+          const value = input.values?.[field];
+          const array = ['availableSizes', 'imageReferenceIds', 'evidenceReferenceIds'].includes(field);
+          const boolean = field === 'customSizingAvailable';
+          return `<label class="listing-input-field ${info.missing ? `missing ${info.severity}` : ''}">
+            <span>${escapeHtml(inputFieldLabel(field))}<b>${escapeHtml(info.severity || 'optional')}</b></span>
+            ${boolean
+              ? `<input type="checkbox" data-listing-input="${field}" ${value ? 'checked' : ''}>`
+              : `<input type="${['price', 'quantity', 'pocketCount', 'insidePockets'].includes(field) ? 'number' : 'text'}" data-listing-input="${field}" value="${escapeHtml(array ? (value || []).join(', ') : value ?? '')}" ${input.notApplicable?.[field] ? 'disabled' : ''}>`}
+            ${!boolean ? `<small><input type="checkbox" data-listing-na="${field}" ${input.notApplicable?.[field] ? 'checked' : ''}> Not applicable</small>` : ''}
+          </label>`;
+        }).join('')}</div>
+      </details>`).join('')}</div>
+    <label class="listing-owner-note"><span>Owner note</span><textarea rows="3" id="listing-owner-note">${escapeHtml(input.ownerNote || '')}</textarea></label>
+  </section>`;
 }
 
 function renderListingStudio() {
@@ -1276,6 +1340,7 @@ function renderListingStudio() {
   const actions = `<button class="btn" type="button" id="back-to-product">Back to Product</button><button class="btn primary" type="button" data-generate-listing>${drafts.length ? 'Regenerate Listing' : 'Generate Listing'}</button>`;
   return `
     ${PageHeader('Listing Studio', `${product.title} · Trusted release content only`, actions, 'active')}
+    ${renderListingInputWorkspace(workspace)}
     ${selected ? `
       <section class="listing-status-row">
         <div><span class="trust-dot"></span><strong>Trusted source</strong><span>Release ${product.governance.latestReleaseNumber} · Knowledge Lock valid</span></div>
@@ -1283,8 +1348,9 @@ function renderListingStudio() {
       </section>
       <div class="listing-insights-grid">
         <section class="card card-pad missing-panel">
-          <div class="card-head"><div><h2>Missing information</h2><p>Warnings stay visible without blocking generation.</p></div><span class="warning-count">${warnings.filter((item) => item.missing).length} open</span></div>
-          <ul class="warning-list">${warnings.map((item) => `<li class="${item.missing ? 'missing' : 'complete'}"><span>${item.missing ? '!' : '✓'}</span><div><strong>${escapeHtml(item.label)}</strong><small>${item.missing ? 'Add governed information when available' : 'Available in trusted source'}</small></div></li>`).join('')}</ul>
+          <div class="card-head"><div><h2>Missing information</h2><p>Critical fields block export; recommended and optional fields remain warnings.</p></div><span class="warning-count">${warnings.filter((item) => item.missing).length} open</span></div>
+          <div class="missing-summary">${['critical', 'recommended', 'optional'].map((severity) => `<span class="${severity}"><strong>${warnings.filter((item) => item.missing && item.severity === severity).length}</strong>${severity}</span>`).join('')}</div>
+          <ul class="warning-list">${warnings.filter((item) => item.missing).slice(0, 12).map((item) => `<li class="missing ${escapeHtml(item.severity)}"><span>!</span><div><strong>${escapeHtml(item.label)}</strong><small>${item.severity === 'critical' ? 'Required before final export' : 'Recommended for stronger listing quality'}</small></div></li>`).join('') || '<li class="complete"><span>✓</span><div><strong>All information complete</strong><small>Ready for export review</small></div></li>'}</ul>
         </section>
         <section class="card card-pad quality-panel">
           <div class="card-head"><div><h2>Listing quality</h2><p>Rule-based readiness indicators</p></div></div>
@@ -1300,7 +1366,7 @@ function renderListingStudio() {
         <div><strong>Draft history</strong><span>Every regeneration creates a new immutable draft.</span></div>
         <label><span>Current</span><select id="draft-select">${drafts.map((item) => `<option value="${item.id}" ${selected?.id === item.id ? 'selected' : ''}>Draft Version ${item.draftVersion}</option>`).join('')}</select></label>
         <label><span>Compare</span><select id="compare-select"><option value="">No comparison</option>${drafts.filter((item) => item.id !== selected?.id).map((item) => `<option value="${item.id}" ${compared?.id === item.id ? 'selected' : ''}>Draft Version ${item.draftVersion}</option>`).join('')}</select></label>
-        <span class="review-state">Review state: Draft</span>
+        <span class="review-state">Review state: ${escapeHtml(selected.approvalState || 'unreviewed')} · ${escapeHtml(selected.generationMode)}</span>
       </section>
       <section class="card copy-workspace">
         <div class="card-head"><div><h2>One-click copy</h2><p>Copy channel-ready drafts without publishing.</p></div></div>
@@ -1313,12 +1379,13 @@ function renderListingStudio() {
         ${channels.map(([id, label]) => `<button type="button" class="workspace-tab ${activeChannel === id ? 'active' : ''}" data-listing-tab="${id}" aria-selected="${activeChannel === id}">${label}</button>`).join('')}
       </nav>
       <section class="card listing-editor">
-        <div class="listing-editor-head"><div><span class="channel-kicker">${escapeHtml(channels.find(([id]) => id === activeChannel)?.[1] || '')}</span><h2>Generated content</h2><p>Review carefully before copying to any sales channel.</p></div><button class="btn" data-copy-listing="${activeChannel}">${state.copiedListingKey === activeChannel ? '✓ Copied' : 'Copy'}</button></div>
+        <div class="listing-editor-head"><div><span class="channel-kicker">${escapeHtml(channels.find(([id]) => id === activeChannel)?.[1] || '')}</span><h2>Generated content</h2><p>Review and edit. Saving creates a new immutable draft.</p></div><div class="button-row"><button class="btn" data-copy-listing="${activeChannel}">${state.copiedListingKey === activeChannel ? '✓ Copied' : 'Copy full tab'}</button><button class="btn primary" id="save-listing-edit" type="button" disabled>Save as new version</button></div></div>
         <div class="listing-editor-body">${renderListingChannel(activeChannel, selected)}</div>
         ${compared ? `<div class="comparison"><div><strong>Compared with Draft Version ${compared.draftVersion}</strong><span>Generated ${new Date(compared.createdAt).toLocaleString()}</span></div><pre>${escapeHtml(listingText(activeChannel, compared.content[activeChannel]))}</pre></div>` : ''}
       </section>
       <details class="card advanced-details"><summary>Advanced provenance details</summary><dl class="definition-grid compact">${definitionRow('Product Version hash', selected.productVersionHash, true)}${definitionRow('Release manifest hash', selected.releaseManifestHash, true)}${definitionRow('Knowledge Lock hash', selected.knowledgeLockHash, true)}${definitionRow('Draft content hash', selected.contentHash, true)}</dl></details>
-      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>Review, compare, and copy. Publishing remains disabled.</span></div><button class="btn primary" type="button" data-generate-listing>Regenerate Listing</button></div>
+      <section class="card export-panel"><div><strong>Review, copy or export</strong><span>Owner approval creates a new immutable version. Nothing is published.</span></div><div class="button-row">${selected.approvalState !== 'owner_approved' && workspace.permissions?.canApprove ? '<button class="btn primary" type="button" id="approve-listing-draft">Approve draft</button>' : ''}<button class="btn" type="button" data-export-listing="json" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download JSON</button><button class="btn" type="button" data-export-listing="text" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download text package</button>${compared ? '<button class="btn" type="button" id="restore-listing-version">Restore compared version</button>' : ''}</div></section>
+      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>Review, compare, and copy. Publishing remains disabled.</span></div><button class="btn primary" type="button" data-generate-listing>Regenerate as New Version</button></div>
     ` : `<section class="card">${EmptyState('No listing drafts', 'Generate from the active Approved Product Release and valid Knowledge Lock.')}</section>`}
   `;
 }
@@ -1844,6 +1911,12 @@ function bindShell() {
       }
     });
   });
+  document.querySelectorAll('[data-open-listing]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      navigateListingStudio(button.dataset.openListing);
+    });
+  });
 
   const governanceAction = async (action, body = {}) => {
     const recordKey = state.mvpProduct.recordKey;
@@ -1909,8 +1982,58 @@ function bindShell() {
   });
   document.getElementById('back-to-product')?.addEventListener('click', () =>
     navigateProduct(state.mvpProduct.recordKey));
+  document.querySelectorAll('[data-listing-input]').forEach((input) => {
+    input.addEventListener('input', () => {
+      state.listingInputDirty = true;
+      document.getElementById('save-listing-input')?.classList.add('attention');
+    });
+  });
+  document.querySelectorAll('[data-listing-na]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const field = input.dataset.listingNa;
+      const fieldInput = document.querySelector(`[data-listing-input="${field}"]`);
+      if (fieldInput) fieldInput.disabled = input.checked;
+      state.listingInputDirty = true;
+    });
+  });
+  document.getElementById('listing-owner-note')?.addEventListener('input', () => {
+    state.listingInputDirty = true;
+  });
+  document.getElementById('save-listing-input')?.addEventListener('click', async () => {
+    const values = {};
+    const notApplicable = {};
+    document.querySelectorAll('[data-listing-input]').forEach((input) => {
+      values[input.dataset.listingInput] = input.type === 'checkbox' ? input.checked : input.value;
+    });
+    document.querySelectorAll('[data-listing-na]').forEach((input) => {
+      if (input.checked) notApplicable[input.dataset.listingNa] = true;
+    });
+    try {
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/input`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            values,
+            notApplicable,
+            ownerNote: document.getElementById('listing-owner-note')?.value || '',
+            expectedRevision: state.listingWorkspace.storeRevision,
+          }),
+        },
+      );
+      state.listingInputDirty = false;
+      render();
+      toast(`Listing Input Draft ${state.listingWorkspace.inputDraft.inputVersion} saved`);
+    } catch (error) {
+      toast(error.message);
+    }
+  });
   document.querySelectorAll('[data-generate-listing]').forEach((button) => {
     button.addEventListener('click', async () => {
+      if (state.listingInputDirty) {
+        toast('Save product information before generating');
+        return;
+      }
       try {
         state.listingWorkspace = await api(
           `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/generate`,
@@ -1935,6 +2058,122 @@ function bindShell() {
   document.getElementById('compare-select')?.addEventListener('change', (event) => {
     state.compareDraftId = event.target.value || null;
     render();
+  });
+  document.querySelector('[data-listing-content-editor]')?.addEventListener('input', (event) => {
+    const draft = state.listingWorkspace.drafts.find((item) =>
+      item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+    state.listingEditContent = structuredClone(draft.content);
+    const section = state.listingTab || 'shopify';
+    if (section === 'buyingGuide') state.listingEditContent[section] = event.target.value;
+    else if (section === 'faq') state.listingEditContent[section] = {
+      manualText: event.target.value,
+    };
+    else state.listingEditContent[section] = {
+      ...state.listingEditContent[section],
+      manualText: event.target.value,
+    };
+    state.listingContentDirty = true;
+    const save = document.getElementById('save-listing-edit');
+    if (save) save.disabled = false;
+  });
+  document.getElementById('save-listing-edit')?.addEventListener('click', async () => {
+    const selected = state.listingWorkspace.drafts.find((item) =>
+      item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+    try {
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/edit`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            draftId: selected.id,
+            content: state.listingEditContent,
+            expectedRevision: state.listingWorkspace.storeRevision,
+          }),
+        },
+      );
+      state.selectedDraftId = state.listingWorkspace.draft.id;
+      state.listingContentDirty = false;
+      state.listingEditContent = null;
+      render();
+      toast(`Edited Draft Version ${state.listingWorkspace.draft.draftVersion} saved`);
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.getElementById('restore-listing-version')?.addEventListener('click', async () => {
+    if (!state.compareDraftId) return;
+    try {
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/restore`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            draftId: state.compareDraftId,
+            expectedRevision: state.listingWorkspace.storeRevision,
+          }),
+        },
+      );
+      state.selectedDraftId = state.listingWorkspace.draft.id;
+      state.compareDraftId = null;
+      render();
+      toast(`Restored as Draft Version ${state.listingWorkspace.draft.draftVersion}`);
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.getElementById('approve-listing-draft')?.addEventListener('click', async () => {
+    const selected = state.listingWorkspace.drafts.find((item) =>
+      item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+    try {
+      state.listingWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/approve`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            draftId: selected.id,
+            expectedRevision: state.listingWorkspace.storeRevision,
+          }),
+        },
+      );
+      state.selectedDraftId = state.listingWorkspace.draft.id;
+      render();
+      toast(`Draft Version ${state.listingWorkspace.draft.draftVersion} Owner approved`);
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.querySelectorAll('[data-export-listing]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const selected = state.listingWorkspace.drafts.find((item) =>
+        item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+      try {
+        const payload = await api(
+          `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio/export`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              draftId: selected.id,
+              catalogId: state.catalogProduct?.catalogProductId || '',
+            }),
+          },
+        );
+        const format = button.dataset.exportListing;
+        const body = format === 'json'
+          ? JSON.stringify(payload, null, 2)
+          : Object.entries(payload.marketplaceContent)
+            .map(([section, content]) => `${section.toUpperCase()}\n${listingText(section, content)}`)
+            .join('\n\n');
+        const blob = new Blob([body], { type: format === 'json' ? 'application/json' : 'text/plain' });
+        const anchor = document.createElement('a');
+        anchor.href = URL.createObjectURL(blob);
+        anchor.download = `${state.mvpProduct.sku || 'motogrip'}-listing-v${selected.draftVersion}.${format === 'json' ? 'json' : 'txt'}`;
+        anchor.click();
+        URL.revokeObjectURL(anchor.href);
+        toast(`${format.toUpperCase()} package downloaded`);
+      } catch (error) {
+        toast(error.message);
+      }
+    });
   });
   document.querySelectorAll('[data-copy-listing]').forEach((button) => {
     button.addEventListener('click', async () => {
@@ -2341,6 +2580,11 @@ async function init() {
         event.preventDefault();
         document.getElementById('global-search')?.focus();
       }
+    });
+    window.addEventListener('beforeunload', (event) => {
+      if (!state.listingInputDirty && !state.listingContentDirty && !state.dirty) return;
+      event.preventDefault();
+      event.returnValue = '';
     });
     const session = await api('/api/admin/session');
     state.authed = session.authenticated;

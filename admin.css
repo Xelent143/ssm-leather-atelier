@@ -1293,6 +1293,36 @@ p {
 .listing-editor-head h2 { padding: 4px 0; }
 .listing-editor-head p { margin: 0; color: var(--muted); }
 .listing-editor-body { display: grid; gap: 16px; padding: 22px; }
+.listing-input-workspace { margin-bottom: 18px; padding: 22px; }
+.listing-input-groups { display: grid; gap: 10px; }
+.listing-input-group { border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface-soft); }
+.listing-input-group summary { display: flex; justify-content: space-between; cursor: pointer; padding: 14px 16px; font-weight: 800; }
+.listing-input-group summary span { color: var(--muted); font-size: 12px; }
+.listing-input-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0 16px 16px; }
+.listing-input-field { display: grid; gap: 7px; min-width: 0; }
+.listing-input-field > span { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 800; }
+.listing-input-field > span b { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.listing-input-field.missing.critical > span b { color: #b42318; }
+.listing-input-field.missing.recommended > span b { color: #b54708; }
+.listing-input-field input[type="text"],
+.listing-input-field input[type="number"],
+.listing-owner-note textarea,
+.listing-edit-field textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); padding: 10px 11px; font: inherit; }
+.listing-input-field input:focus,
+.listing-owner-note textarea:focus,
+.listing-edit-field textarea:focus { outline: 3px solid color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); }
+.listing-input-field small { color: var(--muted); font-size: 11px; }
+.listing-owner-note { display: grid; gap: 7px; margin-top: 16px; font-size: 12px; font-weight: 800; }
+.btn.attention { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+.missing-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.missing-summary span { border-radius: 8px; background: var(--surface-soft); padding: 10px; color: var(--muted); text-transform: capitalize; }
+.missing-summary strong { display: block; color: var(--text); font-size: 20px; }
+.missing-summary .critical strong { color: #b42318; }
+.missing-summary .recommended strong { color: #b54708; }
+.listing-edit-field textarea { min-height: 360px; resize: vertical; line-height: 1.6; }
+.export-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; margin-top: 16px; }
+.export-panel > div:first-child { display: grid; gap: 4px; }
+.export-panel span { color: var(--muted); font-size: 12px; }
 .listing-field { display: grid; gap: 7px; }
 .listing-field-head { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; font-weight: 750; }
 .listing-field-head span { color: var(--faint); font-weight: 600; }
@@ -1806,6 +1836,7 @@ textarea {
 
   .product-workspace-grid,
   .listing-insights-grid { grid-template-columns: 1fr; }
+  .listing-input-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quality-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .listing-draft-bar { grid-template-columns: 1fr 1fr; }
 
@@ -1982,6 +2013,10 @@ textarea {
   .listing-draft-bar select { width: 100%; }
   .listing-editor-head { padding: 16px; }
   .listing-editor-body { padding: 16px; }
+  .listing-input-workspace { padding: 16px; }
+  .listing-input-grid { grid-template-columns: 1fr; }
+  .listing-editor-head,
+  .export-panel { align-items: stretch; flex-direction: column; }
   .comparison { margin: 0 16px 16px; }
   .comparison > div { flex-direction: column; }
   .sticky-action-bar { bottom: 8px; gap: 10px; padding: 10px; }

@@ -1857,23 +1857,34 @@ async function handleApi(req, res, pathname) {
   }
 
   const listingMatch = pathname.match(
-    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/listing-studio(?:\/generate)?$/i,
+    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/listing-studio(?:\/(generate|input|edit|restore|approve|export))?$/i,
   );
   if (listingMatch) {
-    if (!namedOwnerForSession(session)) {
-      sendJson(res, 403, { error: 'Named Owner access is required.' });
-      return true;
-    }
     try {
       const productUuid = listingMatch[1];
-      if (pathname.endsWith('/generate') && req.method === 'POST') {
+      const operation = listingMatch[2] || null;
+      if (req.method === 'POST' && operation) {
         const body = await readBody(req);
-        sendJson(res, 201, await listingStudioService.generate(session, {
+        const linkedCatalog = operation === 'export' && !body.catalogId
+          ? catalogLinkService.catalog().products.find((item) =>
+            item.productUuid === productUuid && item.linkStatus === 'Linked')
+          : null;
+        const input = {
+          ...body,
           productUuid,
-          expectedRevision: body.expectedRevision,
-        }));
+          catalogId: body.catalogId || linkedCatalog?.catalogProductId || '',
+        };
+        const operations = {
+          generate: () => listingStudioService.generate(session, input),
+          input: () => listingStudioService.saveInput(session, input),
+          edit: () => listingStudioService.saveEdit(session, input),
+          restore: () => listingStudioService.restore(session, input),
+          approve: () => listingStudioService.approve(session, input),
+          export: () => listingStudioService.exportPackage(session, input),
+        };
+        sendJson(res, operation === 'export' ? 200 : 201, await operations[operation]());
       } else if (req.method === 'GET') {
-        sendJson(res, 200, listingStudioService.workspace(productUuid));
+        sendJson(res, 200, listingStudioService.workspace(session, productUuid));
       } else {
         sendJson(res, 405, { error: 'Method not allowed.' });
       }
