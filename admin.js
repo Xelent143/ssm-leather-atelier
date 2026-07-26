@@ -19,6 +19,7 @@ const state = {
   mvpProducts: [],
   mvpProduct: null,
   governance: null,
+  productIdentityWorkspace: null,
   listingWorkspace: null,
   selectedDraftId: null,
   compareDraftId: null,
@@ -1131,19 +1132,28 @@ function renderMvpProductDetail() {
 
 function renderProductOverview(product) {
   const governance = product.governance;
+  const managed = state.productIdentityWorkspace?.identity;
   const eligible = governance.knowledgeLockValid && ['approved', 'active'].includes(governance.releaseState);
   return `
     <div class="product-workspace-grid">
       <section class="card">
-        <div class="card-head"><div><h2>Product identity</h2><p>Durable identifiers and ownership</p></div>${statusBadge('existing', 'Read only')}</div>
+        <div class="card-head"><div><h2>Product Identity Engine</h2><p>Durable commerce and factory identifiers</p></div>${statusBadge(managed?.state === 'locked' ? 'active' : 'existing', managed?.state || 'Not generated')}</div>
         <dl class="definition-grid compact">
           ${definitionRow('Product UUID', product.productUuid || 'Not migrated', true)}
-          ${definitionRow('Legacy ID', product.legacyId, true)}
-          ${definitionRow('Brand', product.brand)}
-          ${definitionRow('Legal entity', product.legalEntity)}
-          ${definitionRow('Product family', product.family)}
-          ${definitionRow('Product type', formatProductType(product.productType))}
+          ${definitionRow('Product SKU', managed?.productSku || product.sku || 'Missing SKU', true)}
+          ${definitionRow('Internal Product Code', managed?.internalProductCode || 'Generated after Owner action', true)}
+          ${definitionRow('Factory Code', managed?.factoryCode || 'Generated after Owner action', true)}
+          ${definitionRow('Variant SKUs', String(managed?.variantSkus?.length || 0))}
+          ${definitionRow('Barcode ID', managed?.barcodeId || 'Reserved')}
+          ${definitionRow('QR ID', managed?.qrId || 'Reserved')}
         </dl>
+        <div class="card-pad identity-actions">
+          ${!managed ? '<button class="btn primary" id="generate-product-identity" type="button">Generate identity preview</button>' : ''}
+          ${managed?.state === 'preview' ? '<button class="btn primary" id="approve-product-identity" type="button">Approve identity</button>' : ''}
+          ${managed?.state === 'approved' ? '<button class="btn primary" id="lock-product-identity" type="button">Lock identity</button>' : ''}
+          ${managed?.state === 'locked' ? '<button class="btn" id="unlock-product-identity" type="button">Owner unlock</button>' : ''}
+          ${managed && managed.state !== 'locked' ? '<button class="btn" id="override-product-sku" type="button">Modify SKU</button>' : ''}
+        </div>
       </section>
       <aside class="card governance-card">
         <div class="card-head"><div><h2>Governance checklist</h2><p>Trusted product readiness</p></div></div>
@@ -1310,8 +1320,8 @@ function renderListingInputWorkspace(workspace) {
             <span>${escapeHtml(inputFieldLabel(field))}<b>${escapeHtml(info.severity || 'optional')}</b></span>
             ${boolean
               ? `<input type="checkbox" data-listing-input="${field}" ${value ? 'checked' : ''}>`
-              : `<input type="${['price', 'quantity', 'pocketCount', 'insidePockets'].includes(field) ? 'number' : 'text'}" data-listing-input="${field}" value="${escapeHtml(array ? (value || []).join(', ') : value ?? '')}" ${input.notApplicable?.[field] ? 'disabled' : ''}>`}
-            ${!boolean ? `<small><input type="checkbox" data-listing-na="${field}" ${input.notApplicable?.[field] ? 'checked' : ''}> Not applicable</small>` : ''}
+              : `<input type="${['price', 'quantity', 'pocketCount', 'insidePockets'].includes(field) ? 'number' : 'text'}" data-listing-input="${field}" value="${escapeHtml(array ? (value || []).join(', ') : value ?? '')}" ${input.notApplicable?.[field] || field === 'sku' ? 'disabled' : ''}>`}
+            ${field === 'sku' ? '<small>Managed by Product Identity Engine</small>' : !boolean ? `<small><input type="checkbox" data-listing-na="${field}" ${input.notApplicable?.[field] ? 'checked' : ''}> Not applicable</small>` : ''}
           </label>`;
         }).join('')}</div>
       </details>`).join('')}</div>
@@ -1967,6 +1977,43 @@ function bindShell() {
     })));
   document.querySelectorAll('#open-listing-studio').forEach((button) =>
     button.addEventListener('click', () => navigateListingStudio(state.mvpProduct.recordKey)));
+  const identityAction = async (action, body = {}) => {
+    try {
+      state.productIdentityWorkspace = await api(
+        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/identity/${action}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            ...body,
+            expectedRevision: state.productIdentityWorkspace?.storeRevision,
+          }),
+        },
+      );
+      render();
+      toast(`Product identity ${action} completed`);
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+  document.getElementById('generate-product-identity')?.addEventListener('click', () =>
+    identityAction('generate'));
+  document.getElementById('approve-product-identity')?.addEventListener('click', () =>
+    identityAction('approve'));
+  document.getElementById('lock-product-identity')?.addEventListener('click', () =>
+    identityAction('lock'));
+  document.getElementById('unlock-product-identity')?.addEventListener('click', () => {
+    const reason = window.prompt('Reason for unlocking this identity:');
+    if (reason) identityAction('unlock', { reason });
+  });
+  document.getElementById('override-product-sku')?.addEventListener('click', () => {
+    const productSku = window.prompt(
+      'Enter the replacement Product SKU:',
+      state.productIdentityWorkspace?.identity?.productSku || '',
+    );
+    if (!productSku) return;
+    const reason = window.prompt('Reason for this SKU override:');
+    if (reason) identityAction('override', { productSku, reason });
+  });
   document.querySelectorAll('[data-product-tab]').forEach((button) => {
     button.addEventListener('click', () => {
       state.productDetailTab = button.dataset.productTab;
@@ -2428,6 +2475,7 @@ async function navigateProduct(recordKey, replace = false) {
   state.view = 'product-detail';
   state.query = '';
   state.mvpProduct = null;
+  state.productIdentityWorkspace = null;
   state.mvpError = '';
   window.history[replace ? 'replaceState' : 'pushState'](
     {},
@@ -2437,9 +2485,10 @@ async function navigateProduct(recordKey, replace = false) {
   render();
   try {
     state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
-    state.governance = await api(
-      `/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`,
-    );
+    [state.governance, state.productIdentityWorkspace] = await Promise.all([
+      api(`/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`),
+      api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/identity`),
+    ]);
   } catch (error) {
     state.mvpError = error.message;
   }
@@ -2496,9 +2545,10 @@ async function loadMvpWorkspace() {
     if (state.view === 'product-detail') {
       const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
       state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
-      state.governance = await api(
-        `/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`,
-      );
+      [state.governance, state.productIdentityWorkspace] = await Promise.all([
+        api(`/api/admin/mvp/products/${encodeURIComponent(state.mvpProduct.recordKey)}/governance`),
+        api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/identity`),
+      ]);
     } else if (state.view === 'listing-studio') {
       const parts = window.location.pathname.split('/');
       const recordKey = decodeURIComponent(parts.at(-2) || '');

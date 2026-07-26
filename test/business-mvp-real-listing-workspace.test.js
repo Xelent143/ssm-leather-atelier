@@ -13,6 +13,8 @@ const { createListingStudioStore } = require('../listing-studio-store');
 const { createProductGovernanceService } = require('../product-governance-service');
 const { createProductPlmService } = require('../product-plm-service');
 const { createProductPlmStore } = require('../product-plm-store');
+const { createProductIdentityStore } = require('../product-identity-store');
+const { createProductIdentityService } = require('../product-identity-service');
 
 const completeInput = {
   productTitle: 'Dean Brown Leather Biker Jacket',
@@ -63,8 +65,18 @@ function fixture(accountType = 'owner') {
   const plmService = createProductPlmService({ store: plmStore, audit: { append() {} } });
   const governance = createProductGovernanceService({ store: plmStore, identity });
   const listingStore = createListingStudioStore({ dataDir });
-  const listing = createListingStudioService({ plmStore, listingStore, identity });
-  return { dataDir, governance, identity, listing, listingStore, plmService, plmStore, session, user };
+  const productIdentityService = createProductIdentityService({
+    store: createProductIdentityStore({ dataDir }),
+    identity,
+    year: () => 2026,
+  });
+  const listing = createListingStudioService({
+    plmStore, listingStore, identity, productIdentityService,
+  });
+  return {
+    dataDir, governance, identity, listing, listingStore, plmService, plmStore,
+    productIdentityService, session, user,
+  };
 }
 
 async function trustedProduct(current) {
@@ -114,6 +126,13 @@ test('real product generator creates compliant marketplace packages without unsu
 test('critical information blocks export until a versioned input draft is complete', async () => {
   const current = fixture();
   const productUuid = await trustedProduct(current);
+  const managed = await current.productIdentityService.generate(current.session, {
+    productUuid,
+    brand: 'MOTOGRIP GEAR',
+    productType: 'Motorcycle Jacket',
+    existingSku: 'MG-MJ01',
+    variants: [{ size: 'M', color: 'Brown' }],
+  });
   const first = await current.listing.generate(current.session, { productUuid, expectedRevision: 0 });
   await assert.rejects(
     Promise.resolve().then(() => current.listing.exportPackage(current.session, {
@@ -123,7 +142,7 @@ test('critical information blocks export until a versioned input draft is comple
   );
   const saved = await current.listing.saveInput(current.session, {
     productUuid,
-    values: completeInput,
+    values: { ...completeInput, sku: 'MANUAL-SKU-MUST-NOT-WIN' },
     notApplicable: {
       concealedCarryPockets: true,
       armorCompatibility: true,
@@ -141,6 +160,11 @@ test('critical information blocks export until a versioned input draft is comple
   });
   assert.equal(exported.draftVersion, 2);
   assert.equal(exported.marketplaceContent.etsy.tags.length, 13);
+  assert.equal(exported.productIdentity.productSku, 'MG-MJ01');
+  assert.equal(exported.productIdentity.internalProductCode, managed.identity.internalProductCode);
+  assert.equal(exported.productIdentity.factoryCode, managed.identity.factoryCode);
+  assert.equal(exported.productIdentity.variantSkus[0].sku, 'MG-MJ01-M-BRN');
+  assert.equal(second.inputDraft.values.sku, 'MG-MJ01');
   assert.equal(current.listingStore.read().inputDrafts.length, 1);
   fs.rmSync(current.dataDir, { recursive: true, force: true });
 });

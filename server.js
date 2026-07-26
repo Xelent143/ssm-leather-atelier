@@ -11,6 +11,8 @@ const { createProductPlmService } = require('./product-plm-service');
 const { createProductPlmStore } = require('./product-plm-store');
 const { createProductMvpReadModel } = require('./product-mvp-read-model');
 const { createProductGovernanceService } = require('./product-governance-service');
+const { createProductIdentityStore } = require('./product-identity-store');
+const { createProductIdentityService } = require('./product-identity-service');
 const { createListingStudioStore } = require('./listing-studio-store');
 const { createListingStudioService } = require('./listing-studio-service');
 const { createCatalogSyncStore } = require('./catalog-sync-store');
@@ -48,11 +50,17 @@ const productGovernanceService = createProductGovernanceService({
   store: productPlmStore,
   identity: adminIdentity,
 });
+const productIdentityStore = createProductIdentityStore({ dataDir });
+const productIdentityService = createProductIdentityService({
+  store: productIdentityStore,
+  identity: adminIdentity,
+});
 const listingStudioStore = createListingStudioStore({ dataDir });
 const listingStudioService = createListingStudioService({
   plmStore: productPlmStore,
   listingStore: listingStudioStore,
   identity: adminIdentity,
+  productIdentityService,
 });
 const catalogSyncStore = createCatalogSyncStore({ dataDir });
 const catalogSyncService = createCatalogSyncService({
@@ -1107,6 +1115,10 @@ function safePlmError(error) {
     UNTRUSTED_RELEASE: 409,
     REVISION_CONFLICT: 409,
     LISTING_STORE_UNAVAILABLE: 503,
+    IDENTITY_STORE_UNAVAILABLE: 503,
+    IDENTITY_LOCKED: 409,
+    INVALID_STATE: 409,
+    DUPLICATE_IDENTITY: 409,
     CATALOG_LINK_STORE_UNAVAILABLE: 503,
   };
   return {
@@ -1849,6 +1861,55 @@ async function handleApi(req, res, pathname) {
       };
       const result = await operations[operation]();
       sendJson(res, 201, { ...result, product: productMvpReadModel.product(productUuid) });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const productIdentityMatch = pathname.match(
+    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/identity(?:\/(generate|override|approve|lock|unlock))?$/i,
+  );
+  if (productIdentityMatch) {
+    try {
+      const productUuid = productIdentityMatch[1];
+      const operation = productIdentityMatch[2] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, productIdentityService.view(productUuid));
+      } else if (req.method === 'POST' && operation) {
+        const body = await readBody(req);
+        const product = productMvpReadModel.product(productUuid);
+        if (!product) throw Object.assign(new Error('Product was not found.'), { code: 'VALIDATION' });
+        const catalogProduct = operation === 'generate'
+          ? catalogLinkService.catalog().products.find((item) =>
+            item.productUuid === productUuid && item.linkStatus === 'Linked')
+          : null;
+        const input = {
+          ...body,
+          productUuid,
+          brand: product.brand,
+          productType: product.productType,
+          title: product.title,
+          existingSku: operation === 'generate' ? product.sku : undefined,
+          catalogProductId: catalogProduct?.catalogProductId || null,
+          variants: operation === 'generate'
+            ? (catalogProduct?.variants || []).map((variant) => ({
+              size: variant.option === 'Size' ? variant.value : '',
+            }))
+            : undefined,
+        };
+        const operations = {
+          generate: () => productIdentityService.generate(session, input),
+          override: () => productIdentityService.overrideSku(session, input),
+          approve: () => productIdentityService.approve(session, input),
+          lock: () => productIdentityService.lock(session, input),
+          unlock: () => productIdentityService.unlock(session, input),
+        };
+        sendJson(res, 201, await operations[operation]());
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });

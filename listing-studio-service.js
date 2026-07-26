@@ -287,7 +287,7 @@ function validateEditedContent(content) {
 }
 
 function createListingStudioService(options = {}) {
-  const { plmStore, listingStore, identity } = options;
+  const { plmStore, listingStore, identity, productIdentityService } = options;
   const now = options.now || (() => Date.now());
 
   function actor(session, permissions = ['owner', 'listing_editor']) {
@@ -314,14 +314,25 @@ function createListingStudioService(options = {}) {
     return { resolved, version };
   }
 
+  function managedIdentity(productUuid) {
+    return productIdentityService?.view(productUuid).identity || null;
+  }
+
+  function applyManagedIdentity(productUuid, values) {
+    const managed = managedIdentity(productUuid);
+    return managed ? { ...values, sku: managed.productSku } : values;
+  }
+
   function workspace(session, productUuid) {
     actor(session);
     const { version } = trusted(productUuid);
     const store = listingStore.read();
     const inputDraft = currentInput(store, productUuid, version);
+    inputDraft.values = applyManagedIdentity(productUuid, inputDraft.values);
     return {
       storeRevision: store.storeRevision,
       inputDraft,
+      productIdentity: managedIdentity(productUuid),
       missingInformation: missingInformation(inputDraft.values, inputDraft.notApplicable),
       drafts: store.drafts.filter((item) => item.productUuid === productUuid),
       permissions: {
@@ -336,13 +347,18 @@ function createListingStudioService(options = {}) {
   async function saveInput(session, input) {
     const user = actor(session);
     const { version } = trusted(input.productUuid);
+    const editableValues = { ...(input.values || {}) };
+    delete editableValues.sku;
     const result = await listingStore.mutate((store) => {
       const prior = currentInput(store, input.productUuid, version);
       const record = {
         id: crypto.randomUUID(),
         productUuid: input.productUuid,
         inputVersion: prior.inputVersion + 1,
-        values: { ...prior.values, ...cleanInput(input.values) },
+        values: applyManagedIdentity(
+          input.productUuid,
+          { ...prior.values, ...cleanInput(editableValues) },
+        ),
         notApplicable: Object.fromEntries(Object.entries(input.notApplicable || {})
           .filter(([field, value]) => INPUT_FIELDS.includes(field) && value === true)),
         ownerNote: cleanText(input.ownerNote, 1000),
@@ -368,6 +384,7 @@ function createListingStudioService(options = {}) {
     const { resolved, version } = trusted(input.productUuid);
     const result = await listingStore.mutate((store) => {
       const inputDraft = currentInput(store, input.productUuid, version);
+      inputDraft.values = applyManagedIdentity(input.productUuid, inputDraft.values);
       const missing = missingInformation(inputDraft.values, inputDraft.notApplicable);
       const content = contentOverride || buildContent(inputDraft.values);
       const prior = store.drafts.filter((item) => item.productUuid === input.productUuid);
@@ -454,8 +471,19 @@ function createListingStudioService(options = {}) {
       error.code = 'VALIDATION';
       throw error;
     }
+    const managed = managedIdentity(input.productUuid);
     return {
-      productIdentity: { productUuid: input.productUuid, catalogId: cleanText(input.catalogId, 120) || null },
+      productIdentity: {
+        productUuid: input.productUuid,
+        catalogId: cleanText(input.catalogId, 120) || null,
+        productSku: managed?.productSku || draft.content?.ebay?.itemSpecifics
+          ?.find(([key]) => key === 'SKU')?.[1] || null,
+        internalProductCode: managed?.internalProductCode || null,
+        factoryCode: managed?.factoryCode || null,
+        variantSkus: managed?.variantSkus || [],
+        barcodeId: managed?.barcodeId || null,
+        qrId: managed?.qrId || null,
+      },
       releaseId: resolved.release.id,
       knowledgeLockId: resolved.lock.id,
       draftVersion: draft.draftVersion,
