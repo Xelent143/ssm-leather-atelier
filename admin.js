@@ -28,6 +28,10 @@ const state = {
   catalog: null,
   catalogSyncing: false,
   catalogError: '',
+  catalogProduct: null,
+  catalogAudit: [],
+  productDnaOptions: [],
+  catalogReviewFilter: 'all',
   mvpError: '',
 };
 
@@ -81,6 +85,8 @@ const routeEntries = navigationGroups.flatMap(([, items]) => items);
 routeEntries.push(['current-products', '□', 'Current Product Manager', '/admin/products/current', 'existing']);
 routeEntries.push(['product-detail', '□', 'Product Detail', '/admin/products/:recordKey', 'active']);
 routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:recordKey/listing-studio', 'active']);
+routeEntries.push(['catalog-review', '▦', 'Catalog Review', '/admin/catalog/review', 'active']);
+routeEntries.push(['catalog-detail', '▦', 'Catalog Product Detail', '/admin/catalog/:catalogProductId', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -744,10 +750,12 @@ function formatTimestamp(value) {
 }
 
 function catalogStatusBadge(status) {
-  const tone = status === 'Synced'
+  const tone = status === 'Linked'
     ? 'active'
-    : status === 'Import Error'
+    : ['Import Error', 'Conflict'].includes(status)
       ? 'restricted'
+      : status === 'Ignored'
+        ? 'existing'
       : 'planned';
   return statusBadge(tone, status);
 }
@@ -777,7 +785,7 @@ function renderCatalog() {
     ${PageHeader(
       'Catalog',
       'A read-only identity and inventory projection of the products currently displayed by the MOTOGRIP website.',
-      `<button class="btn primary" id="catalog-sync" type="button" ${state.catalogSyncing ? 'disabled' : ''}>${state.catalogSyncing ? 'Syncing…' : 'Sync website catalog'}</button>`,
+      `<a class="btn" data-route="catalog-review" href="/admin/catalog/review">Review queue</a><button class="btn primary" id="catalog-sync" type="button" ${state.catalogSyncing ? 'disabled' : ''}>${state.catalogSyncing ? 'Syncing…' : 'Sync website catalog'}</button>`,
       'active',
     )}
     ${AlertPanel('Read-only connection', 'Sync reads the existing website catalog and updates only MOTOGRIP OS catalog metadata. It cannot edit, publish, archive, price, or overwrite a website product.', 'info')}
@@ -808,7 +816,7 @@ function renderCatalog() {
     <div class="filter-bar catalog-filter">
       <label class="filter-search"><span class="sr-only">Search catalog</span><input id="catalog-filter" value="${escapeHtml(state.query)}" placeholder="Search title, SKU, brand, type, size, or sync status"></label>
       <span class="filter-spacer"></span>
-      <span class="muted">${products.length} of ${catalog.productCount} products</span>
+      <span class="muted">${products.length} of ${catalog.importedProductCount || catalog.productCount} imported products</span>
     </div>
     <section class="card catalog-table-card">
       <div class="table-wrap">
@@ -827,7 +835,7 @@ function renderCatalog() {
           </thead>
           <tbody>
             ${products.map((product) => `
-              <tr>
+              <tr class="catalog-row" data-catalog-product="${escapeHtml(product.catalogProductId)}" tabindex="0">
                 <td data-label="Product">
                   <div class="resource catalog-product">
                     <div class="thumb catalog-thumb"><img src="${escapeHtml(catalogImage(product.image))}" alt=""></div>
@@ -865,6 +873,195 @@ function renderCatalog() {
       ${products.length ? '' : EmptyState('No catalog products found', 'Adjust the search or run a manual website sync.')}
     </section>
   `;
+}
+
+function catalogReviewProducts() {
+  const products = filteredCatalogProducts();
+  const filter = state.catalogReviewFilter;
+  if (filter === 'all') {
+    return products.filter((product) => ['Needs Review', 'Conflict', 'Import Error'].includes(product.linkStatus));
+  }
+  if (filter === 'unlinked') return products.filter((product) => product.linkStatus === 'Needs Review');
+  return products.filter((product) => product.linkStatus === filter);
+}
+
+function renderCatalogReview() {
+  if (!state.catalog) return LoadingSkeleton();
+  const products = catalogReviewProducts();
+  return `
+    ${PageHeader(
+      'Catalog Review',
+      'Owner-controlled matching between read-only website identities and governed Product DNA.',
+      '<a class="btn" data-route="catalog" href="/admin/catalog">Back to Catalog</a>',
+      'active',
+    )}
+    ${AlertPanel('Owner confirmation required', 'Suggestions never create trusted links automatically. Title similarity is advisory only, and website records remain unchanged.', 'info')}
+    <div class="grid stats catalog-stats">
+      ${StatCard('Review queue', String(state.catalog.needsReviewCount), 'Needs review, conflicts, and errors')}
+      ${StatCard('Linked', String(state.catalog.linkedCount || 0), 'Owner-confirmed Product DNA links')}
+      ${StatCard('Ignored', String(state.catalog.ignoredProductCount || 0), 'Excluded from website metrics')}
+      ${StatCard('Imported', String(state.catalog.importedProductCount || state.catalog.products.length), 'All persistent Catalog records')}
+    </div>
+    <div class="filter-bar catalog-filter">
+      <label class="filter-search"><span class="sr-only">Search review queue</span><input id="catalog-filter" value="${escapeHtml(state.query)}" placeholder="Search title, SKU, Catalog ID, or review reason"></label>
+      <select id="catalog-review-filter" aria-label="Catalog review status">
+        ${[
+          ['all', 'Open review items'],
+          ['unlinked', 'Unlinked Product DNA'],
+          ['Conflict', 'Conflicts'],
+          ['Import Error', 'Import errors'],
+          ['Ignored', 'Ignored'],
+          ['Linked', 'Linked'],
+        ].map(([value, label]) => `<option value="${value}" ${state.catalogReviewFilter === value ? 'selected' : ''}>${label}</option>`).join('')}
+      </select>
+      <span class="filter-spacer"></span>
+      <span class="muted">${products.length} product(s)</span>
+    </div>
+    <section class="catalog-review-grid">
+      ${products.map((product) => {
+        const suggestion = product.suggestedProductDnaMatch;
+        return `<article class="card catalog-review-card" data-catalog-product="${escapeHtml(product.catalogProductId)}" tabindex="0">
+          <div class="catalog-review-product">
+            <div class="thumb catalog-review-thumb"><img src="${escapeHtml(catalogImage(product.image))}" alt=""></div>
+            <div>
+              <div class="button-row">${catalogStatusBadge(product.linkStatus)} ${statusBadge(product.productStatus === 'active' ? 'active' : 'planned', product.productStatus)}</div>
+              <h2>${escapeHtml(product.title)}</h2>
+              <p>${escapeHtml(product.brand)} · ${escapeHtml(formatProductType(product.productType))}</p>
+              <span class="mono">${escapeHtml(product.sku || 'Missing SKU')}</span>
+            </div>
+          </div>
+          <dl class="catalog-review-facts">
+            ${definitionRow('Catalog ID', product.catalogProductId, true)}
+            ${definitionRow('Website identifier', product.source?.sourceId || 'Unavailable', true)}
+            ${definitionRow('Price', money(product.price))}
+            ${definitionRow('Sizes', product.availableSizes.join(', ') || 'None')}
+            ${definitionRow('Variants', String(product.variantCount))}
+            ${definitionRow('Inventory', String(product.totalInventory))}
+          </dl>
+          <div class="match-suggestion ${suggestion ? '' : 'empty'}">
+            <span class="eyebrow">Suggested Product DNA</span>
+            ${suggestion ? `
+              <strong>${escapeHtml(suggestion.productDna?.displayName || suggestion.productUuid)}</strong>
+              <p>${escapeHtml(suggestion.reason)}</p>
+              <div><span class="confidence-meter"><i style="width:${Number(suggestion.confidence)}%"></i></span><b>${Number(suggestion.confidence)}% confidence</b></div>
+            ` : '<strong>No safe suggestion</strong><p>Search Product DNA records manually or leave this product unlinked.</p>'}
+          </div>
+          <div class="catalog-review-reason"><strong>Review reason</strong><p>${escapeHtml(product.reviewReason || 'Owner review required.')}</p></div>
+          <button class="btn primary" type="button" data-open-catalog-product="${escapeHtml(product.catalogProductId)}">Review product</button>
+        </article>`;
+      }).join('') || EmptyState('Review queue is clear', 'No products match the selected review status.')}
+    </section>
+  `;
+}
+
+function linkedMvpProduct(product) {
+  return product?.productUuid
+    ? state.mvpProducts.find((item) => item.productUuid === product.productUuid) || null
+    : null;
+}
+
+function renderCatalogProductDetail() {
+  const product = state.catalogProduct;
+  if (!product) {
+    return `${PageHeader('Catalog Product', 'Loading read-only website identity.', '<a class="btn" data-route="catalog-review" href="/admin/catalog/review">Back to review</a>')}${state.catalogError ? AlertPanel('Product unavailable', state.catalogError, 'warning') : LoadingSkeleton()}`;
+  }
+  const mvpProduct = linkedMvpProduct(product);
+  const eligible = Boolean(mvpProduct?.governance?.knowledgeLockValid &&
+    ['approved', 'active'].includes(mvpProduct?.governance?.releaseState));
+  const dna = product.linkedProductDna;
+  const suggestions = product.suggestions || [];
+  const actions = `<a class="btn" data-route="catalog-review" href="/admin/catalog/review">Back to review</a>
+    ${mvpProduct ? `<button class="btn" type="button" id="open-linked-product-dna">Open Product DNA</button>` : ''}
+    ${eligible ? '<button class="btn primary" type="button" id="open-linked-listing-studio">Open Listing Studio</button>' : ''}`;
+  return `
+    ${PageHeader('Catalog Product Detail', 'Review and confirm the relationship to governed Product DNA.', actions, product.linkStatus === 'Linked' ? 'active' : 'planned')}
+    <section class="product-summary card catalog-detail-summary">
+      <div class="product-summary-media"><img src="${escapeHtml(catalogImage(product.image))}" alt="${escapeHtml(product.title)}"></div>
+      <div class="product-summary-main">
+        <div class="button-row">${catalogStatusBadge(product.linkStatus)} ${statusBadge(product.productStatus === 'active' ? 'active' : 'planned', product.productStatus)}</div>
+        <h1>${escapeHtml(product.title)}</h1>
+        <p>${escapeHtml(product.brand)} · ${escapeHtml(formatProductType(product.productType))}</p>
+        <div class="product-summary-meta">
+          <span><small>SKU</small><strong>${escapeHtml(product.sku || 'Missing')}</strong></span>
+          <span><small>Variants</small><strong>${Number(product.variantCount)}</strong></span>
+          <span><small>Inventory</small><strong>${Number(product.totalInventory)}</strong></span>
+          <span><small>Price</small><strong>${money(product.price)}</strong></span>
+        </div>
+      </div>
+      <div class="product-summary-actions">${product.productUrl ? `<a class="btn" href="${escapeHtml(product.productUrl)}" target="_blank" rel="noreferrer">View website product</a>` : ''}</div>
+    </section>
+    <div class="catalog-detail-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>Catalog identity</h2><p>Stable read-only website projection</p></div>${statusBadge('existing', 'Read only')}</div>
+        <dl class="definition-grid compact">
+          ${definitionRow('Catalog ID', product.catalogProductId, true)}
+          ${definitionRow('Website identifier', product.source?.sourceId, true)}
+          ${definitionRow('Website URL', product.productUrl)}
+          ${definitionRow('Available sizes', product.availableSizes.join(', ') || 'None')}
+          ${definitionRow('Total inventory', String(product.totalInventory))}
+          ${definitionRow('Last imported', formatTimestamp(product.importedAt))}
+        </dl>
+        ${renderCatalogVariants(product)}
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2>Product DNA relationship</h2><p>Owner-confirmed PLM identity</p></div>${catalogStatusBadge(product.linkStatus)}</div>
+        ${dna ? `
+          <dl class="definition-grid compact">
+            ${definitionRow('Product UUID', dna.productUuid, true)}
+            ${definitionRow('Product DNA', dna.displayName)}
+            ${definitionRow('Brand', dna.brand)}
+            ${definitionRow('Product type', formatProductType(dna.productType))}
+            ${definitionRow('Style code', dna.styleCode, true)}
+            ${definitionRow('Match method', product.link?.matchMethod)}
+            ${definitionRow('Linked at', formatTimestamp(product.link?.linkedAt))}
+            ${definitionRow('Linked by', product.link?.linkedBy, true)}
+          </dl>
+          ${state.actorType === 'named_user' ? '<button class="btn danger-outline" id="unlink-catalog-product" type="button">Unlink Product DNA</button>' : ''}
+        ` : `
+          <div class="catalog-dna-search">
+            <label for="catalog-dna-search">Search available Product DNA</label>
+            <input id="catalog-dna-search" placeholder="Search title, SKU, style code, brand, or type">
+          </div>
+          <div id="catalog-dna-results" class="dna-match-list">
+            ${renderDnaMatchOptions(suggestions.length ? suggestions.map((item) => ({
+              ...item.productDna,
+              matchMethod: item.method,
+              confidence: item.confidence,
+              reason: item.reason,
+              suggested: true,
+            })) : state.productDnaOptions)}
+          </div>
+          ${state.actorType === 'named_user' ? '<button class="btn" id="ignore-catalog-product" type="button">Mark as Ignored</button>' : ''}
+        `}
+        ${!eligible && product.linkStatus === 'Linked' ? AlertPanel('Listing Studio remains governed', 'This link does not bypass Product Version, Owner Approval, Product Release, or valid Knowledge Lock requirements.', 'warning') : ''}
+      </section>
+    </div>
+    <section class="card catalog-audit-card">
+      <div class="card-head"><div><h2>Link audit history</h2><p>Append-only Owner actions for this Catalog identity</p></div><span class="muted">${state.catalogAudit.length} event(s)</span></div>
+      <div class="audit-timeline">${state.catalogAudit.map((event) => `
+        <article><span>${escapeHtml(formatTimestamp(event.timestamp))}</span><strong>${escapeHtml(event.action.replaceAll('_', ' '))}</strong><small>${escapeHtml(event.actorId || 'System')} · ${escapeHtml(event.matchMethod || 'No match method')}</small></article>
+      `).join('') || '<p class="muted">No link actions have been recorded.</p>'}</div>
+    </section>
+  `;
+}
+
+function renderDnaMatchOptions(records = []) {
+  if (!records.length) return EmptyState('No Product DNA matches', 'Try another title, SKU, style code, brand, or product type.');
+  return records.slice(0, 12).map((record) => `
+    <article class="dna-match-option">
+      <div>
+        <span class="eyebrow">${record.suggested ? `Suggested · ${Number(record.confidence)}%` : 'Available Product DNA'}</span>
+        <strong>${escapeHtml(record.displayName)}</strong>
+        <p>${escapeHtml(record.brand)} · ${escapeHtml(formatProductType(record.productType))}</p>
+        <small class="mono">${escapeHtml(record.styleCode || record.productUuid)}${record.skus?.length ? ` · ${escapeHtml(record.skus.join(', '))}` : ''}</small>
+        ${record.reason ? `<small>${escapeHtml(record.reason)}</small>` : ''}
+      </div>
+      <div class="button-row">
+        ${record.suggested ? `<button class="btn" type="button" data-reject-dna="${escapeHtml(record.productUuid)}">Reject</button>` : ''}
+        <button class="btn primary" type="button" data-link-dna="${escapeHtml(record.productUuid)}" data-match-method="${escapeHtml(record.matchMethod || 'manual')}">Confirm link</button>
+      </div>
+    </article>
+  `).join('');
 }
 
 function definitionRow(label, value, mono = false) {
@@ -1461,6 +1658,8 @@ function render() {
   const views = {
     dashboard: renderMvpDashboard,
     catalog: renderCatalog,
+    'catalog-review': renderCatalogReview,
+    'catalog-detail': renderCatalogProductDetail,
     products: renderMvpProducts,
     'product-detail': renderMvpProductDetail,
     'listing-studio': renderListingStudio,
@@ -1500,6 +1699,29 @@ function bindShell() {
     state.query = event.target.value;
     render();
   });
+  document.getElementById('catalog-review-filter')?.addEventListener('change', (event) => {
+    state.catalogReviewFilter = event.target.value;
+    render();
+  });
+  document.querySelectorAll('[data-catalog-product], [data-open-catalog-product]').forEach((element) => {
+    const open = (event) => {
+      if (event?.target?.closest('a, button, summary')) return;
+      navigateCatalogProduct(element.dataset.catalogProduct || element.dataset.openCatalogProduct);
+    };
+    element.addEventListener('click', open);
+    element.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        navigateCatalogProduct(element.dataset.catalogProduct || element.dataset.openCatalogProduct);
+      }
+    });
+  });
+  document.querySelectorAll('[data-open-catalog-product]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      navigateCatalogProduct(button.dataset.openCatalogProduct);
+    });
+  });
   document.getElementById('catalog-sync')?.addEventListener('click', async () => {
     state.catalogSyncing = true;
     render();
@@ -1517,6 +1739,59 @@ function bindShell() {
       state.catalogSyncing = false;
       render();
     }
+  });
+  let dnaSearchTimer;
+  document.getElementById('catalog-dna-search')?.addEventListener('input', (event) => {
+    window.clearTimeout(dnaSearchTimer);
+    dnaSearchTimer = window.setTimeout(async () => {
+      try {
+        const result = await api(`/api/admin/catalog/product-dna?q=${encodeURIComponent(event.target.value)}`);
+        state.productDnaOptions = result.products || [];
+        const container = document.getElementById('catalog-dna-results');
+        if (container) {
+          container.innerHTML = renderDnaMatchOptions(state.productDnaOptions);
+          bindCatalogDnaActions();
+        }
+      } catch (error) {
+        toast(error.message);
+      }
+    }, 180);
+  });
+  bindCatalogDnaActions();
+  document.getElementById('unlink-catalog-product')?.addEventListener('click', async () => {
+    try {
+      await api(`/api/admin/catalog/products/${state.catalogProduct.catalogProductId}/unlink`, {
+        method: 'POST',
+        body: JSON.stringify({ expectedRevision: state.catalog.linkStoreRevision }),
+      });
+      await refreshCatalogProduct();
+      toast('Product DNA link removed');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.getElementById('ignore-catalog-product')?.addEventListener('click', async () => {
+    try {
+      await api(`/api/admin/catalog/products/${state.catalogProduct.catalogProductId}/ignore`, {
+        method: 'POST',
+        body: JSON.stringify({
+          expectedRevision: state.catalog.linkStoreRevision,
+          reason: 'Staging or non-website product',
+        }),
+      });
+      await refreshCatalogProduct();
+      toast('Catalog product ignored');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.getElementById('open-linked-product-dna')?.addEventListener('click', () => {
+    const product = linkedMvpProduct(state.catalogProduct);
+    if (product) navigateProduct(product.recordKey);
+  });
+  document.getElementById('open-linked-listing-studio')?.addEventListener('click', () => {
+    const product = linkedMvpProduct(state.catalogProduct);
+    if (product) navigateListingStudio(product.recordKey);
   });
 
   document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
@@ -1825,12 +2100,89 @@ function bindShell() {
   });
 }
 
+function bindCatalogDnaActions() {
+  document.querySelectorAll('[data-link-dna]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await api(`/api/admin/catalog/products/${state.catalogProduct.catalogProductId}/link`, {
+          method: 'POST',
+          body: JSON.stringify({
+            productUuid: button.dataset.linkDna,
+            matchMethod: button.dataset.matchMethod || 'manual',
+            ownerConfirmed: true,
+            expectedRevision: state.catalog.linkStoreRevision,
+          }),
+        });
+        await refreshCatalogProduct();
+        toast('Product DNA link confirmed');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+  });
+  document.querySelectorAll('[data-reject-dna]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await api(`/api/admin/catalog/products/${state.catalogProduct.catalogProductId}/reject-suggestion`, {
+          method: 'POST',
+          body: JSON.stringify({
+            productUuid: button.dataset.rejectDna,
+            expectedRevision: state.catalog.linkStoreRevision,
+          }),
+        });
+        await refreshCatalogProduct();
+        toast('Suggested match rejected');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+  });
+}
+
 function viewFromPath(pathname = window.location.pathname) {
   const normalized = pathname.replace(/\/+$/, '') || '/admin';
+  if (normalized === '/admin/catalog/review') return 'catalog-review';
+  if (/^\/admin\/catalog\/[^/]+$/.test(normalized)) return 'catalog-detail';
   if (/^\/admin\/products\/[^/]+\/listing-studio$/.test(normalized)) return 'listing-studio';
   if (/^\/admin\/products\/(?!current$)[^/]+$/.test(normalized)) return 'product-detail';
   const route = routeEntries.find(([, , , path]) => path === normalized);
   return route?.[0] || 'dashboard';
+}
+
+async function refreshCatalogProduct() {
+  state.catalog = await api('/api/admin/catalog');
+  const result = await api(`/api/admin/catalog/products/${state.catalogProduct.catalogProductId}`);
+  state.catalogProduct = result.product;
+  state.catalogAudit = result.auditEvents || [];
+  state.productDnaOptions = [];
+  render();
+}
+
+async function navigateCatalogProduct(catalogProductId, replace = false) {
+  state.view = 'catalog-detail';
+  state.catalogProduct = null;
+  state.catalogAudit = [];
+  state.productDnaOptions = [];
+  state.catalogError = '';
+  window.history[replace ? 'replaceState' : 'pushState'](
+    {},
+    '',
+    `/admin/catalog/${encodeURIComponent(catalogProductId)}`,
+  );
+  render();
+  try {
+    const [detail, dna] = await Promise.all([
+      api(`/api/admin/catalog/products/${encodeURIComponent(catalogProductId)}`),
+      api('/api/admin/catalog/product-dna'),
+    ]);
+    state.catalogProduct = detail.product;
+    state.catalogAudit = detail.auditEvents || [];
+    state.productDnaOptions = dna.products || [];
+  } catch (error) {
+    state.catalogError = error.message;
+  }
+  render();
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 async function navigateProduct(recordKey, replace = false) {
@@ -1916,6 +2268,11 @@ async function loadMvpWorkspace() {
         `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`,
       );
       state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
+    } else if (state.view === 'catalog-detail') {
+      const catalogProductId = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+      const detail = await api(`/api/admin/catalog/products/${encodeURIComponent(catalogProductId)}`);
+      state.catalogProduct = detail.product;
+      state.catalogAudit = detail.auditEvents || [];
     }
   } catch (error) {
     state.mvpError = error.message;
@@ -1958,7 +2315,10 @@ async function init() {
     } catch {}
     window.addEventListener('popstate', () => {
       state.view = viewFromPath();
-      if (state.view === 'product-detail') {
+      if (state.view === 'catalog-detail') {
+        const catalogProductId = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+        navigateCatalogProduct(catalogProductId, true);
+      } else if (state.view === 'product-detail') {
         const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
         navigateProduct(recordKey, true);
       } else if (state.view === 'listing-studio') {

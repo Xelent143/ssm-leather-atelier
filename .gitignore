@@ -34,6 +34,8 @@ data/listing-studio.json
 data/listing-studio.json.*.tmp
 data/catalog-sync.json
 data/catalog-sync.json.*.tmp
+data/catalog-product-dna-links.json
+data/catalog-product-dna-links.json.*.tmp
 data/ai-product-studio-audit.ndjson
 data/ai-product-studio-jobs/
 data/ai-product-studio-artifacts/

@@ -15,6 +15,8 @@ const { createListingStudioStore } = require('./listing-studio-store');
 const { createListingStudioService } = require('./listing-studio-service');
 const { createCatalogSyncStore } = require('./catalog-sync-store');
 const { createCatalogSyncService } = require('./catalog-sync-service');
+const { createCatalogLinkStore } = require('./catalog-link-store');
+const { createCatalogLinkService } = require('./catalog-link-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -57,6 +59,13 @@ const catalogSyncService = createCatalogSyncService({
   store: catalogSyncStore,
   readWebsiteCatalog: readPublicStore,
   readPlmStore: () => productPlmStore.read(),
+});
+const catalogLinkStore = createCatalogLinkStore({ dataDir });
+const catalogLinkService = createCatalogLinkService({
+  store: catalogLinkStore,
+  catalogService: catalogSyncService,
+  readPlmStore: () => productPlmStore.read(),
+  authorizeOwner: (session) => Boolean(namedOwnerForSession(session)),
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -1098,6 +1107,7 @@ function safePlmError(error) {
     UNTRUSTED_RELEASE: 409,
     REVISION_CONFLICT: 409,
     LISTING_STORE_UNAVAILABLE: 503,
+    CATALOG_LINK_STORE_UNAVAILABLE: 503,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1625,7 +1635,7 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/admin/catalog' && req.method === 'GET') {
     try {
-      sendJson(res, 200, catalogSyncService.catalog());
+      sendJson(res, 200, catalogLinkService.catalog());
     } catch {
       sendJson(res, 503, { error: 'Catalog import is temporarily unavailable.' });
     }
@@ -1638,7 +1648,7 @@ async function handleApi(req, res, pathname) {
       return true;
     }
     try {
-      const result = catalogSyncService.sync();
+      const result = catalogLinkService.sync();
       adminSecurity.audit(req, {
         action: 'catalog_read_only_sync',
         result: 'success',
@@ -1655,6 +1665,90 @@ async function handleApi(req, res, pathname) {
         entityType: 'catalog',
       });
       sendJson(res, 503, { error: 'Catalog import is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/catalog/product-dna' && req.method === 'GET') {
+    try {
+      const requestUrl = new URL(req.url || pathname, `http://${req.headers.host || 'localhost'}`);
+      sendJson(res, 200, {
+        products: catalogLinkService.productDnaRecords(requestUrl.searchParams.get('q') || ''),
+      });
+    } catch {
+      sendJson(res, 503, { error: 'Product DNA search is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/catalog/audit' && req.method === 'GET') {
+    try {
+      const requestUrl = new URL(req.url || pathname, `http://${req.headers.host || 'localhost'}`);
+      sendJson(res, 200, {
+        events: catalogLinkService.auditHistory(requestUrl.searchParams.get('catalogProductId') || ''),
+      });
+    } catch {
+      sendJson(res, 503, { error: 'Catalog audit history is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  const catalogProductMatch = pathname.match(
+    /^\/api\/admin\/catalog\/products\/([0-9a-f-]+)(?:\/(link|unlink|ignore|reject-suggestion))?$/i,
+  );
+  if (catalogProductMatch) {
+    const catalogProductId = catalogProductMatch[1];
+    const operation = catalogProductMatch[2] || null;
+    if (!operation && req.method === 'GET') {
+      const product = catalogLinkService.findCatalogProduct(catalogProductId);
+      if (!product) sendJson(res, 404, { error: 'Catalog product was not found.' });
+      else sendJson(res, 200, {
+        product,
+        linkStoreRevision: catalogLinkStore.read().storeRevision,
+        auditEvents: catalogLinkService.auditHistory(catalogProductId),
+      });
+      return true;
+    }
+    if (req.method !== 'POST') {
+      sendJson(res, 405, { error: 'Method not allowed.' });
+      return true;
+    }
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const input = { ...body, catalogProductId };
+      const operations = {
+        link: () => catalogLinkService.link(session, input),
+        unlink: () => catalogLinkService.unlink(session, input),
+        ignore: () => catalogLinkService.ignore(session, input),
+        'reject-suggestion': () => catalogLinkService.rejectSuggestion(session, input),
+      };
+      if (!operations[operation]) {
+        sendJson(res, 404, { error: 'Catalog review action was not found.' });
+        return true;
+      }
+      const result = operations[operation]();
+      adminSecurity.audit(req, {
+        action: `catalog_product_${operation.replace('-', '_')}`,
+        result: 'success',
+        session,
+        entityType: 'catalog_product',
+        entityId: catalogProductId,
+      });
+      sendJson(res, 200, result);
+    } catch (error) {
+      const safe = safePlmError(error);
+      adminSecurity.audit(req, {
+        action: `catalog_product_${String(operation || 'review').replace('-', '_')}`,
+        result: 'failure',
+        session,
+        entityType: 'catalog_product',
+        entityId: catalogProductId,
+      });
+      sendJson(res, safe.status, { error: safe.message });
     }
     return true;
   }
@@ -2052,6 +2146,8 @@ module.exports = {
   adminSecurity,
   catalogSyncService,
   catalogSyncStore,
+  catalogLinkService,
+  catalogLinkStore,
   productPlmStore,
   productPlmService,
   productMvpReadModel,
