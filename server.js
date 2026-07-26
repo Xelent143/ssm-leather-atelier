@@ -5,6 +5,9 @@ const path = require('path');
 const crypto = require('crypto');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 const { createAdminIdentity } = require('./admin-identity');
+const { createProductPlmAudit } = require('./product-plm-audit');
+const { createProductPlmService } = require('./product-plm-service');
+const { createProductPlmStore } = require('./product-plm-store');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -17,6 +20,12 @@ const adminIdentity = createAdminIdentity({ dataDir });
 const adminSecurity = createAdminSecurity({
   dataDir,
   validateSession: (session) => adminIdentity.sessionIsValid(session),
+});
+const productPlmStore = createProductPlmStore({ dataDir });
+const productPlmAudit = createProductPlmAudit({ dataDir });
+const productPlmService = createProductPlmService({
+  store: productPlmStore,
+  audit: productPlmAudit,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -179,6 +188,16 @@ function readPublicStore() {
     settings: { ...(seedStore.settings || {}), ...(runtimeStore.settings || {}) },
     products: [...productsBySlug.values()],
   };
+}
+
+function readMerchantCatalog() {
+  try {
+    return JSON.parse(fs.readFileSync(merchantStorePath, 'utf8'));
+  } catch {
+    const unavailable = new Error('Merchant catalog source is unavailable.');
+    unavailable.code = 'PLM_SOURCE_UNAVAILABLE';
+    throw unavailable;
+  }
 }
 
 function writeStore(store) {
@@ -1024,6 +1043,30 @@ function normalizeStore(input) {
   };
 }
 
+function namedOwnerForSession(session) {
+  if (!session || session.actorType !== 'named_user' || !session.userId) return null;
+  const user = adminIdentity.findById(session.userId);
+  return user && user.accountType === 'owner' && user.status === 'active' ? user : null;
+}
+
+function safePlmError(error) {
+  const statuses = {
+    PLM_VALIDATION: 400,
+    PLM_MERCHANT_CONFIRMATION_REQUIRED: 400,
+    PLM_REVISION_CONFLICT: 409,
+    PLM_MIGRATION_UNAVAILABLE: 409,
+    PLM_MIGRATION_CONFLICT: 409,
+    PLM_SOURCE_CHANGED: 409,
+    PLM_SOURCE_UNAVAILABLE: 503,
+    PLM_MAPPING_CONFLICT: 409,
+    PLM_STORE_UNAVAILABLE: 503,
+  };
+  return {
+    status: statuses[error.code] || 500,
+    message: statuses[error.code] ? error.message : 'Product PLM operation could not be completed.',
+  };
+}
+
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/catalog' && req.method === 'GET') {
     sendJson(res, 200, publicCatalog(readPublicStore()));
@@ -1514,6 +1557,69 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/plm/status' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productPlmService.status());
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const productDnaMatch = pathname.match(/^\/api\/admin\/plm\/products\/([0-9a-f-]+)\/dna$/i);
+  if (productDnaMatch && req.method === 'GET') {
+    try {
+      const dna = productPlmService.productDna(productDnaMatch[1]);
+      if (!dna) sendJson(res, 404, { error: 'Product DNA was not found.' });
+      else sendJson(res, 200, dna);
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/plm/migrations/preview' && req.method === 'POST') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const merchantCatalog = readMerchantCatalog();
+      const result = await productPlmService.createPreview(req, session, {
+        adminProducts: readStore().products || [],
+        merchantProducts: merchantCatalog.products || [],
+      }, body.expectedRevision);
+      sendJson(res, 201, result);
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/plm/migrations/apply' && req.method === 'POST') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const merchantCatalog = readMerchantCatalog();
+      const result = await productPlmService.applyMigration(req, session, body, {
+        adminProducts: readStore().products || [],
+        merchantProducts: merchantCatalog.products || [],
+      });
+      sendJson(res, 200, result);
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
   if (pathname === '/api/admin/store' && req.method === 'GET') {
     sendJson(res, 200, readStore());
     return true;
@@ -1695,6 +1801,8 @@ module.exports = {
   server,
   adminIdentity,
   adminSecurity,
+  productPlmStore,
+  productPlmService,
   productMeta,
   injectProductHead,
   injectRouteHead,

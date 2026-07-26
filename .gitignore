@@ -25,6 +25,9 @@ data/admin-identities.json
 data/admin-identities.json.*.tmp
 data/admin-identities.bootstrap.lock
 data/admin-store.json.*.tmp
+data/product-plm.json
+data/product-plm.json.*.tmp
+data/product-audit.ndjson
 data/*session*.json
 data/*lockout*.json
 data/*.bak
