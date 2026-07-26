@@ -346,6 +346,95 @@ function createAdminIdentity(options = {}) {
     return publicUser(store.users[index]);
   }
 
+  function updateManagedUserStatus(userId, status) {
+    const user = findById(userId);
+    if (!user || user.accountType !== 'listing_editor') return null;
+    return updateUserStatus(userId, status);
+  }
+
+  async function createManagedUser(input, createdBy) {
+    return serializeMutation(async () => {
+      const store = readStore();
+      const email = normalizeEmail(input.email);
+      const displayName = String(input.displayName || '').trim().slice(0, 120);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !displayName) {
+        throw Object.assign(new Error('Enter a valid email address and display name.'), {
+          code: 'VALIDATION',
+        });
+      }
+      if (store.users.some((user) => user.email === email)) {
+        throw Object.assign(new Error('A user with this email already exists.'), {
+          code: 'IDENTITY_CONFLICT',
+        });
+      }
+      const validation = validatePassword(input.password, { email, displayName });
+      if (!validation.valid) {
+        throw Object.assign(new Error(validation.error), { code: 'PASSWORD_POLICY' });
+      }
+      const timestamp = new Date(now()).toISOString();
+      const user = {
+        id: crypto.randomUUID(),
+        email,
+        displayName,
+        status: input.active === false ? 'disabled' : 'active',
+        accountType: 'listing_editor',
+        passwordHash: await hash(String(input.password), ARGON2_OPTIONS),
+        emailVerifiedAt: timestamp,
+        bootstrapVerifiedAt: null,
+        failedLoginCount: 0,
+        lockedUntil: null,
+        lastLoginAt: null,
+        createdBy: String(createdBy || 'owner'),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        disabledAt: input.active === false ? timestamp : null,
+        passwordChangedAt: timestamp,
+        mustChangePassword: true,
+        sessionRevocationVersion: 1,
+        mfaStatus: 'not_enrolled',
+        locale: null,
+        timezone: null,
+        recoveryMethods: [],
+      };
+      store.users.push(user);
+      writeStore(store);
+      return publicUser(user);
+    });
+  }
+
+  async function resetManagedUserPassword(userId, password) {
+    return serializeMutation(async () => {
+      const store = readStore();
+      const index = store.users.findIndex((user) =>
+        user.id === userId && user.accountType === 'listing_editor');
+      if (index < 0) {
+        throw Object.assign(new Error('Listing Editor was not found.'), { code: 'VALIDATION' });
+      }
+      const user = store.users[index];
+      const validation = validatePassword(password, user);
+      if (!validation.valid) {
+        throw Object.assign(new Error(validation.error), { code: 'PASSWORD_POLICY' });
+      }
+      const timestamp = new Date(now()).toISOString();
+      user.passwordHash = await hash(String(password), ARGON2_OPTIONS);
+      user.passwordChangedAt = timestamp;
+      user.updatedAt = timestamp;
+      user.mustChangePassword = true;
+      user.failedLoginCount = 0;
+      user.lockedUntil = null;
+      user.sessionRevocationVersion = Number(user.sessionRevocationVersion || 0) + 1;
+      store.users[index] = user;
+      writeStore(store);
+      return publicUser(user);
+    });
+  }
+
+  function managedUsers() {
+    return readStore().users
+      .filter((user) => user.accountType === 'listing_editor')
+      .map(publicUser);
+  }
+
   async function createTokenRecord(kind, userId, ttlMs) {
     return serializeMutation(async () => {
     const rawToken = crypto.randomBytes(32).toString('base64url');
@@ -455,6 +544,7 @@ function createAdminIdentity(options = {}) {
     bootstrapAvailable,
     bootstrapOwner,
     countActiveSessions,
+    createManagedUser,
     consumeInvitationToken,
     createInvitationToken,
     findByEmail,
@@ -463,11 +553,14 @@ function createAdminIdentity(options = {}) {
     passwordMatches,
     publicUser,
     readStore,
+    resetManagedUserPassword,
     requestPasswordReset,
     revokeInvitationToken,
     resetPassword,
     sessionIsValid,
+    managedUsers,
     updateUserStatus,
+    updateManagedUserStatus,
     validatePassword,
     paths: { storePath, bootstrapLockPath },
   };

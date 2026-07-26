@@ -19,6 +19,9 @@ const { createCatalogSyncStore } = require('./catalog-sync-store');
 const { createCatalogSyncService } = require('./catalog-sync-service');
 const { createCatalogLinkStore } = require('./catalog-link-store');
 const { createCatalogLinkService } = require('./catalog-link-service');
+const { createOperationalLaunchStore } = require('./operational-launch-store');
+const { createOperationalLaunchService } = require('./operational-launch-service');
+const { createWebsiteWriteAdapter } = require('./website-write-adapter');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -74,6 +77,25 @@ const catalogLinkService = createCatalogLinkService({
   catalogService: catalogSyncService,
   readPlmStore: () => productPlmStore.read(),
   authorizeOwner: (session) => Boolean(namedOwnerForSession(session)),
+});
+const operationalLaunchStore = createOperationalLaunchStore({ dataDir });
+const websiteWriteAdapter = createWebsiteWriteAdapter({
+  readStore,
+  readWebsiteCatalog: readPublicStore,
+  writeStore,
+  onMutation: async () => {
+    catalogLinkService.sync();
+  },
+});
+const operationalLaunchService = createOperationalLaunchService({
+  store: operationalLaunchStore,
+  identity: adminIdentity,
+  listingStore: listingStudioStore,
+  listingService: listingStudioService,
+  productIdentityService,
+  catalogService: catalogSyncService,
+  catalogLinkService,
+  websiteAdapter: websiteWriteAdapter,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -249,13 +271,13 @@ function readMerchantCatalog() {
 }
 
 function writeStore(store) {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true, mode: 0o700 });
   const next = {
     ...store,
     updatedAt: new Date().toISOString(),
   };
   const tmp = `${storePath}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`);
+  fs.writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`, { mode: 0o600 });
   fs.renameSync(tmp, storePath);
 }
 
@@ -1120,6 +1142,17 @@ function safePlmError(error) {
     INVALID_STATE: 409,
     DUPLICATE_IDENTITY: 409,
     CATALOG_LINK_STORE_UNAVAILABLE: 503,
+    OPERATIONAL_STORE_UNAVAILABLE: 503,
+    FORBIDDEN: 403,
+    WORKFLOW_CONFLICT: 409,
+    APPROVAL_REQUIRED: 409,
+    IDENTITY_NOT_LOCKED: 409,
+    CATALOG_LINK_REQUIRED: 409,
+    MISSING_CRITICAL: 409,
+    DUPLICATE_PRODUCT: 409,
+    SYNC_FAILED: 503,
+    IDENTITY_CONFLICT: 409,
+    PASSWORD_POLICY: 400,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1636,11 +1669,136 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/activity-stream' && req.method === 'GET') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-store',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    res.write('retry: 5000\n\n');
+    operationalLaunchService.subscribe(res);
+    return true;
+  }
+
   if (pathname === '/api/admin/mvp/products' && req.method === 'GET') {
     try {
       sendJson(res, 200, { products: productMvpReadModel.products() });
     } catch {
       sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/team/users' && req.method === 'GET') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    sendJson(res, 200, {
+      users: adminIdentity.managedUsers().map((user) => ({
+        ...user,
+        activeSessionCount: adminIdentity.countActiveSessions(
+          user.id,
+          adminSecurity.readState(),
+        ),
+      })),
+    });
+    return true;
+  }
+
+  if (pathname === '/api/admin/team/users' && req.method === 'POST') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const user = await adminIdentity.createManagedUser(body, `user:${session.userId}`);
+      adminSecurity.audit(req, {
+        action: 'listing_editor_created',
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: user.id,
+      });
+      sendJson(res, 201, { user });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const managedUserMatch = pathname.match(
+    /^\/api\/admin\/team\/users\/([0-9a-f-]+)\/(status|reset-password|revoke-sessions)$/i,
+  );
+  if (managedUserMatch && req.method === 'POST') {
+    if (!namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const userId = managedUserMatch[1];
+      const operation = managedUserMatch[2];
+      let result;
+      if (operation === 'status') {
+        result = adminIdentity.updateManagedUserStatus(userId, body.active ? 'active' : 'disabled');
+        if (!result) {
+          throw Object.assign(new Error('Listing Editor was not found.'), { code: 'VALIDATION' });
+        }
+        adminSecurity.revokeUserSessions(userId);
+      } else if (operation === 'reset-password') {
+        result = await adminIdentity.resetManagedUserPassword(userId, body.password);
+        adminSecurity.revokeUserSessions(userId);
+      } else {
+        result = { revokedSessions: adminSecurity.revokeUserSessions(userId) };
+      }
+      adminSecurity.audit(req, {
+        action: `listing_editor_${operation.replace('-', '_')}`,
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: userId,
+      });
+      sendJson(res, 200, { result });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const operationalMatch = pathname.match(
+    /^\/api\/admin\/mvp\/products\/([0-9a-f-]+)\/operational(?:\/(start|submit|request-changes|approve|publish))?$/i,
+  );
+  if (operationalMatch) {
+    try {
+      const productUuid = operationalMatch[1];
+      const operation = operationalMatch[2] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, operationalLaunchService.workflow(session, productUuid));
+      } else if (req.method === 'POST' && operation) {
+        const body = await readBody(req);
+        const input = { ...body, productUuid };
+        const actions = {
+          start: () => operationalLaunchService.start(session, input),
+          submit: () => operationalLaunchService.submit(session, input),
+          'request-changes': () => operationalLaunchService.requestChanges(session, input),
+          approve: () => operationalLaunchService.approve(session, input),
+          publish: () => operationalLaunchService.publish(session, input),
+        };
+        sendJson(res, 201, await actions[operation]());
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, {
+        error: safe.message,
+        currentRevision: error.currentRevision,
+      });
     }
     return true;
   }
@@ -2034,6 +2192,10 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/admin/store' && req.method === 'PUT') {
+    if (session.actorType === 'named_user' && !namedOwnerForSession(session)) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
     const body = await readBody(req);
     const next = normalizeStore(body);
     next.activity = [
@@ -2046,6 +2208,12 @@ async function handleApi(req, res, pathname) {
       ...next.activity.slice(0, 24),
     ];
     writeStore(next);
+    try {
+      catalogLinkService.sync();
+      operationalLaunchService.announce({ type: 'website.published', productUuid: null });
+    } catch {
+      // The saved store remains authoritative; Catalog exposes its own safe sync error.
+    }
     adminSecurity.audit(req, {
       action: 'store_update',
       result: 'success',
@@ -2223,6 +2391,9 @@ module.exports = {
   productPlmStore,
   productPlmService,
   productMvpReadModel,
+  operationalLaunchService,
+  operationalLaunchStore,
+  websiteWriteAdapter,
   productMeta,
   injectProductHead,
   injectRouteHead,

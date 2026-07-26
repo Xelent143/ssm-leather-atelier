@@ -38,6 +38,8 @@ data/product-identities.json
 data/product-identities.json.*.tmp
 data/catalog-product-dna-links.json
 data/catalog-product-dna-links.json.*.tmp
+data/operational-launch.json
+data/operational-launch.json.*.tmp
 data/ai-product-studio-audit.ndjson
 data/ai-product-studio-jobs/
 data/ai-product-studio-artifacts/

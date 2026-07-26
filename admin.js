@@ -36,6 +36,8 @@ const state = {
   catalogAudit: [],
   productDnaOptions: [],
   catalogReviewFilter: 'all',
+  operationalWorkflow: null,
+  teamUsers: [],
   mvpError: '',
 };
 
@@ -411,8 +413,11 @@ function Sidebar() {
 }
 
 function Topbar() {
-  const owner = state.identity?.owner;
-  const profileName = owner?.displayName || (state.actorType === 'legacy' ? 'Legacy owner' : 'Owner');
+  const signedIn = state.identity?.user || state.identity?.owner;
+  const profileName = signedIn?.displayName || (state.actorType === 'legacy' ? 'Legacy owner' : 'Owner');
+  const profileRole = state.identity?.user?.accountType === 'listing_editor'
+    ? 'Listing Editor'
+    : state.actorType === 'named_user' ? 'Named Owner' : 'Compatibility access';
   return `
     <header class="topbar">
       <button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Open navigation">☰</button>
@@ -426,7 +431,7 @@ function Topbar() {
         <button class="btn quick-create" type="button" disabled title="Quick create is coming soon">＋ Quick create</button>
         <button class="profile-chip" id="profile-toggle" type="button" aria-expanded="false">
           <span class="avatar">${escapeHtml(profileName.slice(0, 1).toUpperCase())}</span>
-          <span class="profile-copy"><strong>${escapeHtml(profileName)}</strong><small>${escapeHtml(state.actorType === 'named_user' ? 'Named owner' : 'Compatibility access')}</small></span>
+          <span class="profile-copy"><strong>${escapeHtml(profileName)}</strong><small>${escapeHtml(profileRole)}</small></span>
           <span aria-hidden="true">⌄</span>
         </button>
         <div class="profile-menu" id="profile-menu">
@@ -1344,7 +1349,7 @@ function renderListingStudio() {
     { label: 'Missing evidence', missing: true },
   ];
   const channels = [
-    ['shopify', 'Shopify'], ['ebay', 'eBay'], ['etsy', 'Etsy'],
+    ['shopify', 'Website (Shopify-compatible)'], ['ebay', 'eBay'], ['etsy', 'Etsy'],
     ['seo', 'SEO'], ['faq', 'FAQ'], ['buyingGuide', 'Buying Guide'],
   ];
   const activeChannel = state.listingTab || 'shopify';
@@ -1379,7 +1384,7 @@ function renderListingStudio() {
           <div class="quality-grid intelligence-score-grid">${[
             ['Overall Quality', intelligence.scores.overallQuality],
             ['Google SEO', intelligence.scores.googleSeo],
-            ['Shopify', intelligence.scores.shopify],
+            ['Website / Shopify', intelligence.scores.shopify],
             ['eBay', intelligence.scores.ebay],
             ['Etsy', intelligence.scores.etsy],
             ['Human Readability', intelligence.scores.humanReadability],
@@ -1407,7 +1412,7 @@ function renderListingStudio() {
       <section class="card copy-workspace">
         <div class="card-head"><div><h2>One-click copy</h2><p>Copy channel-ready drafts without publishing.</p></div></div>
         <div class="copy-panel">${['shopify', 'ebay', 'etsy', 'seo', 'faq', 'buyingGuide', 'all'].map((item) => {
-          const label = item === 'buyingGuide' ? 'Buying Guide' : item === 'all' ? 'All' : item[0].toUpperCase() + item.slice(1);
+          const label = item === 'shopify' ? 'Website' : item === 'buyingGuide' ? 'Buying Guide' : item === 'all' ? 'All' : item[0].toUpperCase() + item.slice(1);
           return `<button class="btn ${item === 'all' ? 'primary' : ''} ${state.copiedListingKey === item ? 'copied' : ''}" type="button" data-copy-listing="${item}">${state.copiedListingKey === item ? '✓ Copied' : `Copy ${label}`}</button>`;
         }).join('')}</div>
       </section>
@@ -1420,10 +1425,65 @@ function renderListingStudio() {
         ${compared ? `<div class="comparison"><div><strong>Compared with Draft Version ${compared.draftVersion}</strong><span>Generated ${new Date(compared.createdAt).toLocaleString()}</span></div><pre>${escapeHtml(listingText(activeChannel, compared.content[activeChannel]))}</pre></div>` : ''}
       </section>
       <details class="card advanced-details"><summary>Advanced provenance details</summary><dl class="definition-grid compact">${definitionRow('Product Version hash', selected.productVersionHash, true)}${definitionRow('Release manifest hash', selected.releaseManifestHash, true)}${definitionRow('Knowledge Lock hash', selected.knowledgeLockHash, true)}${definitionRow('Draft content hash', selected.contentHash, true)}</dl></details>
-      <section class="card export-panel"><div><strong>Review, copy or export</strong><span>Owner approval creates a new immutable version. Nothing is published.</span></div><div class="button-row">${selected.approvalState !== 'owner_approved' && workspace.permissions?.canApprove ? '<button class="btn primary" type="button" id="approve-listing-draft">Approve draft</button>' : ''}<button class="btn" type="button" data-export-listing="json" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download JSON</button><button class="btn" type="button" data-export-listing="text" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download text package</button>${compared ? '<button class="btn" type="button" id="restore-listing-version">Restore compared version</button>' : ''}</div></section>
-      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>Review, compare, and copy. Publishing remains disabled.</span></div><button class="btn primary" type="button" data-generate-listing>Regenerate as New Version</button></div>
+      <section class="card export-panel"><div><strong>Review, copy or export</strong><span>Exports remain Owner-only and do not publish.</span></div><div class="button-row">${selected.approvalState !== 'owner_approved' && workspace.permissions?.canApprove ? '<button class="btn" type="button" id="approve-listing-draft">Approve draft package</button>' : ''}<button class="btn" type="button" data-export-listing="json" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download JSON</button><button class="btn" type="button" data-export-listing="text" ${workspace.permissions?.canExport ? '' : 'disabled'}>Download text package</button>${compared ? '<button class="btn" type="button" id="restore-listing-version">Restore compared version</button>' : ''}</div></section>
+      ${renderOperationalWorkflow(selected)}
+      <div class="sticky-action-bar listing-sticky"><div><strong>Draft Version ${selected.draftVersion}</strong><span>${escapeHtml(state.operationalWorkflow?.workflow?.status || 'Draft')} · Website is the primary destination.</span></div><button class="btn primary" type="button" data-generate-listing>Regenerate as New Version</button></div>
     ` : `<section class="card">${EmptyState('No listing drafts', 'Generate from the active Approved Product Release and valid Knowledge Lock.')}</section>`}
   `;
+}
+
+function renderOperationalWorkflow(selected) {
+  const data = state.operationalWorkflow || {};
+  const workflow = data.workflow;
+  const status = workflow?.status || 'Draft';
+  const owner = state.identity?.user?.accountType === 'owner';
+  const actions = [];
+  if (['Draft', 'In Progress', 'Changes Requested'].includes(status)) {
+    actions.push(`<button class="btn primary" data-workflow-action="submit">Submit for Review</button>`);
+  }
+  if (owner && status === 'Submitted for Review') {
+    actions.push('<button class="btn" data-workflow-action="request-changes">Request Changes</button>');
+    actions.push('<button class="btn primary" data-workflow-action="approve">Approve</button>');
+  }
+  if (owner && status === 'Approved') {
+    actions.push('<button class="btn primary" data-workflow-action="publish">Approve &amp; Publish Website</button>');
+  }
+  if (owner && status === 'Failed') {
+    actions.push('<button class="btn primary" data-workflow-action="publish">Retry Website Publication</button>');
+  }
+  return `<section class="card card-pad operational-workflow">
+    <div class="card-head"><div><span class="eyebrow">Website workflow</span><h2>${escapeHtml(status)}</h2><p>Governed review and revision-checked website publishing.</p></div>${statusBadge(status === 'Live' ? 'active' : 'existing', status)}</div>
+    <div class="button-row">${actions.join('') || '<span class="muted">No action is available for the current role and state.</span>'}</div>
+    ${workflow?.note ? `<div class="governance-note warning-note"><strong>Review note</strong><p>${escapeHtml(workflow.note)}</p></div>` : ''}
+    <details class="advanced-details"><summary>Publication history and activity</summary>
+      <div class="activity-list">${(data.activity || []).slice(0, 12).map((event) => `<div><strong>${escapeHtml(event.action)}</strong><span>${escapeHtml(event.actorRole)} · ${new Date(event.timestamp).toLocaleString()}</span></div>`).join('') || '<p class="muted">No workflow activity yet.</p>'}</div>
+    </details>
+  </section>`;
+}
+
+function renderTeamManagement() {
+  if (state.identity?.user?.accountType !== 'owner') {
+    return `${PageHeader('Team Management', 'Owner-only named account management.', '', 'restricted')}${AlertPanel('Access restricted', 'Named Owner access is required.', 'warning')}`;
+  }
+  return `${PageHeader('Team Management', 'Manage real Listing Editor access without sharing Owner credentials.', '', 'active')}
+    <div class="grid two">
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Create Listing Editor</h2><p>The temporary password is hashed immediately and is never returned.</p></div></div>
+        <form id="create-listing-editor" class="form-grid">
+          <div class="field"><label>VA name</label><input name="displayName" required maxlength="120" autocomplete="off"></div>
+          <div class="field"><label>Email</label><input name="email" type="email" required autocomplete="off"></div>
+          <div class="field full"><label>Temporary password</label><input name="password" type="password" required minlength="15" maxlength="128" autocomplete="new-password"></div>
+          <div class="field full"><button class="btn primary" type="submit">Create Listing Editor</button></div>
+        </form>
+      </section>
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Listing Editors</h2><p>Activation and session controls are Owner-only.</p></div><span class="pill">${state.teamUsers.length}</span></div>
+        <div class="activity-list">${state.teamUsers.map((user) => `<article>
+          <div><strong>${escapeHtml(user.displayName)}</strong><span>${escapeHtml(user.email)} · ${escapeHtml(user.status)}</span><small>Last login: ${user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'} · ${user.activeSessionCount || 0} session(s)</small></div>
+          <div class="button-row"><button class="btn" data-team-status="${user.id}" data-active="${user.status !== 'active'}">${user.status === 'active' ? 'Deactivate' : 'Activate'}</button><button class="btn" data-team-reset="${user.id}">Reset password</button><button class="btn" data-team-revoke="${user.id}">Revoke sessions</button></div>
+        </article>`).join('') || '<p class="muted">No Listing Editor accounts yet.</p>'}</div>
+      </section>
+    </div>`;
 }
 
 function renderGenericModule() {
@@ -1772,6 +1832,7 @@ function render() {
     social: renderSocialCenter,
     factory: renderFactoryShell,
     production: renderFactoryShell,
+    team: renderTeamManagement,
   };
   root.innerHTML = AdminLayout((views[state.view] || renderGenericModule)());
   bindShell();
@@ -2053,6 +2114,94 @@ function bindShell() {
       render();
     });
   });
+  document.querySelectorAll('[data-workflow-action]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const action = button.dataset.workflowAction;
+      const selected = state.listingWorkspace.drafts.find((item) =>
+        item.id === state.selectedDraftId) || state.listingWorkspace.drafts.at(-1);
+      const note = action === 'request-changes'
+        ? window.prompt('Describe the required change without including secrets:') : '';
+      if (action === 'request-changes' && !note) return;
+      try {
+        state.operationalWorkflow = await api(
+          `/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational/${action === 'request-changes' ? 'request-changes' : action}`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              draftId: selected.id,
+              catalogId: state.catalogProduct?.catalogProductId || null,
+              note,
+              expectedRevision: state.operationalWorkflow?.storeRevision,
+              expectedOperationalRevision: state.operationalWorkflow?.storeRevision,
+              expectedWebsiteRevision: state.operationalWorkflow?.websiteRevision,
+              idempotencyKey: action === 'publish' ? crypto.randomUUID() : undefined,
+            }),
+          },
+        );
+        if (action === 'publish') {
+          state.catalog = await api('/api/admin/catalog');
+        }
+        render();
+        toast(action === 'publish' ? 'Website published and Catalog synced' : 'Workflow updated');
+      } catch (error) {
+        toast(error.message);
+        state.operationalWorkflow = await api(
+          `/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational`,
+        ).catch(() => state.operationalWorkflow);
+        render();
+      }
+    });
+  });
+  document.getElementById('create-listing-editor')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await api('/api/admin/team/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          displayName: form.get('displayName'),
+          email: form.get('email'),
+          password: form.get('password'),
+        }),
+      });
+      formElement.reset();
+      await loadTeamUsers();
+      render();
+      toast('Listing Editor created');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.querySelectorAll('[data-team-status]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      await api(`/api/admin/team/users/${button.dataset.teamStatus}/status`, {
+        method: 'POST',
+        body: JSON.stringify({ active: button.dataset.active === 'true' }),
+      }).then(loadTeamUsers).then(render).catch((error) => toast(error.message));
+    }));
+  document.querySelectorAll('[data-team-revoke]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      await api(`/api/admin/team/users/${button.dataset.teamRevoke}/revoke-sessions`, {
+        method: 'POST',
+        body: '{}',
+      }).then(loadTeamUsers).then(render).then(() => toast('Sessions revoked'))
+        .catch((error) => toast(error.message));
+    }));
+  document.querySelectorAll('[data-team-reset]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      const password = window.prompt('Enter a temporary password (15–128 characters):');
+      if (!password) return;
+      try {
+        await api(`/api/admin/team/users/${button.dataset.teamReset}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ password }),
+        });
+        toast('Temporary password updated and sessions revoked');
+      } catch (error) {
+        toast(error.message);
+      }
+    }));
   document.getElementById('back-to-product')?.addEventListener('click', () =>
     navigateProduct(state.mvpProduct.recordKey));
   document.querySelectorAll('[data-listing-input]').forEach((input) => {
@@ -2533,9 +2682,10 @@ async function navigateListingStudio(recordKey, replace = false) {
   render();
   try {
     state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
-    state.listingWorkspace = await api(
-      `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`,
-    );
+    [state.listingWorkspace, state.operationalWorkflow] = await Promise.all([
+      api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`),
+      api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational`),
+    ]);
     state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
   } catch (error) {
     state.mvpError = error.message;
@@ -2549,7 +2699,17 @@ function navigate(view, replace = false) {
   state.query = '';
   window.history[replace ? 'replaceState' : 'pushState']({}, '', route[3]);
   render();
+  if (view === 'team') loadTeamUsers().then(render).catch((error) => toast(error.message));
   window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+async function loadTeamUsers() {
+  if (state.identity?.user?.accountType !== 'owner') {
+    state.teamUsers = [];
+    return;
+  }
+  const response = await api('/api/admin/team/users');
+  state.teamUsers = response.users || [];
 }
 
 async function loadStore() {
@@ -2579,9 +2739,10 @@ async function loadMvpWorkspace() {
       const parts = window.location.pathname.split('/');
       const recordKey = decodeURIComponent(parts.at(-2) || '');
       state.mvpProduct = await api(`/api/admin/mvp/products/${encodeURIComponent(recordKey)}`);
-      state.listingWorkspace = await api(
-        `/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`,
-      );
+      [state.listingWorkspace, state.operationalWorkflow] = await Promise.all([
+        api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/listing-studio`),
+        api(`/api/admin/mvp/products/${state.mvpProduct.productUuid}/operational`),
+      ]);
       state.selectedDraftId = state.listingWorkspace.drafts.at(-1)?.id || null;
     } else if (state.view === 'catalog-detail') {
       const catalogProductId = decodeURIComponent(window.location.pathname.split('/').pop() || '');
@@ -2591,6 +2752,9 @@ async function loadMvpWorkspace() {
     }
   } catch (error) {
     state.mvpError = error.message;
+  }
+  if (state.view === 'team') {
+    try { await loadTeamUsers(); } catch {}
   }
   try {
     state.catalog = await api('/api/admin/catalog');
@@ -2609,7 +2773,31 @@ async function loadAdmin() {
   }
   await loadStore();
   await loadMvpWorkspace();
+  startActivityStream();
   render();
+}
+
+let activityStream = null;
+function startActivityStream() {
+  if (activityStream || typeof EventSource === 'undefined') return;
+  activityStream = new EventSource('/api/admin/activity-stream');
+  activityStream.addEventListener('message', async (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      if (!['workflow.updated', 'website.published'].includes(message.type)) return;
+      if (state.mvpProduct?.productUuid === message.productUuid) {
+        state.operationalWorkflow = await api(
+          `/api/admin/mvp/products/${message.productUuid}/operational`,
+        );
+      }
+      if (message.type === 'website.published') {
+        state.catalog = await api('/api/admin/catalog');
+        const products = await api('/api/admin/mvp/products');
+        state.mvpProducts = products.products || [];
+      }
+      render();
+    } catch {}
+  });
 }
 
 async function saveStore() {
