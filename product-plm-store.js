@@ -35,6 +35,8 @@ function createProductPlmStore(options = {}) {
       productIdentities: [],
       productFamilies: [],
       productStyles: [],
+      productComponents: [],
+      productRelationships: [],
       legacyMappings: [],
       migrationPreviews: [],
       migrationBatches: [],
@@ -70,8 +72,8 @@ function createProductPlmStore(options = {}) {
     });
     try {
       const onDisk = JSON.parse(fs.readFileSync(storePath, 'utf8'));
-      const backupPath = `${storePath}.v1.backup`;
-      if (onDisk.schemaVersion === 1 && !fs.existsSync(backupPath)) {
+      const backupPath = `${storePath}.v${onDisk.schemaVersion}.backup`;
+      if (onDisk.schemaVersion < PRODUCT_PLM_SCHEMA_VERSION && !fs.existsSync(backupPath)) {
         fs.copyFileSync(storePath, backupPath, fs.constants.COPYFILE_EXCL);
         fs.chmodSync(backupPath, 0o600);
       }
@@ -101,7 +103,11 @@ function createProductPlmStore(options = {}) {
   return {
     emptyStore,
     mutate,
-    paths: { storePath, v1BackupPath: `${storePath}.v1.backup` },
+    paths: {
+      storePath,
+      v1BackupPath: `${storePath}.v1.backup`,
+      v2BackupPath: `${storePath}.v2.backup`,
+    },
     read,
     write,
   };

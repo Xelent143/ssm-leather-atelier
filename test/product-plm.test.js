@@ -41,7 +41,7 @@ function createFixture() {
 test('empty PLM store is versioned without writing until the first mutation', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal(current.schemaVersion, 2);
+  assert.equal(current.schemaVersion, 3);
   assert.equal(current.storeRevision, 0);
   assert.deepEqual(current.productIdentities, []);
   assert.deepEqual(current.productFamilies, []);

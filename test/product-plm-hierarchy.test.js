@@ -67,7 +67,7 @@ test('first mutation of an on-disk v1 store preserves a restricted rollback back
   const fixture = createFixture();
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(legacyStore(), null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 2);
+  assert.equal(fixture.store.read().schemaVersion, 3);
   assert.equal(fs.existsSync(fixture.store.paths.v1BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v1BackupPath)).schemaVersion, 1);
   assert.equal(fs.statSync(fixture.store.paths.v1BackupPath).mode & 0o777, 0o600);
@@ -227,7 +227,9 @@ test('family and style validation rejects duplicate styles and family cycles', (
   const familyTwoId = crypto.randomUUID();
   const base = {
     ...legacyStore(),
-    schemaVersion: 2,
+    schemaVersion: 3,
+    productComponents: [],
+    productRelationships: [],
     brands: [{
       id: brandId,
       name: 'Test',

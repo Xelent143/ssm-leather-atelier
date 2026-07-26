@@ -40,10 +40,12 @@ function createProductPlmService(options = {}) {
       productIdentityCount: current.productIdentities.length,
       productFamilyCount: current.productFamilies.length,
       productStyleCount: current.productStyles.length,
+      productComponentCount: current.productComponents.length,
+      productRelationshipCount: current.productRelationships.length,
       legacyMappingCount: current.legacyMappings.length,
       migrationPreviewCount: current.migrationPreviews.length,
       migrationBatchCount: current.migrationBatches.length,
-      phase: '3B.2A',
+      phase: '3B.2B',
     };
   }
 

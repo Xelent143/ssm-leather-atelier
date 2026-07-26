@@ -1,12 +1,16 @@
 const crypto = require('crypto');
+const { validateProductComponents } = require('./product-plm-components');
+const { validateProductRelationships } = require('./product-plm-relationships');
 
-const PRODUCT_PLM_SCHEMA_VERSION = 2;
+const PRODUCT_PLM_SCHEMA_VERSION = 3;
 const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'brands',
   'legalEntities',
   'productIdentities',
   'productFamilies',
   'productStyles',
+  'productComponents',
+  'productRelationships',
   'legacyMappings',
   'migrationPreviews',
   'migrationBatches',
@@ -104,13 +108,16 @@ function legacySourceKey(record) {
 function upgradeStore(store) {
   if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
   if (store.schemaVersion === PRODUCT_PLM_SCHEMA_VERSION) return store;
-  if (store.schemaVersion !== 1) throw new Error('Product PLM schema version is unsupported.');
-  return {
-    ...store,
-    schemaVersion: PRODUCT_PLM_SCHEMA_VERSION,
-    productFamilies: [],
-    productStyles: [],
-  };
+  if (![1, 2].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
+  const upgraded = { ...store };
+  if (store.schemaVersion === 1) {
+    upgraded.productFamilies = [];
+    upgraded.productStyles = [];
+  }
+  upgraded.productComponents = [];
+  upgraded.productRelationships = [];
+  upgraded.schemaVersion = PRODUCT_PLM_SCHEMA_VERSION;
+  return upgraded;
 }
 
 function validateStore(store) {
@@ -188,6 +195,8 @@ function validateStore(store) {
     }
     styleCodes.add(styleCode);
   }
+  validateProductComponents(store);
+  validateProductRelationships(store);
   return store;
 }
 
