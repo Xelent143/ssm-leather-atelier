@@ -124,6 +124,76 @@ test('existing Owner is never duplicated, updated, or password-reset', async () 
   fs.rmSync(current.dataDir, { recursive: true, force: true });
 });
 
+test('explicit staging recovery synchronizes only the approved existing Owner password', async () => {
+  const current = fixture();
+  await current.bootstrap.ensure();
+  const before = current.identity.owner();
+  const beforeRevision = before.sessionRevocationVersion;
+  const replacementPassword = 'A replacement staging workshop phrase 2026';
+  const recovery = createAdminStagingBootstrap({
+    dataDir: current.dataDir,
+    env: enabledEnvironment({
+      STAGING_OWNER_PASSWORD: replacementPassword,
+      STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true',
+    }),
+    identity: current.identity,
+    logger: {
+      error(message) { current.log.push(`error:${message}`); },
+      info(message) { current.log.push(`info:${message}`); },
+    },
+    now: () => Date.parse('2026-07-26T13:00:00.000Z'),
+  });
+
+  const result = await recovery.ensure();
+  const after = current.identity.owner();
+  assert.equal(result.action, 'password_synchronized');
+  assert.equal(current.identity.readStore().users.length, 1);
+  assert.equal(after.id, before.id);
+  assert.equal(after.displayName, STAGING_OWNER_DISPLAY_NAME);
+  assert.equal(after.email, STAGING_OWNER_EMAIL);
+  assert.equal(after.accountType, 'owner');
+  assert.equal(after.status, 'active');
+  assert.equal(after.sessionRevocationVersion, beforeRevision + 1);
+
+  const oldLogin = await current.identity.authenticate(STAGING_OWNER_EMAIL, stagingPassword, {
+    headers: { 'x-forwarded-for': '192.0.2.50' },
+    socket: {},
+  });
+  const newLogin = await current.identity.authenticate(STAGING_OWNER_EMAIL, replacementPassword, {
+    headers: { 'x-forwarded-for': '192.0.2.51' },
+    socket: {},
+  });
+  assert.equal(oldLogin.ok, false);
+  assert.equal(newLogin.ok, true);
+
+  const second = await recovery.ensure();
+  assert.equal(second.action, 'owner_exists');
+  assert.equal(current.identity.owner().sessionRevocationVersion, beforeRevision + 1);
+  const serialized = JSON.stringify(current.identity.readStore());
+  assert.doesNotMatch(current.log.join('\n'), /replacement|workshop phrase|argon2|token/i);
+  assert.doesNotMatch(serialized, new RegExp(replacementPassword, 'i'));
+  fs.rmSync(current.dataDir, { recursive: true, force: true });
+});
+
+test('staging password synchronization rejects an unexpected Owner identity', async () => {
+  const current = fixture();
+  await current.identity.bootstrapOwner({
+    displayName: 'Unexpected Owner',
+    email: 'unexpected@example.com',
+    password: stagingPassword,
+  });
+  const recovery = createAdminStagingBootstrap({
+    dataDir: current.dataDir,
+    env: enabledEnvironment({ STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true' }),
+    identity: current.identity,
+    logger: { error() {}, info() {} },
+  });
+  await assert.rejects(recovery.ensure(), (error) =>
+    error.code === 'STAGING_BOOTSTRAP_IDENTITY_MISMATCH');
+  assert.equal(current.identity.readStore().users.length, 1);
+  fs.rmSync(current.dataDir, { recursive: true, force: true });
+});
+
 test('enabled staging fails closed when the protected password is absent', async () => {
   const current = fixture(enabledEnvironment({ STAGING_OWNER_PASSWORD: '' }));
   await assert.rejects(current.bootstrap.ensure(), (error) =>

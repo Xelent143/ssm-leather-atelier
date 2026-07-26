@@ -375,6 +375,16 @@ function createAdminIdentity(options = {}) {
     return createTokenRecord('reset', user.id, RESET_TTL_MS);
   }
 
+  async function passwordMatches(userId, password) {
+    const user = readStore().users.find((item) => item.id === userId);
+    if (!user || user.status !== 'active' || !user.passwordHash) return false;
+    try {
+      return await verify(user.passwordHash, String(password || ''));
+    } catch {
+      return false;
+    }
+  }
+
   async function createInvitationToken(userId) {
     return createTokenRecord('invitation', userId, INVITATION_TTL_MS);
   }
@@ -450,6 +460,7 @@ function createAdminIdentity(options = {}) {
     findByEmail,
     findById,
     owner,
+    passwordMatches,
     publicUser,
     readStore,
     requestPasswordReset,

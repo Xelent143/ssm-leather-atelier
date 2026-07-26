@@ -44,13 +44,40 @@ function createAdminStagingBootstrap(options = {}) {
 
   async function run() {
     if (!stagingGatesMatch(env)) return { ...status(), action: 'disabled' };
-    if (identity.owner()) return { ...status(), action: 'owner_exists' };
-
     const password = String(env.STAGING_OWNER_PASSWORD || '');
+    const existingOwner = identity.owner();
+    const passwordSyncEnabled = env.STAGING_OWNER_PASSWORD_SYNC_ENABLED === 'true';
+
+    if (existingOwner && !passwordSyncEnabled) {
+      return { ...status(), action: 'owner_exists' };
+    }
     if (!password) {
       const unavailable = new Error('Staging Owner bootstrap is not configured.');
       unavailable.code = 'STAGING_BOOTSTRAP_CONFIGURATION';
       throw unavailable;
+    }
+    if (existingOwner) {
+      const exactOwner = existingOwner.displayName === STAGING_OWNER_DISPLAY_NAME &&
+        existingOwner.email === STAGING_OWNER_EMAIL &&
+        existingOwner.accountType === 'owner' &&
+        existingOwner.status === 'active';
+      if (!exactOwner) {
+        const mismatch = new Error('Staging Owner identity does not match the approved recovery account.');
+        mismatch.code = 'STAGING_BOOTSTRAP_IDENTITY_MISMATCH';
+        throw mismatch;
+      }
+      if (await identity.passwordMatches(existingOwner.id, password)) {
+        return { ...status(), action: 'owner_exists' };
+      }
+      const requested = await identity.requestPasswordReset(existingOwner.email);
+      const reset = requested && await identity.resetPassword(requested.rawToken, password);
+      if (!reset?.ok) {
+        const failed = new Error('Staging Owner password synchronization failed.');
+        failed.code = 'STAGING_BOOTSTRAP_PASSWORD_SYNC';
+        throw failed;
+      }
+      logger.info('Staging Named Owner password synchronized');
+      return { ...status(), action: 'password_synchronized', userId: existingOwner.id };
     }
 
     const metadata = {
