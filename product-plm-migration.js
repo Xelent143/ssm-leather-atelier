@@ -6,6 +6,20 @@ const {
   normalizeLegacyProduct,
 } = require('./product-plm-schema');
 const { hierarchyProposal } = require('./product-plm-hierarchy');
+const { canonicalSku, validateSku } = require('./product-plm-sellables');
+
+function commerceProposal(record) {
+  return {
+    baselineSku: record.legacySku || null,
+    baselineSkuValid: !record.legacySku || validateSku(record.legacySku),
+    detectedOptionNames: [...(record.legacyVariantOptions || [])],
+    detectedStockKeys: [...(record.legacyStockKeys || [])],
+    createBaselineSellable: Boolean(record.legacySku),
+    createVariants: false,
+    createMarketplaceIdentities: false,
+    requiresReview: true,
+  };
+}
 
 function matchKeys(record) {
   return [
@@ -63,6 +77,7 @@ function buildMigrationPreview(adminProducts, merchantProducts, options = {}) {
       primarySource: adminRecord,
       linkedSources: merchantRecord ? [merchantRecord] : [],
       hierarchyProposal: hierarchyProposal(adminRecord),
+      commerceProposal: commerceProposal(adminRecord),
     });
   }
 
@@ -76,7 +91,29 @@ function buildMigrationPreview(adminProducts, merchantProducts, options = {}) {
       primarySource: merchantRecord,
       linkedSources: [],
       hierarchyProposal: hierarchyProposal(merchantRecord),
+      commerceProposal: commerceProposal(merchantRecord),
     });
+  }
+
+  const defaultSkuCandidates = candidates.filter((candidate) =>
+    candidate.importByDefault && candidate.commerceProposal.baselineSku);
+  const skuOwners = new Map();
+  for (const candidate of defaultSkuCandidates) {
+    const sku = candidate.commerceProposal.baselineSku;
+    if (!candidate.commerceProposal.baselineSkuValid) {
+      conflicts.push({
+        type: 'invalid_sku',
+        legacyId: candidate.primarySource.legacyId,
+      });
+      continue;
+    }
+    const key = canonicalSku(sku);
+    const owners = skuOwners.get(key) || [];
+    owners.push(candidate.primarySource.legacyId);
+    skuOwners.set(key, owners);
+  }
+  for (const [skuKey, legacyIds] of skuOwners.entries()) {
+    if (legacyIds.length > 1) conflicts.push({ type: 'duplicate_sku', skuKey, legacyIds });
   }
 
   return {
@@ -93,4 +130,4 @@ function buildMigrationPreview(adminProducts, merchantProducts, options = {}) {
   };
 }
 
-module.exports = { buildMigrationPreview, matchKeys, sourceSnapshot };
+module.exports = { buildMigrationPreview, commerceProposal, matchKeys, sourceSnapshot };

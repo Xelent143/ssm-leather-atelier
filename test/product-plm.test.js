@@ -41,11 +41,13 @@ function createFixture() {
 test('empty PLM store is versioned without writing until the first mutation', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal(current.schemaVersion, 3);
+  assert.equal(current.schemaVersion, 4);
   assert.equal(current.storeRevision, 0);
   assert.deepEqual(current.productIdentities, []);
   assert.deepEqual(current.productFamilies, []);
   assert.deepEqual(current.productStyles, []);
+  assert.deepEqual(current.optionDefinitions, []);
+  assert.deepEqual(current.sellableItems, []);
   assert.equal(fs.existsSync(fixture.store.paths.storePath), false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
@@ -119,6 +121,13 @@ test('default migration imports admin products and only links overlapping mercha
   assert.equal(current.brands.length, 6);
   assert.equal(current.productFamilies.length, 4);
   assert.equal(current.productStyles.length, 6);
+  assert.equal(current.sellableItems.length, 6);
+  assert.ok(current.sellableItems.every((item) =>
+    item.sellableType === 'base_sellable' &&
+    item.optionSelections.length === 0 &&
+    item.variantSignature === null));
+  assert.equal(current.optionDefinitions.length, 0);
+  assert.equal(current.marketplaceIdentities.length, 0);
   assert.ok(current.productStyles.every((style) =>
     current.productIdentities.some((identity) =>
       identity.id === style.productUuid &&

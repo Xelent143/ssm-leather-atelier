@@ -1,8 +1,11 @@
 const crypto = require('crypto');
 const { validateProductComponents } = require('./product-plm-components');
+const { validateMarketplaceIdentities } = require('./product-plm-marketplace-identities');
+const { validateProductOptions } = require('./product-plm-options');
 const { validateProductRelationships } = require('./product-plm-relationships');
+const { validateSellableItems } = require('./product-plm-sellables');
 
-const PRODUCT_PLM_SCHEMA_VERSION = 3;
+const PRODUCT_PLM_SCHEMA_VERSION = 4;
 const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'brands',
   'legalEntities',
@@ -11,6 +14,11 @@ const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'productStyles',
   'productComponents',
   'productRelationships',
+  'optionDefinitions',
+  'optionValues',
+  'styleOptionAssignments',
+  'sellableItems',
+  'marketplaceIdentities',
   'legacyMappings',
   'migrationPreviews',
   'migrationBatches',
@@ -98,6 +106,12 @@ function normalizeLegacyProduct(sourceSystem, product) {
     legacyItemGroupId: cleanText(product.itemGroupId, 240),
     title: cleanText(product.title || 'Untitled product', 300),
     brandName: cleanText(product.brand || 'MOTOGRIP GEAR', 160),
+    legacyVariantOptions: Array.isArray(product.variantOptions)
+      ? [...new Set(product.variantOptions.map((value) => cleanText(value, 100)).filter(Boolean))]
+      : [],
+    legacyStockKeys: product.stock && typeof product.stock === 'object' && !Array.isArray(product.stock)
+      ? Object.keys(product.stock).map((value) => cleanText(value, 100)).filter(Boolean)
+      : [],
   };
 }
 
@@ -108,14 +122,21 @@ function legacySourceKey(record) {
 function upgradeStore(store) {
   if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
   if (store.schemaVersion === PRODUCT_PLM_SCHEMA_VERSION) return store;
-  if (![1, 2].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
+  if (![1, 2, 3].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
   const upgraded = { ...store };
   if (store.schemaVersion === 1) {
     upgraded.productFamilies = [];
     upgraded.productStyles = [];
   }
-  upgraded.productComponents = [];
-  upgraded.productRelationships = [];
+  if (store.schemaVersion < 3) {
+    upgraded.productComponents = [];
+    upgraded.productRelationships = [];
+  }
+  upgraded.optionDefinitions = [];
+  upgraded.optionValues = [];
+  upgraded.styleOptionAssignments = [];
+  upgraded.sellableItems = [];
+  upgraded.marketplaceIdentities = [];
   upgraded.schemaVersion = PRODUCT_PLM_SCHEMA_VERSION;
   return upgraded;
 }
@@ -197,6 +218,9 @@ function validateStore(store) {
   }
   validateProductComponents(store);
   validateProductRelationships(store);
+  validateProductOptions(store);
+  validateSellableItems(store);
+  validateMarketplaceIdentities(store);
   return store;
 }
 

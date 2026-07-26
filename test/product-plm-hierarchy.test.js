@@ -67,7 +67,7 @@ test('first mutation of an on-disk v1 store preserves a restricted rollback back
   const fixture = createFixture();
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(legacyStore(), null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 3);
+  assert.equal(fixture.store.read().schemaVersion, 4);
   assert.equal(fs.existsSync(fixture.store.paths.v1BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v1BackupPath)).schemaVersion, 1);
   assert.equal(fs.statSync(fixture.store.paths.v1BackupPath).mode & 0o777, 0o600);
@@ -215,7 +215,9 @@ test('approved migration creates one durable style per Product UUID with correct
     assert.equal(style.legalEntityId, identity.legalEntityId);
   }
   assert.equal(new Set(current.productStyles.map((style) => style.productUuid)).size, 6);
-  assert.equal('sellableItems' in current, false);
+  assert.equal(current.sellableItems.length, 6);
+  assert.ok(current.sellableItems.every((item) =>
+    item.sellableType === 'base_sellable' && item.optionSelections.length === 0));
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
 
@@ -227,9 +229,14 @@ test('family and style validation rejects duplicate styles and family cycles', (
   const familyTwoId = crypto.randomUUID();
   const base = {
     ...legacyStore(),
-    schemaVersion: 3,
+    schemaVersion: 4,
     productComponents: [],
     productRelationships: [],
+    optionDefinitions: [],
+    optionValues: [],
+    styleOptionAssignments: [],
+    sellableItems: [],
+    marketplaceIdentities: [],
     brands: [{
       id: brandId,
       name: 'Test',

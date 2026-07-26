@@ -170,7 +170,7 @@ test('first schema v3 mutation preserves a restricted v2 rollback backup', async
   delete v2.productRelationships;
   fs.writeFileSync(fixture.store.paths.storePath, `${JSON.stringify(v2, null, 2)}\n`, { mode: 0o600 });
   await fixture.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(fixture.store.read().schemaVersion, 3);
+  assert.equal(fixture.store.read().schemaVersion, 4);
   assert.equal(fs.existsSync(fixture.store.paths.v2BackupPath), true);
   assert.equal(JSON.parse(fs.readFileSync(fixture.store.paths.v2BackupPath)).schemaVersion, 2);
   assert.equal(fs.statSync(fixture.store.paths.v2BackupPath).mode & 0o777, 0o600);
@@ -205,8 +205,8 @@ test('component hierarchy accepts bounded nesting and reserved intelligence refe
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
 
-test('every approved Intelligence Domain has at least one reserved reference type', () => {
-  assert.deepEqual(Object.keys(INTELLIGENCE_REFERENCE_TYPES), [
+test('every Phase 3B.2B Intelligence Domain retains reserved reference types', () => {
+  const requiredDomains = [
     'competitor_intelligence',
     'search_intelligence',
     'geo_intelligence',
@@ -221,7 +221,8 @@ test('every approved Intelligence Domain has at least one reserved reference typ
     'global_commerce_calendar',
     'search_intent_engine',
     'opportunity_engine',
-  ]);
+  ];
+  assert.ok(requiredDomains.every((domain) => INTELLIGENCE_REFERENCE_TYPES[domain]?.length));
   assert.ok(Object.values(INTELLIGENCE_REFERENCE_TYPES).every((types) => types.length > 0));
 });
 

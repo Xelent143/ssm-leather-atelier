@@ -13,6 +13,7 @@ const {
   findOrCreateFamily,
   seedInitialBrands,
 } = require('./product-plm-hierarchy');
+const { baselineSellableFromMigration } = require('./product-plm-sellables');
 
 const DEFAULT_BRAND_NAME = 'MOTOGRIP GEAR';
 const DEFAULT_LEGAL_ENTITY_NAME = 'MOTOGRIP GEAR LLC';
@@ -42,10 +43,15 @@ function createProductPlmService(options = {}) {
       productStyleCount: current.productStyles.length,
       productComponentCount: current.productComponents.length,
       productRelationshipCount: current.productRelationships.length,
+      optionDefinitionCount: current.optionDefinitions.length,
+      optionValueCount: current.optionValues.length,
+      styleOptionAssignmentCount: current.styleOptionAssignments.length,
+      sellableItemCount: current.sellableItems.length,
+      marketplaceIdentityCount: current.marketplaceIdentities.length,
       legacyMappingCount: current.legacyMappings.length,
       migrationPreviewCount: current.migrationPreviews.length,
       migrationBatchCount: current.migrationBatches.length,
-      phase: '3B.2B',
+      phase: '3B.2C',
     };
   }
 
@@ -225,7 +231,7 @@ function createProductPlmService(options = {}) {
           timestamp,
           actor.actorId,
         );
-        createStyle(draft, identity, family, candidate.hierarchyProposal, timestamp, actor.actorId);
+        const style = createStyle(draft, identity, family, candidate.hierarchyProposal, timestamp, actor.actorId);
 
         for (const source of allSources) {
           const key = legacySourceKey(source);
@@ -253,6 +259,15 @@ function createProductPlmService(options = {}) {
             createdBy: actor.actorId,
             lastVerifiedAt: timestamp,
           });
+        }
+        if (!draft.sellableItems.some((item) => item.styleId === style.id)) {
+          const baselineSellable = baselineSellableFromMigration(
+            style,
+            candidate,
+            timestamp,
+            actor.actorId,
+          );
+          if (baselineSellable) draft.sellableItems.push(baselineSellable);
         }
       }
 
@@ -287,6 +302,7 @@ function createProductPlmService(options = {}) {
         'productIdentities',
         'productFamilies',
         'productStyles',
+        'sellableItems',
         'legacyMappings',
         'migrationBatches',
       ],
