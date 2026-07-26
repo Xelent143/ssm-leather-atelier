@@ -9,8 +9,13 @@ const { validateProductHistory } = require('./product-plm-history');
 const { validateProductVersions } = require('./product-plm-versions');
 const { validateApprovalPolicies } = require('./product-plm-approval-policies');
 const { validateApprovalRegistry } = require('./product-plm-approvals');
+const {
+  validateProductReleases,
+  validateReleaseLifecycleEvents,
+} = require('./product-plm-releases');
+const { validateKnowledgeLocks } = require('./product-plm-knowledge-locks');
 
-const PRODUCT_PLM_SCHEMA_VERSION = 6;
+const PRODUCT_PLM_SCHEMA_VERSION = 7;
 const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'brands',
   'legalEntities',
@@ -31,6 +36,9 @@ const PRODUCT_PLM_COLLECTIONS = Object.freeze([
   'approvalPolicies',
   'approvalRequests',
   'approvalDecisions',
+  'productReleases',
+  'releaseLifecycleEvents',
+  'knowledgeLocks',
   'legacyMappings',
   'migrationPreviews',
   'migrationBatches',
@@ -134,7 +142,7 @@ function legacySourceKey(record) {
 function upgradeStore(store) {
   if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
   if (store.schemaVersion === PRODUCT_PLM_SCHEMA_VERSION) return store;
-  if (![1, 2, 3, 4, 5].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
+  if (![1, 2, 3, 4, 5, 6].includes(store.schemaVersion)) throw new Error('Product PLM schema version is unsupported.');
   const upgraded = { ...store };
   if (store.schemaVersion === 1) {
     upgraded.productFamilies = [];
@@ -160,6 +168,14 @@ function upgradeStore(store) {
   upgraded.approvalPolicies = [];
   upgraded.approvalRequests = [];
   upgraded.approvalDecisions = [];
+  if (store.schemaVersion === 6) {
+    upgraded.approvalPolicies = store.approvalPolicies;
+    upgraded.approvalRequests = store.approvalRequests;
+    upgraded.approvalDecisions = store.approvalDecisions;
+  }
+  upgraded.productReleases = [];
+  upgraded.releaseLifecycleEvents = [];
+  upgraded.knowledgeLocks = [];
   upgraded.schemaVersion = PRODUCT_PLM_SCHEMA_VERSION;
   return upgraded;
 }
@@ -248,6 +264,9 @@ function validateStore(store) {
   validateProductVersions(store);
   validateApprovalPolicies(store);
   validateApprovalRegistry(store);
+  validateProductReleases(store);
+  validateReleaseLifecycleEvents(store);
+  validateKnowledgeLocks(store);
   validateProductHistory(store);
   return store;
 }

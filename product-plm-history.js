@@ -6,6 +6,7 @@ const HISTORY_KEYS = new Set([
   'eventHash', 'relatedVersionId', 'relatedEvidenceId', 'changedFields',
   'beforeHash', 'afterHash', 'dataClassification',
   'relatedApprovalPolicyId', 'relatedApprovalRequestId', 'relatedApprovalDecisionId',
+  'relatedReleaseId', 'relatedKnowledgeLockId',
 ]);
 
 function isUuid(value) {
@@ -34,6 +35,9 @@ function validateProductHistory(store) {
     approval_policy: new Set(store.approvalPolicies.map((item) => item.id)),
     approval_request: new Set(store.approvalRequests.map((item) => item.id)),
     approval_decision: new Set(store.approvalDecisions.map((item) => item.id)),
+    product_release: new Set(store.productReleases.map((item) => item.id)),
+    release_lifecycle_event: new Set(store.releaseLifecycleEvents.map((item) => item.id)),
+    knowledge_lock: new Set(store.knowledgeLocks.map((item) => item.id)),
   };
   const versionIds = aggregates.product_version;
   const evidenceIds = aggregates.evidence_record;
@@ -58,6 +62,10 @@ function validateProductHistory(store) {
           !aggregates.approval_request.has(event.relatedApprovalRequestId)) ||
         (event.relatedApprovalDecisionId != null &&
           !aggregates.approval_decision.has(event.relatedApprovalDecisionId)) ||
+        (event.relatedReleaseId != null &&
+          !aggregates.product_release.has(event.relatedReleaseId)) ||
+        (event.relatedKnowledgeLockId != null &&
+          !aggregates.knowledge_lock.has(event.relatedKnowledgeLockId)) ||
         !Array.isArray(event.changedFields) || event.changedFields.length > 100 ||
         event.changedFields.some((field) => typeof field !== 'string' || field.length > 160) ||
         (event.beforeHash !== null && !isHash(event.beforeHash)) ||
@@ -94,6 +102,9 @@ function validateAppendOnlyTransition(current, next) {
     'approvalPolicies',
     'approvalRequests',
     'approvalDecisions',
+    'productReleases',
+    'releaseLifecycleEvents',
+    'knowledgeLocks',
   ]) {
     if (next[collection].length < current[collection].length) {
       throw new Error(`Product PLM ${collection} is append-only.`);

@@ -55,6 +55,9 @@ test('empty PLM store is versioned without writing until the first mutation', ()
   assert.deepEqual(current.approvalPolicies, []);
   assert.deepEqual(current.approvalRequests, []);
   assert.deepEqual(current.approvalDecisions, []);
+  assert.deepEqual(current.productReleases, []);
+  assert.deepEqual(current.releaseLifecycleEvents, []);
+  assert.deepEqual(current.knowledgeLocks, []);
   assert.equal(fs.existsSync(fixture.store.paths.storePath), false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });

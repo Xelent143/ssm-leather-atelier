@@ -378,13 +378,14 @@ test('versions reject embedded AI payloads and unrecognized reference fields', a
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
 
-test('Phase 3B.3B introduces approval primitives without releases or Knowledge Locks', () => {
+test('Phase 3B.3C introduces empty release primitives without mutating earlier records', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
   assert.deepEqual(current.approvalPolicies, []);
   assert.deepEqual(current.approvalRequests, []);
   assert.deepEqual(current.approvalDecisions, []);
-  assert.equal('productReleases' in current, false);
-  assert.equal('knowledgeLocks' in current, false);
+  assert.deepEqual(current.productReleases, []);
+  assert.deepEqual(current.releaseLifecycleEvents, []);
+  assert.deepEqual(current.knowledgeLocks, []);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });

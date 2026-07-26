@@ -55,10 +55,13 @@ function createProductPlmService(options = {}) {
       approvalPolicyCount: current.approvalPolicies.length,
       approvalRequestCount: current.approvalRequests.length,
       approvalDecisionCount: current.approvalDecisions.length,
+      productReleaseCount: current.productReleases.length,
+      releaseLifecycleEventCount: current.releaseLifecycleEvents.length,
+      knowledgeLockCount: current.knowledgeLocks.length,
       legacyMappingCount: current.legacyMappings.length,
       migrationPreviewCount: current.migrationPreviews.length,
       migrationBatchCount: current.migrationBatches.length,
-      phase: '3B.3B',
+      phase: '3B.3C',
     };
   }
 

@@ -285,7 +285,7 @@ test('first schema v6 mutation creates a restricted v5 rollback backup', async (
   delete v5.approvalDecisions;
   fs.writeFileSync(current.store.paths.storePath, `${JSON.stringify(v5, null, 2)}\n`, { mode: 0o600 });
   await current.store.mutate((draft) => ({ store: draft, value: true }), 0);
-  assert.equal(current.store.read().schemaVersion, 6);
+  assert.equal(current.store.read().schemaVersion, PRODUCT_PLM_SCHEMA_VERSION);
   assert.equal(fs.existsSync(current.store.paths.v5BackupPath), true);
   assert.equal(fs.statSync(current.store.paths.v5BackupPath).mode & 0o777, 0o600);
   fs.rmSync(current.dataDir, { recursive: true, force: true });

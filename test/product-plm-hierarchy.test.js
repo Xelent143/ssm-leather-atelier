@@ -244,6 +244,9 @@ test('family and style validation rejects duplicate styles and family cycles', (
     approvalPolicies: [],
     approvalRequests: [],
     approvalDecisions: [],
+    productReleases: [],
+    releaseLifecycleEvents: [],
+    knowledgeLocks: [],
     brands: [{
       id: brandId,
       name: 'Test',
