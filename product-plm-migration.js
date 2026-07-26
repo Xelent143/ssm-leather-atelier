@@ -5,6 +5,7 @@ const {
   legacySourceKey,
   normalizeLegacyProduct,
 } = require('./product-plm-schema');
+const { hierarchyProposal } = require('./product-plm-hierarchy');
 
 function matchKeys(record) {
   return [
@@ -61,6 +62,7 @@ function buildMigrationPreview(adminProducts, merchantProducts, options = {}) {
       title: adminRecord.title,
       primarySource: adminRecord,
       linkedSources: merchantRecord ? [merchantRecord] : [],
+      hierarchyProposal: hierarchyProposal(adminRecord),
     });
   }
 
@@ -73,6 +75,7 @@ function buildMigrationPreview(adminProducts, merchantProducts, options = {}) {
       title: merchantRecord.title,
       primarySource: merchantRecord,
       linkedSources: [],
+      hierarchyProposal: hierarchyProposal(merchantRecord),
     });
   }
 

@@ -6,6 +6,13 @@ const {
   legacySourceKey,
 } = require('./product-plm-schema');
 const { buildMigrationPreview, sourceSnapshot } = require('./product-plm-migration');
+const {
+  INITIAL_BRANDS,
+  brandDefinitionForName,
+  createStyle,
+  findOrCreateFamily,
+  seedInitialBrands,
+} = require('./product-plm-hierarchy');
 
 const DEFAULT_BRAND_NAME = 'MOTOGRIP GEAR';
 const DEFAULT_LEGAL_ENTITY_NAME = 'MOTOGRIP GEAR LLC';
@@ -31,10 +38,12 @@ function createProductPlmService(options = {}) {
       brandCount: current.brands.length,
       legalEntityCount: current.legalEntities.length,
       productIdentityCount: current.productIdentities.length,
+      productFamilyCount: current.productFamilies.length,
+      productStyleCount: current.productStyles.length,
       legacyMappingCount: current.legacyMappings.length,
       migrationPreviewCount: current.migrationPreviews.length,
       migrationBatchCount: current.migrationBatches.length,
-      phase: '3B.1',
+      phase: '3B.2A',
     };
   }
 
@@ -58,27 +67,6 @@ function createProductPlmService(options = {}) {
       changedFields: ['migrationPreviews'],
     });
     return { preview, storeRevision: result.store.storeRevision };
-  }
-
-  function findOrCreateBrand(draft, timestamp, actorId) {
-    let brand = draft.brands.find((item) => item.name === DEFAULT_BRAND_NAME);
-    if (!brand) {
-      brand = {
-        id: crypto.randomUUID(),
-        schemaVersion: 1,
-        name: DEFAULT_BRAND_NAME,
-        code: 'MOTOGRIP_GEAR',
-        status: 'active',
-        defaultLegalEntityId: null,
-        dataClassification: 'internal',
-        createdAt: timestamp,
-        createdBy: actorId,
-        updatedAt: timestamp,
-        updatedBy: actorId,
-      };
-      draft.brands.push(brand);
-    }
-    return brand;
   }
 
   function findOrCreateLegalEntity(draft, timestamp, actorId) {
@@ -166,15 +154,24 @@ function createProductPlmService(options = {}) {
       }
 
       const timestamp = new Date(now()).toISOString();
-      const brand = findOrCreateBrand(draft, timestamp, actor.actorId);
       const legalEntity = findOrCreateLegalEntity(draft, timestamp, actor.actorId);
-      brand.defaultLegalEntityId = legalEntity.id;
-      brand.updatedAt = timestamp;
-      brand.updatedBy = actor.actorId;
+      seedInitialBrands(draft.brands, timestamp, actor.actorId, legalEntity.id);
       const batchId = crypto.randomUUID();
       const importedProductUuids = [];
 
       for (const candidate of selected) {
+        const brandDefinition = brandDefinitionForName(candidate.hierarchyProposal?.brandName);
+        if (!brandDefinition || !candidate.hierarchyProposal?.brandRecognized) {
+          const error = new Error('Migration brand requires an approved brand mapping.');
+          error.code = 'PLM_VALIDATION';
+          throw error;
+        }
+        const brand = draft.brands.find((item) => item.code === brandDefinition.code);
+        if (!brand) {
+          const error = new Error('Migration brand is unavailable.');
+          error.code = 'PLM_VALIDATION';
+          throw error;
+        }
         const allSources = [candidate.primarySource, ...candidate.linkedSources];
         const existingMappings = allSources
           .map((source) => draft.legacyMappings.find((mapping) => legacySourceKey(mapping) === legacySourceKey(source)))
@@ -218,6 +215,15 @@ function createProductPlmService(options = {}) {
           draft.productIdentities.push(identity);
         }
         importedProductUuids.push(productUuid);
+        const family = findOrCreateFamily(
+          draft,
+          candidate.hierarchyProposal,
+          brand,
+          legalEntity,
+          timestamp,
+          actor.actorId,
+        );
+        createStyle(draft, identity, family, candidate.hierarchyProposal, timestamp, actor.actorId);
 
         for (const source of allSources) {
           const key = legacySourceKey(source);
@@ -273,7 +279,15 @@ function createProductPlmService(options = {}) {
       entityType: 'migration_batch',
       entityId: result.value.id,
       migrationBatchId: result.value.id,
-      changedFields: ['brands', 'legalEntities', 'productIdentities', 'legacyMappings', 'migrationBatches'],
+      changedFields: [
+        'brands',
+        'legalEntities',
+        'productIdentities',
+        'productFamilies',
+        'productStyles',
+        'legacyMappings',
+        'migrationBatches',
+      ],
       newHash: result.value.sourceSnapshotHash,
     });
     return { batch: result.value, storeRevision: result.store.storeRevision };
@@ -329,5 +343,6 @@ function createProductPlmService(options = {}) {
 module.exports = {
   DEFAULT_BRAND_NAME,
   DEFAULT_LEGAL_ENTITY_NAME,
+  INITIAL_BRANDS,
   createProductPlmService,
 };

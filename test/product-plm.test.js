@@ -41,9 +41,11 @@ function createFixture() {
 test('empty PLM store is versioned without writing until the first mutation', () => {
   const fixture = createFixture();
   const current = fixture.store.read();
-  assert.equal(current.schemaVersion, 1);
+  assert.equal(current.schemaVersion, 2);
   assert.equal(current.storeRevision, 0);
   assert.deepEqual(current.productIdentities, []);
+  assert.deepEqual(current.productFamilies, []);
+  assert.deepEqual(current.productStyles, []);
   assert.equal(fs.existsSync(fixture.store.paths.storePath), false);
   fs.rmSync(fixture.dataDir, { recursive: true, force: true });
 });
@@ -114,6 +116,14 @@ test('default migration imports admin products and only links overlapping mercha
   assert.equal(current.legacyMappings.filter((item) => item.sourceSystem === 'merchant-catalog').length, 6);
   assert.equal(current.brands[0].name, 'MOTOGRIP GEAR');
   assert.equal(current.legalEntities[0].legalName, 'MOTOGRIP GEAR LLC');
+  assert.equal(current.brands.length, 6);
+  assert.equal(current.productFamilies.length, 4);
+  assert.equal(current.productStyles.length, 6);
+  assert.ok(current.productStyles.every((style) =>
+    current.productIdentities.some((identity) =>
+      identity.id === style.productUuid &&
+      identity.brandId === style.brandId &&
+      identity.legalEntityId === style.legalEntityId)));
   assert.ok(current.productIdentities.every((identity) => isUuid(identity.id)));
   assert.ok(current.productIdentities.every((identity) =>
     PRODUCT_BRAIN_REFERENCE_TYPES.every((key) =>

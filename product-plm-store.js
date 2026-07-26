@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const {
   PRODUCT_PLM_SCHEMA_VERSION,
+  upgradeStore,
   validateStore,
 } = require('./product-plm-schema');
 
@@ -32,6 +33,8 @@ function createProductPlmStore(options = {}) {
       brands: [],
       legalEntities: [],
       productIdentities: [],
+      productFamilies: [],
+      productStyles: [],
       legacyMappings: [],
       migrationPreviews: [],
       migrationBatches: [],
@@ -41,7 +44,7 @@ function createProductPlmStore(options = {}) {
   function read() {
     ensureDataDir();
     try {
-      return validateStore(JSON.parse(fs.readFileSync(storePath, 'utf8')));
+      return validateStore(upgradeStore(JSON.parse(fs.readFileSync(storePath, 'utf8'))));
     } catch (error) {
       if (error.code === 'ENOENT') return emptyStore();
       const unavailable = new Error('Product PLM store is unavailable.');
@@ -65,6 +68,16 @@ function createProductPlmStore(options = {}) {
       createdAt: current.createdAt,
       updatedAt: new Date(now()).toISOString(),
     });
+    try {
+      const onDisk = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+      const backupPath = `${storePath}.v1.backup`;
+      if (onDisk.schemaVersion === 1 && !fs.existsSync(backupPath)) {
+        fs.copyFileSync(storePath, backupPath, fs.constants.COPYFILE_EXCL);
+        fs.chmodSync(backupPath, 0o600);
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
     atomicWriteJson(storePath, next);
     return next;
   }
@@ -88,7 +101,7 @@ function createProductPlmStore(options = {}) {
   return {
     emptyStore,
     mutate,
-    paths: { storePath },
+    paths: { storePath, v1BackupPath: `${storePath}.v1.backup` },
     read,
     write,
   };

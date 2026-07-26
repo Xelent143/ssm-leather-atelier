@@ -1,6 +1,36 @@
 const crypto = require('crypto');
 
-const PRODUCT_PLM_SCHEMA_VERSION = 1;
+const PRODUCT_PLM_SCHEMA_VERSION = 2;
+const PRODUCT_PLM_COLLECTIONS = Object.freeze([
+  'brands',
+  'legalEntities',
+  'productIdentities',
+  'productFamilies',
+  'productStyles',
+  'legacyMappings',
+  'migrationPreviews',
+  'migrationBatches',
+]);
+const PRODUCT_TYPES = Object.freeze([
+  'motorcycle_jacket',
+  'motorcycle_vest',
+  'leather_vest',
+  'western_vest',
+  'waistcoat',
+  'bomber_jacket',
+  'varsity_jacket',
+  'trucker_jacket',
+  'cafe_racer_jacket',
+  'chaps',
+  'leather_pants',
+  'leather_shorts',
+  'leather_coat',
+  'leather_bag',
+  'tool_bag',
+  'saddle_bag',
+  'gloves',
+  'accessories',
+]);
 const PRODUCT_BRAIN_REFERENCE_TYPES = Object.freeze([
   'aiAnalysis',
   'leatherExpertNotes',
@@ -71,15 +101,27 @@ function legacySourceKey(record) {
   return `${record.sourceSystem}:${record.sourceEntityType}:${record.legacyId}`;
 }
 
+function upgradeStore(store) {
+  if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
+  if (store.schemaVersion === PRODUCT_PLM_SCHEMA_VERSION) return store;
+  if (store.schemaVersion !== 1) throw new Error('Product PLM schema version is unsupported.');
+  return {
+    ...store,
+    schemaVersion: PRODUCT_PLM_SCHEMA_VERSION,
+    productFamilies: [],
+    productStyles: [],
+  };
+}
+
 function validateStore(store) {
   if (!store || typeof store !== 'object') throw new Error('Product PLM store is invalid.');
   if (store.schemaVersion !== PRODUCT_PLM_SCHEMA_VERSION) throw new Error('Product PLM schema version is unsupported.');
   if (!Number.isInteger(store.storeRevision) || store.storeRevision < 0) throw new Error('Product PLM store revision is invalid.');
-  for (const key of ['brands', 'legalEntities', 'productIdentities', 'legacyMappings', 'migrationPreviews', 'migrationBatches']) {
+  for (const key of PRODUCT_PLM_COLLECTIONS) {
     if (!Array.isArray(store[key])) throw new Error(`Product PLM ${key} collection is invalid.`);
   }
   const ids = new Set();
-  for (const collection of ['brands', 'legalEntities', 'productIdentities', 'legacyMappings', 'migrationPreviews', 'migrationBatches']) {
+  for (const collection of PRODUCT_PLM_COLLECTIONS) {
     for (const entity of store[collection]) {
       if (!isUuid(entity.id)) throw new Error(`Product PLM ${collection} contains an invalid UUID.`);
       if (ids.has(entity.id)) throw new Error('Product PLM contains a duplicate entity UUID.');
@@ -93,13 +135,68 @@ function validateStore(store) {
     sourceKeys.add(key);
     if (!isUuid(mapping.productUuid)) throw new Error('Product PLM legacy mapping target is invalid.');
   }
+  const brandIds = new Set(store.brands.map((item) => item.id));
+  const legalEntityIds = new Set(store.legalEntities.map((item) => item.id));
+  const productUuids = new Set(store.productIdentities.map((item) => item.id));
+  const familyIds = new Set(store.productFamilies.map((item) => item.id));
+  const familyKeys = new Set();
+  for (const family of store.productFamilies) {
+    if (!brandIds.has(family.brandId) || !legalEntityIds.has(family.legalEntityId)) {
+      throw new Error('Product PLM family ownership reference is invalid.');
+    }
+    if (family.parentFamilyId && (!familyIds.has(family.parentFamilyId) || family.parentFamilyId === family.id)) {
+      throw new Error('Product PLM family parent reference is invalid.');
+    }
+    if (family.parentFamilyId) {
+      const parent = store.productFamilies.find((item) => item.id === family.parentFamilyId);
+      if (parent.brandId !== family.brandId || parent.legalEntityId !== family.legalEntityId) {
+        throw new Error('Product PLM family parent ownership is inconsistent.');
+      }
+    }
+    const key = `${family.brandId}:${cleanText(family.code, 100).toUpperCase()}`;
+    if (!family.code || familyKeys.has(key)) throw new Error('Product PLM family code is invalid or duplicated.');
+    familyKeys.add(key);
+  }
+  for (const family of store.productFamilies) {
+    const visited = new Set([family.id]);
+    let parentId = family.parentFamilyId;
+    while (parentId) {
+      if (visited.has(parentId)) throw new Error('Product PLM family hierarchy contains a cycle.');
+      visited.add(parentId);
+      parentId = store.productFamilies.find((item) => item.id === parentId)?.parentFamilyId || null;
+    }
+  }
+  const styleProducts = new Set();
+  const styleCodes = new Set();
+  for (const style of store.productStyles) {
+    if (!productUuids.has(style.productUuid) || !familyIds.has(style.familyId) ||
+        !brandIds.has(style.brandId) || !legalEntityIds.has(style.legalEntityId)) {
+      throw new Error('Product PLM style reference is invalid.');
+    }
+    const identity = store.productIdentities.find((item) => item.id === style.productUuid);
+    const family = store.productFamilies.find((item) => item.id === style.familyId);
+    if (identity.brandId !== style.brandId || identity.legalEntityId !== style.legalEntityId ||
+        family.brandId !== style.brandId || family.legalEntityId !== style.legalEntityId) {
+      throw new Error('Product PLM style ownership is inconsistent.');
+    }
+    if (styleProducts.has(style.productUuid)) throw new Error('Product PLM Product UUID has more than one style.');
+    styleProducts.add(style.productUuid);
+    const styleCode = cleanText(style.styleCode, 100).toUpperCase();
+    if (!styleCode || styleCodes.has(styleCode)) throw new Error('Product PLM style code is invalid or duplicated.');
+    if (!PRODUCT_TYPES.includes(style.productType)) {
+      throw new Error('Product PLM style product type is invalid.');
+    }
+    styleCodes.add(styleCode);
+  }
   return store;
 }
 
 module.exports = {
   DATA_CLASSIFICATIONS,
   PRODUCT_BRAIN_REFERENCE_TYPES,
+  PRODUCT_PLM_COLLECTIONS,
   PRODUCT_PLM_SCHEMA_VERSION,
+  PRODUCT_TYPES,
   canonicalize,
   cleanText,
   contentHash,
@@ -107,5 +204,6 @@ module.exports = {
   isUuid,
   legacySourceKey,
   normalizeLegacyProduct,
+  upgradeStore,
   validateStore,
 };
