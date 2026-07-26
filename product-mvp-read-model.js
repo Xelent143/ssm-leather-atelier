@@ -53,21 +53,21 @@ function governanceProjection(plm, productUuid) {
   let state = 'version_required';
   let label = 'Version required';
   let readiness = 'blocked';
-  let nextAction = 'Create an immutable Product Version in Micro Sprint 2.';
+  let nextAction = 'Create an immutable Product Version.';
   if (latestVersion && !latestRelease) {
     state = approvals.length ? 'release_required' : 'approval_required';
     label = approvals.length ? 'Release required' : 'Approval required';
     nextAction = approvals.length
-      ? 'Create a Product Release in Micro Sprint 2.'
-      : 'Create an Approval Request in Micro Sprint 2.';
+      ? 'Create a Product Release.'
+      : 'Create an Approval Request.';
   } else if (latestRelease && !['approved', 'active'].includes(releaseState)) {
     state = releaseState === 'draft' ? 'release_draft' : `release_${releaseState}`;
     label = releaseState === 'draft' ? 'Release draft' : `Release ${releaseState}`;
-    nextAction = 'Complete the governed release lifecycle in Micro Sprint 2.';
+    nextAction = 'Complete the governed release lifecycle.';
   } else if (latestRelease && !lock) {
     state = 'lock_required';
     label = 'Knowledge Lock required';
-    nextAction = 'Create a Knowledge Lock in Micro Sprint 2.';
+    nextAction = 'Create a Knowledge Lock.';
   } else if (latestRelease && lock) {
     state = 'governed';
     label = 'Governed';
