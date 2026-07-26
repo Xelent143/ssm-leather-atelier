@@ -1278,6 +1278,15 @@ p {
 .quality-grid span { display: block; min-height: 32px; margin: 4px 0 8px; font-size: 11px; color: var(--muted); }
 .quality-grid progress { width: 100%; accent-color: var(--accent); }
 .quality-label { display: block; margin-top: 7px; color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.copy-intelligence-panel { margin-top: 18px; }
+.intelligence-score-grid { grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); }
+.copy-issue-list { display: grid; gap: 12px; margin-top: 20px; }
+.copy-issue { border: 1px solid var(--line); border-left: 4px solid #d99a24; border-radius: 10px; padding: 14px; background: var(--surface); }
+.copy-issue.error { border-left-color: #c43b3b; }
+.copy-issue > div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.copy-issue code { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+.copy-issue blockquote { margin: 8px 0; padding: 8px 10px; background: var(--surface-2); border-radius: 6px; overflow-wrap: anywhere; }
+.copy-issue p { margin: 0; }
 .listing-draft-bar { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 14px; align-items: end; margin-top: 18px; padding: 14px 16px; }
 .listing-draft-bar > div { display: grid; gap: 3px; }
 .listing-draft-bar > div span { color: var(--muted); font-size: 12px; }

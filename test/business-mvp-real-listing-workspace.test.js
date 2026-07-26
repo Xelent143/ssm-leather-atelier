@@ -155,6 +155,9 @@ test('critical information blocks export until a versioned input draft is comple
   const second = await current.listing.generate(current.session, {
     productUuid, expectedRevision: saved.storeRevision,
   });
+  assert.equal(second.draft.copyIntelligence.readOnly, true);
+  assert.ok(second.draft.copyIntelligence.scores.overallQuality >= 0);
+  assert.ok(second.draft.copyIntelligence.issues.every((item) => item.location.field));
   const exported = current.listing.exportPackage(current.session, {
     productUuid, draftId: second.draft.id, catalogId: crypto.randomUUID(),
   });
@@ -195,6 +198,8 @@ test('edits and restores append versions and Listing Editor cannot export', asyn
   assert.equal(restored.draft.sourceDraftId, first.draft.id);
   assert.equal(approved.draft.draftVersion, 4);
   assert.equal(approved.draft.approvalState, 'owner_approved');
+  assert.ok(approved.draft.copyIntelligence);
+  assert.equal(current.listingStore.read().drafts.length, 4);
 
   current.user.accountType = 'listing_editor';
   assert.equal(current.listing.workspace(current.session, productUuid).permissions.canExport, false);

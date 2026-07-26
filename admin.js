@@ -1335,6 +1335,7 @@ function renderListingStudio() {
   if (!product || !workspace) return LoadingSkeleton();
   const drafts = workspace.drafts || [];
   const selected = drafts.find((item) => item.id === state.selectedDraftId) || drafts.at(-1);
+  const intelligence = selected?.copyIntelligence;
   const compared = drafts.find((item) => item.id === state.compareDraftId) || null;
   const warnings = selected?.warnings || [
     { label: 'Missing measurements', missing: true },
@@ -1372,6 +1373,31 @@ function renderListingStudio() {
           ].map(([label, score]) => `<div><div class="quality-score"><strong>${score}</strong><span>/100</span></div><span>${label}</span><progress max="100" value="${score}"></progress><small class="quality-label">${qualityLabel(score)}</small></div>`).join('')}</div>
         </section>
       </div>
+      ${intelligence ? `
+        <section class="card card-pad copy-intelligence-panel">
+          <div class="card-head"><div><span class="eyebrow">Read-only review</span><h2>AI Copy Intelligence</h2><p>Suggestions never overwrite Owner or Listing Editor content.</p></div><span class="warning-count">${intelligence.issueCount} issue${intelligence.issueCount === 1 ? '' : 's'}</span></div>
+          <div class="quality-grid intelligence-score-grid">${[
+            ['Overall Quality', intelligence.scores.overallQuality],
+            ['Google SEO', intelligence.scores.googleSeo],
+            ['Shopify', intelligence.scores.shopify],
+            ['eBay', intelligence.scores.ebay],
+            ['Etsy', intelligence.scores.etsy],
+            ['Human Readability', intelligence.scores.humanReadability],
+            ['Conversion Potential', intelligence.scores.conversionPotential],
+            ['Leather Accuracy', intelligence.scores.leatherAccuracy],
+            ['Unsupported Claim Safety', 100 - intelligence.scores.unsupportedClaimRisk],
+          ].map(([label, score]) => `<div><div class="quality-score"><strong>${score}</strong><span>/100</span></div><span>${escapeHtml(label)}</span><progress max="100" value="${score}"></progress><small class="quality-label">${qualityLabel(score)}</small></div>`).join('')}</div>
+          <div class="copy-issue-list">${intelligence.issues.length ? intelligence.issues.map((item) => `
+            <article class="copy-issue ${escapeHtml(item.severity)}">
+              <div><span class="status-badge ${item.severity === 'error' ? 'restricted' : 'existing'}">${escapeHtml(item.category.replaceAll('_', ' '))}</span><strong>${escapeHtml(item.message)}</strong></div>
+              <code>${escapeHtml(item.location.field)} · ${item.location.start}–${item.location.end}</code>
+              <blockquote>${escapeHtml(item.location.excerpt || 'Empty field')}</blockquote>
+              <p><strong>Suggestion:</strong> ${escapeHtml(item.suggestion)}</p>
+            </article>`).join('') : '<div class="success-note card-pad"><strong>No copy-quality issues detected</strong><p>Continue human review before approval.</p></div>'}</div>
+          <details class="advanced-details"><summary>Human writing score details</summary><dl class="definition-grid compact">${Object.entries(intelligence.scores.humanWriting || {}).map(([key, value]) => definitionRow(inputFieldLabel(key), `${value}/100`)).join('')}</dl></details>
+          <details class="advanced-details"><summary>SEO intelligence details</summary><dl class="definition-grid compact">${Object.entries(intelligence.scores.seoIntelligence || {}).map(([key, value]) => definitionRow(inputFieldLabel(key), typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? 'Not available'))).join('')}</dl></details>
+        </section>
+      ` : ''}
       <section class="card listing-draft-bar">
         <div><strong>Draft history</strong><span>Every regeneration creates a new immutable draft.</span></div>
         <label><span>Current</span><select id="draft-select">${drafts.map((item) => `<option value="${item.id}" ${selected?.id === item.id ? 'selected' : ''}>Draft Version ${item.draftVersion}</option>`).join('')}</select></label>

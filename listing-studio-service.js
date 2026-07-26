@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { resolveApprovedRelease } = require('./product-plm-release-resolver');
 const { hashValue } = require('./product-plm-versions');
+const { analyzeCopy } = require('./copy-intelligence-service');
 
 const INPUT_FIELDS = Object.freeze([
   'productTitle', 'productType', 'brand', 'sku', 'leatherType', 'leatherColor',
@@ -387,6 +388,12 @@ function createListingStudioService(options = {}) {
       inputDraft.values = applyManagedIdentity(input.productUuid, inputDraft.values);
       const missing = missingInformation(inputDraft.values, inputDraft.notApplicable);
       const content = contentOverride || buildContent(inputDraft.values);
+      const copyIntelligence = analyzeCopy({
+        content,
+        facts: inputDraft.values,
+        supportedClaims: [],
+        analyzedAt: new Date(now()).toISOString(),
+      });
       const prior = store.drafts.filter((item) => item.productUuid === input.productUuid);
       const draft = {
         id: crypto.randomUUID(),
@@ -407,6 +414,7 @@ function createListingStudioService(options = {}) {
         sourceDraftId,
         warnings: missing,
         quality: quality(content, missing),
+        copyIntelligence,
         content,
         contentHash: null,
         createdAt: new Date(now()).toISOString(),
