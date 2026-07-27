@@ -24,6 +24,7 @@ const { createOperationalLaunchService } = require('./operational-launch-service
 const { createWebsiteWriteAdapter } = require('./website-write-adapter');
 const { createProductEditorV2Store } = require('./product-editor-v2-store');
 const { createProductEditorV2Service } = require('./product-editor-v2-service');
+const { createProductManagementGridService } = require('./product-management-grid-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -107,6 +108,14 @@ const productEditorV2Service = createProductEditorV2Service({
   productPlmStore,
   websiteAdapter: websiteWriteAdapter,
   operationalLaunchService,
+});
+const productManagementGridService = createProductManagementGridService({
+  store: productEditorV2Store,
+  identity: adminIdentity,
+  editorService: productEditorV2Service,
+  listingStore: listingStudioStore,
+  readWebsiteCatalog: readPublicStore,
+  announce: operationalLaunchService.announce,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -1833,6 +1842,49 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/product-grid' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productManagementGridService.grid(session));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-grid/actions' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 200, await productManagementGridService.mutate(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-grid/duplicate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 201, await productManagementGridService.duplicate(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const productGridHistoryMatch = pathname.match(/^\/api\/admin\/product-grid\/products\/([0-9a-f-]+)\/history$/i);
+  if (productGridHistoryMatch && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productManagementGridService.history(session, productGridHistoryMatch[1]));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
   if (pathname === '/api/admin/product-editor-v2' && req.method === 'GET') {
     try {
       sendJson(res, 200, productEditorV2Service.workspace(session));
@@ -2725,6 +2777,7 @@ module.exports = {
   websiteWriteAdapter,
   productEditorV2Store,
   productEditorV2Service,
+  productManagementGridService,
   productMeta,
   injectProductHead,
   injectRouteHead,
