@@ -137,3 +137,21 @@ test('public PDP receives the published website title and description override',
   const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(source, /p\.publicDescription \|\| p\.story\?\.piece/);
 });
+
+test('hidden products are excluded from public catalog, PDP and sitemap', async () => {
+  const store = JSON.parse(fs.readFileSync(adminStorePath, 'utf8'));
+  const product = store.products.find((item) => item.slug === 'dean-brown-leather-biker-jacket');
+  product.status = 'hidden';
+  fs.writeFileSync(adminStorePath, `${JSON.stringify(store, null, 2)}\n`);
+
+  const catalogResponse = await fetch(`${baseUrl}/api/catalog`);
+  const catalog = await catalogResponse.json();
+  assert.equal(catalog.products.some((item) => item.slug === product.slug), false);
+
+  const pdp = await fetch(`${baseUrl}/products/${product.slug}`);
+  assert.equal(pdp.status, 404);
+
+  const sitemap = await fetch(`${baseUrl}/sitemap.xml`);
+  assert.equal((await sitemap.text()).includes(`/products/${product.slug}`), false);
+
+});

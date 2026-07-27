@@ -135,6 +135,7 @@ const productManagementGridService = createProductManagementGridService({
   editorService: productEditorV2Service,
   listingStore: listingStudioStore,
   readWebsiteCatalog: readPublicStore,
+  websiteAdapter: websiteWriteAdapter,
   announce: operationalLaunchService.announce,
   authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
@@ -152,8 +153,20 @@ const returnRequestAttempts = new Map();
 function productEditorWorkspace(session, productId = null) {
   const workspace = productEditorV2Service.workspace(session, productId);
   try {
-    workspace.taxonomy = categoryTaxonomyService.workspace(session).categories
+    const taxonomyWorkspace = categoryTaxonomyService.workspace(session);
+    workspace.taxonomy = taxonomyWorkspace.categories
       .filter((category) => category.workflowState === 'live' && category.status === 'active')
+      .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
+    const product = workspace.product;
+    const identityIds = new Set([
+      product?.websiteProductId,
+      product?.productUuid,
+      product?.id,
+    ].filter(Boolean).map(String));
+    workspace.assignedTaxonomy = taxonomyWorkspace.categories
+      .filter((category) => category.products?.some((item) =>
+        [item.id, item.websiteProductId, item.productUuid, item.editorProductId]
+          .filter(Boolean).map(String).some((id) => identityIds.has(id))))
       .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
   } catch { workspace.taxonomy = []; }
   return workspace;
@@ -161,11 +174,29 @@ function productEditorWorkspace(session, productId = null) {
 function productGridWorkspace(session) {
   const grid = productManagementGridService.grid(session);
   try {
-    const taxonomy = categoryTaxonomyService.workspace(session).categories;
+    const taxonomyWorkspace = categoryTaxonomyService.workspace(session);
+    const taxonomy = taxonomyWorkspace.categories;
     grid.taxonomy = taxonomy.map(({ id, name, hierarchyPath }) => ({ id, name, hierarchyPath }));
     grid.products = grid.products.map((product) => {
-      const category = taxonomy.find((item) => item.name.toLowerCase() === String(product.category || '').toLowerCase());
-      return { ...product, categoryId: category?.id || null, categoryPath: category?.hierarchyPath || product.category };
+      const identityIds = new Set([
+        product.websiteProductId, product.productUuid, product.editorProductId, product.id,
+      ].filter(Boolean).map(String));
+      const assigned = taxonomy.filter((item) => item.products?.some((candidate) =>
+        [candidate.id, candidate.websiteProductId, candidate.productUuid, candidate.editorProductId]
+          .filter(Boolean).map(String).some((id) => identityIds.has(id))));
+      const category = assigned[0] || taxonomy.find((item) =>
+        item.name.toLowerCase() === String(product.category || '').toLowerCase());
+      const projection = taxonomyWorkspace.products.find((candidate) =>
+        [candidate.id, candidate.websiteProductId, candidate.productUuid, candidate.editorProductId]
+          .filter(Boolean).map(String).some((id) => identityIds.has(id)));
+      return {
+        ...product,
+        categoryProductId: projection?.id || null,
+        categoryId: category?.id || null,
+        categoryPath: category?.hierarchyPath || product.category,
+        categoryIds: assigned.map((item) => item.id),
+        categoryPaths: assigned.map((item) => item.hierarchyPath),
+      };
     });
   } catch { grid.taxonomy = []; }
   return grid;
@@ -648,7 +679,9 @@ function checkoutLineItems(rawItems) {
     const rawId = String(rawItem.baseId || rawItem.id || '');
     const baseId = rawId.replace(/-\d+$/, '');
     const product = store.products.find((candidate) => candidate.id === baseId || candidate.slug === baseId);
-    if (!product || product.status === 'archived') throw new Error('A product in your bag is no longer available.');
+    if (!product || ['archived', 'hidden', 'draft'].includes(product.status)) {
+      throw new Error('A product in your bag is no longer available.');
+    }
 
     const quantity = Number(rawItem.qty);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
@@ -825,7 +858,7 @@ function resolvePath(urlPath) {
 function publicCatalog(store) {
   return {
     settings: store.settings,
-    products: store.products.filter((product) => product.status !== 'archived'),
+    products: store.products.filter((product) => !['archived', 'hidden', 'draft'].includes(product.status)),
   };
 }
 
@@ -1112,7 +1145,8 @@ function servePublicRoute(req, res, route) {
 
 function serveProductPage(req, res, slug) {
   const store = readPublicStore();
-  const product = store.products.find((item) => item.slug === slug && item.status !== 'archived');
+  const product = store.products.find((item) => item.slug === slug &&
+    !['archived', 'hidden', 'draft'].includes(item.status));
   if (!product) {
     send(res, 404, 'Product not found');
     return;
@@ -1131,7 +1165,8 @@ function serveSitemap(req, res) {
   const store = readPublicStore();
   const urls = [
     ...indexablePublicPaths,
-    ...store.products.filter((product) => product.status !== 'archived').map(productPath),
+    ...store.products.filter((product) =>
+      !['archived', 'hidden', 'draft'].includes(product.status)).map(productPath),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1323,7 +1358,7 @@ function normalizeStore(input) {
       gender: String(product.gender || 'Unisex'),
       price: Number(product.price || 0),
       compareAtPrice: product.compareAtPrice === null || product.compareAtPrice === '' ? null : Number(product.compareAtPrice || 0),
-      status: ['active', 'draft', 'archived'].includes(product.status) ? product.status : 'draft',
+      status: ['active', 'draft', 'hidden', 'archived'].includes(product.status) ? product.status : 'draft',
       inventory: Number(product.inventory || 0),
       madeToMeasureEnabled: Boolean(product.madeToMeasureEnabled),
       madeToMeasureSurcharge: Number(product.madeToMeasureSurcharge || 0),

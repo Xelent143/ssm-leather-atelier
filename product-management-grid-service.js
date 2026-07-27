@@ -26,7 +26,7 @@ function stringList(value) {
 const imageUrl = (value = '') => canonicalMediaUrl(value);
 function createProductManagementGridService(options = {}) {
   const {
-    store, identity, editorService, listingStore, readWebsiteCatalog, announce = () => {},
+    store, identity, editorService, listingStore, readWebsiteCatalog, websiteAdapter, announce = () => {},
     authorizeUser = (user, module, action) => user.accountType === 'owner' ||
       !['approve', 'publish', 'delete', 'export', 'configure'].includes(action),
   } = options;
@@ -278,8 +278,22 @@ function createProductManagementGridService(options = {}) {
     const importsWebsiteSource = ids.some((id) => id.startsWith('website:'));
     const resolved = [];
     for (const id of ids) resolved.push(await resolveEditorProduct(session, id));
-    const result = await store.mutate((state) => {
+    const result = await store.mutate(async (state) => {
       const changedProducts = [];
+      const statusInputs = GRID_ACTIONS.has(input.action) && input.action !== 'delete'
+        ? resolved.map((id) => state.products.find((item) => item.id === id))
+          .filter((product) => product?.websiteProductId)
+          .map((product) => ({
+            websiteProductId: product.websiteProductId,
+            currentHandle: product.sourceHandle || product.seo?.handle,
+            expectedWebsiteRevision: product.websiteRevision,
+            status: input.action === 'restore' ? 'active' : input.action === 'hide' ? 'hidden' : input.action,
+          }))
+        : [];
+      const statusChanges = statusInputs.length && websiteAdapter?.setStatuses
+        ? await websiteAdapter.setStatuses(statusInputs)
+        : [];
+      const statusById = new Map(statusChanges.map((change) => [String(change.product.id), change]));
       for (const id of resolved) {
         const product = state.products.find((item) => item.id === id);
         if (!product) throw Object.assign(new Error('Product was not found.'), { code: 'NOT_FOUND' });
@@ -299,9 +313,15 @@ function createProductManagementGridService(options = {}) {
                 ? 'hidden'
                 : input.action;
           if (input.action === 'archive') product.organization.status = 'archived';
-          if (input.action === 'hide') product.organization.status = 'draft';
+          if (input.action === 'hide') product.organization.status = 'hidden';
           if (input.action === 'restore') product.organization.status = product.workflowState === 'live' ? 'active' : 'draft';
+          const websiteChange = statusById.get(String(product.websiteProductId));
+          if (websiteChange) {
+            product.websiteRevision = websiteChange.newRevision;
+            product.websiteSyncStatus = 'synced';
+          }
           changed = ['managementState', 'organization.status'];
+          if (websiteChange) changed.push('websiteRevision', 'websiteSyncStatus');
         } else {
           throw Object.assign(new Error('Unsupported product-grid action.'), { code: 'VALIDATION' });
         }

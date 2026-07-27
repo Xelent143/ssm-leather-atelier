@@ -42,4 +42,11 @@ test('Product Editor uses searchable synchronized taxonomy rather than placehold
   assert.match(editor, /list="pe-taxonomy-options"/);
   assert.match(editor, /placeholder="Select synced category"/);
   assert.match(editor, /item\.hierarchyPath/);
+  assert.match(editor, /Category Manager assignments/);
+});
+
+test('permission SSE refreshes permission-sensitive product and category workspaces', () => {
+  assert.match(admin, /message\.type === 'permissions\.updated'/);
+  assert.match(admin, /await refreshProductGrid\(\)/);
+  assert.match(admin, /state\.taxonomy = await api\('\/api\/admin\/categories'\)/);
 });

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { createUnifiedProductProjection } = require('./unified-product-projection');
 
 const STATUS = new Set(['draft', 'active', 'hidden', 'archived']);
 const BULK_FIELDS = new Set(['name', 'parentId', 'status', 'websiteVisibility', 'sortOrder', 'seoTitle', 'metaDescription', 'themeTemplate', 'internalNote']);
@@ -21,6 +22,10 @@ function createCategoryTaxonomyService(options = {}) {
       !['approve', 'publish', 'delete', 'export', 'configure'].includes(action),
   } = options;
   const now = options.now || (() => Date.now());
+  const productProjection = options.productProjection || createUnifiedProductProjection({
+    readWebsiteCatalog,
+    readEditorProducts,
+  });
   function actor(session, allowLegacy = false) {
     if (allowLegacy && session?.actorType === 'legacy_owner') return { id: 'legacy-compatibility', accountType: 'legacy_owner', status: 'active' };
     const user = session?.actorType === 'named_user' ? identity.findById(session.userId) : null;
@@ -41,30 +46,7 @@ function createCategoryTaxonomyService(options = {}) {
     };
   }
   function products() {
-    const website = readWebsiteCatalog().products || [];
-    const editor = readEditorProducts?.().products || [];
-    const rows = new Map();
-    for (const product of website) rows.set(String(product.id), {
-      id: String(product.id), editorProductId: null, title: product.title, sku: product.sku || '',
-      image: product.primaryImage || product.image || '', status: product.status || 'active',
-      inventory: Number(product.inventory ?? Object.values(product.stock || {}).reduce((sum, quantity) => sum + Number(quantity || 0), 0)),
-      productType: product.productType || '', brand: product.brand || product.maker || '', tags: list(product.tags || product.tag),
-      category: product.category || '', collections: list(product.collections), handle: product.slug || '',
-    });
-    for (const product of editor) {
-      const key = String(product.websiteProductId || product.id);
-      const variants = product.variants || [];
-      rows.set(key, {
-        id: key, editorProductId: product.id, title: product.title, sku: product.identity?.productSku || '',
-        image: product.media?.find((item) => item.featured)?.path || product.media?.[0]?.path || '',
-        status: product.organization?.status || 'draft',
-        inventory: variants.reduce((sum, variant) => sum + Number(variant.quantity || 0), 0),
-        productType: product.organization?.productType || '', brand: product.organization?.brand || '',
-        tags: product.organization?.tags || [], category: product.organization?.category || '',
-        collections: product.organization?.collections || [], handle: product.seo?.handle || '',
-      });
-    }
-    return [...rows.values()];
+    return productProjection.products();
   }
   function pathFor(category, categories, seen = new Set()) {
     if (!category || seen.has(category.id)) return '';
@@ -325,7 +307,11 @@ function createCategoryTaxonomyService(options = {}) {
   function publicCategory(handle) {
     const state = store.read(); const category = project(state).find((item) => item.slug === handle && item.workflowState === 'live' && item.status === 'active' && item.websiteVisibility);
     if (!category) return null;
-    return { ...category, children: project(state).filter((item) => item.parentId === category.id && item.workflowState === 'live' && item.status === 'active' && item.websiteVisibility) };
+    return {
+      ...category,
+      products: category.products.filter((item) => item.status === 'active' && item.websiteStatus === 'active'),
+      children: project(state).filter((item) => item.parentId === category.id && item.workflowState === 'live' && item.status === 'active' && item.websiteVisibility),
+    };
   }
   async function uploadMedia(session, id, input) {
     const user = actor(session);

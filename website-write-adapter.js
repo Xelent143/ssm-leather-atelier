@@ -17,7 +17,18 @@ function cleanSlug(value) {
 }
 
 function websiteRevision(product) {
-  return crypto.createHash('sha256').update(JSON.stringify(product || {})).digest('hex');
+  const stable = product && typeof product === 'object'
+    ? { ...product, websiteRevision: null }
+    : product || {};
+  return crypto.createHash('sha256').update(JSON.stringify(stable)).digest('hex');
+}
+
+function revisionMatches(expected, product) {
+  if (!expected) return true;
+  const legacy = crypto.createHash('sha256').update(JSON.stringify(product || {})).digest('hex');
+  return expected === websiteRevision(product) ||
+    expected === product?.websiteRevision ||
+    expected === legacy;
 }
 
 function createWebsiteWriteAdapter(options = {}) {
@@ -40,7 +51,7 @@ function createWebsiteWriteAdapter(options = {}) {
       String(product.slug) === String(input.currentHandle));
     const current = index >= 0 ? products[index] : source || null;
     const currentRevision = websiteRevision(current);
-    if (input.expectedWebsiteRevision && input.expectedWebsiteRevision !== currentRevision) {
+    if (!revisionMatches(input.expectedWebsiteRevision, current)) {
       throw Object.assign(new Error('Website product changed after this draft was opened.'), {
         code: 'REVISION_CONFLICT',
         currentRevision,
@@ -95,13 +106,77 @@ function createWebsiteWriteAdapter(options = {}) {
     };
   }
 
+  async function setStatuses(inputs = []) {
+    const allowed = new Set(['active', 'hidden', 'archived']);
+    const store = readStore();
+    const products = Array.isArray(store.products) ? store.products : [];
+    const websiteProducts = Array.isArray(readWebsiteCatalog().products)
+      ? readWebsiteCatalog().products
+      : [];
+    const changes = [];
+    const nextProducts = [...products];
+    for (const input of inputs) {
+      if (!allowed.has(input.status)) {
+        throw Object.assign(new Error('Unsupported website product status.'), { code: 'VALIDATION' });
+      }
+      const source = websiteProducts.find((product) =>
+        String(product.id) === String(input.websiteProductId) ||
+        String(product.slug) === String(input.currentHandle));
+      const index = nextProducts.findIndex((product) =>
+        String(product.id) === String(input.websiteProductId) ||
+        String(product.slug) === String(input.currentHandle));
+      const current = index >= 0 ? nextProducts[index] : source || null;
+      if (!current) {
+        throw Object.assign(new Error('Published website product was not found.'), { code: 'NOT_FOUND' });
+      }
+      const currentRevision = websiteRevision(current);
+      if (!revisionMatches(input.expectedWebsiteRevision, current)) {
+        throw Object.assign(new Error('Website product changed after this grid was loaded.'), {
+          code: 'REVISION_CONFLICT',
+          currentRevision,
+        });
+      }
+      const nextProduct = {
+        ...current,
+        status: input.status,
+        updatedAt: new Date().toISOString(),
+        websiteRevision: null,
+      };
+      nextProduct.websiteRevision = websiteRevision({ ...nextProduct, websiteRevision: null });
+      if (index >= 0) nextProducts[index] = nextProduct;
+      else nextProducts.push(nextProduct);
+      changes.push({
+        product: nextProduct,
+        previousRevision: currentRevision,
+        newRevision: nextProduct.websiteRevision,
+      });
+    }
+    writeStore({ ...store, products: nextProducts });
+    try {
+      for (const change of changes) {
+        await onMutation({
+          action: 'website_product_status_updated',
+          product: change.product,
+          previousRevision: change.previousRevision,
+          newRevision: change.newRevision,
+        });
+      }
+    } catch {
+      writeStore(store);
+      throw Object.assign(new Error('Website synchronization failed; no product status change was kept.'), {
+        code: 'SYNC_FAILED',
+      });
+    }
+    return changes;
+  }
+
   function inspect(websiteProductId, handle) {
     const product = (readWebsiteCatalog().products || []).find((item) =>
       String(item.id) === String(websiteProductId) || String(item.slug) === String(handle));
     return { product: product || null, revision: websiteRevision(product || null) };
   }
 
-  return { inspect, publish, revision: websiteRevision };
+  return { inspect, publish, setStatuses, revision: websiteRevision };
 }
 
-module.exports = { PUBLISHABLE_FIELDS, createWebsiteWriteAdapter, websiteRevision };
+module.exports = { PUBLISHABLE_FIELDS, createWebsiteWriteAdapter, revisionMatches, websiteRevision };

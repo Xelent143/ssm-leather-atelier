@@ -175,6 +175,44 @@ test('legacy rows import once before mutation and retain existing website SKU', 
   assert.equal(result.products[0].status, 'Hidden');
 });
 
+test('hide and restore synchronize the existing website identity and revision before grid projection', async (t) => {
+  const current = fixture();
+  t.after(() => fs.rmSync(current.dataDir, { recursive: true, force: true }));
+  await seed(current);
+  const calls = [];
+  current.service = createProductManagementGridService({
+    store: current.store,
+    identity: { findById: (id) => ({
+      owner: { id: 'owner', status: 'active', accountType: 'owner' },
+      editor: { id: 'editor', status: 'active', accountType: 'listing_editor' },
+    }[id] || null) },
+    editorService: {},
+    readWebsiteCatalog: () => ({ products: [] }),
+    websiteAdapter: {
+      async setStatuses(inputs) {
+        calls.push(inputs);
+        return inputs.map((input, index) => ({
+          product: { id: input.websiteProductId, status: input.status },
+          newRevision: `website-revision-${calls.length}-${index}`,
+        }));
+      },
+    },
+  });
+  let grid = await current.service.mutate(current.editor, {
+    action: 'hide', productIds: ['editor-one'], expectedRevision: current.store.read().storeRevision,
+  });
+  assert.equal(calls[0][0].status, 'hide'.replace('hide', 'hidden'));
+  assert.equal(grid.products[0].status, 'Hidden');
+  assert.equal(grid.products[0].syncStatus, 'Synced');
+  assert.equal(current.store.read().products[0].organization.status, 'hidden');
+  grid = await current.service.mutate(current.editor, {
+    action: 'restore', productIds: ['editor-one'], expectedRevision: current.store.read().storeRevision,
+  });
+  assert.equal(calls[1][0].status, 'active');
+  assert.equal(grid.products[0].status, 'Live');
+  assert.equal(current.store.read().products[0].websiteProductId, 'western');
+});
+
 test('Product Grid UI includes professional controls, responsive drawer, and protected actions', () => {
   const ui = fs.readFileSync(path.join(__dirname, '..', 'admin.js'), 'utf8');
   const css = fs.readFileSync(path.join(__dirname, '..', 'admin.css'), 'utf8');

@@ -134,3 +134,31 @@ test('permission audit contains safe metadata and no submitted secret fields', (
   assert.equal(serialized.includes('must-never-appear'), false);
   assert.equal(service.read().auditEvents[0].actorId, owner.id);
 });
+
+test('live role changes and permission removal take effect without replacing the user session', () => {
+  const { owner, assistant, service } = fixture();
+  const sessionIdentity = assistant.id;
+  let workspace = service.save(owner, assistant.id, {
+    roleId: 'listing_assistant', expectedRevision: 0,
+  });
+  assert.equal(service.hasUserPermission(assistant, 'products', 'edit'), true);
+  assert.equal(service.hasUserPermission(assistant, 'publishing', 'publish'), false);
+  workspace = service.save(owner, assistant.id, {
+    roleId: 'publishing_manager', expectedRevision: workspace.revision,
+  });
+  assert.equal(service.hasUserPermission(assistant, 'publishing', 'approve'), true);
+  assert.equal(service.hasUserPermission(assistant, 'publishing', 'publish'), true);
+  workspace = service.save(owner, assistant.id, {
+    roleId: 'full_operational_access', expectedRevision: workspace.revision,
+  });
+  assert.equal(service.hasUserPermission(assistant, 'categories', 'edit'), true);
+  assert.equal(service.hasUserPermission(assistant, 'pricing', 'edit'), true);
+  workspace = service.save(owner, assistant.id, {
+    roleId: 'full_operational_access',
+    permissionOverrides: { 'publishing:publish': false },
+    expectedRevision: workspace.revision,
+  });
+  assert.equal(service.hasUserPermission(assistant, 'publishing', 'publish'), false);
+  assert.equal(assistant.id, sessionIdentity);
+  assert.equal(workspace.users.find((item) => item.id === assistant.id).assignment.roleId, 'full_operational_access');
+});
