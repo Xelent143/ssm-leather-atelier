@@ -508,6 +508,8 @@ function createAdminIdentity(options = {}) {
         recoveryReason: 'explicit_staging_owner_recovery',
         recoverySource: 'staging_startup_one_time',
         recoveryReceiptHash: String(recoveryMetadata.recoveryReceiptHash || ''),
+        recoveryNonceHash: String(recoveryMetadata.recoveryNonceHash || ''),
+        recoveryTokenHash: String(recoveryMetadata.recoveryTokenHash || ''),
         recoveryOwnerId: user.id,
       };
       writeStore(store);

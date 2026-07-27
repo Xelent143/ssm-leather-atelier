@@ -36,6 +36,8 @@ function createAdminStagingBootstrap(options = {}) {
       recoveryVersion: Number(parsed.recoveryVersion) || null,
       recoveryTimestamp: parsed.recoveryTimestamp || null,
       recoveryReceiptHash: parsed.recoveryReceiptHash || null,
+      recoveryNonceHash: parsed.recoveryNonceHash || null,
+      recoveryTokenHash: parsed.recoveryTokenHash || null,
       recoveryOwnerId: parsed.recoveryOwnerId || null,
     };
   }
@@ -46,11 +48,18 @@ function createAdminStagingBootstrap(options = {}) {
     const token = String(env.STAGING_OWNER_RECOVERY_TOKEN || '');
     if (!nonce || !token) return { enabled: true, consumed: false, configured: false };
     const receipt = crypto.createHash('sha256').update(`${nonce}:${token}`).digest('hex');
+    const nonceHash = crypto.createHash('sha256').update(nonce).digest('hex');
+    const recoveryTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const consumed = metadata?.recoveryReceiptHash === receipt ||
+      metadata?.recoveryNonceHash === nonceHash ||
+      metadata?.recoveryTokenHash === recoveryTokenHash;
     return {
-      enabled: metadata?.recoveryReceiptHash !== receipt,
-      consumed: metadata?.recoveryReceiptHash === receipt,
+      enabled: !consumed,
+      consumed,
       configured: true,
       receipt,
+      nonceHash,
+      recoveryTokenHash,
     };
   }
 
@@ -89,7 +98,9 @@ function createAdminStagingBootstrap(options = {}) {
       throw unavailable;
     }
     if (existingOwner) {
-      const exactOwner = existingOwner.displayName === STAGING_OWNER_DISPLAY_NAME &&
+      const ownerRecords = identity.readStore().users.filter((item) => item.accountType === 'owner');
+      const exactOwner = ownerRecords.length === 1 &&
+        existingOwner.displayName === STAGING_OWNER_DISPLAY_NAME &&
         existingOwner.email === STAGING_OWNER_EMAIL &&
         existingOwner.accountType === 'owner' &&
         existingOwner.status === 'active';
@@ -99,8 +110,7 @@ function createAdminStagingBootstrap(options = {}) {
         throw mismatch;
       }
       if (!recovery.configured ||
-          !password ||
-          String(env.STAGING_OWNER_RECOVERY_EXPECTED_USER_ID || '') !== existingOwner.id) {
+          !password) {
         throw Object.assign(new Error('Staging Owner recovery is not configured.'), {
           code: 'STAGING_RECOVERY_CONFIGURATION',
         });
@@ -112,6 +122,8 @@ function createAdminStagingBootstrap(options = {}) {
         {
           recoveryVersion: STAGING_RECOVERY_VERSION,
           recoveryReceiptHash: recovery.receipt,
+          recoveryNonceHash: recovery.nonceHash,
+          recoveryTokenHash: recovery.recoveryTokenHash,
         },
       );
       audit({

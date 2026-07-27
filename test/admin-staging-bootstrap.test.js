@@ -89,6 +89,8 @@ test('approved staging creates exactly one active Named Owner and safe metadata'
     recoveryVersion: null,
     recoveryTimestamp: null,
     recoveryReceiptHash: null,
+    recoveryNonceHash: null,
+    recoveryTokenHash: null,
     recoveryOwnerId: null,
   });
   const serialized = JSON.stringify(metadata);
@@ -141,7 +143,6 @@ test('explicit staging recovery synchronizes only the approved existing Owner pa
       STAGING_OWNER_RECOVERY_ENABLED: 'true',
       STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-a',
       STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-a',
-      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: before.id,
     }),
     identity: current.identity,
     logger: {
@@ -176,6 +177,29 @@ test('explicit staging recovery synchronizes only the approved existing Owner pa
   const second = await recovery.ensure();
   assert.equal(second.action, 'owner_exists');
   assert.equal(current.identity.owner().sessionRevocationVersion, beforeRevision + 1);
+  for (const env of [
+    enabledEnvironment({
+      STAGING_OWNER_PASSWORD: 'Another protected recovery phrase 2029',
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-a',
+      STAGING_OWNER_RECOVERY_TOKEN: 'different-protected-token',
+    }),
+    enabledEnvironment({
+      STAGING_OWNER_PASSWORD: 'Another protected recovery phrase 2029',
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'different-recovery-nonce',
+      STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-a',
+    }),
+  ]) {
+    const replay = createAdminStagingBootstrap({
+      dataDir: current.dataDir,
+      env,
+      identity: current.identity,
+      logger: { error() {}, info() {} },
+    });
+    assert.equal((await replay.ensure()).action, 'owner_exists');
+  }
+  assert.equal(current.identity.owner().sessionRevocationVersion, beforeRevision + 1);
   const serialized = JSON.stringify(current.identity.readStore());
   assert.doesNotMatch(current.log.join('\n'), /replacement|workshop phrase|argon2|token/i);
   assert.doesNotMatch(serialized, new RegExp(replacementPassword, 'i'));
@@ -195,7 +219,6 @@ test('staging password synchronization rejects an unexpected Owner identity', as
       STAGING_OWNER_RECOVERY_ENABLED: 'true',
       STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-b',
       STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-b',
-      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: current.identity.owner().id,
     }),
     identity: current.identity,
     logger: { error() {}, info() {} },
@@ -226,7 +249,6 @@ test('explicit staging recovery clears persisted failed-login state without chan
       STAGING_OWNER_RECOVERY_ENABLED: 'true',
       STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-c',
       STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-c',
-      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: before.id,
     }),
     identity: current.identity,
     logger: { error() {}, info() {} },
@@ -244,6 +266,36 @@ test('explicit staging recovery clears persisted failed-login state without chan
     socket: {},
   });
   assert.equal(login.ok, true);
+  fs.rmSync(current.dataDir, { recursive: true, force: true });
+});
+
+test('recovery refuses ambiguous or duplicated Owner records', async () => {
+  const current = fixture();
+  await current.bootstrap.ensure();
+  const store = current.identity.readStore();
+  store.users.push({
+    ...store.users[0],
+    id: 'duplicated-owner-record',
+    email: 'duplicate-owner@example.com',
+  });
+  fs.writeFileSync(
+    current.identity.paths.storePath,
+    `${JSON.stringify(store, null, 2)}\n`,
+    { mode: 0o600 },
+  );
+  const recovery = createAdminStagingBootstrap({
+    dataDir: current.dataDir,
+    env: enabledEnvironment({
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-d',
+      STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-d',
+    }),
+    identity: current.identity,
+    logger: { error() {}, info() {} },
+  });
+  await assert.rejects(recovery.ensure(), (error) =>
+    error.code === 'STAGING_BOOTSTRAP_IDENTITY_MISMATCH');
+  assert.equal(current.identity.readStore().users.length, 2);
   fs.rmSync(current.dataDir, { recursive: true, force: true });
 });
 
