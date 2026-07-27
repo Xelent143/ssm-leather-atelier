@@ -362,11 +362,16 @@
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 -5px 9px rgba(0,0,0,0.2);
   }
 
-  /* Commerce PDP media layout: compact square thumbnails beside a broad,
-     viewport-height product panel, with a sticky purchase column. */
-  .pdp-commerce-layout { align-items: start; }
-  .pdp-thumb-rail { overflow-y: auto; max-height: min(860px, calc(100vh - 190px)); scrollbar-width: thin; }
-  .pdp-main-image { background-position: center top; }
+  /* Commerce PDP: a compact, centred desktop composition keeps the complete
+     product and the essential buying controls in the same viewport. */
+  .pdp-commerce-layout { align-items: start; box-sizing: border-box; }
+  .pdp-thumb-rail { overflow-y: auto; max-height: min(720px, calc(100vh - 330px)); scrollbar-width: thin; }
+  .pdp-main-image {
+    background-position: center center;
+    background-size: contain !important;
+    background-repeat: no-repeat;
+    background-color: var(--bg-2);
+  }
   .pdp-details-panel { min-width: 0; }
 
   /* scroll snap helpers (for editorial sections) */
@@ -468,11 +473,11 @@
       object-fit: contain;
     }
     .pdp-commerce-layout {
-      grid-template-columns: 72px minmax(0, 1fr) minmax(330px, 0.62fr) !important;
+      grid-template-columns: 64px minmax(0, 1fr) minmax(330px, 0.68fr) !important;
       padding-left: 20px !important;
       padding-right: 20px !important;
     }
-    .pdp-details-panel { padding-left: 28px !important; }
+    .pdp-details-panel { padding-left: 0 !important; }
   }
 
   @media (max-width: 720px) {
@@ -3959,7 +3964,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   return (
     <div className="page-fade">
       {/* Breadcrumb */}
-      <nav style={{ padding: '20px 48px', display: 'flex', gap: 8 }} className="mono">
+      <nav className="mono pdp-breadcrumb" style={{ padding: '16px 0', display: 'flex', gap: 8, maxWidth: 1640, margin: '0 auto', width: '100%' }}>
         <button onClick={() => go('home')} style={{ fontSize: 10, color: 'var(--fg-4)', cursor: 'pointer', background: 'transparent', border: 0, padding: 0 }}>HOUSE</button>
         <span style={{ fontSize: 10, color: 'var(--fg-4)' }}>/</span>
         <button onClick={() => go('shop', { gender: p.gender })} style={{ fontSize: 10, color: 'var(--fg-4)', cursor: 'pointer', background: 'transparent', border: 0, padding: 0 }}>{p.gender.toUpperCase()}</button>
@@ -3970,17 +3975,17 @@ function PDP({ product, go, addToCart, onQuickView }) {
       </nav>
 
       <div className="pdp-commerce-layout" style={{
-        display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
-        padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%',
+        display: 'grid', gridTemplateColumns: '76px minmax(0, 0.96fr) minmax(440px, 0.72fr)', gap: 18,
+        padding: '0 0 64px', maxWidth: 1640, margin: '0 auto', width: '100%',
       }}>
         {/* Thumbnails */}
-        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
+        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 0 }}>
           {images.map((img, i) => (
             <button key={i} onClick={() => setImgIdx(i)}
               aria-label={img.label}
               className="ph tiny" data-img="1" data-label=""
               style={{
-                width: 76, height: 76, aspectRatio: '1', cursor: 'pointer',
+                width: 70, height: 70, aspectRatio: '1', cursor: 'pointer',
                 '--img': `url(${img.src})`,
                 outline: imgIdx === i ? '1px solid var(--fg)' : 'none',
                 outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.6,
@@ -3989,9 +3994,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
           ))}
         </div>
         {/* Main image */}
-        <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
+        <div className="pdp-main-media" style={{ paddingLeft: 0 }}>
           <div className="ph grain pdp-main-image" data-img="1" data-label=""
-            style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
+            style={{ height: 'min(720px, calc(100vh - 330px))', minHeight: 560, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8 }}>
               <button aria-label="Save to wishlist"
                 style={{ width: 36, height: 36, background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(10px)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 0, color: 'var(--fg)' }}>
@@ -4009,22 +4014,22 @@ function PDP({ product, go, addToCart, onQuickView }) {
         </div>
 
         {/* Details panel */}
-        <div className="pdp-details-panel" style={{ paddingLeft: 42, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
+        <div className="pdp-details-panel" style={{ paddingLeft: 0, position: 'sticky', top: 88, alignSelf: 'flex-start' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 8 }}>
             {p.cat.toUpperCase()} · {p.gender.toUpperCase()}
             {p.tag === 'Fit Lab' && <> · FIT LAB</>}
             {finalPiece && <> · FINAL PIECES</>}
           </div>
-          <h1 className="display" style={{ fontSize: 48, lineHeight: 1, margin: 0, fontWeight: 400 }}>{p.name}</h1>
-          <div style={{ color: 'var(--fg-3)', fontSize: 14, marginTop: 12, lineHeight: 1.6 }}>{p.blurb}</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 24, marginBottom: 32 }}>
-            <span className="display" style={{ fontSize: 32 }}>${displayPrice.toLocaleString()}</span>
+          <h1 className="display pdp-product-title" style={{ fontSize: 'clamp(36px, 3vw, 46px)', lineHeight: 1, margin: 0, fontWeight: 400 }}>{p.name}</h1>
+          <div style={{ color: 'var(--fg-3)', fontSize: 14, marginTop: 10, lineHeight: 1.45 }}>{p.blurb}</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 16, marginBottom: 20 }}>
+            <span className="display" style={{ fontSize: 30 }}>${displayPrice.toLocaleString()}</span>
             {p.compareAt && <span className="mono" style={{ fontSize: 11, color: 'var(--fg-4)', textDecoration: 'line-through' }}>${p.compareAt.toLocaleString()}</span>}
             <span className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>USD · DUTIES INCLUDED</span>
           </div>
 
           {/* Trust strip — moved above the picker */}
-          <div style={{ display: 'flex', gap: 12, padding: '14px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 8, padding: '10px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', marginBottom: 16 }}>
             {[
               { i: '✦', t: 'Hand-numbered' },
               { i: '⌖', t: 'Worldwide shipping' },
@@ -4037,12 +4042,12 @@ function PDP({ product, go, addToCart, onQuickView }) {
             ))}
           </div>
 
-          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
             <span>LEATHER · {productLeather.toUpperCase()}</span>
             <span style={{ color: 'var(--fg-4)' }}>{p.materialNote || lObj?.desc}</span>
           </div>
           {!p.materialLocked && (
-            <div style={{ display: 'flex', gap: 10, marginBottom: 28 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
               {SSM_LEATHERS.map(l => (
                 <button key={l.id} className={`swatch ${leather === l.id ? 'active' : ''}`}
                   aria-label={l.name} title={l.name}
@@ -4052,12 +4057,12 @@ function PDP({ product, go, addToCart, onQuickView }) {
           )}
 
           {p.colors?.length > 0 && (
-            <div style={{ marginBottom: 28 }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ marginBottom: 18 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
                 <span>COLOR</span>
                 <span style={{ color: 'var(--fg-2)' }}>{selectedProductColor?.name.toUpperCase()}</span>
               </div>
-              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                 {p.colors.map(c => (
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                     <button className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
@@ -4078,12 +4083,12 @@ function PDP({ product, go, addToCart, onQuickView }) {
           )}
 
           {p.collarColors?.length > 0 && (
-            <div style={{ marginBottom: 28 }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ marginBottom: 18 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
                 <span>COLLAR COLOR</span>
                 <span style={{ color: 'var(--fg-2)' }}>{selectedCollar?.name.toUpperCase()}</span>
               </div>
-              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                 {p.collarColors.map(c => (
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                     <button className={`swatch leather-swatch ${collarColor === c.id ? 'active' : ''}`}
@@ -4096,7 +4101,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </div>
           )}
 
-          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
             <span>SIZE</span>
             <button onClick={() => go('size')} className="ulink"
               style={{ color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 10 }}>
@@ -4111,7 +4116,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
               return (
                 <button key={s} onClick={() => setSize(s)} aria-label={`Size ${s}${out ? ', sold out' : ''}`}
                   style={{
-                    height: 44, position: 'relative',
+                    height: 40, position: 'relative',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     border: `1px solid ${size === s ? 'var(--fg)' : 'var(--line-2)'}`,
                     background: size === s ? 'var(--fg)' : 'transparent',
@@ -4127,7 +4132,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             })}
           </div>
           {p.stock && (
-            <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 24 }}>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginBottom: 16 }}>
               {inStock
                 ? (sizeStock(size) <= 2
                     ? `${sizeStock(size)} ${sizeStock(size) === 1 ? 'PIECE' : 'PIECES'} REMAIN IN ${size}`
@@ -4136,8 +4141,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </div>
           )}
 
-          <div style={{ marginBottom: 24 }}>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ marginBottom: 16 }}>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
               <span>FIT</span>
               <span style={{ color: 'var(--fg-4)' }}>MADE TO MEASURE +${madeToMeasureSurcharge}</span>
             </div>
@@ -4151,9 +4156,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
                   <button key={opt.id} onClick={() => setFitMode(opt.id)}
                     aria-pressed={active}
                     style={{
-                      textAlign: 'left', padding: 14, border: `1px solid ${active ? 'var(--accent-2)' : 'var(--line-2)'}`,
+                      textAlign: 'left', padding: 11, border: `1px solid ${active ? 'var(--accent-2)' : 'var(--line-2)'}`,
                       background: active ? 'rgba(176,138,76,0.08)' : 'transparent',
-                      color: 'var(--fg)', minHeight: 82, cursor: 'pointer',
+                      color: 'var(--fg)', minHeight: 72, cursor: 'pointer',
                     }}>
                     <div style={{ fontFamily: 'var(--display)', fontSize: 18, lineHeight: 1.1 }}>{opt.title}</div>
                     <div className="mono" style={{ fontSize: 8, color: active ? 'var(--accent-2)' : 'var(--fg-4)', marginTop: 8, lineHeight: 1.5 }}>
