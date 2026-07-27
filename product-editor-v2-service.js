@@ -21,7 +21,10 @@ const MEDIA_TYPES = new Map([
   ['image/png', { extension: '.png', signatures: [[0x89, 0x50, 0x4e, 0x47]] }],
   ['image/webp', { extension: '.webp', signatures: [[0x52, 0x49, 0x46, 0x46]] }],
 ]);
-const MEDIA_ROLES = new Set(['Front', 'Back', 'Side', 'Detail', 'Lifestyle', 'Size Chart', 'Other']);
+const MEDIA_ROLES = new Set([
+  'Front', 'Back', 'Left Side', 'Right Side', 'Side', 'Interior', 'Detail',
+  'Hardware', 'Lifestyle', 'Size Chart', 'Unknown', 'Other',
+]);
 const STATUS_VALUES = new Set(['draft', 'active', 'archived']);
 const DEFAULT_LEGAL_ENTITY = 'MOTOGRIP GEAR LLC';
 

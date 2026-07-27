@@ -30,6 +30,9 @@ const { createProductManagementGridService } = require('./product-management-gri
 const { createCategoryTaxonomyStore } = require('./category-taxonomy-store');
 const { createCategoryTaxonomyService } = require('./category-taxonomy-service');
 const { createTeamPermissionsService } = require('./team-permissions-service');
+const { createAiProductCopilotStore } = require('./ai-product-copilot-store');
+const { createAiProductCopilotService } = require('./ai-product-copilot-service');
+const { createOpenAiVisionProvider } = require('./ai-product-copilot-provider');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -129,6 +132,18 @@ const productEditorV2Service = createProductEditorV2Service({
   operationalLaunchService,
   authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
+const aiProductCopilotStore = createAiProductCopilotStore({ dataDir });
+const aiProductCopilotProvider = createOpenAiVisionProvider();
+const aiProductCopilotService = createAiProductCopilotService({
+  store: aiProductCopilotStore,
+  identity: adminIdentity,
+  productStore: productEditorV2Store,
+  plmStore: productPlmStore,
+  provider: aiProductCopilotProvider,
+  dataDir,
+  rootDir: root,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
+});
 const productManagementGridService = createProductManagementGridService({
   store: productEditorV2Store,
   identity: adminIdentity,
@@ -169,6 +184,13 @@ function productEditorWorkspace(session, productId = null) {
           .filter(Boolean).map(String).some((id) => identityIds.has(id))))
       .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
   } catch { workspace.taxonomy = []; }
+  if (workspace.product) {
+    try { workspace.aiCopilot = aiProductCopilotService.workspace(session, workspace.product.id); }
+    catch (error) {
+      if (error.code !== 'FORBIDDEN') throw error;
+      workspace.aiCopilot = null;
+    }
+  }
   return workspace;
 }
 function productGridWorkspace(session) {
@@ -1511,6 +1533,17 @@ function safePlmError(error) {
     MAX_DEPTH: 409,
     DELETE_BLOCKED: 409,
     CONFIRMATION_REQUIRED: 400,
+    AI_STORE_UNAVAILABLE: 503,
+    AI_PROVIDER_NOT_CONFIGURED: 503,
+    AI_PROVIDER_FAILED: 503,
+    AI_PROVIDER_INVALID_RESPONSE: 502,
+    AI_PROVIDER_RATE_LIMIT: 429,
+    AI_PROVIDER_TIMEOUT: 504,
+    AI_SCHEMA_INVALID: 502,
+    AI_IMAGES_REQUIRED: 400,
+    AI_IMAGE_UNAVAILABLE: 400,
+    AI_IMAGE_TOO_LARGE: 400,
+    AI_DAILY_LIMIT: 429,
   };
   return {
     status: statuses[error.code] || 500,
@@ -2233,6 +2266,33 @@ async function handleApi(req, res, pathname) {
     try {
       const body = await readBody(req);
       sendJson(res, 201, await productEditorV2Service.importWebsite(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const copilotMatch = pathname.match(
+    /^\/api\/admin\/ai-product-copilot\/products\/([0-9a-f-]+)(?:\/(analyze|review|cancel))?$/i,
+  );
+  if (copilotMatch) {
+    try {
+      const productId = copilotMatch[1];
+      const operation = copilotMatch[2] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, aiProductCopilotService.workspace(session, productId));
+      } else if (req.method === 'POST' && operation) {
+        const body = await readBody(req);
+        const actions = {
+          analyze: () => aiProductCopilotService.analyze(session, { ...body, productId }),
+          review: () => aiProductCopilotService.recordReview(session, { ...body, productId }),
+          cancel: () => aiProductCopilotService.cancel(session, { ...body, productId }),
+        };
+        sendJson(res, operation === 'analyze' ? 201 : 200, await actions[operation]());
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
@@ -3179,6 +3239,8 @@ module.exports = {
   productManagementGridService,
   categoryTaxonomyStore,
   categoryTaxonomyService,
+  aiProductCopilotStore,
+  aiProductCopilotService,
   productMeta,
   injectProductHead,
   injectRouteHead,

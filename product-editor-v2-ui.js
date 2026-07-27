@@ -49,7 +49,7 @@
         ${item.featured ? '<b>Featured</b>' : ''}
         <input data-media-field="altText" value="${esc(item.altText)}" placeholder="Alt text">
         <input data-media-field="title" value="${esc(item.title)}" placeholder="Image title">
-        <select data-media-field="role">${['Front', 'Back', 'Side', 'Detail', 'Lifestyle', 'Size Chart', 'Other'].map((role) => `<option ${role === item.role ? 'selected' : ''}>${role}</option>`).join('')}</select>
+        <select data-media-field="role">${['Front', 'Back', 'Left Side', 'Right Side', 'Side', 'Interior', 'Detail', 'Hardware', 'Lifestyle', 'Size Chart', 'Unknown', 'Other'].map((role) => `<option ${role === item.role ? 'selected' : ''}>${role}</option>`).join('')}</select>
         <div class="button-row"><button class="btn" type="button" data-feature="${item.id}">Featured</button><button class="btn danger" type="button" data-remove="${item.id}">Remove</button></div>
       </article>`).join('')}</div><label class="btn pe-add-media"><input id="pe-files" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden>＋ Add media</label>`;
   }
@@ -70,6 +70,82 @@
       <div class="pe-table-scroll"><table class="pe-table"><thead><tr><th><input id="pe-all" type="checkbox"></th><th>Variant</th><th>Image</th><th>Variant SKU</th><th>Price</th><th>Compare at</th><th>Cost</th><th>Quantity</th><th>Weight</th><th>Status</th><th>Sell</th></tr></thead><tbody>${product.variants.map((variant) => `<tr data-variant="${variant.id}" data-signature="${esc(variant.signature)}"><td><input data-v-select type="checkbox"></td><td><strong>${esc(Object.values(variant.attributes).join(' / ') || 'Default')}</strong></td><td><select data-v="imageId"><option value="">Default</option>${product.media.map((item) => `<option value="${item.id}" ${variant.imageId === item.id ? 'selected' : ''}>${esc(item.title || item.role || item.originalName)}</option>`).join('')}</select></td><td><code>${esc(variant.sku || 'Generated after approval')}</code></td><td><input data-v="price" type="number" min="0" step=".01" value="${variant.price}"></td><td><input data-v="compareAtPrice" type="number" min="0" step=".01" value="${variant.compareAtPrice ?? ''}"></td><td><input data-v="cost" type="number" min="0" step=".01" value="${variant.cost ?? ''}"></td><td><input data-v="quantity" type="number" min="0" value="${variant.quantity}"></td><td><input data-v="weight" type="number" min="0" step=".01" value="${variant.weight}"></td><td><select data-v="status"><option ${variant.status === 'active' ? 'selected' : ''}>active</option><option ${variant.status === 'disabled' ? 'selected' : ''}>disabled</option></select></td><td><input data-v="availableForSale" type="checkbox" ${variant.availableForSale ? 'checked' : ''}></td></tr>`).join('')}</tbody></table></div>`;
   }
 
+  function suggestionCurrentValue(product, field) {
+    const paths = {
+      title: product.title,
+      'organization.productType': product.organization.productType,
+      'organization.category': product.organization.category,
+      'organization.tags': product.organization.tags,
+      'section.shortDescription': product.sections.shortDescription,
+      'section.fullDescription': product.sections.fullDescription,
+      'section.features': product.sections.features,
+      'section.specifications': product.sections.specifications,
+      'section.perfectFor': product.sections.perfectFor,
+      'section.whyYouWillLoveIt': product.sections.whyYouWillLoveIt,
+      'section.faq': product.sections.faq,
+      'section.buyingGuide': product.sections.buyingGuide,
+      'seo.title': product.seo.title,
+      'seo.metaDescription': product.seo.metaDescription,
+      'seo.handle': product.seo.handle,
+    };
+    const value = paths[field];
+    return Array.isArray(value) ? value.join(', ') : String(value || '');
+  }
+
+  function copilotPanel(product, workspace) {
+    if (!product.id) return `<section class="card pe-card pe-copilot" id="pe-copilot">
+      <div class="card-head"><div><span class="eyebrow">AI Copilot</span><h2>Analyze Product Images</h2><p>Save the initial draft, then upload factual source images before analysis.</p></div><span class="pe-ai-state">Waiting for Images</span></div>
+    </section>`;
+    const copilot = workspace.aiCopilot;
+    if (!copilot) return '';
+    const latest = copilot.latest;
+    const result = latest?.result;
+    const canRun = copilot.permissions?.run || copilot.permissions?.reanalyze;
+    const providerReady = copilot.provider?.configured;
+    const imageName = (id) => product.media.find((item) => item.id === id)?.title ||
+      product.media.find((item) => item.id === id)?.originalName || id;
+    return `<section class="card pe-card pe-copilot" id="pe-copilot">
+      <div class="card-head"><div><span class="eyebrow">AI Product Listing Copilot v1</span><h2>Image analysis → factual website draft</h2><p>AI creates versioned suggestions. Nothing is applied or published without your action.</p></div><span class="pe-ai-state ${latest?.status || ''}">${esc(latest?.status?.replaceAll('_', ' ') || (product.media.length ? 'Ready to Analyze' : 'Waiting for Images'))}</span></div>
+      <div class="pe-mode-switch" role="radiogroup" aria-label="Create product mode"><label><input type="radio" name="pe-create-mode" value="manual" ${!latest ? 'checked' : ''}> Manual Entry</label><label><input type="radio" name="pe-create-mode" value="ai" ${latest ? 'checked' : ''}> Analyze with AI</label></div>
+      <div class="pe-ai-grid">
+        <div class="pe-ai-inputs">
+          <h3>Analysis brief</h3>
+          ${input('Optional product name', 'ai.productName', product.title)}
+          ${textarea('Instructions', 'ai.instruction', latest?.instruction || '')}
+          ${textarea('Known facts (one per line)', 'ai.knownFacts', '')}
+          <div class="pe-grid-2">${input('Target audience', 'ai.targetAudience', 'Leather apparel shoppers')}${input('Target market', 'ai.targetMarket', 'USA')}${select('Brand', 'ai.brand', product.organization.brand, ['MOTOGRIP GEAR', 'BLACKTOP GEAR', 'Vintage Leather Goods', 'BRANDS JACKET HUB', 'The Western Hides', 'Custom Jacket Co', 'Be Smart'])}${select('Preferred tone', 'ai.tone', 'Premium, factual, human and trustworthy', ['Premium, factual, human and trustworthy', 'Technical and concise', 'Western heritage', 'Motorcycle performance'])}</div>
+          <h3>Source images</h3>
+          <div class="pe-ai-images">${product.media.map((item) => `<label><input type="checkbox" data-ai-image="${item.id}" checked><img src="${esc(mediaUrl(item.path) || '')}" alt=""><span>${esc(item.role || 'Unknown')} · ${esc(item.title || item.originalName)}</span></label>`).join('') || '<p class="pe-warning">Upload at least one image in the Media card.</p>'}</div>
+          <label class="pe-field"><span>Image source policy</span><select name="ai.imageSource"><option>Uploaded Images Only</option><option disabled>AI Generated Images — later</option><option disabled>Hybrid — later</option></select></label>
+          <div class="button-row"><button class="btn primary" type="button" id="pe-ai-analyze" ${!canRun || !providerReady || !product.media.length ? 'disabled' : ''}>${latest ? 'Reanalyze' : 'Analyze with AI'}</button><button class="btn" type="button" id="pe-ai-cancel" ${!canRun ? 'disabled' : ''}>Cancel Analysis</button><button class="btn" type="button" id="pe-ai-start-over">Start Over</button></div>
+          <div class="pe-ai-shortcuts" aria-label="AI Copilot actions">
+            ${['Suggest Title', 'Generate SEO', 'Generate FAQ', 'Generate Buying Guide', 'Suggest Categories', 'Check Missing Information'].map((label) => `<button class="btn" type="button" data-ai-shortcut="${esc(label)}" ${!canRun || !providerReady || !product.media.length ? 'disabled' : ''}>✨ ${esc(label)}</button>`).join('')}
+          </div>
+          ${!providerReady ? '<div class="alert warning"><strong>Provider not configured</strong><p>Add the protected server-side provider credential to enable live analysis. Manual Product Editor remains fully available.</p></div>' : ''}
+        </div>
+        <aside class="pe-ai-usage"><h3>Usage & provider</h3>${status('Provider', copilot.provider?.status)}${status('Model', copilot.provider?.model)}${status('Analyses today', copilot.usage?.analysesToday)}${status('Images today', copilot.usage?.imagesAnalyzedToday)}${status('Failed today', copilot.usage?.failedToday)}<small>Daily limit: ${copilot.limits?.maxRequestsPerUserDay} analyses · ${copilot.limits?.maxImages} images each</small></aside>
+      </div>
+      ${latest && result ? `<div class="pe-ai-results">
+        <div class="card-head"><div><h3>AI Suggestions Review</h3><p>Analysis ${latest.version} · ${new Date(latest.generatedAt).toLocaleString()}</p></div><span>${latest.copyAnalysis?.scores?.overallQuality || 0}/100 Copy Quality</span></div>
+        ${latest.trustedConflicts?.length ? `<div class="alert warning"><strong>Trusted-data conflicts</strong>${latest.trustedConflicts.map((item) => `<p>${esc(item.field)}: trusted value retained; AI suggestion requires confirmation.</p>`).join('')}</div>` : ''}
+        <div class="pe-suggestion-list">${latest.suggestions.map((item) => `<article class="pe-suggestion">
+          <label><input type="checkbox" data-ai-suggestion="${esc(item.field)}" ${item.status === 'accepted' ? 'checked' : ''}><strong>${esc(item.field.replaceAll('.', ' › '))}</strong></label>
+          <div><small>Current</small><p>${esc(suggestionCurrentValue(product, item.field) || 'Empty')}</p></div>
+          <div><small>AI suggestion · ${esc(item.confidence)}</small><textarea data-ai-edit="${esc(item.field)}">${esc(Array.isArray(item.value) ? item.value.join(', ') : item.value)}</textarea></div>
+          <div><small>Evidence</small><p>${item.evidence?.length ? item.evidence.map((evidence) => esc(imageName(evidence.imageId))).join(', ') : 'Generated from confirmed facts and brief'}</p></div>
+        </article>`).join('')}</div>
+        <div class="button-row"><button class="btn primary" id="pe-ai-apply-selected" type="button">Apply Selected Suggestions</button><button class="btn" id="pe-ai-apply-safe" type="button">Apply All Safe Suggestions</button><button class="btn" id="pe-ai-reject-uncertain" type="button">Reject All Uncertain</button></div>
+        <div class="pe-ai-review-grid">
+          <section><h3>Fact confidence & evidence</h3>${[...result.visualAnalysis, ...result.productFacts].map((fact) => `<article class="pe-fact ${fact.status}"><strong>${esc(fact.field)}: ${esc(fact.value || 'Not visible')}</strong><span>${esc(fact.confidence)} · ${esc(fact.status.replaceAll('_', ' '))}</span><small>${fact.evidence.map((evidence) => esc(imageName(evidence.imageId))).join(', ') || 'No visual evidence claimed'}</small></article>`).join('')}</section>
+          <section><h3>Missing information</h3>${result.missingInformation.map((item) => `<label class="pe-question"><span>${esc(item.question)} ${item.critical ? '<b>Critical</b>' : ''}</span><select data-ai-answer="${esc(item.field)}"><option value="">Select an answer</option>${item.options.map((option) => `<option>${esc(option)}</option>`).join('')}</select></label>`).join('') || '<p>No unanswered questions.</p>'}</section>
+          <section><h3>Image coverage</h3>${result.imageCoverage.map((item) => `<div class="pe-coverage ${item.available ? 'available' : 'missing'}"><strong>${item.available ? '✓' : '✗'} ${esc(item.role)}</strong><span>${esc(item.recommendation)}</span></div>`).join('')}</section>
+          <section><h3>Secondary drafts</h3><details><summary>eBay (${result.ebayDraft.title.length}/80)</summary><p>${esc(result.ebayDraft.title)}</p><p>${esc(result.ebayDraft.description)}</p></details><details><summary>Etsy (${result.etsyDraft.title.length}/140 · 13 tags)</summary><p>${esc(result.etsyDraft.title)}</p><p>${esc(result.etsyDraft.description)}</p><p>${result.etsyDraft.tags.map(esc).join(' · ')}</p></details><details><summary>AEO / GEO answers</summary>${[...result.aeo, ...result.geo].map((item) => `<p><strong>${esc(item.question)}</strong><br>${esc(item.answer)}</p>`).join('')}</details></section>
+        </div>
+      </div>` : ''}
+      ${copilot.analyses?.length > 1 ? `<details><summary>Analysis history (${copilot.analyses.length})</summary><div class="activity-list">${copilot.analyses.map((item) => `<div><strong>Analysis ${item.version}</strong><span>${esc(item.status.replaceAll('_', ' '))} · ${new Date(item.generatedAt).toLocaleString()}</span></div>`).join('')}</div></details>` : ''}
+    </section>`;
+  }
+
   function render(productInput, workspace, context) {
     const product = productInput || empty();
     const owner = context.owner;
@@ -84,6 +160,7 @@
       ${!product.id ? '<div class="alert info"><strong>New governed product</strong><p>Save the draft first. Product DNA and automatic identities are created only after explicit Owner approval.</p></div>' : ''}
       <form id="pe-form" class="pe-layout">
         <main class="pe-main">
+          ${copilotPanel(product, workspace)}
           <section class="card pe-card"><h2>Product content</h2>${input('Product title', 'title', product.title, 'text', 'required maxlength="300"')}
             <label class="pe-field"><span>Rich description</span><div class="pe-toolbar">${[['bold', 'B'], ['italic', 'I'], ['underline', 'U'], ['formatBlock:h2', 'H2'], ['insertUnorderedList', '• List'], ['insertOrderedList', '1. List'], ['justifyLeft', 'Left'], ['justifyCenter', 'Center'], ['undo', 'Undo'], ['redo', 'Redo']].map(([cmd, label]) => `<button type="button" data-rich="${cmd}">${label}</button>`).join('')}<button type="button" id="pe-link">Link</button><button type="button" id="pe-table">Table</button></div><div id="pe-rich" class="pe-rich" contenteditable="${editable}">${product.descriptionHtml || ''}</div></label>
             <details open><summary>Structured website listing sections</summary><div class="pe-grid-2">${[['shortDescription', 'Short Description'], ['fullDescription', 'Full Description'], ['features', 'Features'], ['specifications', 'Specifications'], ['perfectFor', 'Perfect For'], ['whyYouWillLoveIt', 'Why You’ll Love It'], ['faq', 'FAQ'], ['buyingGuide', 'Buying Guide']].map(([key, label]) => textarea(label, `section.${key}`, product.sections[key])).join('')}</div></details>
@@ -177,6 +254,112 @@
         return result;
       } catch (error) { context.toast(error.message); }
     };
+    const aiValue = (name) => document.getElementById('pe-form')?.elements.namedItem(name)?.value || '';
+    const knownFacts = () => Object.fromEntries(aiValue('ai.knownFacts').split('\n')
+      .map((line) => line.split(/:(.*)/s)).filter((pair) => pair[0]?.trim() && pair[1]?.trim())
+      .map(([key, value]) => [key.trim(), value.trim()]));
+    const confirmedAnswers = () => Object.fromEntries(
+      [...document.querySelectorAll('[data-ai-answer]')]
+        .filter((item) => item.value !== '')
+        .map((item) => [item.dataset.aiAnswer, item.value]),
+    );
+    const refreshCopilot = (response) => {
+      workspace.aiCopilot = response.workspace;
+      context.update(product, workspace);
+    };
+    document.getElementById('pe-ai-analyze')?.addEventListener('click', async () => {
+      try {
+        context.toast('Analyzing product images…');
+        const response = await context.api(`/api/admin/ai-product-copilot/products/${product.id}/analyze`, {
+          method: 'POST',
+          body: JSON.stringify({
+            expectedRevision: workspace.aiCopilot.storeRevision,
+            imageIds: [...document.querySelectorAll('[data-ai-image]:checked')].map((item) => item.dataset.aiImage),
+            productName: aiValue('ai.productName'), instruction: aiValue('ai.instruction'),
+            knownFacts: { ...knownFacts(), ...confirmedAnswers() },
+            targetAudience: aiValue('ai.targetAudience'),
+            targetMarket: aiValue('ai.targetMarket'), brand: aiValue('ai.brand'),
+            tone: aiValue('ai.tone'),
+          }),
+        });
+        refreshCopilot(response);
+        context.toast('AI analysis complete. Review suggestions before applying.');
+      } catch (error) { context.toast(error.message); }
+    });
+    document.querySelectorAll('[data-ai-shortcut]').forEach((button) => button.addEventListener('click', () => {
+      const instruction = document.getElementById('pe-form')?.elements.namedItem('ai.instruction');
+      if (instruction) {
+        const request = `${button.dataset.aiShortcut}. Keep every suggestion factual and require confirmation for uncertain details.`;
+        instruction.value = instruction.value ? `${instruction.value}\n${request}` : request;
+      }
+      document.getElementById('pe-ai-analyze')?.click();
+    }));
+    document.getElementById('pe-ai-cancel')?.addEventListener('click', async () => {
+      try {
+        const response = await context.api(`/api/admin/ai-product-copilot/products/${product.id}/cancel`, {
+          method: 'POST',
+          body: JSON.stringify({
+            expectedRevision: workspace.aiCopilot.storeRevision,
+            instruction: aiValue('ai.instruction'),
+          }),
+        });
+        refreshCopilot(response); context.toast('Analysis cancelled safely');
+      } catch (error) { context.toast(error.message); }
+    });
+    document.getElementById('pe-ai-start-over')?.addEventListener('click', () => {
+      document.querySelectorAll('[data-ai-suggestion]').forEach((item) => { item.checked = false; });
+      const instruction = document.getElementById('pe-form')?.elements.namedItem('ai.instruction');
+      const facts = document.getElementById('pe-form')?.elements.namedItem('ai.knownFacts');
+      if (instruction) instruction.value = '';
+      if (facts) facts.value = '';
+      context.toast('AI selections cleared. Previous analysis history is preserved.');
+    });
+    const setSuggestedField = (field, value) => {
+      const form = document.getElementById('pe-form');
+      if (field === 'title') form.elements.namedItem('title').value = value;
+      else if (field === 'organization.tags') form.elements.namedItem(field).value = value;
+      else {
+        const target = form.elements.namedItem(field);
+        if (target) target.value = value;
+      }
+    };
+    const reviewSuggestions = async (mode) => {
+      const latest = workspace.aiCopilot?.latest;
+      if (!latest) return;
+      const selected = [];
+      const rejected = [];
+      latest.suggestions.forEach((suggestion) => {
+        const checkbox = document.querySelector(`[data-ai-suggestion="${CSS.escape(suggestion.field)}"]`);
+        const safe = suggestion.confidence === 'high' &&
+          !latest.trustedConflicts?.some((conflict) => conflict.field === suggestion.field);
+        const accept = mode === 'safe' ? safe : mode === 'selected' ? checkbox?.checked : false;
+        if (mode === 'reject-uncertain' && !safe) {
+          if (checkbox) checkbox.checked = false;
+          rejected.push(suggestion.field);
+        } else if (accept) {
+          const editor = document.querySelector(`[data-ai-edit="${CSS.escape(suggestion.field)}"]`);
+          setSuggestedField(suggestion.field, editor?.value ?? suggestion.value);
+          selected.push(suggestion.field);
+        }
+      });
+      if (mode !== 'reject-uncertain' && !selected.length) return context.toast('Select at least one AI suggestion');
+      try {
+        const response = await context.api(`/api/admin/ai-product-copilot/products/${product.id}/review`, {
+          method: 'POST',
+          body: JSON.stringify({
+            expectedRevision: workspace.aiCopilot.storeRevision,
+            analysisId: latest.id, acceptedFields: selected, rejectedFields: rejected,
+            draftRevision: product.revision,
+          }),
+        });
+        workspace.aiCopilot = response.workspace;
+        context.dirty();
+        context.toast(selected.length ? 'Suggestions applied locally. Save Draft to persist them.' : 'Uncertain suggestions rejected.');
+      } catch (error) { context.toast(error.message); }
+    };
+    document.getElementById('pe-ai-apply-selected')?.addEventListener('click', () => reviewSuggestions('selected'));
+    document.getElementById('pe-ai-apply-safe')?.addEventListener('click', () => reviewSuggestions('safe'));
+    document.getElementById('pe-ai-reject-uncertain')?.addEventListener('click', () => reviewSuggestions('reject-uncertain'));
     document.querySelectorAll('[data-rich]').forEach((button) => button.addEventListener('click', () => {
       const [command, value] = button.dataset.rich.split(':');
       document.execCommand(command, false, value || null);
