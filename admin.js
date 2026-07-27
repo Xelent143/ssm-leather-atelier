@@ -254,6 +254,7 @@ function filteredReturns() {
 
 function renderLogin(error = '') {
   const named = state.loginMode === 'named';
+  const passwordSet = new URLSearchParams(window.location.search).get('password-set') === 'success';
   root.innerHTML = `
     <main class="login-shell">
       <form class="login-card" id="login-form">
@@ -270,6 +271,7 @@ function renderLogin(error = '') {
           <button class="btn ${!named ? 'primary' : ''}" type="button" data-login-mode="legacy">Legacy compatibility</button>
         </div>
         ${!named && !state.configured ? '<p class="pill archived">Legacy admin access is not configured. Contact the site administrator.</p>' : ''}
+        ${passwordSet ? '<p class="pill active">Password set successfully. Please sign in.</p>' : ''}
         ${named ? `
           <div class="field">
             <label for="email">Email</label>

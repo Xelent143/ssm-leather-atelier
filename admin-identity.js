@@ -517,6 +517,47 @@ function createAdminIdentity(options = {}) {
     });
   }
 
+  async function completeBrowserOwnerRecovery(userId, email, newPassword, recoveryMetadata) {
+    return serializeMutation(async () => {
+      const store = readStore();
+      const matches = store.users
+        .map((user, index) => ({ user, index }))
+        .filter(({ user }) =>
+          user.email === normalizeEmail(email) &&
+          user.displayName === 'Chand Rizvi' &&
+          user.accountType === 'owner' &&
+          user.status === 'active');
+      if (matches.length !== 1 || matches[0].user.id !== userId) {
+        throw Object.assign(new Error('Owner recovery is unavailable.'), {
+          code: 'OWNER_RECOVERY_UNAVAILABLE',
+        });
+      }
+      const { user, index } = matches[0];
+      const validation = validatePassword(newPassword, user);
+      if (!validation.valid) {
+        throw Object.assign(new Error(validation.error), { code: 'PASSWORD_POLICY' });
+      }
+      const timestamp = new Date(now()).toISOString();
+      user.passwordHash = await hash(String(newPassword), ARGON2_OPTIONS);
+      user.passwordChangedAt = timestamp;
+      user.updatedAt = timestamp;
+      user.failedLoginCount = 0;
+      user.lockedUntil = null;
+      user.mustChangePassword = false;
+      user.sessionRevocationVersion = Number(user.sessionRevocationVersion || 0) + 1;
+      store.users[index] = user;
+      store.bootstrapMetadata = {
+        ...(store.bootstrapMetadata || {}),
+        browserRecoveryCodeHash: String(recoveryMetadata.browserRecoveryCodeHash || ''),
+        browserRecoveryCompletedAt: String(recoveryMetadata.browserRecoveryCompletedAt || timestamp),
+        browserRecoveryReason: 'owner_initiated_browser_password_setup',
+        browserRecoverySource: 'staging_owner_recovery_page',
+      };
+      writeStore(store);
+      return publicUser(user);
+    });
+  }
+
   function managedUsers() {
     return readStore().users
       .filter((user) => user.accountType === 'listing_editor')
@@ -635,6 +676,7 @@ function createAdminIdentity(options = {}) {
     countActiveSessions,
     createManagedUser,
     consumeInvitationToken,
+    completeBrowserOwnerRecovery,
     createInvitationToken,
     findByEmail,
     findById,
