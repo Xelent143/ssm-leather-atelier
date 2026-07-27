@@ -73,6 +73,23 @@ function validatePrice(price, compareAtPrice, allowLowerCompareAt = false) {
     throw Object.assign(new Error('Compare-at price cannot be lower than price.'), { code: 'VALIDATION' });
   }
 }
+function importedWebsiteIdentity(source) {
+  const productSku = clean(source?.sku, 80).toUpperCase();
+  if (!productSku) return null;
+  return {
+    productSku,
+    internalProductCode: clean(source.internalProductCode, 80) || null,
+    factoryCode: clean(source.factoryCode, 80) || null,
+    state: 'imported',
+    source: 'website_import',
+    variantSkus: (Array.isArray(source.variants) ? source.variants : [])
+      .filter((variant) => clean(variant.sku, 80))
+      .map((variant) => ({
+        sku: clean(variant.sku, 80).toUpperCase(),
+        attributes: variant.attributes || {},
+      })),
+  };
+}
 
 function createProductEditorV2Service(options = {}) {
   const {
@@ -260,7 +277,27 @@ function createProductEditorV2Service(options = {}) {
     const current = store.read();
     const existing = current.products.find((item) =>
       String(item.websiteProductId) === String(source.id) || item.seo.handle === source.slug);
-    if (existing) return workspace(session, existing.id);
+    const importedIdentity = importedWebsiteIdentity(source);
+    if (existing) {
+      if (!existing.identity?.productSku && importedIdentity) {
+        await store.mutate((state) => {
+          const record = state.products.find((item) => item.id === existing.id);
+          if (!record || record.identity?.productSku) return { store: state, value: record };
+          const previousRevision = record.revision;
+          record.identity = importedIdentity;
+          record.revision += 1;
+          record.updatedAt = new Date(now()).toISOString();
+          record.updatedBy = `user:${user.id}`;
+          appendAudit(state, user, record, 'website_identity_projected', {
+            changedFields: ['identity'],
+            previousRevision,
+            newRevision: record.revision,
+          });
+          return { store: state, value: record };
+        });
+      }
+      return workspace(session, existing.id);
+    }
     const sourceOptions = Array.isArray(source.options) ? source.options :
       Object.keys(source.stock || {}).length ? [{ name: 'Size', values: Object.keys(source.stock) }] : [];
     const normalized = normalizeDraft({
@@ -324,7 +361,7 @@ function createProductEditorV2Service(options = {}) {
         role: order === 0 ? 'Front' : 'Other', featured: order === 0, order,
         createdAt: timestamp, createdBy: 'website-import',
       })),
-      identity: productIdentityService.view(clean(input.productUuid, 80)).identity || null,
+      identity: productIdentityService.view(clean(input.productUuid, 80)).identity || importedIdentity,
       ...normalized,
       createdAt: timestamp, createdBy: `user:${user.id}`, updatedAt: timestamp, updatedBy: `user:${user.id}`,
     };
@@ -577,6 +614,7 @@ function createProductEditorV2Service(options = {}) {
         title: latest.title,
         variants: latest.variants.map((variant) => variant.attributes),
         sellableAttributeKeys: latest.options.map((option) => optionCode(option.name)),
+        existingSku: latest.identity?.productSku || undefined,
       };
       let identityView = productIdentityService.view(latest.productUuid);
       if (!identityView.identity) identityView = await productIdentityService.generate(session, identityInput);
@@ -687,6 +725,7 @@ function createProductEditorV2Service(options = {}) {
         shipping: product.shipping,
         shippingWeight: `${product.shipping.weight} ${product.shipping.weightUnit}`,
         metafields: product.metafields,
+        factualProjection: true,
       },
     });
     await store.mutate((next) => {

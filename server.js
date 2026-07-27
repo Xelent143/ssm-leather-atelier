@@ -25,6 +25,9 @@ const { createOperationalLaunchService } = require('./operational-launch-service
 const { createWebsiteWriteAdapter } = require('./website-write-adapter');
 const { createProductEditorV2Store } = require('./product-editor-v2-store');
 const { createProductEditorV2Service } = require('./product-editor-v2-service');
+const { createProductManagementGridService } = require('./product-management-grid-service');
+const { createCategoryTaxonomyStore } = require('./category-taxonomy-store');
+const { createCategoryTaxonomyService } = require('./category-taxonomy-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -114,7 +117,45 @@ const productEditorV2Service = createProductEditorV2Service({
   websiteAdapter: websiteWriteAdapter,
   operationalLaunchService,
 });
+const productManagementGridService = createProductManagementGridService({
+  store: productEditorV2Store,
+  identity: adminIdentity,
+  editorService: productEditorV2Service,
+  listingStore: listingStudioStore,
+  readWebsiteCatalog: readPublicStore,
+  announce: operationalLaunchService.announce,
+});
+const categoryTaxonomyStore = createCategoryTaxonomyStore({ dataDir });
+const categoryTaxonomyService = createCategoryTaxonomyService({
+  store: categoryTaxonomyStore,
+  identity: adminIdentity,
+  readWebsiteCatalog: readPublicStore,
+  readEditorProducts: () => productEditorV2Store.read(),
+  announce: operationalLaunchService.announce,
+});
 const returnRequestAttempts = new Map();
+
+function productEditorWorkspace(session, productId = null) {
+  const workspace = productEditorV2Service.workspace(session, productId);
+  try {
+    workspace.taxonomy = categoryTaxonomyService.workspace(session).categories
+      .filter((category) => category.workflowState === 'live' && category.status === 'active')
+      .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
+  } catch { workspace.taxonomy = []; }
+  return workspace;
+}
+function productGridWorkspace(session) {
+  const grid = productManagementGridService.grid(session);
+  try {
+    const taxonomy = categoryTaxonomyService.workspace(session).categories;
+    grid.taxonomy = taxonomy.map(({ id, name, hierarchyPath }) => ({ id, name, hierarchyPath }));
+    grid.products = grid.products.map((product) => {
+      const category = taxonomy.find((item) => item.name.toLowerCase() === String(product.category || '').toLowerCase());
+      return { ...product, categoryId: category?.id || null, categoryPath: category?.hierarchyPath || product.category };
+    });
+  } catch { grid.taxonomy = []; }
+  return grid;
+}
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
@@ -307,6 +348,21 @@ function send(res, status, body, contentType = 'text/plain; charset=utf-8', head
   if (indexingDisabled()) responseHeaders['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
   res.writeHead(status, responseHeaders);
   res.end(body);
+}
+
+function serveCategoryPage(req, res, handle) {
+  const category = categoryTaxonomyService.publicCategory(handle);
+  if (!category) {
+    send(res, 404, '<!doctype html><html><head><meta name="robots" content="noindex"><title>Category not found</title></head><body><main><h1>Category not found</h1><a href="/shop">Shop MOTOGRIP GEAR</a></main></body></html>', 'text/html; charset=utf-8');
+    return;
+  }
+  const canonical = absoluteUrl(req, `/collections/${category.slug}`);
+  const publicAsset = (value) => !value || value.startsWith('/') || /^https?:\/\//i.test(value) ? value : `/${value}`;
+  const products = category.products.map((product) => `<article class="product"><a href="/products/${escapeHtml(product.handle)}">${product.image ? `<img src="${escapeHtml(publicAsset(product.image))}" alt="${escapeHtml(product.title)}">` : ''}<h2>${escapeHtml(product.title)}</h2><p>${escapeHtml(product.sku || '')}</p></a></article>`).join('');
+  const children = category.children.length ? `<nav class="children" aria-label="Subcategories">${category.children.map((child) => `<a href="/collections/${escapeHtml(child.slug)}">${escapeHtml(child.name)}</a>`).join('')}</nav>` : '';
+  const image = publicAsset(category.bannerImage || category.featuredImage);
+  const schema = JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: category.name, description: category.description || undefined, url: canonical });
+  send(res, 200, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(category.seoTitle || category.name)}</title>${category.metaDescription ? `<meta name="description" content="${escapeHtml(category.metaDescription)}">` : ''}<link rel="canonical" href="${escapeHtml(canonical)}"><script type="application/ld+json">${schema.replace(/</g, '\\u003c')}</script><style>body{margin:0;font:16px/1.5 Inter,Arial;color:#191512;background:#f7f5f1}main{max-width:1280px;margin:auto;padding:48px 24px}header{text-align:center;margin-bottom:32px}header img{width:100%;max-height:420px;object-fit:cover;border-radius:18px}.children{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:24px}.children a,.product a{color:inherit;text-decoration:none}.children a{padding:10px 16px;border:1px solid #cfc8bf;border-radius:999px;background:#fff}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}.product{background:#fff;padding:14px;border-radius:16px}.product img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}.product h2{font-size:17px}</style></head><body><main><header>${image ? `<img src="${escapeHtml(image)}" alt="">` : ''}<p>${escapeHtml(category.hierarchyPath)}</p><h1>${escapeHtml(category.name)}</h1>${category.description ? `<p>${escapeHtml(category.description)}</p>` : ''}</header>${children}<section class="grid">${products}</section></main></body></html>`, 'text/html; charset=utf-8');
 }
 
 function sendJson(res, status, data, headers = {}) {
@@ -766,7 +822,41 @@ function productMeta(product, store, req) {
   const canonical = product.canonicalUrl || absoluteUrl(req, productPath(product));
   const image = productImageUrl(req, product.primaryImage || product.image);
   const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
-  const availability = Number(product.inventory || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  const sellableVariants = (Array.isArray(product.variants) ? product.variants : [])
+    .filter((variant) => variant.status !== 'disabled' && variant.availableForSale !== false);
+  const availability = (sellableVariants.length
+    ? sellableVariants.some((variant) => Number(variant.quantity || 0) > 0)
+    : Number(product.inventory || 0) > 0)
+    ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  const metafields = product.metafields && typeof product.metafields === 'object' ? product.metafields : {};
+  const factualValue = (value) => value !== undefined && value !== null && value !== '' &&
+    String(value).toLowerCase() !== 'not applicable';
+  const propertyLabels = {
+    outerMaterial: 'Outer material',
+    leatherType: 'Leather type',
+    leatherThickness: 'Leather thickness',
+    liningMaterial: 'Lining',
+    closure: 'Closure',
+    hardware: 'Hardware',
+    pocketCount: 'Pocket count',
+    concealedCarryPockets: 'Concealed-carry pockets',
+    armorCompatibility: 'Armor compatibility',
+    collar: 'Collar',
+    sleeveType: 'Sleeve type',
+    fit: 'Fit',
+    careInstructions: 'Care instructions',
+    customSizingAvailable: 'Custom sizing',
+    personalizationAvailable: 'Personalization',
+    manufacturer: 'Manufacturer',
+    countryOfManufacture: 'Country of manufacture',
+  };
+  const factualProperties = Object.entries(propertyLabels)
+    .filter(([key]) => factualValue(metafields[key]))
+    .map(([key, name]) => ({
+      '@type': 'PropertyValue',
+      name,
+      value: typeof metafields[key] === 'boolean' ? (metafields[key] ? 'Yes' : 'No') : String(metafields[key]),
+    }));
   const productNode = {
     '@type': 'Product',
     '@id': `${canonical}#product`,
@@ -782,11 +872,13 @@ function productMeta(product, store, req) {
       name: product.brand || store.settings.storeName || 'MOTOGRIP GEAR',
     },
     category: product.productType || product.category,
-    material: product.material || product.leatherType || undefined,
-    color: product.color || undefined,
-    size: product.size || undefined,
+    material: (factualValue(metafields.outerMaterial) ? metafields.outerMaterial :
+      factualValue(metafields.leatherType) ? metafields.leatherType :
+      product.factualProjection ? undefined : product.material || product.leatherType || undefined),
+    color: product.factualProjection ? undefined : product.color || undefined,
+    size: product.factualProjection ? undefined : product.size || undefined,
     audience: product.gender ? { '@type': 'PeopleAudience', suggestedGender: product.gender } : undefined,
-    additionalProperty: [
+    additionalProperty: product.factualProjection ? factualProperties : [
       ['Made to measure', product.madeToMeasureEnabled ? `Available +${currency} ${product.madeToMeasureSurcharge}` : 'Not available'],
       ['Leather type', product.leatherType],
       ['Hardware', product.hardware],
@@ -794,6 +886,25 @@ function productMeta(product, store, req) {
       ['Riding use', product.ridingUseCase],
       ['Care', product.careInstructions],
     ].filter(([, value]) => value !== undefined && value !== '').map(([name, value]) => ({ '@type': 'PropertyValue', name, value: String(value) })),
+    hasVariant: sellableVariants.map((variant) => ({
+      '@type': 'Product',
+      sku: variant.sku || undefined,
+      name: [product.title, ...Object.values(variant.attributes || {})].filter(Boolean).join(' - '),
+      additionalProperty: Object.entries(variant.attributes || {}).map(([name, value]) => ({
+        '@type': 'PropertyValue',
+        name,
+        value: String(value),
+      })),
+      offers: {
+        '@type': 'Offer',
+        url: canonical,
+        priceCurrency: currency,
+        price: Number(variant.price ?? product.price ?? 0).toFixed(2),
+        availability: Number(variant.quantity || 0) > 0
+          ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        itemCondition: `https://schema.org/${product.condition || 'NewCondition'}`,
+      },
+    })),
     offers: {
       '@type': 'Offer',
       '@id': `${canonical}#offer`,
@@ -879,17 +990,44 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
       gender: product.gender || 'Unisex',
       price: Number(product.price || 0),
       compareAtPrice: product.compareAtPrice,
-      img: product.primaryImage || product.image,
-      alt: product.galleryImages?.[0] || product.primaryImage || product.image,
-      images: [product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean),
+      brand: product.brand,
+      vendor: product.maker || product.brand,
+      productType: product.productType,
+      category: product.category,
+      seoTitle: product.seoTitle,
+      metaDescription: product.seoDescription,
+      img: productImageUrl(req, product.primaryImage || product.image),
+      alt: productImageUrl(req, product.galleryImages?.[0] || product.primaryImage || product.image),
+      images: [product.primaryImage || product.image, ...(product.galleryImages || [])]
+        .filter(Boolean).map((imagePath) => productImageUrl(req, imagePath)),
       stock: product.stock || {},
       options: product.options || [],
       variants: product.variants || [],
       availableColors: product.availableColors || [],
-      maker: product.maker || product.brand || 'MOTOGRIP GEAR',
+      imageMetadata: (product.imageMetadata || []).map((item) => ({
+        ...item,
+        path: item.path ? productImageUrl(req, item.path) : item.path,
+      })),
+      maker: product.maker || product.brand || '',
       tag: product.tag || '',
       madeToMeasureSurcharge: product.madeToMeasureSurcharge,
       metafields: product.metafields || {},
+      shipping: product.shipping || {},
+      shippingWeight: product.shippingWeight || '',
+      sku: product.sku || '',
+      internalProductCode: product.internalProductCode || '',
+      factoryCode: product.factoryCode || '',
+      sections: {
+        features: product.features || [],
+        specifications: product.specifications || [],
+        perfectFor: product.perfectFor || '',
+        whyYouWillLoveIt: product.whyYouWillLoveIt || '',
+        faq: product.faq || [],
+        buyingGuide: product.buyingGuide || '',
+      },
+      tags: product.tags || [],
+      factualProjection: product.factualProjection === true,
+      reviews: Array.isArray(product.reviews) ? product.reviews : [],
     },
   })};</script>`;
   return html
@@ -1218,8 +1356,17 @@ function normalizeStore(input) {
       shipping: product.shipping && typeof product.shipping === 'object' ? product.shipping : {},
       metafields: product.metafields && typeof product.metafields === 'object' ? product.metafields : {},
       imageMetadata: Array.isArray(product.imageMetadata) ? product.imageMetadata : [],
-      shippingPolicy: String(product.shippingPolicy || 'Complimentary express shipping on stock pieces'),
-      returnPolicy: String(product.returnPolicy || '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support'),
+      shortDescription: String(product.shortDescription || ''),
+      features: Array.isArray(product.features) ? product.features : (product.features || ''),
+      specifications: Array.isArray(product.specifications) ? product.specifications : (product.specifications || ''),
+      perfectFor: String(product.perfectFor || ''),
+      whyYouWillLoveIt: String(product.whyYouWillLoveIt || ''),
+      faq: Array.isArray(product.faq) ? product.faq : (product.faq || ''),
+      buyingGuide: String(product.buyingGuide || ''),
+      tags: Array.isArray(product.tags) ? product.tags.map(String) : [],
+      factualProjection: product.factualProjection === true,
+      shippingPolicy: String(product.shippingPolicy || (product.factualProjection ? '' : 'Complimentary express shipping on stock pieces')),
+      returnPolicy: String(product.returnPolicy || (product.factualProjection ? '' : '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support')),
       ratingValue: Number(product.ratingValue || 0),
       reviewCount: Number(product.reviewCount || 0),
       careInstructions: String(product.careInstructions || ''),
@@ -1295,6 +1442,14 @@ function safePlmError(error) {
     PRODUCT_EDITOR_STORE_UNAVAILABLE: 503,
     IMMUTABLE_RECORD: 409,
     CURRENT_PASSWORD_INVALID: 400,
+    CATEGORY_STORE_UNAVAILABLE: 503,
+    DUPLICATE_SLUG: 409,
+    DUPLICATE_CATEGORY: 409,
+    CIRCULAR_HIERARCHY: 409,
+    MISSING_PARENT: 409,
+    MAX_DEPTH: 409,
+    DELETE_BLOCKED: 409,
+    CONFIRMATION_REQUIRED: 400,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1305,6 +1460,13 @@ function safePlmError(error) {
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/catalog' && req.method === 'GET') {
     sendJson(res, 200, publicCatalog(readPublicStore()));
+    return true;
+  }
+  if (pathname === '/api/categories' && req.method === 'GET') {
+    try {
+      const workspace = categoryTaxonomyService.workspace({ actorType: 'legacy_owner' });
+      sendJson(res, 200, { categories: workspace.categories.filter((item) => !item.parentId && item.workflowState === 'live' && item.status === 'active' && item.websiteVisibility).map(({ id, name, slug, sortOrder, childCount }) => ({ id, name, slug, sortOrder, childCount })).sort((a,b)=>a.sortOrder-b.sortOrder) });
+    } catch { sendJson(res, 200, { categories: [] }); }
     return true;
   }
 
@@ -1883,9 +2045,98 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/product-grid' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productGridWorkspace(session));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/categories' && req.method === 'GET') {
+    try {
+      if (!categoryTaxonomyStore.read().categories.length) await categoryTaxonomyService.sync(session, true);
+      sendJson(res, 200, categoryTaxonomyService.workspace(session));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/categories/sync' && req.method === 'POST') {
+    try { sendJson(res, 200, await categoryTaxonomyService.sync(session)); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories' && req.method === 'POST') {
+    try { sendJson(res, 201, await categoryTaxonomyService.create(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories/bulk' && req.method === 'POST') {
+    try { sendJson(res, 200, await categoryTaxonomyService.bulk(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories/rules/preview' && req.method === 'POST') {
+    try { sendJson(res, 200, categoryTaxonomyService.previewRules(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  const categoryApiMatch = pathname.match(/^\/api\/admin\/categories\/([0-9a-f-]+)(?:\/(assignments|workflow|activity|media))?$/i);
+  if (categoryApiMatch) {
+    try {
+      const [, categoryId, subroute] = categoryApiMatch;
+      if (!subroute && req.method === 'PUT') sendJson(res, 200, await categoryTaxonomyService.update(session, categoryId, await readBody(req)));
+      else if (subroute === 'assignments' && req.method === 'POST') sendJson(res, 200, await categoryTaxonomyService.assign(session, categoryId, await readBody(req)));
+      else if (subroute === 'media' && req.method === 'POST') sendJson(res, 201, await categoryTaxonomyService.uploadMedia(session, categoryId, await readBody(req, 8 * 1024 * 1024)));
+      else if (subroute === 'workflow' && req.method === 'POST') {
+        const body = await readBody(req); sendJson(res, 200, await categoryTaxonomyService.workflow(session, categoryId, body.action, body));
+      } else if (subroute === 'activity' && req.method === 'GET') sendJson(res, 200, categoryTaxonomyService.activity(session, categoryId));
+      else sendJson(res, 405, { error: 'Method not allowed' });
+    } catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-grid/actions' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 200, await productManagementGridService.mutate(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-grid/duplicate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 201, await productManagementGridService.duplicate(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const productGridHistoryMatch = pathname.match(/^\/api\/admin\/product-grid\/products\/([0-9a-f-]+)\/history$/i);
+  if (productGridHistoryMatch && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productManagementGridService.history(session, productGridHistoryMatch[1]));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
   if (pathname === '/api/admin/product-editor-v2' && req.method === 'GET') {
     try {
-      sendJson(res, 200, productEditorV2Service.workspace(session));
+      sendJson(res, 200, productEditorWorkspace(session));
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
@@ -1924,7 +2175,7 @@ async function handleApi(req, res, pathname) {
       const operation = editorProductMatch[2] || null;
       const mediaId = editorProductMatch[3] || null;
       if (req.method === 'GET' && !operation) {
-        sendJson(res, 200, productEditorV2Service.workspace(session, productId));
+        sendJson(res, 200, productEditorWorkspace(session, productId));
       } else if (req.method === 'PUT' && !operation) {
         const body = await readBody(req);
         sendJson(res, 200, await productEditorV2Service.save(session, { ...body, productId }));
@@ -2734,10 +2985,22 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const categoryMatch = requestPath.match(/^\/collections\/([a-z0-9-]+)\/?$/);
+    if (categoryMatch) {
+      serveCategoryPage(req, res, categoryMatch[1]);
+      return;
+    }
+
     const editorMediaMatch = requestPath.match(/^\/product-editor-media\/([0-9a-f-]+)\/([0-9a-f-]+\.(?:jpg|png|webp))$/i);
     if (editorMediaMatch) {
       const mediaPath = path.join(productEditorV2Store.paths.mediaDir, editorMediaMatch[1], editorMediaMatch[2]);
       serveFile(req, res, mediaPath);
+      return;
+    }
+
+    const categoryMediaMatch = requestPath.match(/^\/category-media\/([0-9a-f-]+)\/([0-9a-f-]+\.(?:jpg|png|webp))$/i);
+    if (categoryMediaMatch) {
+      serveFile(req, res, path.join(categoryTaxonomyStore.paths.mediaDir, categoryMediaMatch[1], categoryMediaMatch[2]));
       return;
     }
 
@@ -2798,6 +3061,9 @@ module.exports = {
   websiteWriteAdapter,
   productEditorV2Store,
   productEditorV2Service,
+  productManagementGridService,
+  categoryTaxonomyStore,
+  categoryTaxonomyService,
   productMeta,
   injectProductHead,
   injectRouteHead,

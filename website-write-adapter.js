@@ -8,7 +8,7 @@ const PUBLISHABLE_FIELDS = new Set([
   'descriptionHtml', 'maker', 'category', 'gender', 'collections', 'costPerItem',
   'taxable', 'image', 'primaryImage', 'galleryImages', 'options', 'variants',
   'variantOptions', 'availableColors', 'sku', 'internalProductCode', 'factoryCode',
-  'shipping', 'shippingWeight', 'metafields',
+  'shipping', 'shippingWeight', 'metafields', 'factualProjection',
 ]);
 
 function cleanSlug(value) {

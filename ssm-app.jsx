@@ -26,7 +26,8 @@ const productFromSlug = (slug) => {
     ...product,
     ...(SSM_PRODUCT_OVERRIDE.product || {}),
     name: SSM_PRODUCT_OVERRIDE.title || product.name,
-    publicDescription: SSM_PRODUCT_OVERRIDE.description || product.publicDescription || '',
+    publicDescription: SSM_PRODUCT_OVERRIDE.product?.publicDescription ||
+      SSM_PRODUCT_OVERRIDE.description || product.publicDescription || '',
   };
 };
 const articleFromParams = (params = {}) => params.article
@@ -66,11 +67,16 @@ function applySEO(view, params) {
   let desc  = seo?.desc  || '';
   if (view === 'pdp') {
     const p = params?.product || SSM_PRODUCTS[0];
-    title = SSM_SEO.pdp.title
-      .replace('%name%', p.name)
-      .replace('%cat%', p.cat)
-      .replace('%gender%', p.gender);
-    desc = (p.story?.piece || p.blurb || '').slice(0, 158);
+    if (p.factualProjection) {
+      title = p.seoTitle || `${p.name} | MOTOGRIP GEAR`;
+      desc = (p.metaDescription || p.blurb || '').slice(0, 320);
+    } else {
+      title = SSM_SEO.pdp.title
+        .replace('%name%', p.name)
+        .replace('%cat%', p.cat)
+        .replace('%gender%', p.gender);
+      desc = (p.story?.piece || p.blurb || '').slice(0, 158);
+    }
   }
   if (view === 'article') {
     const article = articleFromParams(params);

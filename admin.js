@@ -46,6 +46,31 @@ const state = {
   productEditorDirty: false,
   productEditorOptionDrafts: [],
   productEditorVariantFilter: '',
+  productGrid: null,
+  productGridSelection: new Set(),
+  productGridFilters: {
+    status: 'all',
+    brand: 'all',
+    productType: 'all',
+    collection: 'all',
+    inventory: 'all',
+  },
+  productGridSort: 'updated-desc',
+  productGridPage: 1,
+  productGridPageSize: 25,
+  productGridPreviewId: null,
+  productGridBulkEditor: false,
+  productGridHistory: null,
+  taxonomy: null,
+  categorySelection: new Set(),
+  categoryFilters: { view: 'all', status: 'all' },
+  categorySort: 'sort-order',
+  categoryPage: 1,
+  categoryPageSize: 25,
+  categoryEditorId: null,
+  categoryExpanded: new Set(),
+  categoryActivity: null,
+  categoryRulePreview: null,
   mvpError: '',
 };
 
@@ -59,8 +84,8 @@ const navigationGroups = [
   ['Commerce', [
     ['catalog', '▦', 'Catalog', '/admin/catalog', 'active'],
     ['products', '□', 'Products', '/admin/products', 'active'],
-    ['categories', '▦', 'Categories', '/admin/categories', 'planned'],
-    ['collections', '◇', 'Collections', '/admin/collections', 'planned'],
+    ['categories', '▦', 'Categories', '/admin/categories', 'active'],
+    ['collections', '◇', 'Collections', '/admin/collections', 'active'],
     ['inventory', '▤', 'Inventory', '/admin/inventory', 'planned'],
     ['orders', '◫', 'Orders', '/admin/orders', 'planned'],
     ['customers', '♙', 'Customers', '/admin/customers', 'planned'],
@@ -103,6 +128,7 @@ routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:
 routeEntries.push(['catalog-review', '▦', 'Catalog Review', '/admin/catalog/review', 'active']);
 routeEntries.push(['catalog-detail', '▦', 'Catalog Product Detail', '/admin/catalog/:catalogProductId', 'active']);
 routeEntries.push(['profile', '♙', 'My Profile', '/admin/profile', 'active']);
+routeEntries.push(['category-editor', '▦', 'Category Editor', '/admin/categories/:categoryId', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -131,6 +157,9 @@ const moduleDetails = {
 function money(value) {
   const currency = state.store?.settings?.currency || 'USD';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+function formatDate(value) {
+  return value ? new Date(value).toLocaleString() : 'Not available';
 }
 
 function escapeHtml(value = '') {
@@ -205,6 +234,44 @@ function filteredMvpProducts() {
     product.legacyId,
     product.governance?.label,
   ].join(' ').toLowerCase().includes(query));
+}
+
+function productGridRows() {
+  const rows = state.productGrid?.products || [];
+  const query = state.query.trim().toLowerCase();
+  const filters = state.productGridFilters;
+  const filtered = rows.filter((product) => {
+    const searchable = [
+      product.title, product.sku, ...(product.variantSkus || []), product.brand,
+      ...(product.tags || []), product.category, ...(product.collections || []), product.handle,
+    ].join(' ').toLowerCase();
+    if (query && !searchable.includes(query)) return false;
+    if (filters.status !== 'all' && product.status !== filters.status) return false;
+    if (filters.brand !== 'all' && product.brand !== filters.brand) return false;
+    if (filters.productType !== 'all' && product.productType !== filters.productType) return false;
+    if (filters.collection !== 'all' && !(product.collections || []).includes(filters.collection)) return false;
+    if (filters.inventory === 'out' && !product.outOfStock) return false;
+    if (filters.inventory === 'in' && product.outOfStock) return false;
+    if (filters.inventory === 'needs-review' && product.syncStatus !== 'Needs Review') return false;
+    if (filters.inventory === 'sync-error' && product.syncStatus !== 'Sync Error') return false;
+    if (filters.inventory === 'missing-images' && !product.missingImages) return false;
+    return true;
+  });
+  return filtered.sort((a, b) => {
+    const rules = {
+      'newest': () => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0),
+      'oldest': () => new Date(a.lastUpdated || 0) - new Date(b.lastUpdated || 0),
+      'price-asc': () => a.price - b.price,
+      'price-desc': () => b.price - a.price,
+      'inventory-asc': () => a.inventory - b.inventory,
+      'inventory-desc': () => b.inventory - a.inventory,
+      'title-asc': () => a.title.localeCompare(b.title),
+      'title-desc': () => b.title.localeCompare(a.title),
+      'updated-asc': () => new Date(a.lastUpdated || 0) - new Date(b.lastUpdated || 0),
+      'updated-desc': () => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0),
+    };
+    return (rules[state.productGridSort] || rules['updated-desc'])();
+  });
 }
 
 function filteredCatalogProducts() {
@@ -418,7 +485,7 @@ function Sidebar() {
       </div>
       <div class="sidebar-footer">
         <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
-        <span class="nav-copy">${state.mvpProducts.length || state.store.products.length} products · Owner workspace</span>
+        <span class="nav-copy">${state.productGrid?.counts?.total ?? (state.mvpProducts.length || state.store.products.length)} products · Owner workspace</span>
       </div>
     </aside>
   `;
@@ -705,8 +772,15 @@ function renderMvpDashboard() {
     return `${PageHeader('Dashboard', 'Your read-only product operating view.', '', 'active')}${AlertPanel('Workspace unavailable', state.mvpError, 'warning')}`;
   }
   if (!dashboard) return LoadingSkeleton();
+  const gridCounts = state.productGrid?.counts || {};
   return `
     ${PageHeader('Dashboard', 'A focused read-only view of product governance and the work that needs attention.', '<a class="btn primary" data-route="products" href="/admin/products">View products</a>', 'active')}
+    <div class="pg-stats pg-dashboard-stats">
+      ${[['Total products', gridCounts.total], ['Live', gridCounts.live], ['Draft', gridCounts.draft],
+        ['Archived', gridCounts.archived], ['Hidden', gridCounts.hidden], ['Needs review', gridCounts.needsReview],
+        ['Sync errors', gridCounts.syncErrors], ['Out of stock', gridCounts.outOfStock]]
+        .map(([label, count]) => `<div class="pg-stat"><span>${label}</span><strong>${Number(count || 0)}</strong></div>`).join('')}
+    </div>
     <div class="grid stats mvp-stats">
       ${StatCard('Products', String(dashboard.productCount), 'Current internal product records')}
       ${StatCard('Governed', String(dashboard.governedCount), 'Approved release and Knowledge Lock')}
@@ -744,20 +818,294 @@ function renderMvpDashboard() {
 }
 
 function renderMvpProducts() {
-  const products = filteredMvpProducts();
+  if (!state.productGrid) {
+    return `${PageHeader('Products', 'Professional product management for MOTOGRIP OS.', '', 'active')}${LoadingSkeleton()}`;
+  }
+  const products = productGridRows();
+  const pageCount = Math.max(1, Math.ceil(products.length / state.productGridPageSize));
+  state.productGridPage = Math.min(state.productGridPage, pageCount);
+  const start = (state.productGridPage - 1) * state.productGridPageSize;
+  const page = products.slice(start, start + state.productGridPageSize);
+  const selected = state.productGridSelection;
+  const pageSelected = page.length > 0 && page.every((product) => selected.has(product.id));
+  const allFilteredSelected = products.length > 0 && products.every((product) => selected.has(product.id));
+  const values = (key) => [...new Set((state.productGrid.products || [])
+    .flatMap((product) => key === 'collection' ? product.collections || [] : [product[key] || ''])
+    .filter(Boolean))].sort();
+  const counts = state.productGrid.counts;
+  const preview = state.productGrid.products.find((product) => product.id === state.productGridPreviewId);
+  const owner = state.productGrid.permissions.delete;
+  const canEdit = state.productGrid.permissions.edit;
+  const statusTone = (value) => value === 'Live' || value === 'Synced'
+    ? 'active' : value === 'Sync Error' ? 'restricted' : value === 'Archived' || value === 'Hidden' ? 'existing' : 'planned';
+  const options = (items, selectedValue) => items.map((value) =>
+    `<option value="${escapeHtml(value)}" ${selectedValue === value ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('');
   return `
-    ${PageHeader('Products', 'Browse current product records and inspect their governed PLM readiness.', '<a class="btn" data-route="current-products" href="/admin/products/current">Legacy Product Manager</a><button class="btn primary" id="open-product-editor">Add Product</button>', 'active')}
-    ${AlertPanel('Read-only workspace', 'No product, storefront, inventory, pricing, or governance data can be changed from this screen.', 'info')}
-    <div class="shell-gap"></div>
-    <div class="filter-bar mvp-filter-bar">
-      <label class="filter-search"><span class="sr-only">Search products</span><input id="mvp-product-filter" value="${escapeHtml(state.query)}" placeholder="Search products, SKU, type, or governance status"></label>
-      <span class="filter-spacer"></span>
-      <span class="muted">${products.length} of ${state.mvpProducts.length} products</span>
+    <div class="pg-page">
+      ${PageHeader('Products', 'Manage products, variants, merchandising status, and website synchronization from one fast workspace.', '<a class="btn" data-route="current-products" href="/admin/products/current">Legacy Product Manager</a><button class="btn primary" id="open-product-editor">Add Product</button>', 'active')}
+      ${canEdit ? '' : AlertPanel('Legacy compatibility access', 'Use Legacy Product Manager for compatibility editing. Named Owner or Listing Editor access is required for Product Grid mutations.', 'info')}
+      <div class="pg-stats">
+        ${[['Total products', counts.total, 'all'], ['Live', counts.live, 'Live'], ['Draft', counts.draft, 'Draft'],
+          ['Archived', counts.archived, 'Archived'], ['Hidden', counts.hidden, 'Hidden'],
+          ['Needs review', counts.needsReview, 'needs-review'], ['Sync errors', counts.syncErrors, 'sync-error'],
+          ['Out of stock', counts.outOfStock, 'out']].map(([label, count, filter]) => `
+            <button class="pg-stat" data-grid-stat="${filter}" type="button"><span>${label}</span><strong>${count}</strong></button>
+          `).join('')}
+      </div>
+      <section class="card pg-card">
+        <div class="pg-toolbar">
+          <label class="filter-search pg-search"><span class="sr-only">Search products</span>
+            <input id="product-grid-search" value="${escapeHtml(state.query)}" placeholder="Search title, SKU, variant SKU, brand, tags, collection, or handle">
+          </label>
+          <select class="pg-select" data-grid-filter="status" aria-label="Filter by status">
+            <option value="all">All statuses</option>${options(['Live', 'Draft', 'Hidden', 'Archived'], state.productGridFilters.status)}
+          </select>
+          <select class="pg-select" data-grid-filter="brand" aria-label="Filter by brand">
+            <option value="all">All brands</option>${options(values('brand'), state.productGridFilters.brand)}
+          </select>
+          <select class="pg-select" data-grid-filter="productType" aria-label="Filter by product type">
+            <option value="all">All product types</option>${options(values('productType'), state.productGridFilters.productType)}
+          </select>
+          <select class="pg-select" data-grid-filter="collection" aria-label="Filter by collection">
+            <option value="all">All collections</option>${options(values('collection'), state.productGridFilters.collection)}
+          </select>
+          <select class="pg-select" data-grid-filter="inventory" aria-label="Filter by product condition">
+            <option value="all">All inventory</option>
+            <option value="in" ${state.productGridFilters.inventory === 'in' ? 'selected' : ''}>In stock</option>
+            <option value="out" ${state.productGridFilters.inventory === 'out' ? 'selected' : ''}>Out of stock</option>
+            <option value="needs-review" ${state.productGridFilters.inventory === 'needs-review' ? 'selected' : ''}>Needs review</option>
+            <option value="sync-error" ${state.productGridFilters.inventory === 'sync-error' ? 'selected' : ''}>Sync errors</option>
+            <option value="missing-images" ${state.productGridFilters.inventory === 'missing-images' ? 'selected' : ''}>Missing images</option>
+          </select>
+          <select class="pg-select" id="product-grid-sort" aria-label="Sort products">
+            ${[['updated-desc','Updated: newest'],['updated-asc','Updated: oldest'],['newest','Newest'],['oldest','Oldest'],
+              ['title-asc','Title A–Z'],['title-desc','Title Z–A'],['price-asc','Price: low to high'],
+              ['price-desc','Price: high to low'],['inventory-asc','Inventory: low to high'],
+              ['inventory-desc','Inventory: high to low']].map(([value,label]) =>
+                `<option value="${value}" ${state.productGridSort === value ? 'selected' : ''}>${label}</option>`).join('')}
+          </select>
+          <button class="btn" id="clear-product-grid-filters" type="button">Clear</button>
+        </div>
+        <div class="pg-selection-tools">
+          <button class="btn compact-btn" id="select-page-products" type="button">${pageSelected ? 'Clear page' : 'Select page'}</button>
+          <button class="btn compact-btn" id="select-filtered-products" type="button">${allFilteredSelected ? 'Clear filtered' : `Select all ${products.length} filtered`}</button>
+          <span>${selected.size} selected · ${products.length} results</span>
+        </div>
+        <div class="pg-table-wrap">
+          <table class="pg-table">
+            <thead><tr>
+              <th class="pg-check"><input id="product-grid-select-page" type="checkbox" ${pageSelected ? 'checked' : ''} aria-label="Select page"></th>
+              <th>Product</th><th>SKU</th><th>Status</th><th>Inventory</th><th>Variants</th><th>Price</th>
+              <th>Brand</th><th>Category</th><th>Product type</th><th>Collections</th><th>Sync</th><th>Updated</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${page.map((product) => `
+                <tr class="pg-row" data-grid-preview="${escapeHtml(product.id)}" tabindex="0">
+                  <td class="pg-check"><input data-grid-select="${escapeHtml(product.id)}" type="checkbox" ${selected.has(product.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(product.title)}"></td>
+                  <td class="pg-product"><img src="${escapeHtml(product.image)}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.handle)}</small></span></td>
+                  <td><code>${escapeHtml(product.sku || 'Missing SKU')}</code></td>
+                  <td>${statusBadge(statusTone(product.status), product.status)}</td>
+                  <td><strong>${product.inventory}</strong>${product.outOfStock ? '<small class="pg-warning">Out of stock</small>' : ''}</td>
+                  <td>${product.variantCount}</td>
+                  <td>${money(product.price)}${product.compareAtPrice > product.price ? `<small><s>${money(product.compareAtPrice)}</s></small>` : ''}</td>
+                  <td>${escapeHtml(product.brand || '—')}</td>
+                  <td>${product.categoryId ? `<button class="link-button" data-open-product-category="${product.categoryId}">${escapeHtml(product.categoryPath || product.category)}</button>` : escapeHtml(product.category || '—')}</td>
+                  <td>${escapeHtml(product.productType || '—')}</td>
+                  <td><span class="pg-clamp">${escapeHtml((product.collections || []).join(', ') || '—')}</span></td>
+                  <td>${statusBadge(statusTone(product.syncStatus), product.syncStatus)}</td>
+                  <td>${escapeHtml(formatTimestamp(product.lastUpdated))}</td>
+                  <td>
+                    <details class="pg-actions">
+                      <summary aria-label="Actions for ${escapeHtml(product.title)}">•••</summary>
+                      <div>
+                        <button data-grid-action="preview" data-product-id="${escapeHtml(product.id)}">Preview website</button>
+                        ${canEdit ? `
+                          <button data-grid-action="edit" data-product-id="${escapeHtml(product.id)}">Edit</button>
+                          <button data-grid-action="editor" data-product-id="${escapeHtml(product.id)}">Open Product Editor v2</button>
+                          <button data-grid-action="revise" data-product-id="${escapeHtml(product.id)}">Create new revision</button>
+                          <button data-grid-action="duplicate" data-product-id="${escapeHtml(product.id)}">Duplicate</button>
+                          ${product.status !== 'Archived' ? `<button data-grid-action="archive" data-product-id="${escapeHtml(product.id)}">Archive</button>` : ''}
+                          ${product.status !== 'Hidden' ? `<button data-grid-action="hide" data-product-id="${escapeHtml(product.id)}">Hide</button>` : ''}
+                          ${['Archived','Hidden'].includes(product.status) ? `<button data-grid-action="restore" data-product-id="${escapeHtml(product.id)}">Restore</button>` : ''}
+                          ${owner ? `<button class="danger-text" data-grid-action="delete" data-product-id="${escapeHtml(product.id)}">Delete</button>` : ''}
+                          <button data-grid-action="activity" data-product-id="${escapeHtml(product.id)}">View activity</button>
+                          <button data-grid-action="history" data-product-id="${escapeHtml(product.id)}">View history</button>
+                        ` : ''}
+                      </div>
+                    </details>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          ${page.length ? '' : EmptyState('No matching products', 'Clear filters or adjust your search.')}
+        </div>
+        <div class="pg-pagination">
+          <span>Showing ${page.length ? start + 1 : 0}–${Math.min(start + page.length, products.length)} of ${products.length}</span>
+          <label>Rows <select id="product-grid-page-size">${[25,50,100].map(size => `<option ${state.productGridPageSize === size ? 'selected' : ''}>${size}</option>`).join('')}</select></label>
+          <button class="btn compact-btn" id="product-grid-prev" ${state.productGridPage <= 1 ? 'disabled' : ''}>Previous</button>
+          <span>Page ${state.productGridPage} of ${pageCount}</span>
+          <button class="btn compact-btn" id="product-grid-next" ${state.productGridPage >= pageCount ? 'disabled' : ''}>Next</button>
+        </div>
+      </section>
+      ${selected.size && canEdit ? `
+        <div class="pg-bulk-bar">
+          <strong>${selected.size} selected</strong>
+          <button class="btn primary" data-grid-bulk="edit">Bulk edit</button>
+          <button class="btn" data-grid-bulk="inventory">Bulk inventory</button>
+          <button class="btn" data-grid-bulk="price">Bulk price</button>
+          <button class="btn" data-grid-bulk="status">Bulk status</button>
+          <button class="btn" data-grid-bulk="tags">Bulk tags</button>
+          <button class="btn" data-grid-bulk="collections">Bulk collections</button>
+          <button class="btn" data-grid-taxonomy="add">Assign category</button>
+          <button class="btn" data-grid-taxonomy="remove">Remove category</button>
+          <button class="btn" data-grid-bulk-action="archive">Archive</button>
+          <button class="btn" data-grid-bulk-action="hide">Hide</button>
+          <button class="btn" data-grid-bulk-action="restore">Restore</button>
+          ${owner ? '<button class="btn danger" data-grid-bulk-action="delete">Delete</button>' : ''}
+          <button class="btn" id="product-grid-export">Export</button>
+          <button class="btn" id="clear-product-grid-selection">Clear</button>
+        </div>` : ''}
+      ${preview ? renderProductGridPreview(preview) : ''}
+      ${state.productGridBulkEditor ? renderProductGridBulkEditor() : ''}
+      ${state.productGridHistory ? renderProductGridHistory(state.productGridHistory) : ''}
     </div>
-    <section class="card">
-      ${mvpProductRows(products)}
-    </section>
   `;
+}
+
+function renderProductGridPreview(product) {
+  return `<div class="pg-drawer-backdrop" data-close-grid-panel></div>
+    <aside class="pg-drawer" aria-label="Product quick preview">
+      <div class="pg-drawer-head"><div><span class="eyebrow">Quick preview</span><h2>${escapeHtml(product.title)}</h2></div><button class="icon-button" data-close-grid-panel aria-label="Close preview">×</button></div>
+      <img class="pg-preview-image" src="${escapeHtml(product.image)}" alt="">
+      <div class="pg-preview-actions">
+        <button class="btn primary" data-grid-action="editor" data-product-id="${escapeHtml(product.id)}">Edit</button>
+        <button class="btn" data-grid-action="preview" data-product-id="${escapeHtml(product.id)}">Preview</button>
+        ${statusBadge(product.status === 'Live' ? 'active' : 'planned', product.status)}
+        <button class="btn" data-grid-action="edit" data-product-id="${escapeHtml(product.id)}">Open product</button>
+      </div>
+      <div class="pg-preview-grid">
+        <div><span>SKU</span><strong>${escapeHtml(product.sku || 'Missing SKU')}</strong></div>
+        <div><span>Variants</span><strong>${product.variantCount}</strong></div>
+        <div><span>Inventory</span><strong>${product.inventory}</strong></div>
+        <div><span>Sync</span><strong>${escapeHtml(product.syncStatus)}</strong></div>
+      </div>
+      <section><h3>Variants</h3>${product.variants.length ? `<div class="pg-variant-list">${product.variants.slice(0,12).map(variant =>
+        `<div><span>${escapeHtml(Object.values(variant.attributes || {}).join(' / ') || 'Default')}</span><code>${escapeHtml(variant.sku || 'Pending SKU')}</code><strong>${variant.quantity}</strong></div>`).join('')}</div>` : '<p class="muted">No variant details available.</p>'}</section>
+      <section><h3>SEO</h3><p><strong>${escapeHtml(product.seo.title || 'SEO title not set')}</strong></p><p class="muted">${escapeHtml(product.seo.metaDescription || 'Meta description not set')}</p></section>
+      <section><h3>Activity</h3><p>${product.activityCount} recorded Product Editor events.</p></section>
+      <section><h3>Recent drafts</h3>${product.recentDrafts?.length
+        ? product.recentDrafts.map((draft) => `<div class="pg-draft"><strong>Draft ${escapeHtml(draft.version || '—')}</strong><span>${escapeHtml(draft.approvalState)}</span><small>${escapeHtml(formatTimestamp(draft.createdAt))}</small></div>`).join('')
+        : `<p class="muted">${escapeHtml(product.reviewStatus || 'No active review')}</p>`}</section>
+    </aside>`;
+}
+
+function renderProductGridBulkEditor() {
+  return `<div class="pg-modal-backdrop" data-close-grid-panel>
+    <form class="pg-modal" id="product-grid-bulk-form">
+      <div class="pg-drawer-head"><div><span class="eyebrow">Spreadsheet-style bulk editor</span><h2>Edit ${state.productGridSelection.size} products</h2></div><button class="icon-button" type="button" data-close-grid-panel>×</button></div>
+      <p class="muted">Only completed fields are applied. Product SKU, variant SKU, Product Identity, governance, and publishing remain locked.</p>
+      <div class="pg-bulk-grid">
+        <label>Price<input name="price" type="number" min="0" step="0.01"></label>
+        <label>Compare price<input name="compareAtPrice" type="number" min="0" step="0.01"></label>
+        <label>Inventory per variant<input name="variantInventory" type="number" min="0" step="1"></label>
+        <label>Variant price<input name="variantPrice" type="number" min="0" step="0.01"></label>
+        <label>Status<select name="status"><option value="">No change</option><option>draft</option><option>active</option><option>hidden</option><option>archived</option></select></label>
+        <label>Brand<input name="brand"></label>
+        <label>Category<input name="category"></label>
+        <label>Product type<input name="productType"></label>
+        <label>Collections<input name="collections" placeholder="Comma separated"></label>
+        <label>Tags<input name="tags" placeholder="Comma separated"></label>
+        <label>Weight<input name="weight" type="number" min="0" step="0.01"></label>
+        <label>Processing time<input name="processingTime"></label>
+      </div>
+      <div class="pg-locked-row"><span>Product SKU</span><code>Locked by Product Identity Engine</code></div>
+      <div class="button-row end"><button class="btn" type="button" data-close-grid-panel>Cancel</button><button class="btn primary" type="submit">Apply changes</button></div>
+    </form>
+  </div>`;
+}
+
+function renderProductGridHistory(history) {
+  return `<div class="pg-modal-backdrop" data-close-grid-panel>
+    <section class="pg-modal pg-history">
+      <div class="pg-drawer-head"><div><span class="eyebrow">Activity and history</span><h2>${escapeHtml(history.product.title)}</h2></div><button class="icon-button" data-close-grid-panel>×</button></div>
+      ${history.events.length ? history.events.map(event => `<article><span>${escapeHtml(formatTimestamp(event.timestamp))}</span><strong>${escapeHtml(event.action.replaceAll('_',' '))}</strong><small>${escapeHtml(event.actorRole || 'system')} · revision ${event.newRevision ?? '—'}</small></article>`).join('') : EmptyState('No activity yet', 'Product events will appear here.')}
+    </section>
+  </div>`;
+}
+
+function categoryRows() {
+  if (!state.taxonomy) return [];
+  const query = state.query.trim().toLowerCase();
+  const categories = state.taxonomy.categories.filter((category) => {
+    const searchable = [category.name, category.slug, category.hierarchyPath, category.seoTitle, category.status, category.syncState, ...category.products.flatMap((product) => [product.title, product.sku])].join(' ').toLowerCase();
+    if (query && !searchable.includes(query)) return false;
+    const view = state.categoryFilters.view;
+    if (view === 'roots' && category.parentId) return false;
+    if (view === 'subcategories' && !category.parentId) return false;
+    if (view === 'empty' && category.productCount) return false;
+    if (view === 'missing-image' && category.featuredImage) return false;
+    if (view === 'missing-seo' && category.seoStatus !== 'Missing SEO') return false;
+    if (view === 'needs-review' && category.syncState !== 'Needs Review') return false;
+    if (view === 'sync-error' && category.syncState !== 'Import Error') return false;
+    if (state.categoryFilters.status !== 'all' && category.status !== state.categoryFilters.status) return false;
+    return true;
+  });
+  const compare = {
+    'name-asc': (a,b) => a.name.localeCompare(b.name), 'name-desc': (a,b) => b.name.localeCompare(a.name),
+    products: (a,b) => b.productCount-a.productCount, children: (a,b) => b.childCount-a.childCount,
+    'sort-order': (a,b) => a.sortOrder-b.sortOrder, newest: (a,b) => new Date(b.createdAt)-new Date(a.createdAt),
+    oldest: (a,b) => new Date(a.createdAt)-new Date(b.createdAt), updated: (a,b) => new Date(b.updatedAt)-new Date(a.updatedAt),
+  }[state.categorySort];
+  return categories.sort(compare);
+}
+
+function renderCategories() {
+  if (!state.taxonomy) return `${PageHeader('Categories & Collections', 'Loading synchronized website taxonomy.', '', 'active')}${LoadingSkeleton()}`;
+  const rows = categoryRows(); const counts = state.taxonomy.counts;
+  const start = (state.categoryPage - 1) * state.categoryPageSize; const page = rows.slice(start, start + state.categoryPageSize);
+  const stats = [['Total',counts.total,'all'],['Root',counts.roots,'roots'],['Subcategories',counts.subcategories,'subcategories'],['Active',counts.active,'active'],['Hidden',counts.hidden,'hidden'],['Archived',counts.archived,'archived'],['Needs review',counts.needsReview,'needs-review'],['Empty',counts.empty,'empty'],['Sync errors',counts.syncErrors,'sync-error']];
+  return `<div class="taxonomy-page">
+    ${PageHeader('Categories & Collections', 'Manage website taxonomy, nested navigation, assignments, SEO, and synchronization.', '<button class="btn" id="taxonomy-sync">Sync website</button><button class="btn primary" id="add-category">Add category</button>', 'active')}
+    <div class="pg-stats">${stats.map(([label,value,filter]) => `<button class="pg-stat" data-category-stat="${filter}"><span>${label}</span><strong>${value}</strong></button>`).join('')}</div>
+    <div class="pg-toolbar card"><div class="pg-search"><span>⌕</span><input id="category-search" value="${escapeHtml(state.query)}" placeholder="Search category, slug, product, SKU, SEO, or status"></div>
+      <select data-category-filter="view"><option value="all">All categories</option><option value="roots">Root categories</option><option value="subcategories">Subcategories</option><option value="empty">Empty categories</option><option value="missing-image">Missing images</option><option value="missing-seo">Missing SEO</option><option value="needs-review">Needs review</option><option value="sync-error">Sync errors</option></select>
+      <select data-category-filter="status"><option value="all">All statuses</option><option value="active">Active</option><option value="draft">Draft</option><option value="hidden">Hidden</option><option value="archived">Archived</option></select>
+      <select id="category-sort"><option value="sort-order">Sort order</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="products">Product count</option><option value="children">Child count</option><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="updated">Recently updated</option></select>
+    </div>
+    <div class="card pg-table-card"><div class="pg-table-wrap"><table class="pg-table taxonomy-table"><thead><tr><th><input id="category-select-page" type="checkbox"></th><th>Category</th><th>Parent / path</th><th>Products</th><th>Children</th><th>Status</th><th>Visibility</th><th>SEO</th><th>Sync</th><th>Updated</th><th>Actions</th></tr></thead><tbody>
+      ${page.map((category) => `<tr data-category-row="${category.id}" draggable="true">
+        <td><input type="checkbox" data-category-select="${category.id}" ${state.categorySelection.has(category.id)?'checked':''}></td>
+        <td><div class="pg-product-cell">${category.featuredImage?`<img src="${escapeHtml(category.featuredImage)}" alt="">`:'<span class="pg-image-placeholder">▦</span>'}<div style="padding-left:${Math.min(2,(category.hierarchyPath.match(/>/g)||[]).length)*16}px"><button class="link-button" data-open-category="${category.id}">${escapeHtml(category.name)}</button><small>/${escapeHtml(category.slug)}</small></div></div></td>
+        <td>${escapeHtml(category.parentId ? category.hierarchyPath : 'Root category')}</td><td>${category.productCount}</td><td>${category.childCount}</td><td>${statusBadge(category.status==='active'?'active':'planned',category.status)}</td><td>${category.websiteVisibility?'Visible':'Unlisted'}</td><td>${escapeHtml(category.seoStatus)}</td><td>${statusBadge(category.syncState==='Synced'?'active':'planned',category.syncState)}</td><td>${escapeHtml(formatDate(category.updatedAt))}</td>
+        <td><details class="pg-actions"><summary>•••</summary><div><button data-category-action="edit" data-category-id="${category.id}">Edit</button><button data-category-action="preview" data-category-id="${category.id}">Preview website</button><button data-category-action="add-child" data-category-id="${category.id}">Add subcategory</button><button data-category-action="duplicate" data-category-id="${category.id}">Duplicate as draft</button><button data-category-action="hide" data-category-id="${category.id}">Hide</button><button data-category-action="archive" data-category-id="${category.id}">Archive</button><button data-category-action="restore" data-category-id="${category.id}">Restore</button><button data-category-action="activity" data-category-id="${category.id}">Activity & sync history</button>${state.taxonomy.permissions.delete?`<button class="danger" data-category-action="delete" data-category-id="${category.id}">Delete safely</button>`:''}</div></details></td>
+      </tr>`).join('') || '<tr><td colspan="11"><div class="empty-state"><h3>No categories match this view</h3><p>Change filters or create a category.</p></div></td></tr>'}
+    </tbody></table></div><div class="pg-pagination"><select id="category-page-size"><option>25</option><option>50</option><option>100</option></select><span>${rows.length?start+1:0}–${Math.min(start+state.categoryPageSize,rows.length)} of ${rows.length}</span><button class="btn" id="category-prev" ${state.categoryPage<=1?'disabled':''}>Previous</button><button class="btn" id="category-next" ${start+state.categoryPageSize>=rows.length?'disabled':''}>Next</button></div></div>
+    ${state.categorySelection.size?`<div class="pg-bulk-bar"><strong>${state.categorySelection.size} selected</strong><button data-category-bulk="edit">Bulk edit</button><button data-category-bulk="hide">Hide</button><button data-category-bulk="archive">Archive</button><button data-category-bulk="restore">Restore</button><button data-category-bulk="export">Export</button><button id="clear-category-selection">Clear</button></div>`:''}
+    ${state.categoryEditorId!==null?renderCategoryEditor():''}${state.categoryActivity?renderCategoryActivity():''}
+  </div>`;
+}
+
+function renderCategoryEditor() {
+  const category = state.taxonomy.categories.find((item) => item.id === state.categoryEditorId);
+  const isNew = !category;
+  const model = category || { id:'',name:'',slug:'',parentId:'',description:'',featuredImage:'',bannerImage:'',seoTitle:'',metaDescription:'',status:'draft',websiteVisibility:true,sortOrder:0,themeTemplate:'default',internalNote:'',products:[],workflowState:'draft',revision:0 };
+  const categories = state.taxonomy.categories.filter((item) => item.id !== model.id);
+  const assigned = new Set(model.products.map((item) => item.id));
+  return `<div class="pg-modal-backdrop"><section class="pg-modal category-editor" role="dialog" aria-modal="true"><div class="pg-drawer-head"><div><span class="eyebrow">${isNew?'New taxonomy record':'Category Editor'}</span><h2>${escapeHtml(model.name||'Untitled category')}</h2></div><button class="icon-button" data-close-category>×</button></div>
+    <form id="category-editor-form"><div class="category-editor-grid"><main>
+      <section class="card card-pad"><h3>Category details</h3><label>Name<input name="name" required value="${escapeHtml(model.name)}"></label><label>Description<textarea name="description">${escapeHtml(model.description)}</textarea></label><div class="pg-form-grid"><label>Parent<select name="parentId"><option value="">Root category</option>${categories.map((item)=>`<option value="${item.id}" ${item.id===model.parentId?'selected':''}>${escapeHtml(item.hierarchyPath)}</option>`).join('')}</select></label><label>URL handle<input name="slug" required value="${escapeHtml(model.slug)}"></label><label>Sort order<input name="sortOrder" type="number" min="0" value="${model.sortOrder}"></label><label>Theme template<input name="themeTemplate" value="${escapeHtml(model.themeTemplate)}"></label></div></section>
+      <section class="card card-pad"><h3>Images</h3><div class="pg-form-grid"><label>Featured image URL<input name="featuredImage" value="${escapeHtml(model.featuredImage)}"></label><label>Banner image URL<input name="bannerImage" value="${escapeHtml(model.bannerImage)}"></label>${!isNew?'<label>Upload featured image<input type="file" data-category-media="featured" accept=".jpg,.jpeg,.png,.webp"></label><label>Upload banner image<input type="file" data-category-media="banner" accept=".jpg,.jpeg,.png,.webp"></label>':'<p>Save the category before uploading media.</p>'}</div></section>
+      <section class="card card-pad"><h3>Search engine listing</h3><label>SEO title <small>${model.seoTitle.length}/60</small><input name="seoTitle" value="${escapeHtml(model.seoTitle)}"></label><label>Meta description <small>${model.metaDescription.length}/160</small><textarea name="metaDescription">${escapeHtml(model.metaDescription)}</textarea></label></section>
+      <section class="card card-pad"><h3>Manual product assignments</h3><input id="category-product-search" placeholder="Search products by title or SKU"><div class="category-products">${state.taxonomy.products.map((product)=>`<label data-category-product-label="${escapeHtml(`${product.title} ${product.sku}`.toLowerCase())}"><input type="checkbox" name="productAssignment" value="${product.id}" ${assigned.has(product.id)?'checked':''}><img src="${escapeHtml(product.image||'/assets/generated/leather-detail.png')}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.sku||'Missing SKU')} · ${escapeHtml(product.status)}</small></span></label>`).join('')}</div></section>
+      <section class="card card-pad"><h3>Automated assignment rule preview</h3><p class="muted">Rules never apply silently. Preview matching products, then select them manually above.</p><div class="pg-form-grid"><label>Field<select id="category-rule-field"><option value="productType">Product type</option><option value="brand">Brand</option><option value="tag">Tag contains</option><option value="color">Color</option><option value="price">Price greater than</option></select></label><label>Value<input id="category-rule-value"></label></div><button type="button" class="btn" id="preview-category-rule">Preview rule</button>${state.categoryRulePreview?`<p><strong>${state.categoryRulePreview.products.length} products match:</strong> ${escapeHtml(state.categoryRulePreview.products.map((item)=>item.title).join(', ')||'None')}</p>`:''}</section>
+    </main><aside><section class="card card-pad"><h3>Publishing</h3><label>Status<select name="status">${['draft','active','hidden','archived'].map(value=>`<option ${value===model.status?'selected':''}>${value}</option>`).join('')}</select></label><label class="check"><input type="checkbox" name="websiteVisibility" ${model.websiteVisibility?'checked':''}> Website visibility</label><p>Workflow: <strong>${escapeHtml(model.workflowState)}</strong></p></section><section class="card card-pad"><h3>Internal note</h3><textarea name="internalNote">${escapeHtml(model.internalNote)}</textarea></section></aside></div>
+      <div class="pg-modal-actions"><button type="button" class="btn" data-close-category>Cancel</button><button class="btn" name="intent" value="save">Save draft</button>${!isNew?'<button class="btn" name="intent" value="submit">Submit for review</button>':''}${!isNew&&state.taxonomy.permissions.approve?'<button type="button" class="btn" data-category-workflow="approve">Owner approve</button><button type="button" class="btn primary" data-category-workflow="publish">Publish website</button>':'<button class="btn primary" name="intent" value="save">Create category</button>'}</div>
+    </form></section></div>`;
+}
+
+function renderCategoryActivity() {
+  return `<div class="pg-modal-backdrop"><section class="pg-modal"><div class="pg-drawer-head"><h2>Category activity & sync history</h2><button class="icon-button" data-close-category-activity>×</button></div><div class="pg-history-list">${[...(state.categoryActivity.events||[]),...(state.categoryActivity.syncEvents||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).map(event=>`<article><strong>${escapeHtml(event.action)}</strong><span>${escapeHtml(event.actorRole||event.result||'system')}</span><time>${escapeHtml(formatDate(event.timestamp))}</time></article>`).join('')||'<p>No activity yet.</p>'}</div></section></div>`;
 }
 
 function catalogImage(value = '') {
@@ -1920,6 +2268,9 @@ function render() {
     'catalog-review': renderCatalogReview,
     'catalog-detail': renderCatalogProductDetail,
     products: renderMvpProducts,
+    categories: renderCategories,
+    collections: renderCategories,
+    'category-editor': renderCategories,
     'product-detail': renderMvpProductDetail,
     'listing-studio': renderListingStudio,
     'product-editor': () => window.ProductEditorV2UI.render(
@@ -1955,7 +2306,67 @@ function render() {
       },
     });
   }
+  bindCategoryManagement();
   if (state.dirty) document.querySelector('.savebar')?.classList.add('visible');
+}
+
+function bindCategoryManagement() {
+  document.querySelectorAll('[data-open-product-category]').forEach((button)=>button.addEventListener('click',(event)=>{event.stopPropagation();navigate('categories');state.categoryEditorId=button.dataset.openProductCategory;render();}));
+  document.getElementById('category-search')?.addEventListener('input', (event) => { state.query=event.target.value;state.categoryPage=1;render(); });
+  document.querySelectorAll('[data-category-filter]').forEach((select)=>select.addEventListener('change',()=>{state.categoryFilters[select.dataset.categoryFilter]=select.value;state.categoryPage=1;render();}));
+  document.getElementById('category-sort')?.addEventListener('change',(event)=>{state.categorySort=event.target.value;render();});
+  document.querySelectorAll('[data-category-stat]').forEach((button)=>button.addEventListener('click',()=>{const value=button.dataset.categoryStat;state.categoryFilters={view:'all',status:'all'};if(['active','hidden','archived'].includes(value))state.categoryFilters.status=value;else state.categoryFilters.view=value;render();}));
+  document.getElementById('taxonomy-sync')?.addEventListener('click',async()=>{try{state.taxonomy=await api('/api/admin/categories/sync',{method:'POST',body:'{}'});toast('Website taxonomy synchronized');render();}catch(error){toast(error.message);}});
+  document.getElementById('add-category')?.addEventListener('click',()=>{state.categoryEditorId=false;render();});
+  document.querySelectorAll('[data-open-category]').forEach((button)=>button.addEventListener('click',()=>{state.categoryEditorId=button.dataset.openCategory;render();}));
+  document.querySelectorAll('[data-close-category]').forEach((button)=>button.addEventListener('click',(event)=>{if(button.classList.contains('pg-modal-backdrop')&&event.target!==button)return;state.categoryEditorId=null;render();}));
+  document.querySelectorAll('[data-close-category-activity]').forEach((button)=>button.addEventListener('click',()=>{state.categoryActivity=null;render();}));
+  document.getElementById('category-product-search')?.addEventListener('input',(event)=>document.querySelectorAll('[data-category-product-label]').forEach((label)=>{label.hidden=!label.dataset.categoryProductLabel.includes(event.target.value.toLowerCase());}));
+  document.getElementById('preview-category-rule')?.addEventListener('click',async()=>{try{state.categoryRulePreview=await api('/api/admin/categories/rules/preview',{method:'POST',body:JSON.stringify({mode:'all',rules:[{field:document.getElementById('category-rule-field').value,value:document.getElementById('category-rule-value').value}]})});render();}catch(error){toast(error.message);}});
+  document.querySelectorAll('[data-category-media]').forEach((input)=>input.addEventListener('change',async()=>{
+    const file=input.files?.[0];if(!file)return;try{const dataBase64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file);});await api(`/api/admin/categories/${state.categoryEditorId}/media`,{method:'POST',body:JSON.stringify({mimeType:file.type,dataBase64,role:input.dataset.categoryMedia,expectedRevision:state.taxonomy.storeRevision})});state.taxonomy=await api('/api/admin/categories');toast('Category image uploaded');render();}catch(error){toast(error.message);}
+  }));
+  document.getElementById('category-editor-form')?.addEventListener('submit',async(event)=>{
+    event.preventDefault(); const form=new FormData(event.currentTarget); const existing=state.taxonomy.categories.find((item)=>item.id===state.categoryEditorId);
+    const fields=Object.fromEntries([...form.entries()].filter(([key])=>!['productAssignment','intent'].includes(key))); fields.websiteVisibility=form.has('websiteVisibility'); fields.sortOrder=Number(fields.sortOrder||0); fields.expectedRevision=state.taxonomy.storeRevision; fields.submit=event.submitter?.value==='submit';
+    try {
+      const response=await api(existing?`/api/admin/categories/${existing.id}`:'/api/admin/categories',{method:existing?'PUT':'POST',body:JSON.stringify(fields)});
+      state.taxonomy=await api('/api/admin/categories'); const saved=response.category;
+      const selected=form.getAll('productAssignment'); const current=new Set(existing?.products.map((item)=>item.id)||[]);
+      const add=selected.filter((id)=>!current.has(id)); const remove=[...current].filter((id)=>!selected.includes(id));
+      if(saved?.id&&(add.length||remove.length)) state.taxonomy=await api(`/api/admin/categories/${saved.id}/assignments`,{method:'POST',body:JSON.stringify({add,remove,expectedRevision:state.taxonomy.storeRevision})});
+      state.categoryEditorId=null;toast(fields.submit?'Category submitted for Owner review':'Category saved');render();
+    } catch(error){toast(error.message);}
+  });
+  document.querySelectorAll('[data-category-workflow]').forEach((button)=>button.addEventListener('click',async()=>{
+    const category=state.taxonomy.categories.find((item)=>item.id===state.categoryEditorId);try{state.taxonomy=await api(`/api/admin/categories/${category.id}/workflow`,{method:'POST',body:JSON.stringify({action:button.dataset.categoryWorkflow,expectedRevision:state.taxonomy.storeRevision})});toast(`Category ${button.dataset.categoryWorkflow}d`);render();}catch(error){toast(error.message);}
+  }));
+  document.querySelectorAll('[data-category-action]').forEach((button)=>button.addEventListener('click',async()=>{
+    const id=button.dataset.categoryId; const action=button.dataset.categoryAction; const category=state.taxonomy.categories.find((item)=>item.id===id);
+    try {
+      if(action==='edit'){state.categoryEditorId=id;render();return;} if(action==='add-child'){state.categoryEditorId=false;render();requestAnimationFrame(()=>{document.querySelector('[name=parentId]').value=id;});return;}
+      if(action==='preview'){window.open(`/collections/${category.slug}`,'_blank','noopener');return;} if(action==='activity'){state.categoryActivity=await api(`/api/admin/categories/${id}/activity`);render();return;}
+      if(action==='duplicate'){const copy={...category,name:`${category.name} — Copy`,slug:`${category.slug}-copy`,parentId:category.parentId,status:'draft',websiteVisibility:false};delete copy.id;state.taxonomy=(await api('/api/admin/categories',{method:'POST',body:JSON.stringify(copy)}),await api('/api/admin/categories'));toast('Category duplicated as draft');render();return;}
+      let confirmation; if(action==='delete'){confirmation=window.prompt('Permanent deletion is Owner-only and permitted only when safe. Type DELETE to confirm.');if(confirmation!=='DELETE')return;}
+      state.taxonomy=await api(`/api/admin/categories/${id}/workflow`,{method:'POST',body:JSON.stringify({action,confirmation,expectedRevision:state.taxonomy.storeRevision})});toast(`Category ${action} complete`);render();
+    } catch(error){toast(error.message);}
+  }));
+  document.querySelectorAll('[data-category-select]').forEach((input)=>input.addEventListener('change',()=>{input.checked?state.categorySelection.add(input.dataset.categorySelect):state.categorySelection.delete(input.dataset.categorySelect);render();}));
+  document.querySelectorAll('[data-category-row]').forEach((row)=>{
+    row.addEventListener('dragstart',(event)=>event.dataTransfer.setData('text/category-id',row.dataset.categoryRow));
+    row.addEventListener('dragover',(event)=>event.preventDefault());
+    row.addEventListener('drop',async(event)=>{event.preventDefault();const sourceId=event.dataTransfer.getData('text/category-id');const targetId=row.dataset.categoryRow;if(!sourceId||sourceId===targetId)return;const target=state.taxonomy.categories.find((item)=>item.id===targetId);if(!window.confirm(`Move this category under “${target.name}”? Product assignments, IDs, SEO, and history will be preserved.`))return;try{await api(`/api/admin/categories/${sourceId}`,{method:'PUT',body:JSON.stringify({parentId:targetId,expectedRevision:state.taxonomy.storeRevision})});state.taxonomy=await api('/api/admin/categories');toast('Hierarchy updated');render();}catch(error){toast(error.message);}});
+  });
+  document.getElementById('category-select-page')?.addEventListener('change',(event)=>{const rows=categoryRows();const start=(state.categoryPage-1)*state.categoryPageSize;rows.slice(start,start+state.categoryPageSize).forEach((item)=>event.target.checked?state.categorySelection.add(item.id):state.categorySelection.delete(item.id));render();});
+  document.getElementById('clear-category-selection')?.addEventListener('click',()=>{state.categorySelection.clear();render();});
+  document.querySelectorAll('[data-category-bulk]').forEach((button)=>button.addEventListener('click',async()=>{
+    const action=button.dataset.categoryBulk;if(action==='export'){const blob=new Blob([JSON.stringify(state.taxonomy.categories.filter((item)=>state.categorySelection.has(item.id)),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='motogrip-categories.json';link.click();URL.revokeObjectURL(url);return;}
+    let values={};if(action==='edit'){const status=window.prompt('Set status: active, hidden, archived, or draft');if(!status)return;values={status};}
+    try{state.taxonomy=await api('/api/admin/categories/bulk',{method:'POST',body:JSON.stringify({categoryIds:[...state.categorySelection],action,values})});state.categorySelection.clear();toast('Bulk category action complete');render();}catch(error){toast(error.message);}
+  }));
+  document.getElementById('category-page-size')?.addEventListener('change',(event)=>{state.categoryPageSize=Number(event.target.value);state.categoryPage=1;render();});
+  document.getElementById('category-prev')?.addEventListener('click',()=>{state.categoryPage=Math.max(1,state.categoryPage-1);render();});
+  document.getElementById('category-next')?.addEventListener('click',()=>{state.categoryPage+=1;render();});
 }
 
 function bindShell() {
@@ -1997,6 +2408,138 @@ function bindShell() {
     state.query = event.target.value;
     render();
   });
+  document.getElementById('product-grid-search')?.addEventListener('input', (event) => {
+    state.query = event.target.value;
+    state.productGridPage = 1;
+    render();
+  });
+  document.querySelectorAll('[data-grid-filter]').forEach((select) => select.addEventListener('change', () => {
+    state.productGridFilters[select.dataset.gridFilter] = select.value;
+    state.productGridPage = 1;
+    render();
+  }));
+  document.getElementById('product-grid-sort')?.addEventListener('change', (event) => {
+    state.productGridSort = event.target.value;
+    render();
+  });
+  document.getElementById('clear-product-grid-filters')?.addEventListener('click', () => {
+    state.query = '';
+    state.productGridFilters = { status: 'all', brand: 'all', productType: 'all', collection: 'all', inventory: 'all' };
+    state.productGridPage = 1;
+    render();
+  });
+  document.querySelectorAll('[data-grid-stat]').forEach((button) => button.addEventListener('click', () => {
+    const value = button.dataset.gridStat;
+    state.productGridFilters = { status: 'all', brand: 'all', productType: 'all', collection: 'all', inventory: 'all' };
+    if (['Live', 'Draft', 'Archived', 'Hidden'].includes(value)) state.productGridFilters.status = value;
+    if (['needs-review', 'sync-error', 'out'].includes(value)) state.productGridFilters.inventory = value;
+    state.productGridPage = 1;
+    render();
+  }));
+  const toggleGridPage = (checked) => {
+    const rows = productGridRows();
+    const start = (state.productGridPage - 1) * state.productGridPageSize;
+    rows.slice(start, start + state.productGridPageSize).forEach((product) =>
+      checked ? state.productGridSelection.add(product.id) : state.productGridSelection.delete(product.id));
+    render();
+  };
+  document.getElementById('product-grid-select-page')?.addEventListener('change', (event) => toggleGridPage(event.target.checked));
+  document.getElementById('select-page-products')?.addEventListener('click', () => {
+    const rows = productGridRows();
+    const start = (state.productGridPage - 1) * state.productGridPageSize;
+    const page = rows.slice(start, start + state.productGridPageSize);
+    toggleGridPage(!page.every((product) => state.productGridSelection.has(product.id)));
+  });
+  document.getElementById('select-filtered-products')?.addEventListener('click', () => {
+    const rows = productGridRows();
+    const allSelected = rows.every((product) => state.productGridSelection.has(product.id));
+    rows.forEach((product) => allSelected
+      ? state.productGridSelection.delete(product.id)
+      : state.productGridSelection.add(product.id));
+    render();
+  });
+  document.querySelectorAll('[data-grid-select]').forEach((input) => input.addEventListener('change', (event) => {
+    event.stopPropagation();
+    event.target.checked
+      ? state.productGridSelection.add(input.dataset.gridSelect)
+      : state.productGridSelection.delete(input.dataset.gridSelect);
+    render();
+  }));
+  document.querySelectorAll('[data-grid-preview]').forEach((row) => {
+    const open = (event) => {
+      if (event.target.closest('button,input,a,details,summary,select')) return;
+      state.productGridPreviewId = row.dataset.gridPreview;
+      render();
+    };
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') open(event);
+    });
+  });
+  document.querySelectorAll('[data-close-grid-panel]').forEach((button) => button.addEventListener('click', (event) => {
+    if (button.classList.contains('pg-modal-backdrop') && event.target !== button) return;
+    if (button.classList.contains('pg-drawer-backdrop') && event.target !== button) return;
+    state.productGridPreviewId = null;
+    state.productGridBulkEditor = false;
+    state.productGridHistory = null;
+    render();
+  }));
+  document.getElementById('clear-product-grid-selection')?.addEventListener('click', () => {
+    state.productGridSelection.clear();
+    render();
+  });
+  document.getElementById('product-grid-page-size')?.addEventListener('change', (event) => {
+    state.productGridPageSize = Number(event.target.value);
+    state.productGridPage = 1;
+    render();
+  });
+  document.getElementById('product-grid-prev')?.addEventListener('click', () => {
+    state.productGridPage = Math.max(1, state.productGridPage - 1);
+    render();
+  });
+  document.getElementById('product-grid-next')?.addEventListener('click', () => {
+    state.productGridPage += 1;
+    render();
+  });
+  document.querySelectorAll('[data-grid-bulk]').forEach((button) => button.addEventListener('click', () => {
+    state.productGridBulkEditor = true;
+    render();
+    const focusNames = { inventory: 'variantInventory', price: 'price', status: 'status', tags: 'tags', collections: 'collections' };
+    document.querySelector(`[name="${focusNames[button.dataset.gridBulk] || 'price'}"]`)?.focus();
+  }));
+  document.querySelectorAll('[data-grid-taxonomy]').forEach((button)=>button.addEventListener('click',async()=>{
+    if(!state.taxonomy)return toast('Category taxonomy is unavailable');const options=state.taxonomy.categories.map((item)=>`${item.id} · ${item.hierarchyPath}`).join('\n');const categoryId=window.prompt(`Paste the Category ID:\n${options}`);if(!categoryId)return;const productIds=state.productGrid.products.filter((item)=>state.productGridSelection.has(item.id)).map((item)=>String(item.websiteProductId||item.editorProductId));try{state.taxonomy=await api(`/api/admin/categories/${categoryId}/assignments`,{method:'POST',body:JSON.stringify({[button.dataset.gridTaxonomy]:productIds,expectedRevision:state.taxonomy.storeRevision})});toast('Product category assignments updated');render();}catch(error){toast(error.message);}
+  }));
+  document.querySelectorAll('[data-grid-bulk-action]').forEach((button) => button.addEventListener('click', async () => {
+    if (button.dataset.gridBulkAction === 'delete' && !window.confirm('Remove the selected products from the active grid? This keeps an audit-safe tombstone.')) return;
+    await runProductGridMutation(button.dataset.gridBulkAction, [...state.productGridSelection]);
+  }));
+  document.getElementById('product-grid-bulk-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const values = {};
+    for (const [key, value] of new FormData(event.currentTarget).entries()) {
+      if (String(value).trim() !== '') values[key] = value;
+    }
+    if (!Object.keys(values).length) return toast('Enter at least one bulk value');
+    await runProductGridMutation('bulk_edit', [...state.productGridSelection], values);
+    state.productGridBulkEditor = false;
+  });
+  document.getElementById('product-grid-export')?.addEventListener('click', () => {
+    const selectedRows = (state.productGrid.products || []).filter((product) => state.productGridSelection.has(product.id));
+    const safe = selectedRows.map(({ id, title, sku, status, inventory, variantCount, price, brand, category, productType, collections, tags, syncStatus, handle }) =>
+      ({ id, title, sku, status, inventory, variantCount, price, brand, category, productType, collections, tags, syncStatus, handle }));
+    const url = URL.createObjectURL(new Blob([JSON.stringify(safe, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `motogrip-products-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast('Product export prepared');
+  });
+  document.querySelectorAll('[data-grid-action]').forEach((button) => button.addEventListener('click', async (event) => {
+    event.stopPropagation();
+    await runProductGridAction(button.dataset.gridAction, button.dataset.productId);
+  }));
   document.getElementById('catalog-filter')?.addEventListener('input', (event) => {
     state.query = event.target.value;
     render();
@@ -2939,6 +3482,96 @@ async function navigateProductEditor(productId = null, replace = false) {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
+async function refreshProductGrid() {
+  state.productGrid = await api('/api/admin/product-grid');
+  const validIds = new Set(state.productGrid.products.map((product) => product.id));
+  state.productGridSelection = new Set([...state.productGridSelection].filter((id) => validIds.has(id)));
+}
+
+async function ensureGridEditorProduct(productId) {
+  const product = state.productGrid.products.find((item) => item.id === productId);
+  if (!product) throw new Error('Product was not found');
+  if (product.editorProductId) return product;
+  const result = await api('/api/admin/product-editor-v2/import', {
+    method: 'POST',
+    body: JSON.stringify({ websiteProductId: product.websiteProductId, handle: product.handle }),
+  });
+  await refreshProductGrid();
+  return state.productGrid.products.find((item) => item.editorProductId === result.product.id) || {
+    ...product,
+    id: result.product.id,
+    editorProductId: result.product.id,
+    productUuid: result.product.productUuid,
+  };
+}
+
+async function runProductGridMutation(action, productIds, values = {}) {
+  try {
+    state.productGrid = await api('/api/admin/product-grid/actions', {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        productIds,
+        values,
+        expectedRevision: state.productGrid.storeRevision,
+      }),
+    });
+    state.productGridSelection.clear();
+    state.productGridPreviewId = null;
+    toast(action === 'bulk_edit' ? 'Bulk changes saved' : `Products ${action}d`);
+    render();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function runProductGridAction(action, productId) {
+  try {
+    const source = state.productGrid.products.find((item) => item.id === productId);
+    if (!source) throw new Error('Product was not found');
+    if (action === 'preview') {
+      window.open(`/products/${encodeURIComponent(source.handle)}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (['edit', 'editor'].includes(action)) {
+      const product = await ensureGridEditorProduct(productId);
+      await navigateProductEditor(product.editorProductId);
+      return;
+    }
+    if (action === 'revise') {
+      const product = await ensureGridEditorProduct(productId);
+      const workspace = await api(`/api/admin/product-editor-v2/products/${encodeURIComponent(product.editorProductId)}`);
+      await api(`/api/admin/product-editor-v2/products/${encodeURIComponent(product.editorProductId)}/revise`, {
+        method: 'POST',
+        body: JSON.stringify({ expectedRevision: workspace.storeRevision }),
+      });
+      await refreshProductGrid();
+      toast('New product revision created');
+      render();
+      return;
+    }
+    if (action === 'duplicate') {
+      state.productGrid = await api('/api/admin/product-grid/duplicate', {
+        method: 'POST',
+        body: JSON.stringify({ productId, expectedRevision: state.productGrid.storeRevision }),
+      });
+      toast('Product duplicated as a new draft');
+      render();
+      return;
+    }
+    if (['activity', 'history'].includes(action)) {
+      const product = await ensureGridEditorProduct(productId);
+      state.productGridHistory = await api(`/api/admin/product-grid/products/${encodeURIComponent(product.editorProductId)}/history`);
+      render();
+      return;
+    }
+    if (action === 'delete' && !window.confirm('Remove this product from the active grid? An audit-safe tombstone will remain.')) return;
+    await runProductGridMutation(action, [productId]);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
 function navigate(view, replace = false) {
   const route = routeEntries.find(([id]) => id === view) || routeEntries[0];
   state.view = route[0];
@@ -2977,12 +3610,14 @@ async function loadStore() {
 
 async function loadMvpWorkspace() {
   try {
-    const [dashboard, productResponse] = await Promise.all([
+    const [dashboard, productResponse, productGrid] = await Promise.all([
       api('/api/admin/mvp/dashboard'),
       api('/api/admin/mvp/products'),
+      api('/api/admin/product-grid'),
     ]);
     state.mvpDashboard = dashboard;
     state.mvpProducts = productResponse.products || [];
+    state.productGrid = productGrid;
     state.mvpError = '';
     if (state.view === 'product-detail') {
       const recordKey = decodeURIComponent(window.location.pathname.split('/').pop() || '');
@@ -3029,6 +3664,7 @@ async function loadMvpWorkspace() {
   } catch (error) {
     state.catalogError = error.message;
   }
+  try { state.taxonomy = await api('/api/admin/categories'); } catch {}
 }
 
 async function loadAdmin() {
@@ -3051,7 +3687,7 @@ function startActivityStream() {
   activityStream.addEventListener('message', async (event) => {
     try {
       const message = JSON.parse(event.data);
-      if (!['draft.updated', 'workflow.updated', 'website.published'].includes(message.type)) return;
+      if (!['draft.updated', 'workflow.updated', 'website.published', 'product.grid.updated', 'category.updated', 'category.assignment.updated', 'category.sync.completed'].includes(message.type)) return;
       if (state.mvpProduct?.productUuid === message.productUuid) {
         const previousDraftId = state.selectedDraftId;
         const [workflow, workspace] = await Promise.all([
@@ -3069,11 +3705,13 @@ function startActivityStream() {
           }
         }
       }
-      if (message.type === 'website.published') {
+      if (['website.published', 'product.grid.updated'].includes(message.type)) {
         state.catalog = await api('/api/admin/catalog');
         const products = await api('/api/admin/mvp/products');
         state.mvpProducts = products.products || [];
+        await refreshProductGrid();
       }
+      if (message.type.startsWith('category.')) state.taxonomy = await api('/api/admin/categories');
       render();
     } catch {}
   });

@@ -47,13 +47,14 @@ test('responsive and accessibility foundations are present', () => {
   assert.match(adminJs, /aria-label="Primary navigation"/);
 });
 
-test('Business MVP read-only workspace exposes dashboard, products, and detail screens', () => {
+test('Business MVP preserves read-only product detail while Product Grid v2 manages Product Editor records', () => {
   assert.match(adminJs, /function renderMvpDashboard\(\)/);
   assert.match(adminJs, /function renderMvpProducts\(\)/);
   assert.match(adminJs, /function renderMvpProductDetail\(\)/);
   assert.match(adminJs, /\/api\/admin\/mvp\/dashboard/);
   assert.match(adminJs, /\/api\/admin\/mvp\/products/);
-  assert.match(adminJs, /Read-only workspace/);
+  assert.match(adminJs, /Professional product management|Manage products, variants, merchandising status/);
+  assert.match(adminJs, /\/api\/admin\/product-grid/);
   assert.doesNotMatch(adminJs, /fetch\(['"]\/api\/admin\/mvp\/[^'"]*['"],\s*\{\s*method:\s*['"](POST|PUT|PATCH|DELETE)/);
   assert.match(adminCss, /\.product-detail-grid/);
   assert.match(adminCss, /\.mvp-task/);
