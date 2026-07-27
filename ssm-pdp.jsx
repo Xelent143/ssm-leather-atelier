@@ -80,18 +80,18 @@ function PDP({ product, go, addToCart, onQuickView }) {
         <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
       </nav>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: '80px 1fr 480px', gap: 0,
-        padding: '0 48px 80px',
+      <div className="pdp-commerce-layout" style={{
+        display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
+        padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%',
       }}>
         {/* Thumbnails */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
+        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
           {images.map((img, i) => (
             <button key={i} onClick={() => setImgIdx(i)}
               aria-label={img.label}
               className="ph tiny" data-img="1" data-label=""
               style={{
-                width: 64, aspectRatio: '3/4', cursor: 'pointer',
+                width: 76, height: 76, aspectRatio: '1', cursor: 'pointer',
                 '--img': `url(${img.src})`,
                 outline: imgIdx === i ? '1px solid var(--fg)' : 'none',
                 outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.6,
@@ -100,9 +100,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
           ))}
         </div>
         {/* Main image */}
-        <div style={{ paddingLeft: 24 }}>
-          <div className="ph grain" data-img="1" data-label=""
-            style={{ aspectRatio: '4/5', position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
+        <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
+          <div className="ph grain pdp-main-image" data-img="1" data-label=""
+            style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8 }}>
               <button aria-label="Save to wishlist"
                 style={{ width: 36, height: 36, background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(10px)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 0, color: 'var(--fg)' }}>
@@ -120,7 +120,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
         </div>
 
         {/* Details panel */}
-        <div style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
+        <div className="pdp-details-panel" style={{ paddingLeft: 42, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
             {p.cat.toUpperCase()} · {p.gender.toUpperCase()}
             {p.tag === 'Fit Lab' && <> · FIT LAB</>}
