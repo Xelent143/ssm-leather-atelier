@@ -18,8 +18,9 @@ test('admin shell includes the complete grouped navigation architecture', () => 
 test('existing product manager remains available behind its own route', () => {
   assert.match(adminJs, /function renderCurrentProductManager\(\)/);
   assert.match(adminJs, /\/admin\/products\/current/);
-  assert.match(adminJs, /Open Current Product Manager/);
-  assert.match(adminJs, /id="new-product"/);
+  assert.match(adminJs, /Legacy Product Manager/);
+  assert.match(adminJs, /This legacy editor is retained for compatibility/);
+  assert.match(adminJs, /id="open-product-editor">Add Product/);
 });
 
 test('unfinished shell actions are visibly disabled and status-labelled', () => {

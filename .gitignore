@@ -40,6 +40,9 @@ data/catalog-product-dna-links.json
 data/catalog-product-dna-links.json.*.tmp
 data/operational-launch.json
 data/operational-launch.json.*.tmp
+data/product-editor-v2.json
+data/product-editor-v2.json.*.tmp
+data/product-editor-media/
 data/ai-product-studio-audit.ndjson
 data/ai-product-studio-jobs/
 data/ai-product-studio-artifacts/

@@ -41,6 +41,11 @@ const state = {
   teamUsers: [],
   profile: null,
   profileTab: 'profile',
+  productEditorWorkspace: null,
+  productEditorProduct: null,
+  productEditorDirty: false,
+  productEditorOptionDrafts: [],
+  productEditorVariantFilter: '',
   mvpError: '',
 };
 
@@ -91,7 +96,8 @@ const navigationGroups = [
 ];
 
 const routeEntries = navigationGroups.flatMap(([, items]) => items);
-routeEntries.push(['current-products', '□', 'Current Product Manager', '/admin/products/current', 'existing']);
+routeEntries.push(['current-products', '□', 'Legacy Product Manager', '/admin/products/current', 'existing']);
+routeEntries.push(['product-editor', '□', 'Product Editor v2', '/admin/product-editor/new', 'active']);
 routeEntries.push(['product-detail', '□', 'Product Detail', '/admin/products/:recordKey', 'active']);
 routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:recordKey/listing-studio', 'active']);
 routeEntries.push(['catalog-review', '▦', 'Catalog Review', '/admin/catalog/review', 'active']);
@@ -618,7 +624,8 @@ function renderCurrentProductManager() {
   if (!state.selectedProductId && products[0]) state.selectedProductId = products[0].id;
   const product = productById();
   return `
-    ${PageHeader('Current Product Manager', 'The existing catalog editor is preserved here with its original read/write behavior.', '<a class="btn" data-route="products" href="/admin/products">Back to product shell</a><button class="btn primary" id="new-product">Add product</button>', 'existing')}
+    ${PageHeader('Legacy Product Manager', 'The existing catalog editor is preserved here with its original read/write behavior.', '<a class="btn" data-route="products" href="/admin/products">Back to products</a>', 'existing')}
+    ${AlertPanel('Compatibility editor', 'This legacy editor is retained for compatibility. Use Product Editor v2 for new products and full variant management.', 'info')}
     <div class="grid two-col">
       <div class="card">
         <div class="card-head"><h2>Catalog</h2><span class="pill">${products.length} shown</span></div>
@@ -640,8 +647,8 @@ function DataTableShell(products) {
 function renderProductsShell() {
   const products = filteredProducts();
   return `
-    ${PageHeader('Products', 'A scalable catalog workspace layered safely over the existing product store.', '<button class="btn" type="button" disabled title="Requires a future catalog workflow">Import</button><button class="btn" type="button" disabled>Export</button><a class="btn primary" data-route="current-products" href="/admin/products/current">Open Current Product Manager</a>', 'existing')}
-    ${AlertPanel('Existing workflow preserved', 'This overview is read-only. Product creation and editing continue only inside the Current Product Manager.', 'info')}
+    ${PageHeader('Products', 'A scalable catalog workspace layered safely over the existing product store.', '<a class="btn" data-route="current-products" href="/admin/products/current">Legacy Product Manager</a><button class="btn primary" id="open-product-editor">Add Product</button>', 'existing')}
+    ${AlertPanel('Product Editor v2 available', 'Create complete governed products with media, options, variants, inventory, SEO and Owner publishing.', 'info')}
     <div class="shell-gap"></div>
     ${FilterBar()}
     ${DataTableShell(products)}
@@ -670,7 +677,7 @@ function mvpProductRows(products) {
   return `
     <div class="table-wrap">
       <table class="mvp-products-table">
-        <thead><tr><th>Product</th><th>Brand</th><th>Type</th><th>Governance</th><th>Inventory</th><th>Listing</th></tr></thead>
+        <thead><tr><th>Product</th><th>Brand</th><th>Type</th><th>Governance</th><th>Inventory</th><th>Actions</th></tr></thead>
         <tbody>
           ${products.map((product) => `
             <tr class="clickable" data-mvp-product="${escapeHtml(product.recordKey)}" tabindex="0" aria-label="Open ${escapeHtml(product.title)}">
@@ -679,9 +686,9 @@ function mvpProductRows(products) {
               <td>${escapeHtml(formatProductType(product.productType))}</td>
               <td>${governanceBadge(product.governance)}</td>
               <td>${Number(product.inventory || 0)}</td>
-              <td>${product.governance?.knowledgeLockValid
-                ? `<button class="btn compact-btn" type="button" data-open-listing="${escapeHtml(product.recordKey)}">Create / continue listing</button>`
-                : '<span class="muted">Governance required</span>'}</td>
+              <td><div class="button-row"><button class="btn compact-btn" type="button" data-edit-v2="${escapeHtml(product.legacyId || '')}" data-product-uuid="${escapeHtml(product.productUuid || '')}" data-handle="${escapeHtml(product.slug || '')}">Edit v2</button>${product.governance?.knowledgeLockValid
+                ? `<button class="btn compact-btn" type="button" data-open-listing="${escapeHtml(product.recordKey)}">Listing</button>`
+                : '<span class="muted">Governance required</span>'}</div></td>
             </tr>
           `).join('')}
         </tbody>
@@ -737,7 +744,7 @@ function renderMvpDashboard() {
 function renderMvpProducts() {
   const products = filteredMvpProducts();
   return `
-    ${PageHeader('Products', 'Browse current product records and inspect their governed PLM readiness.', '<a class="btn" data-route="current-products" href="/admin/products/current">Open Current Product Manager</a>', 'active')}
+    ${PageHeader('Products', 'Browse current product records and inspect their governed PLM readiness.', '<a class="btn" data-route="current-products" href="/admin/products/current">Legacy Product Manager</a><button class="btn primary" id="open-product-editor">Add Product</button>', 'active')}
     ${AlertPanel('Read-only workspace', 'No product, storefront, inventory, pricing, or governance data can be changed from this screen.', 'info')}
     <div class="shell-gap"></div>
     <div class="filter-bar mvp-filter-bar">
@@ -1900,6 +1907,11 @@ function render() {
     products: renderMvpProducts,
     'product-detail': renderMvpProductDetail,
     'listing-studio': renderListingStudio,
+    'product-editor': () => window.ProductEditorV2UI.render(
+      state.productEditorProduct,
+      state.productEditorWorkspace,
+      { owner: state.identity?.user?.accountType === 'owner' },
+    ),
     'current-products': renderCurrentProductManager,
     'ai-product': renderAIProductStudio,
     marketing: renderMarketingCenter,
@@ -1911,6 +1923,23 @@ function render() {
   };
   root.innerHTML = AdminLayout((views[state.view] || renderGenericModule)());
   bindShell();
+  if (state.view === 'product-editor') {
+    window.ProductEditorV2UI.bind(state.productEditorProduct, state.productEditorWorkspace, {
+      owner: state.identity?.user?.accountType === 'owner',
+      api,
+      toast,
+      dirty: () => { state.productEditorDirty = true; },
+      update: (product, workspace) => {
+        state.productEditorProduct = product;
+        state.productEditorWorkspace = workspace;
+        state.productEditorDirty = false;
+        if (product?.id && window.location.pathname.endsWith('/new')) {
+          window.history.replaceState({}, '', `/admin/product-editor/${product.id}`);
+        }
+        render();
+      },
+    });
+  }
   if (state.dirty) document.querySelector('.savebar')?.classList.add('visible');
 }
 
@@ -1926,6 +1955,25 @@ function bindShell() {
     state.query = event.target.value;
     if (state.view === 'products') render();
   });
+  document.querySelectorAll('#open-product-editor').forEach((button) =>
+    button.addEventListener('click', () => navigateProductEditor(null)));
+  document.querySelectorAll('[data-edit-v2]').forEach((button) => button.addEventListener('click', async (event) => {
+    event.stopPropagation();
+    try {
+      const result = await api('/api/admin/product-editor-v2/import', {
+        method: 'POST',
+        body: JSON.stringify({
+          websiteProductId: button.dataset.editV2,
+          productUuid: button.dataset.productUuid,
+          handle: button.dataset.handle,
+          expectedRevision: state.productEditorWorkspace?.storeRevision,
+        }),
+      });
+      await navigateProductEditor(result.product.id);
+    } catch (error) {
+      toast(error.message);
+    }
+  }));
   document.getElementById('product-shell-filter')?.addEventListener('input', (event) => {
     state.query = event.target.value;
     render();
@@ -2762,6 +2810,7 @@ function viewFromPath(pathname = window.location.pathname) {
   if (normalized === '/admin/catalog/review') return 'catalog-review';
   if (/^\/admin\/catalog\/[^/]+$/.test(normalized)) return 'catalog-detail';
   if (/^\/admin\/products\/[^/]+\/listing-studio$/.test(normalized)) return 'listing-studio';
+  if (/^\/admin\/product-editor\/(?:new|[0-9a-f-]+)$/.test(normalized)) return 'product-editor';
   if (/^\/admin\/products\/(?!current$)[^/]+$/.test(normalized)) return 'product-detail';
   const route = routeEntries.find(([, , , path]) => path === normalized);
   return route?.[0] || 'dashboard';
@@ -2851,6 +2900,30 @@ async function navigateListingStudio(recordKey, replace = false) {
   render();
 }
 
+async function navigateProductEditor(productId = null, replace = false) {
+  state.view = 'product-editor';
+  state.productEditorDirty = false;
+  state.productEditorProduct = productId ? null : window.ProductEditorV2UI.empty();
+  state.productEditorWorkspace = null;
+  window.history[replace ? 'replaceState' : 'pushState'](
+    {},
+    '',
+    `/admin/product-editor/${productId || 'new'}`,
+  );
+  render();
+  try {
+    const result = await api(productId
+      ? `/api/admin/product-editor-v2/products/${encodeURIComponent(productId)}`
+      : '/api/admin/product-editor-v2');
+    state.productEditorWorkspace = result;
+    state.productEditorProduct = productId ? result.product : window.ProductEditorV2UI.empty();
+  } catch (error) {
+    state.mvpError = error.message;
+  }
+  render();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
 function navigate(view, replace = false) {
   const route = routeEntries.find(([id]) => id === view) || routeEntries[0];
   state.view = route[0];
@@ -2859,6 +2932,7 @@ function navigate(view, replace = false) {
   render();
   if (view === 'team') loadTeamUsers().then(render).catch((error) => toast(error.message));
   if (view === 'profile') loadProfile().then(render).catch((error) => toast(error.message));
+  if (view === 'product-editor') navigateProductEditor(null, true);
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
@@ -2917,6 +2991,13 @@ async function loadMvpWorkspace() {
       const detail = await api(`/api/admin/catalog/products/${encodeURIComponent(catalogProductId)}`);
       state.catalogProduct = detail.product;
       state.catalogAudit = detail.auditEvents || [];
+    } else if (state.view === 'product-editor') {
+      const productId = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+      const result = await api(productId === 'new'
+        ? '/api/admin/product-editor-v2'
+        : `/api/admin/product-editor-v2/products/${encodeURIComponent(productId)}`);
+      state.productEditorWorkspace = result;
+      state.productEditorProduct = productId === 'new' ? window.ProductEditorV2UI.empty() : result.product;
     }
   } catch (error) {
     state.mvpError = error.message;

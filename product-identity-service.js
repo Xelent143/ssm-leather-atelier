@@ -36,18 +36,30 @@ function productTypeCode(...values) {
   const source = values.map((value) => clean(value)).join(' ');
   return TYPE_RULES.find(([, pattern]) => pattern.test(source))?.[0] || 'OTH';
 }
-function variantParts(attributes = {}) {
+function variantParts(attributes = {}, sellableAttributeKeys = []) {
   const transforms = [
     ['size', (value) => codePart(value)],
     ['color', (value) => COLOR_CODES[clean(value).toLowerCase()] || codePart(value, 3)],
     ['leatherType', (value) => codePart(value)],
+    ['leather_type', (value) => codePart(value)],
     ['fit', (value) => codePart(value)],
     ['length', (value) => codePart(value)],
     ['hardwareFinish', (value) => codePart(value)],
+    ['hardware_color', (value) => COLOR_CODES[clean(value).toLowerCase()] || codePart(value, 3)],
     ['lining', (value) => codePart(value)],
     ['armor', (value) => codePart(value)],
   ];
-  return transforms.map(([key, transform]) => transform(attributes[key])).filter(Boolean);
+  const known = new Set(transforms.map(([key]) => key));
+  const standard = transforms.map(([key, transform]) => transform(attributes[key])).filter(Boolean);
+  const approvedCustomKeys = new Set((Array.isArray(sellableAttributeKeys) ? sellableAttributeKeys : [])
+    .map((key) => clean(key, 80)).filter(Boolean));
+  const custom = Object.entries(attributes)
+    .filter(([key, value]) => !known.has(key) && approvedCustomKeys.has(key) && clean(value))
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => key.includes('color')
+      ? (COLOR_CODES[clean(value).toLowerCase()] || codePart(value, 3))
+      : codePart(value));
+  return [...standard, ...custom];
 }
 
 function createProductIdentityService(options = {}) {
@@ -135,7 +147,7 @@ function createProductIdentityService(options = {}) {
       const generatedSku = `${prefix}-${typeCode}-${String(productSequence).padStart(4, '0')}`;
       const productSku = clean(input.existingSku, 64) || generatedSku;
       const variantSkus = (Array.isArray(input.variants) ? input.variants : []).map((attributes) => {
-        const parts = variantParts(attributes);
+        const parts = variantParts(attributes, input.sellableAttributeKeys);
         return {
           id: crypto.randomUUID(),
           attributes: Object.fromEntries(Object.entries(attributes)

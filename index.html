@@ -3862,7 +3862,10 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const p = product || SSM_PRODUCTS[0];
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
-  const [productColor, setProductColor] = React.useState(p.defaultColor || p.colors?.[0]?.id || null);
+  const [productColor, setProductColor] = React.useState(
+    p.defaultColor || p.colors?.[0]?.id ||
+    p.options?.find(option => option.name.toLowerCase() === 'color')?.values?.[0] || null,
+  );
   const [collarColor, setCollarColor] = React.useState(p.defaultCollarColor || p.collarColors?.[0]?.id || null);
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('details');
@@ -3882,20 +3885,32 @@ function PDP({ product, go, addToCart, onQuickView }) {
     weight: '',
   });
 
-  const images = p.gallery || [
+  const images = p.gallery || (p.images?.length ? p.images.map((src, index) => ({
+    label: index === 0 ? 'Featured product image' : `Product image ${index + 1}`,
+    src,
+  })) : [
     { label: 'On model · 3/4', src: p.img },
     { label: 'Detail · placket', src: p.alt || p.img },
     { label: 'Detail · stitching', src: SSM_ASSETS.detail },
     { label: 'Back · studio', src: p.img },
     { label: 'Flat lay', src: p.alt || p.img },
-  ];
+  ]);
 
   const lObj = SSM_LEATHERS.find(l => l.id === leather);
   const productLeather = p.material || lObj?.name || 'Selected hide';
   const selectedCollar = p.collarColors?.find(c => c.id === collarColor);
-  const selectedProductColor = p.colors?.find(c => c.id === productColor);
-  const productSizes = p.sizes || ['XS','S','M','L','XL','XXL'];
-  const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
+  const optionColors = p.options?.find(option => option.name.toLowerCase() === 'color')?.values || [];
+  const productColors = p.colors || optionColors.map(value => ({ id: value, name: value, color: '#6f4a32' }));
+  const selectedProductColor = productColors.find(c => c.id === productColor) || productColors[0];
+  const productSizes = p.options?.find(option => option.name.toLowerCase() === 'size')?.values
+    || p.sizes || Object.keys(p.stock || {}).length && Object.keys(p.stock) || ['XS','S','M','L','XL','XXL'];
+  const sizeStock = (s) => p.variants?.length
+    ? p.variants.filter(variant =>
+      variant.status !== 'disabled' && variant.availableForSale !== false &&
+      (!variant.attributes?.size || variant.attributes.size === s) &&
+      (!selectedProductColor?.name || !variant.attributes?.color || variant.attributes.color === selectedProductColor.name))
+      .reduce((total, variant) => total + Number(variant.quantity || 0), 0)
+    : (p.stock ? (p.stock[s] || 0) : 99);
   const inStock = sizeStock(size) > 0;
   const finalPiece = p.stock && Object.values(p.stock).reduce((a,b) => a+b, 0) <= 4;
   const madeToMeasureSurcharge = p.madeToMeasureSurcharge ?? 50;
@@ -4022,14 +4037,14 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </div>
           )}
 
-          {p.colors?.length > 0 && (
+          {productColors.length > 0 && (
             <div style={{ marginBottom: 28 }}>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
                 <span>COLOR</span>
                 <span style={{ color: 'var(--fg-2)' }}>{selectedProductColor?.name.toUpperCase()}</span>
               </div>
               <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                {p.colors.map(c => (
+                {productColors.map(c => (
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                     <button className={`swatch leather-swatch ${productColor === c.id ? 'active' : ''}`}
                       aria-label={`Product color ${c.name}`} aria-pressed={productColor === c.id} title={c.name}
@@ -4246,7 +4261,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
                         </div>
                       ))}
                     </div>
-                  ) : s.content}
+                  ) : (s.id === 'details' && String(s.content || '').includes('<')
+                    ? <div dangerouslySetInnerHTML={{ __html: s.content }} />
+                    : s.content)}
                 </div>
               )}
             </div>
@@ -7253,9 +7270,11 @@ const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const SSM_PRODUCT_OVERRIDE = window.__SSM_PRODUCT_OVERRIDE__ || null;
 const productFromSlug = (slug) => {
   const product = SSM_PRODUCTS.find(p => p.slug === slug) || null;
-  if (!product || SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
+  if (SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
+  if (!product) return SSM_PRODUCT_OVERRIDE.product || null;
   return {
     ...product,
+    ...(SSM_PRODUCT_OVERRIDE.product || {}),
     name: SSM_PRODUCT_OVERRIDE.title || product.name,
     publicDescription: SSM_PRODUCT_OVERRIDE.description || product.publicDescription || '',
   };

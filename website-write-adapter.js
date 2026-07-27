@@ -5,6 +5,10 @@ const PUBLISHABLE_FIELDS = new Set([
   'perfectFor', 'whyYouWillLoveIt', 'faq', 'buyingGuide', 'seoTitle',
   'metaDescription', 'tags', 'brand', 'productType', 'slug', 'price',
   'compareAtPrice', 'status', 'stock', 'inventory', 'imageMetadata',
+  'descriptionHtml', 'maker', 'category', 'gender', 'collections', 'costPerItem',
+  'taxable', 'image', 'primaryImage', 'galleryImages', 'options', 'variants',
+  'variantOptions', 'availableColors', 'sku', 'internalProductCode', 'factoryCode',
+  'shipping', 'shippingWeight', 'metafields',
 ]);
 
 function cleanSlug(value) {

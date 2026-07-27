@@ -20,9 +20,11 @@ const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const SSM_PRODUCT_OVERRIDE = window.__SSM_PRODUCT_OVERRIDE__ || null;
 const productFromSlug = (slug) => {
   const product = SSM_PRODUCTS.find(p => p.slug === slug) || null;
-  if (!product || SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
+  if (SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
+  if (!product) return SSM_PRODUCT_OVERRIDE.product || null;
   return {
     ...product,
+    ...(SSM_PRODUCT_OVERRIDE.product || {}),
     name: SSM_PRODUCT_OVERRIDE.title || product.name,
     publicDescription: SSM_PRODUCT_OVERRIDE.description || product.publicDescription || '',
   };

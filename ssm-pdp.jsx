@@ -9,6 +9,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const p = product || SSM_PRODUCTS[0];
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
+  const [color, setColor] = React.useState(
+    product?.options?.find(option => option.name.toLowerCase() === 'color')?.values?.[0] || '',
+  );
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('details');
   const [notifyOpen, setNotifyOpen] = React.useState(false);
@@ -26,16 +29,25 @@ function PDP({ product, go, addToCart, onQuickView }) {
     weight: '',
   });
 
-  const images = [
-    { label: 'On model · 3/4', src: p.img },
-    { label: 'Detail · placket', src: p.alt || p.img },
-    { label: 'Detail · stitching', src: SSM_ASSETS.detail },
-    { label: 'Back · studio', src: p.img },
-    { label: 'Flat lay', src: p.alt || p.img },
-  ];
+  const sourceImages = p.images?.length ? p.images : [p.img, p.alt || p.img, SSM_ASSETS.detail, p.img, p.alt || p.img];
+  const images = sourceImages.map((src, index) => ({
+    label: index === 0 ? 'Featured product image' : `Product image ${index + 1}`,
+    src,
+  }));
 
   const lObj = SSM_LEATHERS.find(l => l.id === leather);
-  const sizeStock = (s) => p.stock ? (p.stock[s] || 0) : 99;
+  const sizeOptions = p.options?.find(option => option.name.toLowerCase() === 'size')?.values
+    || Object.keys(p.stock || {});
+  const availableSizes = sizeOptions.length ? sizeOptions : ['XS','S','M','L','XL','XXL'];
+  const colorOptions = p.options?.find(option => option.name.toLowerCase() === 'color')?.values
+    || p.availableColors || [];
+  const sizeStock = (s) => p.variants?.length
+    ? p.variants.filter(variant =>
+      variant.status !== 'disabled' && variant.availableForSale !== false &&
+      (!variant.attributes?.size || variant.attributes.size === s) &&
+      (!color || !variant.attributes?.color || variant.attributes.color === color))
+      .reduce((total, variant) => total + Number(variant.quantity || 0), 0)
+    : (p.stock ? (p.stock[s] || 0) : 99);
   const inStock = sizeStock(size) > 0;
   const finalPiece = p.stock && Object.values(p.stock).reduce((a,b) => a+b, 0) <= 4;
   const madeToMeasureSurcharge = p.madeToMeasureSurcharge ?? 50;
@@ -159,6 +171,22 @@ function PDP({ product, go, addToCart, onQuickView }) {
             ))}
           </div>
 
+          {colorOptions.length > 0 && (
+            <>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
+                COLOR · {color.toUpperCase()}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+                {colorOptions.map(value => (
+                  <button key={value} onClick={() => setColor(value)} aria-pressed={color === value}
+                    style={{ minHeight: 38, padding: '0 14px', border: `1px solid ${color === value ? 'var(--fg)' : 'var(--line-2)'}`, background: color === value ? 'var(--fg)' : 'transparent', color: color === value ? 'var(--bg)' : 'var(--fg-2)', cursor: 'pointer' }}>
+                    {value}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
           <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
             <span>SIZE</span>
             <button onClick={() => go('size')} className="ulink"
@@ -167,7 +195,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 12 }}>
-            {['XS','S','M','L','XL','XXL'].map(s => {
+            {availableSizes.map(s => {
               const stock = sizeStock(s);
               const out = stock === 0;
               const low = stock > 0 && stock < 2;
@@ -252,6 +280,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
               onClick={() => addToCart(p, {
                 leather: lObj.name,
                 size,
+                color,
                 price: displayPrice,
                 surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
                 fitMode,
@@ -336,7 +365,9 @@ function PDP({ product, go, addToCart, onQuickView }) {
                         </div>
                       ))}
                     </div>
-                  ) : s.content}
+                  ) : (s.id === 'details' && String(s.content || '').includes('<')
+                    ? <div dangerouslySetInnerHTML={{ __html: s.content }} />
+                    : s.content)}
                 </div>
               )}
             </div>

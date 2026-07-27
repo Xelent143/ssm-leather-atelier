@@ -22,6 +22,8 @@ const { createCatalogLinkService } = require('./catalog-link-service');
 const { createOperationalLaunchStore } = require('./operational-launch-store');
 const { createOperationalLaunchService } = require('./operational-launch-service');
 const { createWebsiteWriteAdapter } = require('./website-write-adapter');
+const { createProductEditorV2Store } = require('./product-editor-v2-store');
+const { createProductEditorV2Service } = require('./product-editor-v2-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -96,6 +98,15 @@ const operationalLaunchService = createOperationalLaunchService({
   catalogService: catalogSyncService,
   catalogLinkService,
   websiteAdapter: websiteWriteAdapter,
+});
+const productEditorV2Store = createProductEditorV2Store({ dataDir });
+const productEditorV2Service = createProductEditorV2Service({
+  store: productEditorV2Store,
+  identity: adminIdentity,
+  productIdentityService,
+  productPlmStore,
+  websiteAdapter: websiteWriteAdapter,
+  operationalLaunchService,
 });
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -338,12 +349,12 @@ function productImageUrl(req, imagePath) {
   return absoluteUrl(req, cleanPath);
 }
 
-function readBody(req) {
+function readBody(req, maxBytes = 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 1024 * 1024) {
+      if (body.length > maxBytes) {
         reject(new Error('Request body too large'));
         req.destroy();
       }
@@ -768,6 +779,28 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
     slug: product.slug,
     title: product.title,
     description: product.description,
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.title,
+      blurb: product.shortDescription || product.description,
+      publicDescription: product.descriptionHtml || product.description,
+      cat: product.category || product.productType || 'Products',
+      gender: product.gender || 'Unisex',
+      price: Number(product.price || 0),
+      compareAtPrice: product.compareAtPrice,
+      img: product.primaryImage || product.image,
+      alt: product.galleryImages?.[0] || product.primaryImage || product.image,
+      images: [product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean),
+      stock: product.stock || {},
+      options: product.options || [],
+      variants: product.variants || [],
+      availableColors: product.availableColors || [],
+      maker: product.maker || product.brand || 'MOTOGRIP GEAR',
+      tag: product.tag || '',
+      madeToMeasureSurcharge: product.madeToMeasureSurcharge,
+      metafields: product.metafields || {},
+    },
   })};</script>`;
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
@@ -1084,6 +1117,17 @@ function normalizeStore(input) {
       itemGroupId: String(product.itemGroupId || product.slug || product.id || ''),
       variantOptions: Array.isArray(product.variantOptions) ? product.variantOptions.map(String) : [],
       shippingWeight: String(product.shippingWeight || ''),
+      descriptionHtml: String(product.descriptionHtml || ''),
+      collections: Array.isArray(product.collections) ? product.collections.map(String) : [],
+      options: Array.isArray(product.options) ? product.options : [],
+      variants: Array.isArray(product.variants) ? product.variants : [],
+      costPerItem: product.costPerItem === null || product.costPerItem === '' ? null : Number(product.costPerItem || 0),
+      taxable: product.taxable !== false,
+      internalProductCode: String(product.internalProductCode || ''),
+      factoryCode: String(product.factoryCode || ''),
+      shipping: product.shipping && typeof product.shipping === 'object' ? product.shipping : {},
+      metafields: product.metafields && typeof product.metafields === 'object' ? product.metafields : {},
+      imageMetadata: Array.isArray(product.imageMetadata) ? product.imageMetadata : [],
       shippingPolicy: String(product.shippingPolicy || 'Complimentary express shipping on stock pieces'),
       returnPolicy: String(product.returnPolicy || '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support'),
       ratingValue: Number(product.ratingValue || 0),
@@ -1158,6 +1202,8 @@ function safePlmError(error) {
     SYNC_FAILED: 503,
     IDENTITY_CONFLICT: 409,
     PASSWORD_POLICY: 400,
+    PRODUCT_EDITOR_STORE_UNAVAILABLE: 503,
+    IMMUTABLE_RECORD: 409,
     CURRENT_PASSWORD_INVALID: 400,
   };
   return {
@@ -1692,6 +1738,87 @@ async function handleApi(req, res, pathname) {
       sendJson(res, 200, { products: productMvpReadModel.products() });
     } catch {
       sendJson(res, 503, { error: 'Product workspace is temporarily unavailable.' });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-editor-v2' && req.method === 'GET') {
+    try {
+      sendJson(res, 200, productEditorV2Service.workspace(session));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-editor-v2/products' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 201, await productEditorV2Service.create(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/product-editor-v2/import' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      sendJson(res, 201, await productEditorV2Service.importWebsite(session, body));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const editorProductMatch = pathname.match(
+    /^\/api\/admin\/product-editor-v2\/products\/([0-9a-f-]+)(?:\/(media|media-library|submit|approve|request-changes|publish|revise))?(?:\/([0-9a-f-]+))?$/i,
+  );
+  if (editorProductMatch) {
+    try {
+      const productId = editorProductMatch[1];
+      const operation = editorProductMatch[2] || null;
+      const mediaId = editorProductMatch[3] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, productEditorV2Service.workspace(session, productId));
+      } else if (req.method === 'PUT' && !operation) {
+        const body = await readBody(req);
+        sendJson(res, 200, await productEditorV2Service.save(session, { ...body, productId }));
+      } else if (operation === 'media' && req.method === 'POST' && !mediaId) {
+        const body = await readBody(req, 8 * 1024 * 1024);
+        sendJson(res, 201, await productEditorV2Service.uploadMedia(session, { ...body, productId }));
+      } else if (operation === 'media' && req.method === 'PUT' && !mediaId) {
+        const body = await readBody(req);
+        sendJson(res, 200, await productEditorV2Service.updateMedia(session, { ...body, productId }));
+      } else if (operation === 'media' && req.method === 'DELETE' && mediaId) {
+        const body = await readBody(req);
+        sendJson(res, 200, await productEditorV2Service.removeMedia(session, { ...body, productId, mediaId }));
+      } else if (operation === 'media-library' && req.method === 'POST') {
+        const body = await readBody(req);
+        sendJson(res, 201, await productEditorV2Service.attachMedia(session, { ...body, productId }));
+      } else if (req.method === 'POST' && operation) {
+        const body = await readBody(req);
+        const actions = {
+          submit: () => productEditorV2Service.submit(session, { ...body, productId }),
+          approve: () => productEditorV2Service.approve(session, { ...body, productId }),
+          'request-changes': () => productEditorV2Service.requestChanges(session, { ...body, productId }),
+          publish: () => productEditorV2Service.publish(session, { ...body, productId }),
+          revise: () => productEditorV2Service.revise(session, { ...body, productId }),
+        };
+        if (!actions[operation]) {
+          sendJson(res, 405, { error: 'Method not allowed.' });
+        } else {
+          sendJson(res, 201, await actions[operation]());
+        }
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
     }
     return true;
   }
@@ -2444,6 +2571,13 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const editorMediaMatch = requestPath.match(/^\/product-editor-media\/([0-9a-f-]+)\/([0-9a-f-]+\.(?:jpg|png|webp))$/i);
+    if (editorMediaMatch) {
+      const mediaPath = path.join(productEditorV2Store.paths.mediaDir, editorMediaMatch[1], editorMediaMatch[2]);
+      serveFile(req, res, mediaPath);
+      return;
+    }
+
     const normalizedRoutePath = requestPath !== '/' ? requestPath.replace(/\/$/, '') : '/';
     if (publicRoutes[normalizedRoutePath]) {
       if (requestPath !== normalizedRoutePath && requestPath !== '/') {
@@ -2498,6 +2632,8 @@ module.exports = {
   operationalLaunchService,
   operationalLaunchStore,
   websiteWriteAdapter,
+  productEditorV2Store,
+  productEditorV2Service,
   productMeta,
   injectProductHead,
   injectRouteHead,
