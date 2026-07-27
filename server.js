@@ -676,7 +676,41 @@ function productMeta(product, store, req) {
   const canonical = product.canonicalUrl || absoluteUrl(req, productPath(product));
   const image = productImageUrl(req, product.primaryImage || product.image);
   const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
-  const availability = Number(product.inventory || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  const sellableVariants = (Array.isArray(product.variants) ? product.variants : [])
+    .filter((variant) => variant.status !== 'disabled' && variant.availableForSale !== false);
+  const availability = (sellableVariants.length
+    ? sellableVariants.some((variant) => Number(variant.quantity || 0) > 0)
+    : Number(product.inventory || 0) > 0)
+    ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  const metafields = product.metafields && typeof product.metafields === 'object' ? product.metafields : {};
+  const factualValue = (value) => value !== undefined && value !== null && value !== '' &&
+    String(value).toLowerCase() !== 'not applicable';
+  const propertyLabels = {
+    outerMaterial: 'Outer material',
+    leatherType: 'Leather type',
+    leatherThickness: 'Leather thickness',
+    liningMaterial: 'Lining',
+    closure: 'Closure',
+    hardware: 'Hardware',
+    pocketCount: 'Pocket count',
+    concealedCarryPockets: 'Concealed-carry pockets',
+    armorCompatibility: 'Armor compatibility',
+    collar: 'Collar',
+    sleeveType: 'Sleeve type',
+    fit: 'Fit',
+    careInstructions: 'Care instructions',
+    customSizingAvailable: 'Custom sizing',
+    personalizationAvailable: 'Personalization',
+    manufacturer: 'Manufacturer',
+    countryOfManufacture: 'Country of manufacture',
+  };
+  const factualProperties = Object.entries(propertyLabels)
+    .filter(([key]) => factualValue(metafields[key]))
+    .map(([key, name]) => ({
+      '@type': 'PropertyValue',
+      name,
+      value: typeof metafields[key] === 'boolean' ? (metafields[key] ? 'Yes' : 'No') : String(metafields[key]),
+    }));
   const productNode = {
     '@type': 'Product',
     '@id': `${canonical}#product`,
@@ -692,11 +726,13 @@ function productMeta(product, store, req) {
       name: product.brand || store.settings.storeName || 'MOTOGRIP GEAR',
     },
     category: product.productType || product.category,
-    material: product.material || product.leatherType || undefined,
-    color: product.color || undefined,
-    size: product.size || undefined,
+    material: (factualValue(metafields.outerMaterial) ? metafields.outerMaterial :
+      factualValue(metafields.leatherType) ? metafields.leatherType :
+      product.factualProjection ? undefined : product.material || product.leatherType || undefined),
+    color: product.factualProjection ? undefined : product.color || undefined,
+    size: product.factualProjection ? undefined : product.size || undefined,
     audience: product.gender ? { '@type': 'PeopleAudience', suggestedGender: product.gender } : undefined,
-    additionalProperty: [
+    additionalProperty: product.factualProjection ? factualProperties : [
       ['Made to measure', product.madeToMeasureEnabled ? `Available +${currency} ${product.madeToMeasureSurcharge}` : 'Not available'],
       ['Leather type', product.leatherType],
       ['Hardware', product.hardware],
@@ -704,6 +740,25 @@ function productMeta(product, store, req) {
       ['Riding use', product.ridingUseCase],
       ['Care', product.careInstructions],
     ].filter(([, value]) => value !== undefined && value !== '').map(([name, value]) => ({ '@type': 'PropertyValue', name, value: String(value) })),
+    hasVariant: sellableVariants.map((variant) => ({
+      '@type': 'Product',
+      sku: variant.sku || undefined,
+      name: [product.title, ...Object.values(variant.attributes || {})].filter(Boolean).join(' - '),
+      additionalProperty: Object.entries(variant.attributes || {}).map(([name, value]) => ({
+        '@type': 'PropertyValue',
+        name,
+        value: String(value),
+      })),
+      offers: {
+        '@type': 'Offer',
+        url: canonical,
+        priceCurrency: currency,
+        price: Number(variant.price ?? product.price ?? 0).toFixed(2),
+        availability: Number(variant.quantity || 0) > 0
+          ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        itemCondition: `https://schema.org/${product.condition || 'NewCondition'}`,
+      },
+    })),
     offers: {
       '@type': 'Offer',
       '@id': `${canonical}#offer`,
@@ -789,17 +844,44 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
       gender: product.gender || 'Unisex',
       price: Number(product.price || 0),
       compareAtPrice: product.compareAtPrice,
-      img: product.primaryImage || product.image,
-      alt: product.galleryImages?.[0] || product.primaryImage || product.image,
-      images: [product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean),
+      brand: product.brand,
+      vendor: product.maker || product.brand,
+      productType: product.productType,
+      category: product.category,
+      seoTitle: product.seoTitle,
+      metaDescription: product.seoDescription,
+      img: productImageUrl(req, product.primaryImage || product.image),
+      alt: productImageUrl(req, product.galleryImages?.[0] || product.primaryImage || product.image),
+      images: [product.primaryImage || product.image, ...(product.galleryImages || [])]
+        .filter(Boolean).map((imagePath) => productImageUrl(req, imagePath)),
       stock: product.stock || {},
       options: product.options || [],
       variants: product.variants || [],
       availableColors: product.availableColors || [],
-      maker: product.maker || product.brand || 'MOTOGRIP GEAR',
+      imageMetadata: (product.imageMetadata || []).map((item) => ({
+        ...item,
+        path: item.path ? productImageUrl(req, item.path) : item.path,
+      })),
+      maker: product.maker || product.brand || '',
       tag: product.tag || '',
       madeToMeasureSurcharge: product.madeToMeasureSurcharge,
       metafields: product.metafields || {},
+      shipping: product.shipping || {},
+      shippingWeight: product.shippingWeight || '',
+      sku: product.sku || '',
+      internalProductCode: product.internalProductCode || '',
+      factoryCode: product.factoryCode || '',
+      sections: {
+        features: product.features || [],
+        specifications: product.specifications || [],
+        perfectFor: product.perfectFor || '',
+        whyYouWillLoveIt: product.whyYouWillLoveIt || '',
+        faq: product.faq || [],
+        buyingGuide: product.buyingGuide || '',
+      },
+      tags: product.tags || [],
+      factualProjection: product.factualProjection === true,
+      reviews: Array.isArray(product.reviews) ? product.reviews : [],
     },
   })};</script>`;
   return html
@@ -1128,8 +1210,17 @@ function normalizeStore(input) {
       shipping: product.shipping && typeof product.shipping === 'object' ? product.shipping : {},
       metafields: product.metafields && typeof product.metafields === 'object' ? product.metafields : {},
       imageMetadata: Array.isArray(product.imageMetadata) ? product.imageMetadata : [],
-      shippingPolicy: String(product.shippingPolicy || 'Complimentary express shipping on stock pieces'),
-      returnPolicy: String(product.returnPolicy || '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support'),
+      shortDescription: String(product.shortDescription || ''),
+      features: Array.isArray(product.features) ? product.features : (product.features || ''),
+      specifications: Array.isArray(product.specifications) ? product.specifications : (product.specifications || ''),
+      perfectFor: String(product.perfectFor || ''),
+      whyYouWillLoveIt: String(product.whyYouWillLoveIt || ''),
+      faq: Array.isArray(product.faq) ? product.faq : (product.faq || ''),
+      buyingGuide: String(product.buyingGuide || ''),
+      tags: Array.isArray(product.tags) ? product.tags.map(String) : [],
+      factualProjection: product.factualProjection === true,
+      shippingPolicy: String(product.shippingPolicy || (product.factualProjection ? '' : 'Complimentary express shipping on stock pieces')),
+      returnPolicy: String(product.returnPolicy || (product.factualProjection ? '' : '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support')),
       ratingValue: Number(product.ratingValue || 0),
       reviewCount: Number(product.reviewCount || 0),
       careInstructions: String(product.careInstructions || ''),

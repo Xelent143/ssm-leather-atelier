@@ -63,7 +63,11 @@ function fixture() {
   const product = (overrides = {}) => ({
     title: 'Men’s Brown Leather Western Vest',
     descriptionHtml: '<p>Brown leather western vest.</p>',
-    sections: { fullDescription: 'Brown leather western vest for everyday wear.' },
+    sections: {
+      shortDescription: 'Brown leather western vest.',
+      fullDescription: 'Brown leather western vest for everyday wear.',
+      features: ['Button-front closure'],
+    },
     organization: {
       brand: 'MOTOGRIP GEAR', vendor: 'MOTOGRIP GEAR', productType: 'Western Vest',
       category: 'Vests', gender: 'Men', collections: ['Western'], tags: ['brown leather vest'],
@@ -281,6 +285,15 @@ test('existing website products import once with URLs, stock and SKU-compatible 
   assert.equal(result.products.length, 1);
   assert.equal(result.product.seo.handle, 'dean-brown-leather-biker-jacket');
   assert.equal(result.product.variants.length, 2);
+  assert.equal(result.product.identity.productSku, 'MG-MJ01');
+  assert.equal(result.product.identity.state, 'imported');
+  await current.store.mutate((state) => {
+    state.products[0].identity = null;
+    return { store: state };
+  });
+  result = await service.importWebsite(current.editorSession, { websiteProductId: 'dean' });
+  assert.equal(result.product.identity.productSku, 'MG-MJ01');
+  assert.equal(result.auditEvents[0].action, 'website_identity_projected');
 });
 
 test('Owner publishes one governed website product idempotently with variants, media, SEO and inventory', async () => {
@@ -344,6 +357,10 @@ test('Owner publishes one governed website product idempotently with variants, m
   assert.equal(current.website().products[0].variants.length, 10);
   assert.equal(current.website().products[0].inventory, 55);
   assert.equal(current.website().products[0].sku, 'MG-VST-0001');
+  assert.equal(current.website().products[0].factualProjection, true);
+  assert.equal(current.website().products[0].shortDescription.length > 0, true);
+  assert.equal(current.website().products[0].features.length > 0, true);
+  assert.equal(current.website().products[0].metafields.leatherType, 'Cowhide');
   assert.equal(current.website().products[0].primaryImage.includes('/product-editor-media/'), true);
   const repeated = await current.service.publish(current.ownerSession, {
     productId: result.product.id, expectedRevision: result.storeRevision, idempotencyKey: key,
@@ -370,6 +387,49 @@ test('Product Editor v2 UI exposes required business controls and legacy compati
   assert.equal(css.includes('@media(max-width:720px)'), true);
   assert.equal(css.includes('.pe-table-scroll{overflow:auto;max-width:100%'), true);
   assert.equal(server.includes('variants: product.variants || []'), true);
-  assert.equal(storefront.includes('productColors.length > 0'), true);
-  assert.equal(storefront.includes('variant.attributes?.color'), true);
+  assert.equal(server.includes('factualProjection: product.factualProjection === true'), true);
+  assert.equal(storefront.includes('function FactualPDP'), true);
+  assert.equal(storefront.includes('p.factualProjection'), true);
+  assert.equal(storefront.includes('selectedVariant?.sku'), true);
+  assert.equal(storefront.includes('selectedCompareAt > selectedPrice'), true);
+  assert.equal(storefront.includes('Array.isArray(p.reviews) && p.reviews.length > 0'), true);
+});
+
+test('factual PDP does not use generic leather, review, fit, or merchandising fallbacks', () => {
+  const storefront = fs.readFileSync(path.join(__dirname, '..', 'ssm-pdp.jsx'), 'utf8');
+  const start = storefront.indexOf('function FactualPDP');
+  const end = storefront.indexOf('function PDP(', start);
+  const factual = storefront.slice(start, end);
+  for (const forbidden of [
+    'SSM_LEATHERS',
+    'Hand-numbered',
+    'Lifetime repair',
+    '4.9 / 5',
+    'Sigrid K.',
+    'Twelve months in our vegetable-tanning pit',
+    'Glass-finish full-grain calfskin',
+  ]) assert.equal(factual.includes(forbidden), false, forbidden);
+  for (const required of [
+    'p.options',
+    'sellableVariants',
+    'optionAvailable',
+    'selectedVariant?.imageId',
+    'selectedVariant?.price',
+    'p.metafields',
+    'p.sections?.faq',
+  ]) assert.equal(factual.includes(required), true, required);
+});
+
+test('published Product Editor schema uses factual variants and omits unsupported review fallbacks', () => {
+  const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  const app = fs.readFileSync(path.join(__dirname, '..', 'ssm-app.jsx'), 'utf8');
+  assert.equal(server.includes('const sellableVariants = (Array.isArray(product.variants)'), true);
+  assert.equal(server.includes('hasVariant: sellableVariants.map'), true);
+  assert.equal(server.includes('product.factualProjection ? factualProperties'), true);
+  assert.equal(server.includes('product.factualProjection ? undefined : product.color'), true);
+  assert.equal(server.includes('productImageUrl(req, product.primaryImage || product.image)'), true);
+  assert.equal(server.includes('productNode.aggregateRating'), true);
+  assert.equal(server.includes('Number(product.ratingValue || 0) > 0'), true);
+  assert.equal(app.includes('p.metaDescription || p.blurb'), true);
+  assert.equal(app.includes('SSM_PRODUCT_OVERRIDE.product?.publicDescription'), true);
 });
