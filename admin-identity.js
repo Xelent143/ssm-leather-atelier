@@ -68,6 +68,12 @@ function passwordHashNeedsUpgrade(encodedHash) {
     Number(match[3]) < ARGON2_OPTIONS.parallelism;
 }
 
+function passwordHashIsValid(encodedHash) {
+  return /^\$argon2id\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+/]+={0,2}\$[A-Za-z0-9+/]+={0,2}$/.test(
+    String(encodedHash || ''),
+  );
+}
+
 function publicUser(user) {
   if (!user) return null;
   return {
@@ -467,6 +473,48 @@ function createAdminIdentity(options = {}) {
     });
   }
 
+  async function recoverStagingOwnerPassword(userId, email, newPassword, recoveryMetadata) {
+    return serializeMutation(async () => {
+      const store = readStore();
+      const index = store.users.findIndex((user) =>
+        user.id === userId &&
+        user.email === normalizeEmail(email) &&
+        user.accountType === 'owner' &&
+        user.status === 'active');
+      if (index < 0) {
+        throw Object.assign(new Error('Approved staging Owner recovery identity was not found.'), {
+          code: 'STAGING_RECOVERY_IDENTITY_MISMATCH',
+        });
+      }
+      const user = store.users[index];
+      const validation = validatePassword(newPassword, user);
+      if (!validation.valid) {
+        throw Object.assign(new Error('Staging Owner recovery is not configured.'), {
+          code: 'STAGING_RECOVERY_CONFIGURATION',
+        });
+      }
+      const timestamp = new Date(now()).toISOString();
+      user.passwordHash = await hash(String(newPassword), ARGON2_OPTIONS);
+      user.passwordChangedAt = timestamp;
+      user.updatedAt = timestamp;
+      user.failedLoginCount = 0;
+      user.lockedUntil = null;
+      user.sessionRevocationVersion = Number(user.sessionRevocationVersion || 0) + 1;
+      store.users[index] = user;
+      store.bootstrapMetadata = {
+        ...(store.bootstrapMetadata || {}),
+        recoveryVersion: Number(recoveryMetadata.recoveryVersion) || 1,
+        recoveryTimestamp: timestamp,
+        recoveryReason: 'explicit_staging_owner_recovery',
+        recoverySource: 'staging_startup_one_time',
+        recoveryReceiptHash: String(recoveryMetadata.recoveryReceiptHash || ''),
+        recoveryOwnerId: user.id,
+      };
+      writeStore(store);
+      return publicUser(user);
+    });
+  }
+
   function managedUsers() {
     return readStore().users
       .filter((user) => user.accountType === 'listing_editor')
@@ -590,9 +638,11 @@ function createAdminIdentity(options = {}) {
     findById,
     owner,
     passwordMatches,
+    passwordHashIsValid: (value) => passwordHashIsValid(value),
     publicUser,
     readStore,
     resetManagedUserPassword,
+    recoverStagingOwnerPassword,
     requestPasswordReset,
     revokeInvitationToken,
     resetPassword,
@@ -618,6 +668,7 @@ module.exports = {
   createAdminIdentity,
   normalizeEmail,
   passwordHashNeedsUpgrade,
+  passwordHashIsValid,
   publicUser,
   tokenHash,
   validatePassword,

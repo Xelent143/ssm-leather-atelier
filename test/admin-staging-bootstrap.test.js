@@ -82,10 +82,14 @@ test('approved staging creates exactly one active Named Owner and safe metadata'
 
   const metadata = current.bootstrap.readMetadata();
   assert.deepEqual(metadata, {
-    bootstrapVersion: 1,
+    bootstrapVersion: 2,
     bootstrapTimestamp: '2026-07-26T12:00:00.000Z',
     bootstrapReason: 'missing_staging_owner',
     bootstrapSource: 'staging_startup',
+    recoveryVersion: null,
+    recoveryTimestamp: null,
+    recoveryReceiptHash: null,
+    recoveryOwnerId: null,
   });
   const serialized = JSON.stringify(metadata);
   assert.doesNotMatch(serialized, /password|argon2|passphrase/i);
@@ -134,7 +138,10 @@ test('explicit staging recovery synchronizes only the approved existing Owner pa
     dataDir: current.dataDir,
     env: enabledEnvironment({
       STAGING_OWNER_PASSWORD: replacementPassword,
-      STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-a',
+      STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-a',
+      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: before.id,
     }),
     identity: current.identity,
     logger: {
@@ -146,7 +153,7 @@ test('explicit staging recovery synchronizes only the approved existing Owner pa
 
   const result = await recovery.ensure();
   const after = current.identity.owner();
-  assert.equal(result.action, 'password_synchronized');
+  assert.equal(result.action, 'recovered');
   assert.equal(current.identity.readStore().users.length, 1);
   assert.equal(after.id, before.id);
   assert.equal(after.displayName, STAGING_OWNER_DISPLAY_NAME);
@@ -184,7 +191,12 @@ test('staging password synchronization rejects an unexpected Owner identity', as
   });
   const recovery = createAdminStagingBootstrap({
     dataDir: current.dataDir,
-    env: enabledEnvironment({ STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true' }),
+    env: enabledEnvironment({
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-b',
+      STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-b',
+      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: current.identity.owner().id,
+    }),
     identity: current.identity,
     logger: { error() {}, info() {} },
   });
@@ -210,13 +222,18 @@ test('explicit staging recovery clears persisted failed-login state without chan
 
   const recovery = createAdminStagingBootstrap({
     dataDir: current.dataDir,
-    env: enabledEnvironment({ STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true' }),
+    env: enabledEnvironment({
+      STAGING_OWNER_RECOVERY_ENABLED: 'true',
+      STAGING_OWNER_RECOVERY_NONCE: 'recovery-2026-07-27-c',
+      STAGING_OWNER_RECOVERY_TOKEN: 'protected-recovery-token-c',
+      STAGING_OWNER_RECOVERY_EXPECTED_USER_ID: before.id,
+    }),
     identity: current.identity,
     logger: { error() {}, info() {} },
   });
   const result = await recovery.ensure();
   const after = current.identity.readStore().users[0];
-  assert.equal(result.action, 'password_synchronized');
+  assert.equal(result.action, 'recovered');
   assert.equal(after.id, before.id);
   assert.equal(current.identity.readStore().users.length, 1);
   assert.equal(after.failedLoginCount, 0);
@@ -227,6 +244,25 @@ test('explicit staging recovery clears persisted failed-login state without chan
     socket: {},
   });
   assert.equal(login.ok, true);
+  fs.rmSync(current.dataDir, { recursive: true, force: true });
+});
+
+test('legacy synchronization flag cannot overwrite an Owner-managed password', async () => {
+  const current = fixture();
+  await current.bootstrap.ensure();
+  const before = structuredClone(current.identity.readStore().users[0]);
+  const attempted = createAdminStagingBootstrap({
+    dataDir: current.dataDir,
+    env: enabledEnvironment({
+      STAGING_OWNER_PASSWORD: 'A mismatched environment secret phrase 2028',
+      STAGING_OWNER_PASSWORD_SYNC_ENABLED: 'true',
+    }),
+    identity: current.identity,
+    logger: { error() {}, info() {} },
+  });
+  assert.equal((await attempted.ensure()).action, 'owner_exists');
+  assert.deepEqual(current.identity.readStore().users[0], before);
+  assert.equal(attempted.status().automaticSecretSynchronization, false);
   fs.rmSync(current.dataDir, { recursive: true, force: true });
 });
 

@@ -157,10 +157,16 @@ test('staging bootstrap diagnostics require an active Named Owner', async () => 
   });
   assert.equal(named.response.status, 200);
   assert.deepEqual(Object.keys(named.data).sort(), [
+    'automaticSecretSynchronization',
     'bootstrapEnabled',
     'bootstrapVersion',
     'lastBootstrapTime',
+    'lastRecoveryTime',
+    'ownerActive',
     'ownerExists',
+    'passwordSource',
+    'recoveryMode',
+    'storedHashValid',
   ]);
   assert.equal(named.data.ownerExists, true);
   assert.equal(named.data.bootstrapEnabled, false);

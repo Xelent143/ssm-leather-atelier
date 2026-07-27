@@ -1517,6 +1517,7 @@ function renderOwnerProfile() {
   }
   const profile = state.profile?.user || state.identity.user;
   const sessions = state.profile?.sessions || [];
+  const authority = state.profile?.passwordAuthority || {};
   const activeTab = state.profileTab === 'security' ? 'security' : 'profile';
   const formatDate = (value) => value ? new Date(value).toLocaleString() : 'Not available';
   const content = activeTab === 'security' ? `
@@ -1537,6 +1538,18 @@ function renderOwnerProfile() {
           ${item.current ? statusBadge('active', 'Current') : ''}
         </article>`).join('') || '<p class="muted">No active sessions found.</p>'}</div>
         <div class="button-row"><button class="btn" id="logout-other-sessions" type="button" ${sessions.filter((item) => !item.current).length ? '' : 'disabled'}>Log out other sessions</button></div>
+      </section>
+      <section class="card card-pad">
+        <div class="card-head"><div><h2>Password authority</h2><p>Privacy-safe staging authentication diagnostics.</p></div>${statusBadge(authority.storedHashValid && authority.ownerActive ? 'active' : 'warning', authority.storedHashValid && authority.ownerActive ? 'Healthy' : 'Review')}</div>
+        <dl class="detail-list">
+          <div><dt>Password source</dt><dd>Owner-managed</dd></div>
+          <div><dt>Bootstrap status</dt><dd>${authority.ownerExists ? 'Completed' : 'Pending'}</dd></div>
+          <div><dt>Automatic secret synchronization</dt><dd>Disabled</dd></div>
+          <div><dt>Recovery mode</dt><dd>${authority.recoveryMode ? 'Enabled' : 'Disabled'}</dd></div>
+          <div><dt>Stored Owner</dt><dd>${authority.ownerExists ? 'Exists' : 'Missing'}</dd></div>
+          <div><dt>Stored hash</dt><dd>${authority.storedHashValid ? 'Valid' : 'Invalid'}</dd></div>
+          <div><dt>Owner account</dt><dd>${authority.ownerActive ? 'Active' : 'Inactive'}</dd></div>
+        </dl>
       </section>
     </div>` : `
     <div class="grid two">
@@ -2122,7 +2135,7 @@ function bindShell() {
       await loadProfile();
       state.identity = await api('/api/admin/me');
       render();
-      toast('Password changed. Other Owner sessions were signed out.');
+      toast('Your new password is now the permanent staging Owner password and will not be replaced during deployment.');
     } catch (error) {
       event.currentTarget.reset();
       toast(error.message);

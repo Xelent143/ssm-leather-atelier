@@ -33,13 +33,17 @@ const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const adminIdentity = createAdminIdentity({ dataDir });
-const adminStagingBootstrap = createAdminStagingBootstrap({
-  dataDir,
-  identity: adminIdentity,
-});
 const adminSecurity = createAdminSecurity({
   dataDir,
   validateSession: (session) => adminIdentity.sessionIsValid(session),
+});
+const adminStagingBootstrap = createAdminStagingBootstrap({
+  dataDir,
+  identity: adminIdentity,
+  audit: (event) => adminSecurity.audit({ headers: {}, socket: {} }, {
+    ...event,
+    actorId: 'system:staging-owner-recovery',
+  }),
 });
 const productPlmStore = createProductPlmStore({ dataDir });
 const productPlmAudit = createProductPlmAudit({ dataDir });
@@ -1832,6 +1836,7 @@ async function handleApi(req, res, pathname) {
     sendJson(res, 200, {
       user: adminIdentity.publicUser(owner),
       sessions: adminSecurity.activeUserSessions(owner.id, session.token),
+      passwordAuthority: adminStagingBootstrap.status(),
     });
     return true;
   }
