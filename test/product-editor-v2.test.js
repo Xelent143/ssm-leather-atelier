@@ -119,6 +119,34 @@ test('rich HTML removes executable content and inline event handlers', () => {
   assert.equal(value.includes('javascript:'), false);
 });
 
+test('media path backfill is safe, audited and idempotent', async (t) => {
+  const current = fixture();
+  t.after(() => fs.rmSync(current.dataDir, { recursive: true, force: true }));
+  await current.store.mutate((state) => {
+    state.products.push({
+      id: crypto.randomUUID(),
+      productUuid: crypto.randomUUID(),
+      title: 'Imported media fixture',
+      media: [{
+        id: crypto.randomUUID(),
+        path: 'assets/generated/dean front.png',
+        featured: true,
+        order: 0,
+      }],
+    });
+    return { store: state, value: null };
+  });
+  const first = await current.service.backfillMediaPaths();
+  const afterFirst = current.store.read();
+  assert.equal(first.changed, 1);
+  assert.equal(afterFirst.products[0].media[0].path, '/assets/generated/dean%20front.png');
+  assert.equal(afterFirst.auditEvents.at(-1).action, 'product_media_path_normalized');
+  const revision = afterFirst.storeRevision;
+  const second = await current.service.backfillMediaPaths();
+  assert.equal(second.changed, 0);
+  assert.equal(current.store.read().storeRevision, revision);
+});
+
 test('Listing Editor creates, edits and submits a complete draft', async () => {
   const current = fixture();
   let result = await current.service.create(current.editorSession, current.product());

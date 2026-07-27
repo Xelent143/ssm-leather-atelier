@@ -35,12 +35,17 @@
     `<div class="pe-status"><span>${esc(label)}</span><strong>${esc(String(value || '').replaceAll('_', ' '))}</strong></div>`;
   const csv = (value) => String(value || '').split(',').map((item) => item.trim()).filter(Boolean);
   const code = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  const mediaUrl = (value) => window.MotogripMediaUrl.canonicalMediaUrl(value, { fallback: null });
 
   function media(product) {
     if (!product.media.length) return `<label class="pe-drop" id="pe-drop"><input id="pe-files" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden><strong>Drop product images here</strong><span>or choose JPG, PNG or WEBP files up to 5 MB</span><span class="btn">Choose files</span></label>`;
     return `<div class="pe-media-grid">${[...product.media].sort((a, b) => a.order - b.order).map((item) => `
       <article class="pe-media" draggable="true" data-media-id="${item.id}">
-        <img src="${esc(item.path)}" alt="${esc(item.altText || item.title || 'Product image')}">
+        <div class="pe-media-preview ${mediaUrl(item.path) ? 'is-loading' : 'is-broken'}">
+          ${mediaUrl(item.path) ? `<img src="${esc(mediaUrl(item.path))}" alt="${esc(item.altText || item.title || 'Product image')}" loading="lazy">` : ''}
+          <span class="pe-media-loading">Loading image…</span>
+          <div class="pe-media-error"><strong>Media unavailable</strong><code>${esc(String(item.path || '').slice(0, 180))}</code><div class="button-row"><button class="btn" type="button" data-media-retry>Retry</button><label class="btn"><input type="file" data-media-replace="${item.id}" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>Replace</label></div></div>
+        </div>
         ${item.featured ? '<b>Featured</b>' : ''}
         <input data-media-field="altText" value="${esc(item.altText)}" placeholder="Alt text">
         <input data-media-field="title" value="${esc(item.title)}" placeholder="Image title">
@@ -169,6 +174,7 @@
         const result = await context.api(path, { method, body: JSON.stringify(payload) });
         context.update(result.product, result);
         context.toast('Product Editor updated');
+        return result;
       } catch (error) { context.toast(error.message); }
     };
     document.querySelectorAll('[data-rich]').forEach((button) => button.addEventListener('click', () => {
@@ -269,6 +275,66 @@
         action(`/api/admin/product-editor-v2/products/${product.id}/media`, 'PUT', { expectedRevision: workspace.storeRevision, media: next });
       });
     });
+    document.querySelectorAll('.pe-media-preview img').forEach((image) => {
+      const preview = image.closest('.pe-media-preview');
+      image.addEventListener('load', () => preview.classList.replace('is-loading', 'is-loaded'));
+      image.addEventListener('error', () => preview.classList.replace('is-loading', 'is-broken'));
+      if (image.complete) preview.classList.replace('is-loading', image.naturalWidth ? 'is-loaded' : 'is-broken');
+    });
+    document.querySelectorAll('[data-media-retry]').forEach((button) => button.addEventListener('click', () => {
+      const preview = button.closest('.pe-media-preview');
+      const image = preview.querySelector('img');
+      if (!image) return;
+      preview.className = 'pe-media-preview is-loading';
+      const url = new URL(image.src, location.origin);
+      url.searchParams.set('retry', Date.now());
+      image.src = url.href;
+    }));
+    document.querySelectorAll('[data-media-replace]').forEach((input) => input.addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const dataBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      try {
+        const uploaded = await context.api(`/api/admin/product-editor-v2/products/${product.id}/media`, {
+          method: 'POST',
+          body: JSON.stringify({
+            expectedRevision: workspace.storeRevision,
+            fileName: file.name,
+            mimeType: file.type,
+            dataBase64,
+            role: product.media.find((item) => item.id === input.dataset.mediaReplace)?.role || 'Other',
+            altText: product.media.find((item) => item.id === input.dataset.mediaReplace)?.altText || product.title,
+          }),
+        });
+        const prior = product.media.find((item) => item.id === input.dataset.mediaReplace);
+        const priorIds = new Set(product.media.map((item) => item.id));
+        const replacement = uploaded.product.media.find((item) => !priorIds.has(item.id));
+        if (!prior || !replacement) throw new Error('Replacement image could not be resolved');
+        const ordered = product.media.map((item) => item.id === prior.id ? {
+          ...replacement,
+          featured: prior.featured,
+          role: prior.role,
+          altText: prior.altText,
+          title: prior.title,
+        } : item);
+        const reordered = await context.api(`/api/admin/product-editor-v2/products/${product.id}/media`, {
+          method: 'PUT',
+          body: JSON.stringify({ expectedRevision: uploaded.storeRevision, media: ordered }),
+        });
+        const replaced = await context.api(`/api/admin/product-editor-v2/products/${product.id}/media/${input.dataset.mediaReplace}`, {
+          method: 'DELETE',
+          body: JSON.stringify({ expectedRevision: reordered.storeRevision }),
+        });
+        context.update(replaced.product, replaced);
+        context.toast('Product image replaced');
+      } catch (error) {
+        context.toast(error.message);
+      }
+    }));
     document.getElementById('pe-submit')?.addEventListener('click', () =>
       action(`/api/admin/product-editor-v2/products/${product.id}/submit`, 'POST', { expectedRevision: workspace.storeRevision }));
     document.getElementById('pe-changes')?.addEventListener('click', () =>

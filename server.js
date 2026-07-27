@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { canonicalMediaUrl } = require('./media-url');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 const { createAdminIdentity } = require('./admin-identity');
 const { createAdminStagingBootstrap } = require('./admin-staging-bootstrap');
@@ -502,8 +503,8 @@ function productPath(product) {
 }
 
 function productImageUrl(req, imagePath) {
-  if (!imagePath) return absoluteUrl(req, '/assets/motogrip-logo-transparent.png');
-  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  const cleanPath = canonicalMediaUrl(imagePath, { fallback: '/assets/motogrip-logo-transparent.png' });
+  if (/^https:\/\//i.test(cleanPath)) return cleanPath;
   if (assetCdnBase && cleanPath.startsWith('/assets/generated/')) return `${assetCdnBase}${cleanPath}`;
   return absoluteUrl(req, cleanPath);
 }
@@ -2947,6 +2948,7 @@ function serveFile(req, res, filePath) {
       res.writeHead(200, {
         'Content-Type': types[ext] || 'application/octet-stream',
         'Cache-Control': ext === '.html' || isAdminAsset ? 'no-cache' : 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
       });
       if (req.method === 'HEAD') res.end();
       else res.end(data);
@@ -3108,6 +3110,7 @@ ensureStore();
 
 if (require.main === module) {
   adminStagingBootstrap.ensure()
+    .then(() => productEditorV2Service.backfillMediaPaths())
     .then(() => {
       server.listen(port, host, () => {
         console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);

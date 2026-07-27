@@ -32,6 +32,17 @@
 @media(max-width:1100px){.pe-layout{grid-template-columns:1fr}.pe-side{grid-template-columns:repeat(2,minmax(0,1fr))}.pe-sticky{position:static}.pe-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.pe-actions{left:0}}
 @media(max-width:720px){.pe-page{padding-bottom:140px}.pe-head,.pe-actions{align-items:stretch;flex-direction:column}.pe-layout,.pe-side,.pe-grid-2,.pe-grid-3,.pe-grid-4{grid-template-columns:1fr}.pe-card{padding:16px}.pe-option{grid-template-columns:1fr}.pe-presets{grid-column:auto}.pe-bulk{grid-template-columns:1fr 1fr}.pe-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pe-actions{padding:10px 14px}.pe-actions .button-row{overflow-x:auto;flex-wrap:nowrap}.pe-head h1{font-size:24px}}
 
+/* Canonical media previews: fixed geometry prevents broken assets from stretching the editor. */
+.pe-media{align-content:start;min-width:0}
+.pe-media-preview{position:relative;display:grid;place-items:center;height:220px;overflow:hidden;border-radius:8px;background:#f6f4f1}
+.pe-media-preview img{width:100%;height:100%;aspect-ratio:auto;object-fit:contain;border-radius:0}
+.pe-media-loading{color:#71717a;font-size:13px}
+.pe-media-preview.is-loaded .pe-media-loading,.pe-media-preview.is-loaded .pe-media-error,.pe-media-preview.is-loading .pe-media-error,.pe-media-preview.is-broken img,.pe-media-preview.is-broken .pe-media-loading{display:none}
+.pe-media-error{display:grid;gap:9px;width:100%;padding:16px;text-align:center}
+.pe-media-error code{display:block;overflow-wrap:anywhere;color:#71717a;font-size:11px}
+.pe-media .button-row{align-items:center}
+@media(max-width:720px){.pe-media-preview{height:170px}.pe-media-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+
 * {
   box-sizing: border-box;
 }

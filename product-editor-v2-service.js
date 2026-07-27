@@ -9,6 +9,7 @@ const {
   seedInitialBrands,
 } = require('./product-plm-hierarchy');
 const { emptyProductBrainReferences } = require('./product-plm-schema');
+const { canonicalMediaUrl } = require('./media-url');
 
 const PRODUCT_TYPES = Object.freeze([
   'Leather Jacket', 'Motorcycle Jacket', 'Leather Vest', 'Biker Vest', 'Western Vest',
@@ -348,7 +349,9 @@ function createProductEditorV2Service(options = {}) {
         })),
     });
     const timestamp = new Date(now()).toISOString();
-    const mediaPaths = [source.primaryImage || source.image, ...(source.galleryImages || [])].filter(Boolean);
+    const mediaPaths = [source.primaryImage || source.image, ...(source.galleryImages || [])]
+      .map((mediaPath) => canonicalMediaUrl(mediaPath, { fallback: null }))
+      .filter(Boolean);
     const record = {
       id: crypto.randomUUID(),
       productUuid: clean(input.productUuid, 80) || crypto.randomUUID(),
@@ -784,8 +787,43 @@ function createProductEditorV2Service(options = {}) {
     return workspace(session, input.productId);
   }
 
+  async function backfillMediaPaths() {
+    const current = store.read();
+    const changes = current.products.flatMap((product) => (product.media || []).flatMap((media) => {
+      const normalized = canonicalMediaUrl(media.path, { fallback: null });
+      return normalized && normalized !== media.path
+        ? [{ productId: product.id, mediaId: media.id, normalized }]
+        : [];
+    }));
+    if (!changes.length) return { changed: 0 };
+    const result = await store.mutate((state) => {
+      const timestamp = new Date(now()).toISOString();
+      let changed = 0;
+      for (const change of changes) {
+        const product = state.products.find((item) => item.id === change.productId);
+        const media = product?.media?.find((item) => item.id === change.mediaId);
+        if (!media || media.path === change.normalized) continue;
+        media.path = change.normalized;
+        product.updatedAt = timestamp;
+        state.auditEvents.push({
+          id: crypto.randomUUID(),
+          productId: product.id,
+          actorId: 'system:media-path-backfill',
+          action: 'product_media_path_normalized',
+          changedFields: ['media.path'],
+          mediaId: media.id,
+          result: 'success',
+          timestamp,
+        });
+        changed += 1;
+      }
+      return { store: state, value: changed };
+    });
+    return { changed: result.value };
+  }
+
   return {
-    workspace, create, importWebsite, save, uploadMedia, updateMedia, attachMedia, removeMedia, submit,
+    workspace, create, importWebsite, save, uploadMedia, updateMedia, attachMedia, removeMedia, backfillMediaPaths, submit,
     approve: (session, input) => review(session, input, 'approve'),
     requestChanges: (session, input) => review(session, input, 'request_changes'),
     publish, revise, criticalFields,

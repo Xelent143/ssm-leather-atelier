@@ -1139,8 +1139,7 @@ function renderCategoryActivity() {
 }
 
 function catalogImage(value = '') {
-  const source = String(value || 'assets/generated/leather-detail.png');
-  return source.startsWith('/') ? source : `/${source}`;
+  return window.MotogripMediaUrl.canonicalMediaUrl(value);
 }
 
 function formatTimestamp(value) {

@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { canonicalMediaUrl } = require('./media-url');
 
 const SYNC_STATUSES = Object.freeze([
   'Synced',
@@ -23,8 +24,7 @@ function canonicalPath(product) {
 }
 
 function imagePath(product) {
-  const value = clean(product?.primaryImage || product?.image, 'assets/generated/leather-detail.png');
-  return value.startsWith('/') ? value : `/${value}`;
+  return canonicalMediaUrl(clean(product?.primaryImage || product?.image));
 }
 
 function catalogUuid(seed) {

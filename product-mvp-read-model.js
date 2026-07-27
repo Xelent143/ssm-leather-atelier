@@ -1,13 +1,12 @@
 const { deriveReleaseLifecycle } = require('./product-plm-releases');
+const { canonicalMediaUrl } = require('./media-url');
 
 function clean(value, fallback = '') {
   return String(value ?? fallback).trim();
 }
 
 function legacyImage(product) {
-  const value = clean(product?.primaryImage || product?.image);
-  if (!value) return '/assets/generated/leather-detail.png';
-  return value.startsWith('/') ? value : `/${value}`;
+  return canonicalMediaUrl(clean(product?.primaryImage || product?.image));
 }
 
 function legacyKey(id) {

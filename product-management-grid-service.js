@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { canonicalMediaUrl } = require('./media-url');
 
 const GRID_ACTIONS = new Set(['archive', 'hide', 'restore', 'delete']);
 const BULK_FIELDS = new Set([
@@ -22,10 +23,7 @@ function stringList(value) {
   return [...new Set((Array.isArray(value) ? value : String(value || '').split(','))
     .map((item) => text(item, 80)).filter(Boolean))].slice(0, 100);
 }
-function imageUrl(value = '') {
-  const source = String(value || 'assets/generated/leather-detail.png');
-  return source.startsWith('/') || /^https?:\/\//i.test(source) ? source : `/${source}`;
-}
+const imageUrl = (value = '') => canonicalMediaUrl(value);
 function createProductManagementGridService(options = {}) {
   const {
     store, identity, editorService, listingStore, readWebsiteCatalog, announce = () => {},
