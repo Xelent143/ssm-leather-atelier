@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 const { createAdminIdentity } = require('./admin-identity');
 const { createAdminStagingBootstrap } = require('./admin-staging-bootstrap');
+const { createAdminOwnerRecovery, OWNER_EMAIL } = require('./admin-owner-recovery');
 const { createProductPlmAudit } = require('./product-plm-audit');
 const { createProductPlmService } = require('./product-plm-service');
 const { createProductPlmStore } = require('./product-plm-store');
@@ -45,6 +46,7 @@ const adminStagingBootstrap = createAdminStagingBootstrap({
     actorId: 'system:staging-owner-recovery',
   }),
 });
+const adminOwnerRecovery = createAdminOwnerRecovery({ identity: adminIdentity });
 const productPlmStore = createProductPlmStore({ dataDir });
 const productPlmAudit = createProductPlmAudit({ dataDir });
 const productPlmService = createProductPlmService({
@@ -333,6 +335,90 @@ function escapeHtml(value = '') {
 
 function escapeScriptJson(value) {
   return JSON.stringify(value).replaceAll('<', '\\u003c');
+}
+
+function ownerRecoveryPage() {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Owner password setup | MOTOGRIP OS</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d0d0d;--card:#171717;--line:#333;--text:#f8f5ef;--muted:#b8b1a6;--gold:#d3a75a;--danger:#f2a6a6;--ok:#9bd6ae}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#292016 0,#0d0d0d 48%);font:16px/1.5 system-ui,sans-serif;color:var(--text);padding:24px}
+    main{width:min(100%,520px);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:0 24px 70px #0009}
+    h1{margin:4px 0 10px;font-size:28px}.eyebrow{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    p{color:var(--muted)}label{display:block;margin:18px 0 7px;font-weight:700}input{width:100%;border:1px solid #484848;border-radius:10px;background:#0f0f0f;color:var(--text);padding:13px 14px;font:inherit}
+    input:focus,button:focus-visible{outline:3px solid #d3a75a66;outline-offset:2px;border-color:var(--gold)}input[readonly]{color:#d8d2c9;background:#202020}
+    .password-row{display:grid;grid-template-columns:1fr auto;gap:8px}.toggle{border:1px solid #484848;background:#262626;color:var(--text);border-radius:10px;padding:0 14px;cursor:pointer}
+    .policy{font-size:13px}.message{min-height:24px;margin:16px 0 0;font-weight:700}.message.error{color:var(--danger)}.message.ok{color:var(--ok)}
+    .submit{width:100%;margin-top:18px;border:0;border-radius:10px;background:var(--gold);color:#17120a;padding:14px;font:inherit;font-weight:900;cursor:pointer}.submit:disabled{opacity:.55;cursor:wait}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Staging only · single use</div>
+    <h1>Set Owner password</h1>
+    <p>This protected page changes only the existing Named Owner password. It expires after one successful use.</p>
+    <form id="recovery-form" novalidate>
+      <label for="email">Owner email</label>
+      <input id="email" type="email" value="${escapeHtml(OWNER_EMAIL)}" readonly autocomplete="username">
+      <label for="recovery-code">Recovery code</label>
+      <div class="password-row"><input id="recovery-code" type="password" required autocomplete="one-time-code"><button class="toggle" type="button" data-toggle="recovery-code">Show</button></div>
+      <label for="new-password">New password</label>
+      <div class="password-row"><input id="new-password" type="password" required minlength="15" maxlength="128" autocomplete="new-password"><button class="toggle" type="button" data-toggle="new-password">Show</button></div>
+      <label for="confirm-password">Confirm new password</label>
+      <div class="password-row"><input id="confirm-password" type="password" required minlength="15" maxlength="128" autocomplete="new-password"><button class="toggle" type="button" data-toggle="confirm-password">Show</button></div>
+      <p class="policy">Use a unique passphrase of 15–128 characters that is not based on your email, name, or MOTOGRIP. Your password is used exactly as entered; spaces are not added, removed, or trimmed.</p>
+      <div id="message" class="message" role="alert" aria-live="polite"></div>
+      <button id="submit" class="submit" type="submit">Set password</button>
+    </form>
+  </main>
+  <script>
+    document.querySelectorAll('[data-toggle]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var input = document.getElementById(button.getAttribute('data-toggle'));
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        button.textContent = showing ? 'Show' : 'Hide';
+      });
+    });
+    document.getElementById('recovery-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      var message = document.getElementById('message');
+      var submit = document.getElementById('submit');
+      var password = document.getElementById('new-password').value;
+      var confirmation = document.getElementById('confirm-password').value;
+      message.className = 'message error';
+      if (password !== confirmation) { message.textContent = 'New password confirmation does not match.'; return; }
+      if (Array.from(password).length < 15 || Array.from(password).length > 128) { message.textContent = 'Choose a unique passphrase between 15 and 128 characters.'; return; }
+      submit.disabled = true; message.textContent = '';
+      try {
+        var response = await fetch('/api/admin/owner-recovery', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            recoveryCode: document.getElementById('recovery-code').value,
+            newPassword: password,
+            confirmNewPassword: confirmation
+          })
+        });
+        var result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Owner password setup could not be completed.');
+        message.className = 'message ok';
+        message.textContent = 'Password set successfully. Redirecting to sign in…';
+        window.location.replace(result.redirect || '/admin?password-set=success');
+      } catch (error) {
+        message.textContent = error.message;
+        submit.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>`;
 }
 
 function absoluteUrl(req, urlPath = '/') {
@@ -1422,6 +1508,57 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/admin/owner-recovery' && req.method === 'POST') {
+    if (!adminIdentity.allowAction(req, 'owner_browser_recovery', 5, 15 * 60 * 1000)) {
+      sendJson(res, 429, { error: 'Owner password setup could not be completed.' });
+      return true;
+    }
+    if (!adminSecurity.validOrigin(req)) {
+      adminSecurity.audit(req, {
+        action: 'owner_browser_recovery',
+        result: 'rejected_origin',
+        actorId: 'staging:owner-recovery',
+      });
+      sendJson(res, 403, { error: 'Owner password setup could not be completed.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const user = await adminOwnerRecovery.complete(body);
+      adminSecurity.revokeUserSessions(user.id);
+      adminSecurity.audit(req, {
+        action: 'owner_browser_recovery_completed',
+        result: 'success',
+        actorId: 'staging:owner-recovery',
+        entityType: 'admin_user',
+      });
+      adminSecurity.securityEvent(req, {
+        severity: 'high',
+        action: 'owner_browser_recovery_completed',
+        result: 'success',
+        actorId: 'staging:owner-recovery',
+        entityType: 'admin_user',
+      });
+      sendJson(res, 200, {
+        ok: true,
+        redirect: '/admin?password-set=success',
+      }, {
+        'Clear-Site-Data': '"cache", "cookies", "storage"',
+      });
+    } catch (error) {
+      const policyError = error.code === 'PASSWORD_POLICY';
+      adminSecurity.audit(req, {
+        action: 'owner_browser_recovery',
+        result: 'failed',
+        actorId: 'staging:owner-recovery',
+      });
+      sendJson(res,
+        error.code === 'OWNER_RECOVERY_UNAVAILABLE' ? 410 : 403,
+        { error: policyError ? error.message : 'Owner password setup could not be completed.' });
+    }
+    return true;
+  }
+
   if (pathname === '/api/admin/bootstrap/owner' && req.method === 'POST') {
     const session = adminSecurity.getSession(req);
     if (!session || session.actorType !== 'legacy_owner') {
@@ -2496,6 +2633,27 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     const requestPath = decodeURIComponent(url.pathname);
 
+    if (requestPath === '/admin/owner-recovery') {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        send(res, 405, 'Method not allowed');
+        return;
+      }
+      const recovery = adminOwnerRecovery.status();
+      if (!recovery.enabled || !recovery.ownerMatches) {
+        send(res, 410, 'Owner password setup is unavailable.');
+        return;
+      }
+      send(res, 200, req.method === 'HEAD' ? '' : ownerRecoveryPage(), 'text/html; charset=utf-8', {
+        'Cache-Control': 'no-store, max-age=0',
+        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+        'Referrer-Policy': 'no-referrer',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-Robots-Tag': 'noindex, nofollow, noarchive',
+      });
+      return;
+    }
+
     if (requestPath === '/admin/system/bootstrap-status') {
       if (req.method !== 'GET') {
         send(res, 405, 'Method not allowed');
@@ -2625,6 +2783,7 @@ if (require.main === module) {
 module.exports = {
   server,
   adminIdentity,
+  adminOwnerRecovery,
   adminStagingBootstrap,
   adminSecurity,
   catalogSyncService,
