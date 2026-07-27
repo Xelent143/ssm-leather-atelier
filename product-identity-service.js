@@ -63,14 +63,20 @@ function variantParts(attributes = {}, sellableAttributeKeys = []) {
 }
 
 function createProductIdentityService(options = {}) {
-  const { store, identity } = options;
+  const {
+    store, identity,
+    authorizeUser = (user, module, action) => user.accountType === 'owner',
+  } = options;
   const now = options.now || (() => Date.now());
   const year = options.year || (() => new Date(now()).getUTCFullYear());
 
-  function owner(session) {
+  function authorized(session, action, ownerOnly = false) {
     const user = session?.actorType === 'named_user' ? identity.findById(session.userId) : null;
-    if (!user || user.status !== 'active' || user.accountType !== 'owner') {
-      throw Object.assign(new Error('Named Owner access is required.'), {
+    if (!user || user.status !== 'active' ||
+        (ownerOnly ? user.accountType !== 'owner' : !authorizeUser(user, 'productIdentity', action))) {
+      throw Object.assign(new Error(ownerOnly
+        ? 'Named Owner access is required.'
+        : 'Product Identity permission is required.'), {
         code: 'OWNER_REQUIRED',
       });
     }
@@ -131,7 +137,7 @@ function createProductIdentityService(options = {}) {
   }
 
   async function generate(session, input) {
-    const user = owner(session);
+    const user = authorized(session, 'create');
     if (!clean(input.productUuid)) {
       throw Object.assign(new Error('Product UUID is required.'), { code: 'VALIDATION' });
     }
@@ -193,7 +199,7 @@ function createProductIdentityService(options = {}) {
   }
 
   async function overrideSku(session, input) {
-    const user = owner(session);
+    const user = authorized(session, 'approve', true);
     const nextSku = clean(input.productSku, 64).toUpperCase();
     if (!/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(nextSku)) {
       throw Object.assign(new Error('SKU format is invalid.'), { code: 'VALIDATION' });
@@ -218,7 +224,7 @@ function createProductIdentityService(options = {}) {
   }
 
   async function transition(session, input, target) {
-    const user = owner(session);
+    const user = authorized(session, target === 'approved' ? 'approve' : 'edit', target === 'unlocked');
     await store.mutate((state) => {
       const record = state.identities.find((item) => item.productUuid === input.productUuid);
       if (!record) throw Object.assign(new Error('Product Identity was not found.'), { code: 'VALIDATION' });

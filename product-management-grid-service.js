@@ -27,7 +27,11 @@ function imageUrl(value = '') {
   return source.startsWith('/') || /^https?:\/\//i.test(source) ? source : `/${source}`;
 }
 function createProductManagementGridService(options = {}) {
-  const { store, identity, editorService, listingStore, readWebsiteCatalog, announce = () => {} } = options;
+  const {
+    store, identity, editorService, listingStore, readWebsiteCatalog, announce = () => {},
+    authorizeUser = (user, module, action) => user.accountType === 'owner' ||
+      !['approve', 'publish', 'delete', 'export', 'configure'].includes(action),
+  } = options;
   const now = options.now || (() => Date.now());
 
   function actor(session) {
@@ -45,17 +49,17 @@ function createProductManagementGridService(options = {}) {
     throw Object.assign(new Error('Authenticated admin access is required.'), { code: 'FORBIDDEN' });
   }
   function permissions(user) {
-    const canEdit = ['owner', 'listing_editor'].includes(user.accountType);
+    const canEdit = authorizeUser(user, 'products', 'edit');
     return {
       edit: canEdit,
       duplicate: canEdit,
       archive: canEdit,
       hide: canEdit,
       restore: canEdit,
-      bulkEdit: canEdit,
-      export: canEdit,
+      bulkEdit: authorizeUser(user, 'products', 'bulkEdit'),
+      export: authorizeUser(user, 'products', 'export'),
       delete: user.accountType === 'owner',
-      publish: user.accountType === 'owner',
+      publish: authorizeUser(user, 'publishing', 'publish'),
       overrideSku: false,
       modifyIdentity: false,
       modifyGovernance: false,
@@ -264,6 +268,13 @@ function createProductManagementGridService(options = {}) {
   }
   async function mutate(session, input) {
     const user = actor(session);
+    const requiredAction = input.action === 'bulk_edit' ? 'bulkEdit' : input.action === 'delete' ? 'delete' : 'edit';
+    if (!authorizeUser(user, 'products', requiredAction) ||
+        (input.action === 'delete' && user.accountType !== 'owner')) {
+      throw Object.assign(new Error(input.action === 'delete'
+        ? 'Owner access is required.'
+        : 'Product management permission is required.'), { code: 'FORBIDDEN' });
+    }
     const ids = [...new Set((input.productIds || []).map(String))].slice(0, 1000);
     if (!ids.length) throw Object.assign(new Error('Select at least one product.'), { code: 'VALIDATION' });
     const importsWebsiteSource = ids.some((id) => id.startsWith('website:'));

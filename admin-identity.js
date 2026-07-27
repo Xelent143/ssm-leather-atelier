@@ -87,6 +87,7 @@ function publicUser(user) {
     locale: user.locale,
     timezone: user.timezone,
     lastLoginAt: user.lastLoginAt,
+    createdBy: user.createdBy,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     disabledAt: user.disabledAt,

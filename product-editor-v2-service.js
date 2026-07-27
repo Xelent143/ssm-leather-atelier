@@ -95,6 +95,8 @@ function createProductEditorV2Service(options = {}) {
   const {
     store, identity, productIdentityService, productPlmStore, websiteAdapter,
     operationalLaunchService,
+    authorizeUser = (user, module, action) => user.accountType === 'owner' ||
+      !['approve', 'publish', 'delete', 'export', 'configure'].includes(action),
   } = options;
   const now = options.now || (() => Date.now());
 
@@ -146,8 +148,8 @@ function createProductEditorV2Service(options = {}) {
       permissions: {
         edit: true,
         submit: true,
-        approve: user.accountType === 'owner',
-        publish: user.accountType === 'owner',
+        approve: authorizeUser(user, 'publishing', 'approve'),
+        publish: authorizeUser(user, 'publishing', 'publish'),
       },
       productTypes: PRODUCT_TYPES,
       mediaLibrary: products.flatMap((item) => item.media || []).map((item) => ({
@@ -238,6 +240,9 @@ function createProductEditorV2Service(options = {}) {
 
   async function create(session, input) {
     const user = actor(session);
+    if (!authorizeUser(user, 'products', 'create')) {
+      throw Object.assign(new Error('Product create permission is required.'), { code: 'FORBIDDEN' });
+    }
     const productUuid = crypto.randomUUID();
     const normalized = normalizeDraft(input);
     const timestamp = new Date(now()).toISOString();
@@ -403,6 +408,9 @@ function createProductEditorV2Service(options = {}) {
 
   async function uploadMedia(session, input) {
     const user = actor(session);
+    if (!authorizeUser(user, 'media', 'create')) {
+      throw Object.assign(new Error('Media upload permission is required.'), { code: 'FORBIDDEN' });
+    }
     const type = MEDIA_TYPES.get(clean(input.mimeType, 80).toLowerCase());
     if (!type) throw Object.assign(new Error('Only JPG, PNG and WEBP images are supported.'), { code: 'VALIDATION' });
     let bytes;
@@ -455,6 +463,9 @@ function createProductEditorV2Service(options = {}) {
 
   async function updateMedia(session, input) {
     const user = actor(session);
+    if (!authorizeUser(user, 'media', 'edit')) {
+      throw Object.assign(new Error('Media edit permission is required.'), { code: 'FORBIDDEN' });
+    }
     await store.mutate((state) => {
       const product = state.products.find((item) => item.id === input.productId);
       if (!product) throw Object.assign(new Error('Product draft was not found.'), { code: 'NOT_FOUND' });
@@ -586,7 +597,10 @@ function createProductEditorV2Service(options = {}) {
   }
 
   async function review(session, input, action) {
-    const user = actor(session, ['owner']);
+    const user = actor(session);
+    if (!authorizeUser(user, 'publishing', 'approve')) {
+      throw Object.assign(new Error('Approval permission is required.'), { code: 'FORBIDDEN' });
+    }
     const current = store.read();
     const product = current.products.find((item) => item.id === input.productId);
     if (!product) throw Object.assign(new Error('Product draft was not found.'), { code: 'NOT_FOUND' });
@@ -649,7 +663,10 @@ function createProductEditorV2Service(options = {}) {
   }
 
   async function publish(session, input) {
-    const user = actor(session, ['owner']);
+    const user = actor(session);
+    if (!authorizeUser(user, 'publishing', 'publish')) {
+      throw Object.assign(new Error('Publishing permission is required.'), { code: 'FORBIDDEN' });
+    }
     const state = store.read();
     const product = state.products.find((item) => item.id === input.productId);
     const idempotencyKey = clean(input.idempotencyKey, 200);

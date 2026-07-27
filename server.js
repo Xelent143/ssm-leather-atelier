@@ -28,6 +28,7 @@ const { createProductEditorV2Service } = require('./product-editor-v2-service');
 const { createProductManagementGridService } = require('./product-management-grid-service');
 const { createCategoryTaxonomyStore } = require('./category-taxonomy-store');
 const { createCategoryTaxonomyService } = require('./category-taxonomy-service');
+const { createTeamPermissionsService } = require('./team-permissions-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -37,9 +38,15 @@ const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
 const merchantStorePath = path.join(root, 'merchant-catalog.json');
 const adminIdentity = createAdminIdentity({ dataDir });
+const teamPermissionsService = createTeamPermissionsService({ dataDir, identity: adminIdentity });
 const adminSecurity = createAdminSecurity({
   dataDir,
-  validateSession: (session) => adminIdentity.sessionIsValid(session),
+  validateSession: (session) => {
+    if (!adminIdentity.sessionIsValid(session)) return false;
+    if (session.actorType !== 'named_user') return true;
+    const user = adminIdentity.findById(session.userId);
+    return teamPermissionsService.loginDecision(user, {}, 0).allowed;
+  },
 });
 const adminStagingBootstrap = createAdminStagingBootstrap({
   dataDir,
@@ -68,6 +75,7 @@ const productIdentityStore = createProductIdentityStore({ dataDir });
 const productIdentityService = createProductIdentityService({
   store: productIdentityStore,
   identity: adminIdentity,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const listingStudioStore = createListingStudioStore({ dataDir });
 const listingStudioService = createListingStudioService({
@@ -75,6 +83,7 @@ const listingStudioService = createListingStudioService({
   listingStore: listingStudioStore,
   identity: adminIdentity,
   productIdentityService,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const catalogSyncStore = createCatalogSyncStore({ dataDir });
 const catalogSyncService = createCatalogSyncService({
@@ -107,6 +116,7 @@ const operationalLaunchService = createOperationalLaunchService({
   catalogService: catalogSyncService,
   catalogLinkService,
   websiteAdapter: websiteWriteAdapter,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const productEditorV2Store = createProductEditorV2Store({ dataDir });
 const productEditorV2Service = createProductEditorV2Service({
@@ -116,6 +126,7 @@ const productEditorV2Service = createProductEditorV2Service({
   productPlmStore,
   websiteAdapter: websiteWriteAdapter,
   operationalLaunchService,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const productManagementGridService = createProductManagementGridService({
   store: productEditorV2Store,
@@ -124,6 +135,7 @@ const productManagementGridService = createProductManagementGridService({
   listingStore: listingStudioStore,
   readWebsiteCatalog: readPublicStore,
   announce: operationalLaunchService.announce,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const categoryTaxonomyStore = createCategoryTaxonomyStore({ dataDir });
 const categoryTaxonomyService = createCategoryTaxonomyService({
@@ -132,6 +144,7 @@ const categoryTaxonomyService = createCategoryTaxonomyService({
   readWebsiteCatalog: readPublicStore,
   readEditorProducts: () => productEditorV2Store.read(),
   announce: operationalLaunchService.announce,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
 const returnRequestAttempts = new Map();
 
@@ -1405,6 +1418,17 @@ function namedOwnerForSession(session) {
   return user && user.accountType === 'owner' && user.status === 'active' ? user : null;
 }
 
+function namedUserForSession(session) {
+  if (!session || session.actorType !== 'named_user' || !session.userId) return null;
+  const user = adminIdentity.findById(session.userId);
+  return user && user.status === 'active' ? user : null;
+}
+
+function hasPermission(session, module, action) {
+  const user = namedUserForSession(session);
+  return Boolean(user && teamPermissionsService.hasUserPermission(user, module, action));
+}
+
 function safePlmError(error) {
   const statuses = {
     PLM_VALIDATION: 400,
@@ -1429,6 +1453,7 @@ function safePlmError(error) {
     DUPLICATE_IDENTITY: 409,
     CATALOG_LINK_STORE_UNAVAILABLE: 503,
     OPERATIONAL_STORE_UNAVAILABLE: 503,
+    PERMISSION_STORE_UNAVAILABLE: 503,
     FORBIDDEN: 403,
     WORKFLOW_CONFLICT: 409,
     APPROVAL_REQUIRED: 409,
@@ -1806,6 +1831,19 @@ async function handleApi(req, res, pathname) {
         actorId: result.user ? `user:${result.user.id}` : 'anonymous',
       });
       sendJson(res, result.reason === 'rate_limit' ? 429 : 401, {
+        error: 'Unable to sign in. Check your credentials or try again later.',
+      });
+      return true;
+    }
+    const activeSessions = adminIdentity.countActiveSessions(result.user.id, adminSecurity.readState());
+    const access = teamPermissionsService.loginDecision(result.user, req, activeSessions);
+    if (!access.allowed) {
+      adminSecurity.audit(req, {
+        action: 'named_login_access_restricted',
+        result: 'failed',
+        actorId: `user:${result.user.id}`,
+      });
+      sendJson(res, 401, {
         error: 'Unable to sign in. Check your credentials or try again later.',
       });
       return true;
@@ -2310,30 +2348,28 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/admin/team/users' && req.method === 'GET') {
-    if (!namedOwnerForSession(session)) {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
       sendJson(res, 403, { error: 'Named Owner access is required.' });
       return true;
     }
-    sendJson(res, 200, {
-      users: adminIdentity.managedUsers().map((user) => ({
-        ...user,
-        activeSessionCount: adminIdentity.countActiveSessions(
-          user.id,
-          adminSecurity.readState(),
-        ),
-      })),
-    });
+    sendJson(res, 200, teamPermissionsService.workspace(owner, adminSecurity));
     return true;
   }
 
   if (pathname === '/api/admin/team/users' && req.method === 'POST') {
-    if (!namedOwnerForSession(session)) {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
       sendJson(res, 403, { error: 'Named Owner access is required.' });
       return true;
     }
     try {
       const body = await readBody(req);
       const user = await adminIdentity.createManagedUser(body, `user:${session.userId}`);
+      teamPermissionsService.save(owner, user.id, {
+        roleId: body.roleId || 'listing_editor',
+        expectedRevision: teamPermissionsService.read().revision,
+      });
       adminSecurity.audit(req, {
         action: 'listing_editor_created',
         result: 'success',
@@ -2341,7 +2377,43 @@ async function handleApi(req, res, pathname) {
         entityType: 'admin_user',
         entityId: user.id,
       });
-      sendJson(res, 201, { user });
+      operationalLaunchService.announce({ type: 'permissions.updated', userId: user.id });
+      sendJson(res, 201, {
+        user,
+        workspace: teamPermissionsService.workspace(owner, adminSecurity),
+      });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const permissionUserMatch = pathname.match(
+    /^\/api\/admin\/team\/users\/([0-9a-f-]+)\/(permissions|clone-permissions)$/i,
+  );
+  if (permissionUserMatch && req.method === 'POST') {
+    const owner = namedOwnerForSession(session);
+    if (!owner) {
+      sendJson(res, 403, { error: 'Named Owner access is required.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const userId = permissionUserMatch[1];
+      const operation = permissionUserMatch[2];
+      const result = operation === 'permissions'
+        ? teamPermissionsService.save(owner, userId, body)
+        : teamPermissionsService.clone(owner, body.sourceUserId, userId, body.expectedRevision);
+      adminSecurity.audit(req, {
+        action: operation === 'permissions' ? 'team_permissions_changed' : 'team_permissions_cloned',
+        result: 'success',
+        session,
+        entityType: 'admin_user',
+        entityId: userId,
+      });
+      operationalLaunchService.announce({ type: 'permissions.updated', userId });
+      sendJson(res, 200, result);
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
@@ -2368,11 +2440,14 @@ async function handleApi(req, res, pathname) {
           throw Object.assign(new Error('Listing Editor was not found.'), { code: 'VALIDATION' });
         }
         adminSecurity.revokeUserSessions(userId);
+        teamPermissionsService.record(namedOwnerForSession(session), userId, body.active ? 'account_activated' : 'account_deactivated');
       } else if (operation === 'reset-password') {
         result = await adminIdentity.resetManagedUserPassword(userId, body.password);
         adminSecurity.revokeUserSessions(userId);
+        teamPermissionsService.record(namedOwnerForSession(session), userId, 'password_reset');
       } else {
         result = { revokedSessions: adminSecurity.revokeUserSessions(userId) };
+        teamPermissionsService.record(namedOwnerForSession(session), userId, 'sessions_revoked');
       }
       adminSecurity.audit(req, {
         action: `listing_editor_${operation.replace('-', '_')}`,
@@ -2802,6 +2877,7 @@ async function handleApi(req, res, pathname) {
     sendJson(res, 200, {
       actorType: session.actorType,
       user: adminIdentity.publicUser(namedUser),
+      access: namedUser ? teamPermissionsService.userAccess(namedUser) : null,
       owner: adminIdentity.publicUser(owner),
       activeSessionCount: namedUser
         ? adminIdentity.countActiveSessions(namedUser.id, adminSecurity.readState())
@@ -3049,6 +3125,7 @@ module.exports = {
   adminOwnerRecovery,
   adminStagingBootstrap,
   adminSecurity,
+  teamPermissionsService,
   catalogSyncService,
   catalogSyncStore,
   catalogLinkService,

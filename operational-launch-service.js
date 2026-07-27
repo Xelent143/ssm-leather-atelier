@@ -9,6 +9,7 @@ function createOperationalLaunchService(options = {}) {
   const {
     store, identity, listingStore, listingService, productIdentityService,
     catalogService, catalogLinkService, websiteAdapter,
+    authorizeUser = (user, module, action) => user.accountType === 'owner',
   } = options;
   const now = options.now || (() => Date.now());
   const subscribers = new Set();
@@ -90,9 +91,9 @@ function createOperationalLaunchService(options = {}) {
 
   async function transition(session, input, action, note = '') {
     const actor = user(session);
-    const ownerOnly = new Set(['approve', 'request_changes']);
-    if (ownerOnly.has(action) && actor.accountType !== 'owner') {
-      throw Object.assign(new Error('Named Owner access is required.'), { code: 'FORBIDDEN' });
+    if (['approve', 'request_changes'].includes(action) &&
+        !authorizeUser(actor, 'publishing', 'approve')) {
+      throw Object.assign(new Error('Publishing approval permission is required.'), { code: 'FORBIDDEN' });
     }
     const targetStates = {
       revise: 'Draft',
@@ -203,8 +204,9 @@ function createOperationalLaunchService(options = {}) {
     const actor = input.actorType === 'codex'
       ? actorRecord(null, 'codex')
       : actorRecord(session);
-    if (actor.type !== 'named_owner' && actor.type !== 'codex') {
-      throw Object.assign(new Error('Only the Named Owner may publish.'), { code: 'FORBIDDEN' });
+    const publishingUser = input.actorType === 'codex' ? null : user(session);
+    if (actor.type !== 'codex' && !authorizeUser(publishingUser, 'publishing', 'publish')) {
+      throw Object.assign(new Error('Publishing permission is required.'), { code: 'FORBIDDEN' });
     }
     if (input.actorType === 'codex' && context.codexAuthorized !== true) {
       throw Object.assign(new Error('Codex service authorization is required.'), { code: 'FORBIDDEN' });

@@ -15,7 +15,11 @@ function list(value) {
 }
 function fail(message, code = 'VALIDATION') { throw Object.assign(new Error(message), { code }); }
 function createCategoryTaxonomyService(options = {}) {
-  const { store, identity, readWebsiteCatalog, readEditorProducts, announce = () => {} } = options;
+  const {
+    store, identity, readWebsiteCatalog, readEditorProducts, announce = () => {},
+    authorizeUser = (user, module, action) => user.accountType === 'owner' ||
+      !['approve', 'publish', 'delete', 'export', 'configure'].includes(action),
+  } = options;
   const now = options.now || (() => Date.now());
   function actor(session, allowLegacy = false) {
     if (allowLegacy && session?.actorType === 'legacy_owner') return { id: 'legacy-compatibility', accountType: 'legacy_owner', status: 'active' };
@@ -24,9 +28,17 @@ function createCategoryTaxonomyService(options = {}) {
     return user;
   }
   function permissions(user) {
-    const edit = ['owner', 'listing_editor'].includes(user.accountType);
-    return { edit, create: edit, assignments: edit, rules: edit, submit: edit, approve: user.accountType === 'owner',
-      publish: user.accountType === 'owner', delete: user.accountType === 'owner', liveNavigation: user.accountType === 'owner' };
+    return {
+      edit: authorizeUser(user, 'categories', 'edit'),
+      create: authorizeUser(user, 'categories', 'create'),
+      assignments: authorizeUser(user, 'categories', 'edit'),
+      rules: authorizeUser(user, 'categories', 'edit'),
+      submit: authorizeUser(user, 'categories', 'edit'),
+      approve: authorizeUser(user, 'categories', 'approve'),
+      publish: authorizeUser(user, 'categories', 'publish'),
+      delete: user.accountType === 'owner' && authorizeUser(user, 'categories', 'delete'),
+      liveNavigation: authorizeUser(user, 'categories', 'publish'),
+    };
   }
   function products() {
     const website = readWebsiteCatalog().products || [];
@@ -171,7 +183,9 @@ function createCategoryTaxonomyService(options = {}) {
     };
   }
   async function create(session, input) {
-    const user = actor(session); const timestamp = new Date(now()).toISOString();
+    const user = actor(session);
+    if (!authorizeUser(user, 'categories', 'create')) fail('Category create permission is required.', 'FORBIDDEN');
+    const timestamp = new Date(now()).toISOString();
     const result = await store.mutate((state) => {
       const category = normalizeInput(input, {
         id: crypto.randomUUID(), websiteCategoryId: null, sourceKeys: [], kind: input.kind === 'collection' ? 'collection' : 'category',
@@ -186,6 +200,7 @@ function createCategoryTaxonomyService(options = {}) {
   }
   async function update(session, id, input) {
     const user = actor(session);
+    if (!authorizeUser(user, 'categories', 'edit')) fail('Category edit permission is required.', 'FORBIDDEN');
     const result = await store.mutate((state) => {
       const index = state.categories.findIndex((item) => item.id === id); if (index < 0) fail('Category was not found.', 'NOT_FOUND');
       const previous = structuredClone(state.categories[index]);
@@ -202,7 +217,11 @@ function createCategoryTaxonomyService(options = {}) {
     announce({ type: 'category.updated', categoryId: id }); return { category: project(result.store).find((item) => item.id === id), storeRevision: result.store.storeRevision };
   }
   async function workflow(session, id, action, input = {}) {
-    const user = actor(session); if (['approve', 'publish', 'delete'].includes(action) && user.accountType !== 'owner') fail('Named Owner access is required.', 'FORBIDDEN');
+    const user = actor(session);
+    const permission = action === 'approve' ? 'approve' : action === 'publish' ? 'publish' : action === 'delete' ? 'delete' : 'edit';
+    if (!authorizeUser(user, 'categories', permission) || (action === 'delete' && user.accountType !== 'owner')) {
+      fail('Named Owner or delegated Category permission is required.', 'FORBIDDEN');
+    }
     const result = await store.mutate((state) => {
       const category = state.categories.find((item) => item.id === id); if (!category) fail('Category was not found.', 'NOT_FOUND');
       const previous = structuredClone(category);
@@ -228,7 +247,9 @@ function createCategoryTaxonomyService(options = {}) {
     return { ...workspace(session), result: result.value };
   }
   async function assign(session, id, input) {
-    const user = actor(session); const add = list(input.add); const remove = list(input.remove);
+    const user = actor(session);
+    if (!authorizeUser(user, 'categories', 'edit')) fail('Category assignment permission is required.', 'FORBIDDEN');
+    const add = list(input.add); const remove = list(input.remove);
     const result = await store.mutate((state) => {
       const category = state.categories.find((item) => item.id === id); if (!category) fail('Category was not found.', 'NOT_FOUND');
       const valid = new Set(products().map((item) => item.id)); if ([...add, ...remove].some((item) => !valid.has(item))) fail('One or more products were not found.', 'NOT_FOUND');
@@ -244,6 +265,8 @@ function createCategoryTaxonomyService(options = {}) {
     announce({ type: 'category.assignment.updated', categoryId: id }); return { ...workspace(session), categoryId: id };
   }
   async function bulk(session, input) {
+    const user = actor(session);
+    if (!authorizeUser(user, 'categories', 'bulkEdit')) fail('Category bulk-edit permission is required.', 'FORBIDDEN');
     const ids = list(input.categoryIds); if (!ids.length) fail('Select at least one category.');
     let latest; for (const id of ids) {
       if (input.action === 'edit') {
@@ -254,7 +277,9 @@ function createCategoryTaxonomyService(options = {}) {
     return latest || workspace(session);
   }
   function previewRules(session, input) {
-    actor(session); const rules = Array.isArray(input.rules) ? input.rules : [];
+    const user = actor(session);
+    if (!authorizeUser(user, 'categories', 'edit')) fail('Category rule permission is required.', 'FORBIDDEN');
+    const rules = Array.isArray(input.rules) ? input.rules : [];
     for (const rule of rules) if (!RULE_FIELDS.has(rule.field)) fail('Unsupported category rule.');
     const matches = products().filter((product) => {
       const results = rules.map((rule) => {
@@ -277,6 +302,7 @@ function createCategoryTaxonomyService(options = {}) {
   }
   async function uploadMedia(session, id, input) {
     const user = actor(session);
+    if (!authorizeUser(user, 'media', 'create')) fail('Media upload permission is required.', 'FORBIDDEN');
     const types = { 'image/jpeg': { ext: '.jpg', signatures: [[0xff,0xd8,0xff]] }, 'image/png': { ext: '.png', signatures: [[0x89,0x50,0x4e,0x47]] }, 'image/webp': { ext: '.webp', signatures: [[0x52,0x49,0x46,0x46]] } };
     const type = types[clean(input.mimeType,80).toLowerCase()]; if (!type) fail('Only JPG, PNG and WEBP category images are supported.');
     const bytes = Buffer.from(String(input.dataBase64||''),'base64');

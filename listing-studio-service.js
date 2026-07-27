@@ -288,7 +288,10 @@ function validateEditedContent(content) {
 }
 
 function createListingStudioService(options = {}) {
-  const { plmStore, listingStore, identity, productIdentityService } = options;
+  const {
+    plmStore, listingStore, identity, productIdentityService,
+    authorizeUser = (user, module, action) => user.accountType === 'owner',
+  } = options;
   const now = options.now || (() => Date.now());
 
   function actor(session, permissions = ['owner', 'listing_editor']) {
@@ -339,8 +342,8 @@ function createListingStudioService(options = {}) {
       permissions: {
         canEdit: true,
         canGenerate: true,
-        canApprove: actor(session).accountType === 'owner',
-        canExport: actor(session).accountType === 'owner',
+        canApprove: authorizeUser(actor(session), 'publishing', 'approve'),
+        canExport: authorizeUser(actor(session), 'publishing', 'export'),
       },
     };
   }
@@ -451,7 +454,10 @@ function createListingStudioService(options = {}) {
   }
 
   async function approve(session, input) {
-    actor(session, ['owner']);
+    const approvingUser = actor(session);
+    if (!authorizeUser(approvingUser, 'publishing', 'approve')) {
+      throw Object.assign(new Error('Authorized Listing Studio access is required for approval.'), { code: 'FORBIDDEN' });
+    }
     const store = listingStore.read();
     const source = store.drafts.find((item) =>
       item.id === input.draftId && item.productUuid === input.productUuid);
@@ -467,7 +473,10 @@ function createListingStudioService(options = {}) {
   }
 
   function exportPackage(session, input) {
-    const user = actor(session, ['owner']);
+    const user = actor(session);
+    if (!authorizeUser(user, 'publishing', 'export')) {
+      throw Object.assign(new Error('Authorized Listing Studio access is required for export.'), { code: 'FORBIDDEN' });
+    }
     const { resolved } = trusted(input.productUuid);
     const store = listingStore.read();
     const draft = store.drafts.find((item) =>

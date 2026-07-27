@@ -39,6 +39,9 @@ const state = {
   catalogReviewFilter: 'all',
   operationalWorkflow: null,
   teamUsers: [],
+  teamWorkspace: null,
+  teamEditorId: null,
+  teamPermissionSearch: '',
   profile: null,
   profileTab: 'profile',
   productEditorWorkspace: null,
@@ -461,6 +464,27 @@ function breadcrumbs() {
   return `<nav class="breadcrumbs" aria-label="Breadcrumb"><a data-route="dashboard" href="/admin">MOTOGRIP OS</a><span>/</span>${group ? `<span>${escapeHtml(group[0])}</span><span>/</span>` : ''}<strong>${escapeHtml(title)}</strong></nav>`;
 }
 
+function canAccess(module, action = 'view') {
+  if (state.identity?.user?.accountType === 'owner' || state.actorType === 'legacy') return true;
+  return state.identity?.access?.permissions?.[`${module}:${action}`] === true;
+}
+
+function navigationModule(id) {
+  if (['catalog', 'products', 'collections'].includes(id)) return 'products';
+  if (id === 'categories') return 'categories';
+  if (['inventory'].includes(id)) return 'inventory';
+  if (['orders'].includes(id)) return 'orders';
+  if (['customers', 'reviews'].includes(id)) return 'customers';
+  if (['marketing', 'social', 'email', 'coupons'].includes(id)) return 'website';
+  if (['seo', 'merchant'].includes(id)) return 'seo';
+  if (['ai-product', 'ai-settings'].includes(id)) return 'ai';
+  if (id === 'media') return 'media';
+  if (['reports', 'finance'].includes(id)) return 'reports';
+  if (id === 'team') return 'team';
+  if (['website', 'system'].includes(id)) return 'settings';
+  return 'dashboard';
+}
+
 function Sidebar() {
   return `
     <aside class="sidebar" aria-label="Primary navigation">
@@ -473,7 +497,7 @@ function Sidebar() {
         ${navigationGroups.map(([group, items]) => `
           <div class="nav-group">
             <div class="nav-label">${escapeHtml(group)}</div>
-            ${items.map(([id, icon, label, path, status]) => `
+            ${items.filter(([id]) => canAccess(navigationModule(id))).map(([id, icon, label, path, status]) => `
               <a class="nav-item ${state.view === id ? 'active' : ''}" data-route="${id}" href="${path}" ${state.view === id ? 'aria-current="page"' : ''}>
                 <span class="nav-icon" aria-hidden="true">${icon}</span>
                 <span class="nav-copy">${escapeHtml(label)}</span>
@@ -495,7 +519,7 @@ function Topbar() {
   const signedIn = state.identity?.user || state.identity?.owner;
   const profileName = signedIn?.displayName || (state.actorType === 'legacy' ? 'Legacy owner' : 'Owner');
   const profileRole = state.identity?.user?.accountType === 'listing_editor'
-    ? 'Listing Editor'
+    ? (state.identity?.access?.roleName || 'Listing Editor')
     : state.actorType === 'named_user' ? 'Named Owner' : 'Compatibility access';
   return `
     <header class="topbar">
@@ -1808,20 +1832,22 @@ function renderOperationalWorkflow(selected) {
   const workflow = data.workflow;
   const status = workflow?.status || 'Draft';
   const owner = state.identity?.user?.accountType === 'owner';
+  const canApprove = owner || canAccess('publishing', 'approve');
+  const canPublish = owner || canAccess('publishing', 'publish');
   const workflowDraftIsSelected = !workflow?.draftId || workflow.draftId === selected.id;
   const actions = [];
   if (status === 'Changes Requested' ||
       (['Draft', 'In Progress'].includes(status) && workflowDraftIsSelected)) {
     actions.push(`<button class="btn primary" data-workflow-action="submit">Submit for Review</button>`);
   }
-  if (owner && status === 'Submitted for Review' && workflowDraftIsSelected) {
+  if (canApprove && status === 'Submitted for Review' && workflowDraftIsSelected) {
     actions.push('<button class="btn" data-workflow-action="request-changes">Request Changes</button>');
     actions.push('<button class="btn primary" data-workflow-action="approve">Approve</button>');
   }
-  if (owner && status === 'Approved' && workflowDraftIsSelected) {
+  if (canPublish && status === 'Approved' && workflowDraftIsSelected) {
     actions.push('<button class="btn primary" data-workflow-action="publish">Approve &amp; Publish Website</button>');
   }
-  if (owner && status === 'Failed') {
+  if (canPublish && status === 'Failed') {
     actions.push('<button class="btn primary" data-workflow-action="publish">Retry Website Publication</button>');
   }
   return `<section class="card card-pad operational-workflow">
@@ -1840,25 +1866,66 @@ function renderTeamManagement() {
   if (state.identity?.user?.accountType !== 'owner') {
     return `${PageHeader('Team Management', 'Owner-only named account management.', '', 'restricted')}${AlertPanel('Access restricted', 'Named Owner access is required.', 'warning')}`;
   }
-  return `${PageHeader('Team Management', 'Manage real Listing Editor access without sharing Owner credentials.', '', 'active')}
-    <div class="grid two">
+  const workspace = state.teamWorkspace || { roles: [], modules: [], actions: [], auditEvents: [], protectedPermissions: [] };
+  const selected = state.teamUsers.find((user) => user.id === state.teamEditorId);
+  const initials = (name) => String(name || '?').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+  const formatDate = (value) => value ? new Date(value).toLocaleString() : 'Never';
+  return `${PageHeader('Team & Access', 'Enterprise roles, time-bound access, login controls, and searchable accountability.', '', 'active')}
+    <div class="grid stats">
+      ${StatCard('Team members', state.teamUsers.length, 'Named operational accounts')}
+      ${StatCard('Active', state.teamUsers.filter((user) => user.status === 'active' && !user.accessExpired).length, 'Available to sign in')}
+      ${StatCard('Sessions', state.teamUsers.reduce((sum, user) => sum + Number(user.activeSessionCount || 0), 0), 'Current sessions')}
+      ${StatCard('Access reviews', state.teamUsers.filter((user) => user.assignment?.source === 'backward_compatible_default').length, 'Legacy roles to confirm')}
+    </div>
+    <div class="grid two team-layout">
       <section class="card card-pad">
-        <div class="card-head"><div><h2>Create Listing Editor</h2><p>The temporary password is hashed immediately and is never returned.</p></div></div>
+        <div class="card-head"><div><h2>Add team member</h2><p>Start from a safe role preset. Passwords are hashed immediately and never returned.</p></div></div>
         <form id="create-listing-editor" class="form-grid">
-          <div class="field"><label>VA name</label><input name="displayName" required maxlength="120" autocomplete="off"></div>
+          <div class="field"><label>Name</label><input name="displayName" required maxlength="120" autocomplete="off"></div>
           <div class="field"><label>Email</label><input name="email" type="email" required autocomplete="off"></div>
+          <div class="field full"><label>Role preset</label><select name="roleId">${workspace.roles.filter((role) => role.id !== 'custom').map((role) => `<option value="${role.id}">${escapeHtml(role.name)}</option>`).join('')}</select></div>
           <div class="field full"><label>Temporary password</label><input name="password" type="password" required minlength="15" maxlength="128" autocomplete="new-password"></div>
-          <div class="field full"><button class="btn primary" type="submit">Create Listing Editor</button></div>
+          <div class="field full"><button class="btn primary" type="submit">Create team member</button></div>
         </form>
       </section>
       <section class="card card-pad">
-        <div class="card-head"><div><h2>Listing Editors</h2><p>Activation and session controls are Owner-only.</p></div><span class="pill">${state.teamUsers.length}</span></div>
-        <div class="activity-list">${state.teamUsers.map((user) => `<article>
-          <div><strong>${escapeHtml(user.displayName)}</strong><span>${escapeHtml(user.email)} · ${escapeHtml(user.status)}</span><small>Last login: ${user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'} · ${user.activeSessionCount || 0} session(s)</small></div>
-          <div class="button-row"><button class="btn" data-team-status="${user.id}" data-active="${user.status !== 'active'}">${user.status === 'active' ? 'Deactivate' : 'Activate'}</button><button class="btn" data-team-reset="${user.id}">Reset password</button><button class="btn" data-team-revoke="${user.id}">Revoke sessions</button></div>
-        </article>`).join('') || '<p class="muted">No Listing Editor accounts yet.</p>'}</div>
+        <div class="card-head"><div><h2>Role presets</h2><p>Business-ready defaults with Owner boundaries always enforced.</p></div><span class="pill">${workspace.roles.length}</span></div>
+        <div class="role-preset-grid">${workspace.roles.map((role) => `<article class="role-preset"><strong>${escapeHtml(role.name)}</strong><span>${Object.values(role.permissions).filter(Boolean).length} capabilities</span></article>`).join('')}</div>
       </section>
-    </div>`;
+    </div>
+    <section class="card card-pad">
+      <div class="card-head"><div><h2>Team directory</h2><p>Access, sessions, and permission ownership at a glance.</p></div><span class="pill">${state.teamUsers.length}</span></div>
+      <div class="team-card-grid">${state.teamUsers.map((user) => `<article class="team-member-card">
+        <div class="team-avatar">${escapeHtml(initials(user.displayName))}</div>
+        <div class="team-member-main"><div class="team-member-title"><div><strong>${escapeHtml(user.displayName)}</strong><span>${escapeHtml(user.email)}</span></div>${statusBadge(user.status === 'active' && !user.accessExpired ? 'active' : 'warning', user.accessExpired ? 'Expired' : user.status)}</div>
+          <div class="team-role-line"><span class="role-chip">${escapeHtml(user.assignment?.roleName || 'Listing Editor')}</span><span>${user.permissionSummary || 0} permissions</span></div>
+          <dl class="team-meta"><div><dt>Last login</dt><dd>${escapeHtml(formatDate(user.lastLoginAt))}</dd></div><div><dt>Sessions</dt><dd>${user.activeSessionCount || 0}</dd></div><div><dt>Created by</dt><dd>${escapeHtml(user.createdBy || user.assignment?.createdBy || 'Owner')}</dd></div><div><dt>Access changed</dt><dd>${escapeHtml(formatDate(user.assignment?.lastPermissionChangeAt))}</dd></div></dl>
+        </div>
+        <div class="team-card-actions"><button class="btn primary" data-team-edit="${user.id}">Edit access</button><button class="btn" data-team-clone-target="${user.id}">Clone permissions</button><button class="btn" data-team-reset="${user.id}">Reset password</button><button class="btn" data-team-status="${user.id}" data-active="${user.status !== 'active'}">${user.status === 'active' ? 'Deactivate' : 'Activate'}</button><button class="btn" data-team-revoke="${user.id}">Revoke sessions</button></div>
+      </article>`).join('') || '<p class="muted">No team members yet.</p>'}</div>
+    </section>
+    ${selected ? renderPermissionBuilder(selected, workspace) : ''}
+    <section class="card card-pad"><div class="card-head"><div><h2>Permission activity</h2><p>Privacy-safe role and access changes.</p></div></div><div class="activity-list">${workspace.auditEvents.slice(0, 30).map((event) => `<article><div><strong>${escapeHtml(event.action.replaceAll('_', ' '))}</strong><span>${escapeHtml(event.newRole || event.previousRole || 'Permission update')}</span><small>${new Date(event.timestamp).toLocaleString()} · ${event.addedPermissions.length} added · ${event.removedPermissions.length} removed</small></div></article>`).join('') || '<p class="muted">No permission changes recorded.</p>'}</div></section>`;
+}
+
+function renderPermissionBuilder(user, workspace) {
+  const assignment = user.assignment;
+  const moduleLabel = (module) => ({ productDna: 'Product DNA', productIdentity: 'Product Identity', ai: 'AI & Copy Intelligence', sync: 'Sync Engine' }[module] || module.replace(/([A-Z])/g, ' $1'));
+  const rows = workspace.modules.filter((module) => !state.teamPermissionSearch || moduleLabel(module).toLowerCase().includes(state.teamPermissionSearch.toLowerCase())).map((module) => `<div class="permission-row">
+    <div class="permission-module"><strong>${escapeHtml(moduleLabel(module))}</strong><small>${workspace.actions.filter((action) => assignment.permissions[`${module}:${action}`]).length} enabled</small></div>
+    ${workspace.actions.map((action) => {
+      const key = `${module}:${action}`;
+      const protectedPermission = workspace.protectedPermissions.includes(key);
+      return `<label class="permission-cell ${protectedPermission ? 'protected' : ''}"><input type="checkbox" data-permission="${key}" ${assignment.permissions[key] ? 'checked' : ''} ${protectedPermission ? 'disabled' : ''}><span>${escapeHtml(action === 'bulkEdit' ? 'Bulk edit' : action)}</span></label>`;
+    }).join('')}
+  </div>`).join('');
+  return `<div class="access-drawer-backdrop" data-close-team-editor></div><aside class="access-drawer">
+    <header><div><span class="eyebrow">Permission builder</span><h2>${escapeHtml(user.displayName)}</h2><p>${escapeHtml(user.email)}</p></div><button class="icon-button" data-close-team-editor aria-label="Close">×</button></header>
+    <form id="team-permission-form"><section class="access-section"><h3>Role and access period</h3><div class="form-grid"><div class="field"><label>Role preset</label><select name="roleId">${workspace.roles.map((role) => `<option value="${role.id}" ${assignment.roleId === role.id ? 'selected' : ''}>${escapeHtml(role.name)}</option>`).join('')}</select></div><div class="field"><label>Access expires</label><select name="expiryPreset"><option value="never">Never</option><option value="1">1 day</option><option value="7">7 days</option><option value="30">30 days</option><option value="custom">Custom</option></select></div><div class="field full"><label>Custom expiry</label><input name="expiresAt" type="datetime-local" value="${assignment.expiresAt ? assignment.expiresAt.slice(0, 16) : ''}"></div></div></section>
+      <section class="access-section"><div class="card-head"><div><h3>Permission matrix</h3><p>Owner-protected capabilities can never be delegated.</p></div><input id="permission-search" type="search" placeholder="Search modules…" value="${escapeHtml(state.teamPermissionSearch)}"></div><div class="permission-matrix-head"><span>Module</span>${workspace.actions.map((action) => `<span>${escapeHtml(action === 'bulkEdit' ? 'Bulk edit' : action)}</span>`).join('')}</div><div class="permission-matrix">${rows}</div></section>
+      <section class="access-section"><h3>Login restrictions</h3><div class="restriction-grid"><label class="restriction-card"><input name="canLogin" type="checkbox" ${assignment.restrictions.canLogin ? 'checked' : ''}><span><strong>Can login</strong><small>Disable without deleting.</small></span></label><label class="restriction-card"><input name="officeHoursOnly" type="checkbox" ${assignment.restrictions.officeHoursOnly ? 'checked' : ''}><span><strong>Office hours only</strong><small>09:00–18:00 PKT.</small></span></label><label class="restriction-card"><input name="require2fa" type="checkbox" ${assignment.restrictions.require2fa ? 'checked' : ''}><span><strong>Require 2FA</strong><small>Blocks until enrolled.</small></span></label><label class="restriction-card"><input name="unlimitedDevices" type="checkbox" ${assignment.restrictions.unlimitedDevices ? 'checked' : ''}><span><strong>Unlimited devices</strong><small>Otherwise one device.</small></span></label><div class="field"><label>Allowed IPs</label><input name="allowedIps" value="${escapeHtml((assignment.restrictions.allowedIps || []).join(', '))}"></div><div class="field"><label>Allowed countries</label><input name="allowedCountries" value="${escapeHtml((assignment.restrictions.allowedCountries || []).join(', '))}" placeholder="PK, US, GB"></div></div></section>
+      <footer class="sticky-form-actions"><button type="button" class="btn" data-close-team-editor>Cancel</button><button class="btn primary" type="submit">Save access</button></footer>
+    </form></aside>`;
 }
 
 function renderOwnerProfile() {
@@ -2887,12 +2954,13 @@ function bindShell() {
           displayName: form.get('displayName'),
           email: form.get('email'),
           password: form.get('password'),
+          roleId: form.get('roleId'),
         }),
       });
       formElement.reset();
       await loadTeamUsers();
       render();
-      toast('Listing Editor created');
+      toast('Team member created');
     } catch (error) {
       toast(error.message);
     }
@@ -2922,6 +2990,79 @@ function bindShell() {
           body: JSON.stringify({ password }),
         });
         toast('Temporary password updated and sessions revoked');
+      } catch (error) {
+        toast(error.message);
+      }
+    }));
+  document.querySelectorAll('[data-team-edit]').forEach((button) =>
+    button.addEventListener('click', () => {
+      state.teamEditorId = button.dataset.teamEdit;
+      render();
+    }));
+  document.querySelectorAll('[data-close-team-editor]').forEach((button) =>
+    button.addEventListener('click', () => {
+      state.teamEditorId = null;
+      state.teamPermissionSearch = '';
+      render();
+    }));
+  document.getElementById('permission-search')?.addEventListener('input', (event) => {
+    state.teamPermissionSearch = event.target.value;
+    render();
+  });
+  document.getElementById('team-permission-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const expiryPreset = form.get('expiryPreset');
+    const expiry = expiryPreset === 'custom' ? form.get('expiresAt') :
+      expiryPreset === 'never' ? null :
+        new Date(Date.now() + Number(expiryPreset) * 86400000).toISOString();
+    const permissions = Object.fromEntries(
+      [...document.querySelectorAll('[data-permission]')].map((input) => [input.dataset.permission, input.checked]),
+    );
+    try {
+      const response = await api(`/api/admin/team/users/${state.teamEditorId}/permissions`, {
+        method: 'POST',
+        body: JSON.stringify({
+          roleId: form.get('roleId'),
+          permissions,
+          permissionOverrides: permissions,
+          expiresAt: expiry,
+          restrictions: {
+            canLogin: form.get('canLogin') === 'on',
+            officeHoursOnly: form.get('officeHoursOnly') === 'on',
+            require2fa: form.get('require2fa') === 'on',
+            unlimitedDevices: form.get('unlimitedDevices') === 'on',
+            allowedIps: String(form.get('allowedIps') || '').split(',').map((value) => value.trim()).filter(Boolean),
+            allowedCountries: String(form.get('allowedCountries') || '').split(',').map((value) => value.trim()).filter(Boolean),
+          },
+          expectedRevision: state.teamWorkspace.revision,
+        }),
+      });
+      state.teamWorkspace = response;
+      state.teamUsers = response.users || [];
+      state.teamEditorId = null;
+      render();
+      toast('Access updated in real time');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.querySelectorAll('[data-team-clone-target]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      const eligible = state.teamUsers.filter((user) => user.id !== button.dataset.teamCloneTarget);
+      const sourceEmail = window.prompt(`Copy permissions from which team member?\n${eligible.map((user) => user.email).join('\n')}`);
+      if (!sourceEmail) return;
+      const source = eligible.find((user) => user.email.toLowerCase() === sourceEmail.trim().toLowerCase());
+      if (!source) return toast('Select an existing team member email');
+      try {
+        const response = await api(`/api/admin/team/users/${button.dataset.teamCloneTarget}/clone-permissions`, {
+          method: 'POST',
+          body: JSON.stringify({ sourceUserId: source.id, expectedRevision: state.teamWorkspace.revision }),
+        });
+        state.teamWorkspace = response;
+        state.teamUsers = response.users || [];
+        render();
+        toast('Permissions cloned');
       } catch (error) {
         toast(error.message);
       }
@@ -3590,6 +3731,7 @@ async function loadTeamUsers() {
     return;
   }
   const response = await api('/api/admin/team/users');
+  state.teamWorkspace = response;
   state.teamUsers = response.users || [];
 }
 
@@ -3687,7 +3829,13 @@ function startActivityStream() {
   activityStream.addEventListener('message', async (event) => {
     try {
       const message = JSON.parse(event.data);
-      if (!['draft.updated', 'workflow.updated', 'website.published', 'product.grid.updated', 'category.updated', 'category.assignment.updated', 'category.sync.completed'].includes(message.type)) return;
+      if (!['draft.updated', 'workflow.updated', 'website.published', 'product.grid.updated', 'category.updated', 'category.assignment.updated', 'category.sync.completed', 'permissions.updated'].includes(message.type)) return;
+      if (message.type === 'permissions.updated') {
+        state.identity = await api('/api/admin/me');
+        if (state.identity?.user?.accountType === 'owner') await loadTeamUsers();
+        render();
+        return;
+      }
       if (state.mvpProduct?.productUuid === message.productUuid) {
         const previousDraftId = state.selectedDraftId;
         const [workflow, workspace] = await Promise.all([
