@@ -25,6 +25,8 @@ const { createWebsiteWriteAdapter } = require('./website-write-adapter');
 const { createProductEditorV2Store } = require('./product-editor-v2-store');
 const { createProductEditorV2Service } = require('./product-editor-v2-service');
 const { createProductManagementGridService } = require('./product-management-grid-service');
+const { createCategoryTaxonomyStore } = require('./category-taxonomy-store');
+const { createCategoryTaxonomyService } = require('./category-taxonomy-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -117,7 +119,37 @@ const productManagementGridService = createProductManagementGridService({
   readWebsiteCatalog: readPublicStore,
   announce: operationalLaunchService.announce,
 });
+const categoryTaxonomyStore = createCategoryTaxonomyStore({ dataDir });
+const categoryTaxonomyService = createCategoryTaxonomyService({
+  store: categoryTaxonomyStore,
+  identity: adminIdentity,
+  readWebsiteCatalog: readPublicStore,
+  readEditorProducts: () => productEditorV2Store.read(),
+  announce: operationalLaunchService.announce,
+});
 const returnRequestAttempts = new Map();
+
+function productEditorWorkspace(session, productId = null) {
+  const workspace = productEditorV2Service.workspace(session, productId);
+  try {
+    workspace.taxonomy = categoryTaxonomyService.workspace(session).categories
+      .filter((category) => category.workflowState === 'live' && category.status === 'active')
+      .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
+  } catch { workspace.taxonomy = []; }
+  return workspace;
+}
+function productGridWorkspace(session) {
+  const grid = productManagementGridService.grid(session);
+  try {
+    const taxonomy = categoryTaxonomyService.workspace(session).categories;
+    grid.taxonomy = taxonomy.map(({ id, name, hierarchyPath }) => ({ id, name, hierarchyPath }));
+    grid.products = grid.products.map((product) => {
+      const category = taxonomy.find((item) => item.name.toLowerCase() === String(product.category || '').toLowerCase());
+      return { ...product, categoryId: category?.id || null, categoryPath: category?.hierarchyPath || product.category };
+    });
+  } catch { grid.taxonomy = []; }
+  return grid;
+}
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
@@ -310,6 +342,21 @@ function send(res, status, body, contentType = 'text/plain; charset=utf-8', head
   if (indexingDisabled()) responseHeaders['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
   res.writeHead(status, responseHeaders);
   res.end(body);
+}
+
+function serveCategoryPage(req, res, handle) {
+  const category = categoryTaxonomyService.publicCategory(handle);
+  if (!category) {
+    send(res, 404, '<!doctype html><html><head><meta name="robots" content="noindex"><title>Category not found</title></head><body><main><h1>Category not found</h1><a href="/shop">Shop MOTOGRIP GEAR</a></main></body></html>', 'text/html; charset=utf-8');
+    return;
+  }
+  const canonical = absoluteUrl(req, `/collections/${category.slug}`);
+  const publicAsset = (value) => !value || value.startsWith('/') || /^https?:\/\//i.test(value) ? value : `/${value}`;
+  const products = category.products.map((product) => `<article class="product"><a href="/products/${escapeHtml(product.handle)}">${product.image ? `<img src="${escapeHtml(publicAsset(product.image))}" alt="${escapeHtml(product.title)}">` : ''}<h2>${escapeHtml(product.title)}</h2><p>${escapeHtml(product.sku || '')}</p></a></article>`).join('');
+  const children = category.children.length ? `<nav class="children" aria-label="Subcategories">${category.children.map((child) => `<a href="/collections/${escapeHtml(child.slug)}">${escapeHtml(child.name)}</a>`).join('')}</nav>` : '';
+  const image = publicAsset(category.bannerImage || category.featuredImage);
+  const schema = JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: category.name, description: category.description || undefined, url: canonical });
+  send(res, 200, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(category.seoTitle || category.name)}</title>${category.metaDescription ? `<meta name="description" content="${escapeHtml(category.metaDescription)}">` : ''}<link rel="canonical" href="${escapeHtml(canonical)}"><script type="application/ld+json">${schema.replace(/</g, '\\u003c')}</script><style>body{margin:0;font:16px/1.5 Inter,Arial;color:#191512;background:#f7f5f1}main{max-width:1280px;margin:auto;padding:48px 24px}header{text-align:center;margin-bottom:32px}header img{width:100%;max-height:420px;object-fit:cover;border-radius:18px}.children{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:24px}.children a,.product a{color:inherit;text-decoration:none}.children a{padding:10px 16px;border:1px solid #cfc8bf;border-radius:999px;background:#fff}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}.product{background:#fff;padding:14px;border-radius:16px}.product img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}.product h2{font-size:17px}</style></head><body><main><header>${image ? `<img src="${escapeHtml(image)}" alt="">` : ''}<p>${escapeHtml(category.hierarchyPath)}</p><h1>${escapeHtml(category.name)}</h1>${category.description ? `<p>${escapeHtml(category.description)}</p>` : ''}</header>${children}<section class="grid">${products}</section></main></body></html>`, 'text/html; charset=utf-8');
 }
 
 function sendJson(res, status, data, headers = {}) {
@@ -1305,6 +1352,14 @@ function safePlmError(error) {
     PRODUCT_EDITOR_STORE_UNAVAILABLE: 503,
     IMMUTABLE_RECORD: 409,
     CURRENT_PASSWORD_INVALID: 400,
+    CATEGORY_STORE_UNAVAILABLE: 503,
+    DUPLICATE_SLUG: 409,
+    DUPLICATE_CATEGORY: 409,
+    CIRCULAR_HIERARCHY: 409,
+    MISSING_PARENT: 409,
+    MAX_DEPTH: 409,
+    DELETE_BLOCKED: 409,
+    CONFIRMATION_REQUIRED: 400,
   };
   return {
     status: statuses[error.code] || 500,
@@ -1315,6 +1370,13 @@ function safePlmError(error) {
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/catalog' && req.method === 'GET') {
     sendJson(res, 200, publicCatalog(readPublicStore()));
+    return true;
+  }
+  if (pathname === '/api/categories' && req.method === 'GET') {
+    try {
+      const workspace = categoryTaxonomyService.workspace({ actorType: 'legacy_owner' });
+      sendJson(res, 200, { categories: workspace.categories.filter((item) => !item.parentId && item.workflowState === 'live' && item.status === 'active' && item.websiteVisibility).map(({ id, name, slug, sortOrder, childCount }) => ({ id, name, slug, sortOrder, childCount })).sort((a,b)=>a.sortOrder-b.sortOrder) });
+    } catch { sendJson(res, 200, { categories: [] }); }
     return true;
   }
 
@@ -1844,11 +1906,57 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/admin/product-grid' && req.method === 'GET') {
     try {
-      sendJson(res, 200, productManagementGridService.grid(session));
+      sendJson(res, 200, productGridWorkspace(session));
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
     }
+    return true;
+  }
+
+  if (pathname === '/api/admin/categories' && req.method === 'GET') {
+    try {
+      if (!categoryTaxonomyStore.read().categories.length) await categoryTaxonomyService.sync(session, true);
+      sendJson(res, 200, categoryTaxonomyService.workspace(session));
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/categories/sync' && req.method === 'POST') {
+    try { sendJson(res, 200, await categoryTaxonomyService.sync(session)); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories' && req.method === 'POST') {
+    try { sendJson(res, 201, await categoryTaxonomyService.create(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories/bulk' && req.method === 'POST') {
+    try { sendJson(res, 200, await categoryTaxonomyService.bulk(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  if (pathname === '/api/admin/categories/rules/preview' && req.method === 'POST') {
+    try { sendJson(res, 200, categoryTaxonomyService.previewRules(session, await readBody(req))); }
+    catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
+    return true;
+  }
+  const categoryApiMatch = pathname.match(/^\/api\/admin\/categories\/([0-9a-f-]+)(?:\/(assignments|workflow|activity|media))?$/i);
+  if (categoryApiMatch) {
+    try {
+      const [, categoryId, subroute] = categoryApiMatch;
+      if (!subroute && req.method === 'PUT') sendJson(res, 200, await categoryTaxonomyService.update(session, categoryId, await readBody(req)));
+      else if (subroute === 'assignments' && req.method === 'POST') sendJson(res, 200, await categoryTaxonomyService.assign(session, categoryId, await readBody(req)));
+      else if (subroute === 'media' && req.method === 'POST') sendJson(res, 201, await categoryTaxonomyService.uploadMedia(session, categoryId, await readBody(req, 8 * 1024 * 1024)));
+      else if (subroute === 'workflow' && req.method === 'POST') {
+        const body = await readBody(req); sendJson(res, 200, await categoryTaxonomyService.workflow(session, categoryId, body.action, body));
+      } else if (subroute === 'activity' && req.method === 'GET') sendJson(res, 200, categoryTaxonomyService.activity(session, categoryId));
+      else sendJson(res, 405, { error: 'Method not allowed' });
+    } catch (error) { const safe = safePlmError(error); sendJson(res, safe.status, { error: safe.message }); }
     return true;
   }
 
@@ -1887,7 +1995,7 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/admin/product-editor-v2' && req.method === 'GET') {
     try {
-      sendJson(res, 200, productEditorV2Service.workspace(session));
+      sendJson(res, 200, productEditorWorkspace(session));
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
@@ -1926,7 +2034,7 @@ async function handleApi(req, res, pathname) {
       const operation = editorProductMatch[2] || null;
       const mediaId = editorProductMatch[3] || null;
       if (req.method === 'GET' && !operation) {
-        sendJson(res, 200, productEditorV2Service.workspace(session, productId));
+        sendJson(res, 200, productEditorWorkspace(session, productId));
       } else if (req.method === 'PUT' && !operation) {
         const body = await readBody(req);
         sendJson(res, 200, await productEditorV2Service.save(session, { ...body, productId }));
@@ -2714,10 +2822,22 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const categoryMatch = requestPath.match(/^\/collections\/([a-z0-9-]+)\/?$/);
+    if (categoryMatch) {
+      serveCategoryPage(req, res, categoryMatch[1]);
+      return;
+    }
+
     const editorMediaMatch = requestPath.match(/^\/product-editor-media\/([0-9a-f-]+)\/([0-9a-f-]+\.(?:jpg|png|webp))$/i);
     if (editorMediaMatch) {
       const mediaPath = path.join(productEditorV2Store.paths.mediaDir, editorMediaMatch[1], editorMediaMatch[2]);
       serveFile(req, res, mediaPath);
+      return;
+    }
+
+    const categoryMediaMatch = requestPath.match(/^\/category-media\/([0-9a-f-]+)\/([0-9a-f-]+\.(?:jpg|png|webp))$/i);
+    if (categoryMediaMatch) {
+      serveFile(req, res, path.join(categoryTaxonomyStore.paths.mediaDir, categoryMediaMatch[1], categoryMediaMatch[2]));
       return;
     }
 
@@ -2778,6 +2898,8 @@ module.exports = {
   productEditorV2Store,
   productEditorV2Service,
   productManagementGridService,
+  categoryTaxonomyStore,
+  categoryTaxonomyService,
   productMeta,
   injectProductHead,
   injectRouteHead,

@@ -61,6 +61,16 @@ const state = {
   productGridPreviewId: null,
   productGridBulkEditor: false,
   productGridHistory: null,
+  taxonomy: null,
+  categorySelection: new Set(),
+  categoryFilters: { view: 'all', status: 'all' },
+  categorySort: 'sort-order',
+  categoryPage: 1,
+  categoryPageSize: 25,
+  categoryEditorId: null,
+  categoryExpanded: new Set(),
+  categoryActivity: null,
+  categoryRulePreview: null,
   mvpError: '',
 };
 
@@ -74,8 +84,8 @@ const navigationGroups = [
   ['Commerce', [
     ['catalog', '▦', 'Catalog', '/admin/catalog', 'active'],
     ['products', '□', 'Products', '/admin/products', 'active'],
-    ['categories', '▦', 'Categories', '/admin/categories', 'planned'],
-    ['collections', '◇', 'Collections', '/admin/collections', 'planned'],
+    ['categories', '▦', 'Categories', '/admin/categories', 'active'],
+    ['collections', '◇', 'Collections', '/admin/collections', 'active'],
     ['inventory', '▤', 'Inventory', '/admin/inventory', 'planned'],
     ['orders', '◫', 'Orders', '/admin/orders', 'planned'],
     ['customers', '♙', 'Customers', '/admin/customers', 'planned'],
@@ -118,6 +128,7 @@ routeEntries.push(['listing-studio', '✦', 'Listing Studio', '/admin/products/:
 routeEntries.push(['catalog-review', '▦', 'Catalog Review', '/admin/catalog/review', 'active']);
 routeEntries.push(['catalog-detail', '▦', 'Catalog Product Detail', '/admin/catalog/:catalogProductId', 'active']);
 routeEntries.push(['profile', '♙', 'My Profile', '/admin/profile', 'active']);
+routeEntries.push(['category-editor', '▦', 'Category Editor', '/admin/categories/:categoryId', 'active']);
 
 const moduleDetails = {
   'my-work': ['My Work', 'A focused queue for tasks assigned to the signed-in team member.', ['Assigned tasks', 'Due dates', 'Priority views'], 'Task ownership service', 'Phase 2B'],
@@ -146,6 +157,9 @@ const moduleDetails = {
 function money(value) {
   const currency = state.store?.settings?.currency || 'USD';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+function formatDate(value) {
+  return value ? new Date(value).toLocaleString() : 'Not available';
 }
 
 function escapeHtml(value = '') {
@@ -893,7 +907,7 @@ function renderMvpProducts() {
                   <td>${product.variantCount}</td>
                   <td>${money(product.price)}${product.compareAtPrice > product.price ? `<small><s>${money(product.compareAtPrice)}</s></small>` : ''}</td>
                   <td>${escapeHtml(product.brand || '—')}</td>
-                  <td>${escapeHtml(product.category || '—')}</td>
+                  <td>${product.categoryId ? `<button class="link-button" data-open-product-category="${product.categoryId}">${escapeHtml(product.categoryPath || product.category)}</button>` : escapeHtml(product.category || '—')}</td>
                   <td>${escapeHtml(product.productType || '—')}</td>
                   <td><span class="pg-clamp">${escapeHtml((product.collections || []).join(', ') || '—')}</span></td>
                   <td>${statusBadge(statusTone(product.syncStatus), product.syncStatus)}</td>
@@ -941,6 +955,8 @@ function renderMvpProducts() {
           <button class="btn" data-grid-bulk="status">Bulk status</button>
           <button class="btn" data-grid-bulk="tags">Bulk tags</button>
           <button class="btn" data-grid-bulk="collections">Bulk collections</button>
+          <button class="btn" data-grid-taxonomy="add">Assign category</button>
+          <button class="btn" data-grid-taxonomy="remove">Remove category</button>
           <button class="btn" data-grid-bulk-action="archive">Archive</button>
           <button class="btn" data-grid-bulk-action="hide">Hide</button>
           <button class="btn" data-grid-bulk-action="restore">Restore</button>
@@ -1014,6 +1030,80 @@ function renderProductGridHistory(history) {
       ${history.events.length ? history.events.map(event => `<article><span>${escapeHtml(formatTimestamp(event.timestamp))}</span><strong>${escapeHtml(event.action.replaceAll('_',' '))}</strong><small>${escapeHtml(event.actorRole || 'system')} · revision ${event.newRevision ?? '—'}</small></article>`).join('') : EmptyState('No activity yet', 'Product events will appear here.')}
     </section>
   </div>`;
+}
+
+function categoryRows() {
+  if (!state.taxonomy) return [];
+  const query = state.query.trim().toLowerCase();
+  const categories = state.taxonomy.categories.filter((category) => {
+    const searchable = [category.name, category.slug, category.hierarchyPath, category.seoTitle, category.status, category.syncState, ...category.products.flatMap((product) => [product.title, product.sku])].join(' ').toLowerCase();
+    if (query && !searchable.includes(query)) return false;
+    const view = state.categoryFilters.view;
+    if (view === 'roots' && category.parentId) return false;
+    if (view === 'subcategories' && !category.parentId) return false;
+    if (view === 'empty' && category.productCount) return false;
+    if (view === 'missing-image' && category.featuredImage) return false;
+    if (view === 'missing-seo' && category.seoStatus !== 'Missing SEO') return false;
+    if (view === 'needs-review' && category.syncState !== 'Needs Review') return false;
+    if (view === 'sync-error' && category.syncState !== 'Import Error') return false;
+    if (state.categoryFilters.status !== 'all' && category.status !== state.categoryFilters.status) return false;
+    return true;
+  });
+  const compare = {
+    'name-asc': (a,b) => a.name.localeCompare(b.name), 'name-desc': (a,b) => b.name.localeCompare(a.name),
+    products: (a,b) => b.productCount-a.productCount, children: (a,b) => b.childCount-a.childCount,
+    'sort-order': (a,b) => a.sortOrder-b.sortOrder, newest: (a,b) => new Date(b.createdAt)-new Date(a.createdAt),
+    oldest: (a,b) => new Date(a.createdAt)-new Date(b.createdAt), updated: (a,b) => new Date(b.updatedAt)-new Date(a.updatedAt),
+  }[state.categorySort];
+  return categories.sort(compare);
+}
+
+function renderCategories() {
+  if (!state.taxonomy) return `${PageHeader('Categories & Collections', 'Loading synchronized website taxonomy.', '', 'active')}${LoadingSkeleton()}`;
+  const rows = categoryRows(); const counts = state.taxonomy.counts;
+  const start = (state.categoryPage - 1) * state.categoryPageSize; const page = rows.slice(start, start + state.categoryPageSize);
+  const stats = [['Total',counts.total,'all'],['Root',counts.roots,'roots'],['Subcategories',counts.subcategories,'subcategories'],['Active',counts.active,'active'],['Hidden',counts.hidden,'hidden'],['Archived',counts.archived,'archived'],['Needs review',counts.needsReview,'needs-review'],['Empty',counts.empty,'empty'],['Sync errors',counts.syncErrors,'sync-error']];
+  return `<div class="taxonomy-page">
+    ${PageHeader('Categories & Collections', 'Manage website taxonomy, nested navigation, assignments, SEO, and synchronization.', '<button class="btn" id="taxonomy-sync">Sync website</button><button class="btn primary" id="add-category">Add category</button>', 'active')}
+    <div class="pg-stats">${stats.map(([label,value,filter]) => `<button class="pg-stat" data-category-stat="${filter}"><span>${label}</span><strong>${value}</strong></button>`).join('')}</div>
+    <div class="pg-toolbar card"><div class="pg-search"><span>⌕</span><input id="category-search" value="${escapeHtml(state.query)}" placeholder="Search category, slug, product, SKU, SEO, or status"></div>
+      <select data-category-filter="view"><option value="all">All categories</option><option value="roots">Root categories</option><option value="subcategories">Subcategories</option><option value="empty">Empty categories</option><option value="missing-image">Missing images</option><option value="missing-seo">Missing SEO</option><option value="needs-review">Needs review</option><option value="sync-error">Sync errors</option></select>
+      <select data-category-filter="status"><option value="all">All statuses</option><option value="active">Active</option><option value="draft">Draft</option><option value="hidden">Hidden</option><option value="archived">Archived</option></select>
+      <select id="category-sort"><option value="sort-order">Sort order</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="products">Product count</option><option value="children">Child count</option><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="updated">Recently updated</option></select>
+    </div>
+    <div class="card pg-table-card"><div class="pg-table-wrap"><table class="pg-table taxonomy-table"><thead><tr><th><input id="category-select-page" type="checkbox"></th><th>Category</th><th>Parent / path</th><th>Products</th><th>Children</th><th>Status</th><th>Visibility</th><th>SEO</th><th>Sync</th><th>Updated</th><th>Actions</th></tr></thead><tbody>
+      ${page.map((category) => `<tr data-category-row="${category.id}" draggable="true">
+        <td><input type="checkbox" data-category-select="${category.id}" ${state.categorySelection.has(category.id)?'checked':''}></td>
+        <td><div class="pg-product-cell">${category.featuredImage?`<img src="${escapeHtml(category.featuredImage)}" alt="">`:'<span class="pg-image-placeholder">▦</span>'}<div style="padding-left:${Math.min(2,(category.hierarchyPath.match(/>/g)||[]).length)*16}px"><button class="link-button" data-open-category="${category.id}">${escapeHtml(category.name)}</button><small>/${escapeHtml(category.slug)}</small></div></div></td>
+        <td>${escapeHtml(category.parentId ? category.hierarchyPath : 'Root category')}</td><td>${category.productCount}</td><td>${category.childCount}</td><td>${statusBadge(category.status==='active'?'active':'planned',category.status)}</td><td>${category.websiteVisibility?'Visible':'Unlisted'}</td><td>${escapeHtml(category.seoStatus)}</td><td>${statusBadge(category.syncState==='Synced'?'active':'planned',category.syncState)}</td><td>${escapeHtml(formatDate(category.updatedAt))}</td>
+        <td><details class="pg-actions"><summary>•••</summary><div><button data-category-action="edit" data-category-id="${category.id}">Edit</button><button data-category-action="preview" data-category-id="${category.id}">Preview website</button><button data-category-action="add-child" data-category-id="${category.id}">Add subcategory</button><button data-category-action="duplicate" data-category-id="${category.id}">Duplicate as draft</button><button data-category-action="hide" data-category-id="${category.id}">Hide</button><button data-category-action="archive" data-category-id="${category.id}">Archive</button><button data-category-action="restore" data-category-id="${category.id}">Restore</button><button data-category-action="activity" data-category-id="${category.id}">Activity & sync history</button>${state.taxonomy.permissions.delete?`<button class="danger" data-category-action="delete" data-category-id="${category.id}">Delete safely</button>`:''}</div></details></td>
+      </tr>`).join('') || '<tr><td colspan="11"><div class="empty-state"><h3>No categories match this view</h3><p>Change filters or create a category.</p></div></td></tr>'}
+    </tbody></table></div><div class="pg-pagination"><select id="category-page-size"><option>25</option><option>50</option><option>100</option></select><span>${rows.length?start+1:0}–${Math.min(start+state.categoryPageSize,rows.length)} of ${rows.length}</span><button class="btn" id="category-prev" ${state.categoryPage<=1?'disabled':''}>Previous</button><button class="btn" id="category-next" ${start+state.categoryPageSize>=rows.length?'disabled':''}>Next</button></div></div>
+    ${state.categorySelection.size?`<div class="pg-bulk-bar"><strong>${state.categorySelection.size} selected</strong><button data-category-bulk="edit">Bulk edit</button><button data-category-bulk="hide">Hide</button><button data-category-bulk="archive">Archive</button><button data-category-bulk="restore">Restore</button><button data-category-bulk="export">Export</button><button id="clear-category-selection">Clear</button></div>`:''}
+    ${state.categoryEditorId!==null?renderCategoryEditor():''}${state.categoryActivity?renderCategoryActivity():''}
+  </div>`;
+}
+
+function renderCategoryEditor() {
+  const category = state.taxonomy.categories.find((item) => item.id === state.categoryEditorId);
+  const isNew = !category;
+  const model = category || { id:'',name:'',slug:'',parentId:'',description:'',featuredImage:'',bannerImage:'',seoTitle:'',metaDescription:'',status:'draft',websiteVisibility:true,sortOrder:0,themeTemplate:'default',internalNote:'',products:[],workflowState:'draft',revision:0 };
+  const categories = state.taxonomy.categories.filter((item) => item.id !== model.id);
+  const assigned = new Set(model.products.map((item) => item.id));
+  return `<div class="pg-modal-backdrop"><section class="pg-modal category-editor" role="dialog" aria-modal="true"><div class="pg-drawer-head"><div><span class="eyebrow">${isNew?'New taxonomy record':'Category Editor'}</span><h2>${escapeHtml(model.name||'Untitled category')}</h2></div><button class="icon-button" data-close-category>×</button></div>
+    <form id="category-editor-form"><div class="category-editor-grid"><main>
+      <section class="card card-pad"><h3>Category details</h3><label>Name<input name="name" required value="${escapeHtml(model.name)}"></label><label>Description<textarea name="description">${escapeHtml(model.description)}</textarea></label><div class="pg-form-grid"><label>Parent<select name="parentId"><option value="">Root category</option>${categories.map((item)=>`<option value="${item.id}" ${item.id===model.parentId?'selected':''}>${escapeHtml(item.hierarchyPath)}</option>`).join('')}</select></label><label>URL handle<input name="slug" required value="${escapeHtml(model.slug)}"></label><label>Sort order<input name="sortOrder" type="number" min="0" value="${model.sortOrder}"></label><label>Theme template<input name="themeTemplate" value="${escapeHtml(model.themeTemplate)}"></label></div></section>
+      <section class="card card-pad"><h3>Images</h3><div class="pg-form-grid"><label>Featured image URL<input name="featuredImage" value="${escapeHtml(model.featuredImage)}"></label><label>Banner image URL<input name="bannerImage" value="${escapeHtml(model.bannerImage)}"></label>${!isNew?'<label>Upload featured image<input type="file" data-category-media="featured" accept=".jpg,.jpeg,.png,.webp"></label><label>Upload banner image<input type="file" data-category-media="banner" accept=".jpg,.jpeg,.png,.webp"></label>':'<p>Save the category before uploading media.</p>'}</div></section>
+      <section class="card card-pad"><h3>Search engine listing</h3><label>SEO title <small>${model.seoTitle.length}/60</small><input name="seoTitle" value="${escapeHtml(model.seoTitle)}"></label><label>Meta description <small>${model.metaDescription.length}/160</small><textarea name="metaDescription">${escapeHtml(model.metaDescription)}</textarea></label></section>
+      <section class="card card-pad"><h3>Manual product assignments</h3><input id="category-product-search" placeholder="Search products by title or SKU"><div class="category-products">${state.taxonomy.products.map((product)=>`<label data-category-product-label="${escapeHtml(`${product.title} ${product.sku}`.toLowerCase())}"><input type="checkbox" name="productAssignment" value="${product.id}" ${assigned.has(product.id)?'checked':''}><img src="${escapeHtml(product.image||'/assets/generated/leather-detail.png')}" alt=""><span><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.sku||'Missing SKU')} · ${escapeHtml(product.status)}</small></span></label>`).join('')}</div></section>
+      <section class="card card-pad"><h3>Automated assignment rule preview</h3><p class="muted">Rules never apply silently. Preview matching products, then select them manually above.</p><div class="pg-form-grid"><label>Field<select id="category-rule-field"><option value="productType">Product type</option><option value="brand">Brand</option><option value="tag">Tag contains</option><option value="color">Color</option><option value="price">Price greater than</option></select></label><label>Value<input id="category-rule-value"></label></div><button type="button" class="btn" id="preview-category-rule">Preview rule</button>${state.categoryRulePreview?`<p><strong>${state.categoryRulePreview.products.length} products match:</strong> ${escapeHtml(state.categoryRulePreview.products.map((item)=>item.title).join(', ')||'None')}</p>`:''}</section>
+    </main><aside><section class="card card-pad"><h3>Publishing</h3><label>Status<select name="status">${['draft','active','hidden','archived'].map(value=>`<option ${value===model.status?'selected':''}>${value}</option>`).join('')}</select></label><label class="check"><input type="checkbox" name="websiteVisibility" ${model.websiteVisibility?'checked':''}> Website visibility</label><p>Workflow: <strong>${escapeHtml(model.workflowState)}</strong></p></section><section class="card card-pad"><h3>Internal note</h3><textarea name="internalNote">${escapeHtml(model.internalNote)}</textarea></section></aside></div>
+      <div class="pg-modal-actions"><button type="button" class="btn" data-close-category>Cancel</button><button class="btn" name="intent" value="save">Save draft</button>${!isNew?'<button class="btn" name="intent" value="submit">Submit for review</button>':''}${!isNew&&state.taxonomy.permissions.approve?'<button type="button" class="btn" data-category-workflow="approve">Owner approve</button><button type="button" class="btn primary" data-category-workflow="publish">Publish website</button>':'<button class="btn primary" name="intent" value="save">Create category</button>'}</div>
+    </form></section></div>`;
+}
+
+function renderCategoryActivity() {
+  return `<div class="pg-modal-backdrop"><section class="pg-modal"><div class="pg-drawer-head"><h2>Category activity & sync history</h2><button class="icon-button" data-close-category-activity>×</button></div><div class="pg-history-list">${[...(state.categoryActivity.events||[]),...(state.categoryActivity.syncEvents||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).map(event=>`<article><strong>${escapeHtml(event.action)}</strong><span>${escapeHtml(event.actorRole||event.result||'system')}</span><time>${escapeHtml(formatDate(event.timestamp))}</time></article>`).join('')||'<p>No activity yet.</p>'}</div></section></div>`;
 }
 
 function catalogImage(value = '') {
@@ -2163,6 +2253,9 @@ function render() {
     'catalog-review': renderCatalogReview,
     'catalog-detail': renderCatalogProductDetail,
     products: renderMvpProducts,
+    categories: renderCategories,
+    collections: renderCategories,
+    'category-editor': renderCategories,
     'product-detail': renderMvpProductDetail,
     'listing-studio': renderListingStudio,
     'product-editor': () => window.ProductEditorV2UI.render(
@@ -2198,7 +2291,67 @@ function render() {
       },
     });
   }
+  bindCategoryManagement();
   if (state.dirty) document.querySelector('.savebar')?.classList.add('visible');
+}
+
+function bindCategoryManagement() {
+  document.querySelectorAll('[data-open-product-category]').forEach((button)=>button.addEventListener('click',(event)=>{event.stopPropagation();navigate('categories');state.categoryEditorId=button.dataset.openProductCategory;render();}));
+  document.getElementById('category-search')?.addEventListener('input', (event) => { state.query=event.target.value;state.categoryPage=1;render(); });
+  document.querySelectorAll('[data-category-filter]').forEach((select)=>select.addEventListener('change',()=>{state.categoryFilters[select.dataset.categoryFilter]=select.value;state.categoryPage=1;render();}));
+  document.getElementById('category-sort')?.addEventListener('change',(event)=>{state.categorySort=event.target.value;render();});
+  document.querySelectorAll('[data-category-stat]').forEach((button)=>button.addEventListener('click',()=>{const value=button.dataset.categoryStat;state.categoryFilters={view:'all',status:'all'};if(['active','hidden','archived'].includes(value))state.categoryFilters.status=value;else state.categoryFilters.view=value;render();}));
+  document.getElementById('taxonomy-sync')?.addEventListener('click',async()=>{try{state.taxonomy=await api('/api/admin/categories/sync',{method:'POST',body:'{}'});toast('Website taxonomy synchronized');render();}catch(error){toast(error.message);}});
+  document.getElementById('add-category')?.addEventListener('click',()=>{state.categoryEditorId=false;render();});
+  document.querySelectorAll('[data-open-category]').forEach((button)=>button.addEventListener('click',()=>{state.categoryEditorId=button.dataset.openCategory;render();}));
+  document.querySelectorAll('[data-close-category]').forEach((button)=>button.addEventListener('click',(event)=>{if(button.classList.contains('pg-modal-backdrop')&&event.target!==button)return;state.categoryEditorId=null;render();}));
+  document.querySelectorAll('[data-close-category-activity]').forEach((button)=>button.addEventListener('click',()=>{state.categoryActivity=null;render();}));
+  document.getElementById('category-product-search')?.addEventListener('input',(event)=>document.querySelectorAll('[data-category-product-label]').forEach((label)=>{label.hidden=!label.dataset.categoryProductLabel.includes(event.target.value.toLowerCase());}));
+  document.getElementById('preview-category-rule')?.addEventListener('click',async()=>{try{state.categoryRulePreview=await api('/api/admin/categories/rules/preview',{method:'POST',body:JSON.stringify({mode:'all',rules:[{field:document.getElementById('category-rule-field').value,value:document.getElementById('category-rule-value').value}]})});render();}catch(error){toast(error.message);}});
+  document.querySelectorAll('[data-category-media]').forEach((input)=>input.addEventListener('change',async()=>{
+    const file=input.files?.[0];if(!file)return;try{const dataBase64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file);});await api(`/api/admin/categories/${state.categoryEditorId}/media`,{method:'POST',body:JSON.stringify({mimeType:file.type,dataBase64,role:input.dataset.categoryMedia,expectedRevision:state.taxonomy.storeRevision})});state.taxonomy=await api('/api/admin/categories');toast('Category image uploaded');render();}catch(error){toast(error.message);}
+  }));
+  document.getElementById('category-editor-form')?.addEventListener('submit',async(event)=>{
+    event.preventDefault(); const form=new FormData(event.currentTarget); const existing=state.taxonomy.categories.find((item)=>item.id===state.categoryEditorId);
+    const fields=Object.fromEntries([...form.entries()].filter(([key])=>!['productAssignment','intent'].includes(key))); fields.websiteVisibility=form.has('websiteVisibility'); fields.sortOrder=Number(fields.sortOrder||0); fields.expectedRevision=state.taxonomy.storeRevision; fields.submit=event.submitter?.value==='submit';
+    try {
+      const response=await api(existing?`/api/admin/categories/${existing.id}`:'/api/admin/categories',{method:existing?'PUT':'POST',body:JSON.stringify(fields)});
+      state.taxonomy=await api('/api/admin/categories'); const saved=response.category;
+      const selected=form.getAll('productAssignment'); const current=new Set(existing?.products.map((item)=>item.id)||[]);
+      const add=selected.filter((id)=>!current.has(id)); const remove=[...current].filter((id)=>!selected.includes(id));
+      if(saved?.id&&(add.length||remove.length)) state.taxonomy=await api(`/api/admin/categories/${saved.id}/assignments`,{method:'POST',body:JSON.stringify({add,remove,expectedRevision:state.taxonomy.storeRevision})});
+      state.categoryEditorId=null;toast(fields.submit?'Category submitted for Owner review':'Category saved');render();
+    } catch(error){toast(error.message);}
+  });
+  document.querySelectorAll('[data-category-workflow]').forEach((button)=>button.addEventListener('click',async()=>{
+    const category=state.taxonomy.categories.find((item)=>item.id===state.categoryEditorId);try{state.taxonomy=await api(`/api/admin/categories/${category.id}/workflow`,{method:'POST',body:JSON.stringify({action:button.dataset.categoryWorkflow,expectedRevision:state.taxonomy.storeRevision})});toast(`Category ${button.dataset.categoryWorkflow}d`);render();}catch(error){toast(error.message);}
+  }));
+  document.querySelectorAll('[data-category-action]').forEach((button)=>button.addEventListener('click',async()=>{
+    const id=button.dataset.categoryId; const action=button.dataset.categoryAction; const category=state.taxonomy.categories.find((item)=>item.id===id);
+    try {
+      if(action==='edit'){state.categoryEditorId=id;render();return;} if(action==='add-child'){state.categoryEditorId=false;render();requestAnimationFrame(()=>{document.querySelector('[name=parentId]').value=id;});return;}
+      if(action==='preview'){window.open(`/collections/${category.slug}`,'_blank','noopener');return;} if(action==='activity'){state.categoryActivity=await api(`/api/admin/categories/${id}/activity`);render();return;}
+      if(action==='duplicate'){const copy={...category,name:`${category.name} — Copy`,slug:`${category.slug}-copy`,parentId:category.parentId,status:'draft',websiteVisibility:false};delete copy.id;state.taxonomy=(await api('/api/admin/categories',{method:'POST',body:JSON.stringify(copy)}),await api('/api/admin/categories'));toast('Category duplicated as draft');render();return;}
+      let confirmation; if(action==='delete'){confirmation=window.prompt('Permanent deletion is Owner-only and permitted only when safe. Type DELETE to confirm.');if(confirmation!=='DELETE')return;}
+      state.taxonomy=await api(`/api/admin/categories/${id}/workflow`,{method:'POST',body:JSON.stringify({action,confirmation,expectedRevision:state.taxonomy.storeRevision})});toast(`Category ${action} complete`);render();
+    } catch(error){toast(error.message);}
+  }));
+  document.querySelectorAll('[data-category-select]').forEach((input)=>input.addEventListener('change',()=>{input.checked?state.categorySelection.add(input.dataset.categorySelect):state.categorySelection.delete(input.dataset.categorySelect);render();}));
+  document.querySelectorAll('[data-category-row]').forEach((row)=>{
+    row.addEventListener('dragstart',(event)=>event.dataTransfer.setData('text/category-id',row.dataset.categoryRow));
+    row.addEventListener('dragover',(event)=>event.preventDefault());
+    row.addEventListener('drop',async(event)=>{event.preventDefault();const sourceId=event.dataTransfer.getData('text/category-id');const targetId=row.dataset.categoryRow;if(!sourceId||sourceId===targetId)return;const target=state.taxonomy.categories.find((item)=>item.id===targetId);if(!window.confirm(`Move this category under “${target.name}”? Product assignments, IDs, SEO, and history will be preserved.`))return;try{await api(`/api/admin/categories/${sourceId}`,{method:'PUT',body:JSON.stringify({parentId:targetId,expectedRevision:state.taxonomy.storeRevision})});state.taxonomy=await api('/api/admin/categories');toast('Hierarchy updated');render();}catch(error){toast(error.message);}});
+  });
+  document.getElementById('category-select-page')?.addEventListener('change',(event)=>{const rows=categoryRows();const start=(state.categoryPage-1)*state.categoryPageSize;rows.slice(start,start+state.categoryPageSize).forEach((item)=>event.target.checked?state.categorySelection.add(item.id):state.categorySelection.delete(item.id));render();});
+  document.getElementById('clear-category-selection')?.addEventListener('click',()=>{state.categorySelection.clear();render();});
+  document.querySelectorAll('[data-category-bulk]').forEach((button)=>button.addEventListener('click',async()=>{
+    const action=button.dataset.categoryBulk;if(action==='export'){const blob=new Blob([JSON.stringify(state.taxonomy.categories.filter((item)=>state.categorySelection.has(item.id)),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='motogrip-categories.json';link.click();URL.revokeObjectURL(url);return;}
+    let values={};if(action==='edit'){const status=window.prompt('Set status: active, hidden, archived, or draft');if(!status)return;values={status};}
+    try{state.taxonomy=await api('/api/admin/categories/bulk',{method:'POST',body:JSON.stringify({categoryIds:[...state.categorySelection],action,values})});state.categorySelection.clear();toast('Bulk category action complete');render();}catch(error){toast(error.message);}
+  }));
+  document.getElementById('category-page-size')?.addEventListener('change',(event)=>{state.categoryPageSize=Number(event.target.value);state.categoryPage=1;render();});
+  document.getElementById('category-prev')?.addEventListener('click',()=>{state.categoryPage=Math.max(1,state.categoryPage-1);render();});
+  document.getElementById('category-next')?.addEventListener('click',()=>{state.categoryPage+=1;render();});
 }
 
 function bindShell() {
@@ -2338,6 +2491,9 @@ function bindShell() {
     render();
     const focusNames = { inventory: 'variantInventory', price: 'price', status: 'status', tags: 'tags', collections: 'collections' };
     document.querySelector(`[name="${focusNames[button.dataset.gridBulk] || 'price'}"]`)?.focus();
+  }));
+  document.querySelectorAll('[data-grid-taxonomy]').forEach((button)=>button.addEventListener('click',async()=>{
+    if(!state.taxonomy)return toast('Category taxonomy is unavailable');const options=state.taxonomy.categories.map((item)=>`${item.id} · ${item.hierarchyPath}`).join('\n');const categoryId=window.prompt(`Paste the Category ID:\n${options}`);if(!categoryId)return;const productIds=state.productGrid.products.filter((item)=>state.productGridSelection.has(item.id)).map((item)=>String(item.websiteProductId||item.editorProductId));try{state.taxonomy=await api(`/api/admin/categories/${categoryId}/assignments`,{method:'POST',body:JSON.stringify({[button.dataset.gridTaxonomy]:productIds,expectedRevision:state.taxonomy.storeRevision})});toast('Product category assignments updated');render();}catch(error){toast(error.message);}
   }));
   document.querySelectorAll('[data-grid-bulk-action]').forEach((button) => button.addEventListener('click', async () => {
     if (button.dataset.gridBulkAction === 'delete' && !window.confirm('Remove the selected products from the active grid? This keeps an audit-safe tombstone.')) return;
@@ -3493,6 +3649,7 @@ async function loadMvpWorkspace() {
   } catch (error) {
     state.catalogError = error.message;
   }
+  try { state.taxonomy = await api('/api/admin/categories'); } catch {}
 }
 
 async function loadAdmin() {
@@ -3515,7 +3672,7 @@ function startActivityStream() {
   activityStream.addEventListener('message', async (event) => {
     try {
       const message = JSON.parse(event.data);
-      if (!['draft.updated', 'workflow.updated', 'website.published', 'product.grid.updated'].includes(message.type)) return;
+      if (!['draft.updated', 'workflow.updated', 'website.published', 'product.grid.updated', 'category.updated', 'category.assignment.updated', 'category.sync.completed'].includes(message.type)) return;
       if (state.mvpProduct?.productUuid === message.productUuid) {
         const previousDraftId = state.selectedDraftId;
         const [workflow, workspace] = await Promise.all([
@@ -3539,6 +3696,7 @@ function startActivityStream() {
         state.mvpProducts = products.products || [];
         await refreshProductGrid();
       }
+      if (message.type.startsWith('category.')) state.taxonomy = await api('/api/admin/categories');
       render();
     } catch {}
   });

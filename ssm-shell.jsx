@@ -27,6 +27,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
   const [isMobile, setIsMobile] = React.useState(
     typeof window !== 'undefined' ? window.innerWidth < 900 : false
   );
+  const [websiteCategories, setWebsiteCategories] = React.useState([]);
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -40,6 +41,18 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
   }, []);
 
   React.useEffect(() => { setMobileOpen(false); }, [view]);
+  React.useEffect(() => {
+    let active = true;
+    fetch('/api/categories', { credentials: 'same-origin' }).then(response => response.ok ? response.json() : { categories: [] })
+      .then(data => { if (active) setWebsiteCategories((data.categories || []).slice(0, 6)); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const commerceNav = websiteCategories.length
+    ? websiteCategories.map(category => ({ label: category.name, categorySlug: category.slug }))
+    : SSM_NAV;
+  const openNav = (item) => item.categorySlug
+    ? window.location.assign(`/collections/${item.categorySlug}`)
+    : go(item.view, item.filter ? { gender: item.filter } : null);
 
   return (
     <header style={{
@@ -67,8 +80,8 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
           </button>
         ) : (
           <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-            {SSM_NAV.map(n => (
-              <button key={n.label} onClick={() => go(n.view, n.filter ? { gender: n.filter } : null)}
+            {commerceNav.map(n => (
+              <button key={n.label} onClick={() => openNav(n)}
                 className="ulink"
                 style={{
                   fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
@@ -119,8 +132,8 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
             </button>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            {SSM_NAV.map(n => (
-              <button key={n.label} onClick={() => go(n.view, n.filter ? { gender: n.filter } : null)}
+            {commerceNav.map(n => (
+              <button key={n.label} onClick={() => openNav(n)}
                 style={{
                   textAlign: 'left', padding: '20px 0', borderBottom: '1px solid var(--line)',
                   fontFamily: 'var(--display)', fontSize: 28, fontWeight: 400,
