@@ -110,6 +110,9 @@ function createCategoryTaxonomyService(options = {}) {
   }
   async function sync(session, automatic = false) {
     const user = actor(session, automatic);
+    if (!automatic && !authorizeUser(user, 'categories', 'edit')) {
+      fail('Category synchronization permission is required.', 'FORBIDDEN');
+    }
     const result = await store.mutate((state) => {
       const timestamp = new Date(now()).toISOString();
       const touched = [];
@@ -123,11 +126,18 @@ function createCategoryTaxonomyService(options = {}) {
             name: clean(source.name, 100), slug: slug(source.name), parentId: null, description: '',
             featuredImage: '', bannerImage: '', seoTitle: '', metaDescription: '', status: 'active',
             websiteVisibility: true, sortOrder: state.categories.filter((item) => !item.parentId).length + 1,
-            themeTemplate: 'default', internalNote: '', workflowState: 'live', syncState: 'Synced',
+            themeTemplate: 'default', internalNote: '', workflowState: 'live', syncState: 'Needs Review',
+            hierarchyReviewRequired: true, hierarchyConfirmedAt: null,
             createdAt: timestamp, updatedAt: timestamp, revision: 1, websiteRevision: 1,
           };
           state.categories.push(category); touched.push(category.id);
-        } else if (!category.sourceKeys?.includes(sourceKey)) category.sourceKeys = [...(category.sourceKeys || []), sourceKey];
+        } else {
+          if (!category.sourceKeys?.includes(sourceKey)) category.sourceKeys = [...(category.sourceKeys || []), sourceKey];
+          if (!category.parentId && !category.hierarchyConfirmedAt) {
+            category.hierarchyReviewRequired = true;
+            category.syncState = 'Needs Review';
+          }
+        }
         if (!state.assignments.some((item) => item.categoryId === category.id && item.productId === source.productId)) {
           state.assignments.push({ id: crypto.randomUUID(), categoryId: category.id, productId: source.productId, source: 'website_import', manual: false, createdAt: timestamp });
         }
@@ -153,6 +163,9 @@ function createCategoryTaxonomyService(options = {}) {
   }
   function workspace(session) {
     const user = actor(session, true); const state = store.read(); const categories = project(state);
+    const sourceRows = websiteSources();
+    const sourceNames = [...new Set(sourceRows.map((item) => `${item.kind}:${slug(item.name)}`))];
+    const imported = categories.filter((item) => item.websiteCategoryId || item.sourceKeys?.length);
     const counts = {
       total: categories.length, roots: categories.filter((item) => !item.parentId).length,
       subcategories: categories.filter((item) => item.parentId).length,
@@ -163,7 +176,19 @@ function createCategoryTaxonomyService(options = {}) {
       empty: categories.filter((item) => item.productCount === 0).length,
       syncErrors: categories.filter((item) => item.syncState === 'Import Error').length,
     };
-    return { schemaVersion: 1, storeRevision: state.storeRevision, lastImportAt: state.lastImportAt, categories, products: products(), counts, permissions: permissions(user) };
+    const reconciliation = {
+      sourceCount: sourceNames.length,
+      sourceRecordCount: sourceRows.length,
+      importedCount: imported.length,
+      deduplicatedCount: Math.max(0, sourceRows.length - sourceNames.length),
+      rootCount: categories.filter((item) => !item.parentId).length,
+      childCount: categories.filter((item) => item.parentId).length,
+      needsReviewCount: categories.filter((item) => item.syncState === 'Needs Review').length,
+      failedCount: categories.filter((item) => item.syncState === 'Import Error').length,
+      assignmentCount: state.assignments.length,
+      importedNames: imported.map((item) => item.name).sort((a, b) => a.localeCompare(b)),
+    };
+    return { schemaVersion: 1, storeRevision: state.storeRevision, lastImportAt: state.lastImportAt, categories, products: products(), counts, reconciliation, permissions: permissions(user) };
   }
   function normalizeInput(input, existing = {}) {
     const status = clean(input.status ?? existing.status ?? 'draft', 20).toLowerCase();
@@ -206,6 +231,8 @@ function createCategoryTaxonomyService(options = {}) {
       const previous = structuredClone(state.categories[index]);
       const category = normalizeInput(input, state.categories[index]);
       validateHierarchy(category, state.categories); ensureUnique(category, state.categories);
+      category.hierarchyReviewRequired = false;
+      category.hierarchyConfirmedAt = category.hierarchyConfirmedAt || new Date(now()).toISOString();
       category.revision += 1; category.updatedAt = new Date(now()).toISOString();
       category.workflowState = input.submit ? 'submitted' : category.workflowState;
       category.syncState = category.workflowState === 'live' ? 'Synced' : 'Needs Review';

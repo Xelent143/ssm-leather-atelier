@@ -2064,6 +2064,8 @@ textarea {
 .taxonomy-page{min-width:0}.taxonomy-page>*{min-width:0}.taxonomy-page .pg-table-card,.taxonomy-page .pg-table-wrap{min-width:0;max-width:100%}
 /* Enterprise Team & Access */
 .team-layout { margin: 1.25rem 0; }
+.taxonomy-reconciliation { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; margin: 0 0 1rem; padding: .75rem 1rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.taxonomy-reconciliation span { padding: .3rem .55rem; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .78rem; }
 .role-preset-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
 .role-preset { border: 1px solid var(--line); border-radius: 12px; padding: .85rem; background: var(--surface-soft); display: grid; gap: .2rem; }
 .role-preset span, .team-member-title span, .team-role-line, .team-meta { color: var(--muted); font-size: .78rem; }
