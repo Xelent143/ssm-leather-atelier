@@ -43,6 +43,78 @@
   const code = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
   const mediaUrl = (value) => window.MotogripMediaUrl.canonicalMediaUrl(value, { fallback: null });
 
+  function mediaStudioPanel(product, workspace) {
+    if (!product.id) return `<section class="card pe-card pe-media-studio">
+      <div class="card-head"><div><span class="eyebrow">AI Media Studio v1</span><h2>Product media workflow</h2><p>Save the product draft before preparing its reference-image and asset plan.</p></div><span class="pe-ai-state">Draft required</span></div>
+    </section>`;
+    const studio = workspace.aiMediaStudio;
+    if (!studio) return '';
+    const plan = studio.plan;
+    const analysis = plan.analysis;
+    const canPrepare = studio.permissions.prepare;
+    const modeLabel = {
+      uploaded_only: 'Uploaded Images Only',
+      hybrid: 'Hybrid',
+      ai_generated: 'AI Generated',
+    };
+    const modeDescription = {
+      uploaded_only: 'Use uploaded product images only. No future generated assets are required.',
+      hybrid: 'Use uploaded references and plan only the missing assets for future generation.',
+      ai_generated: 'Use reference images to plan a complete future generated asset package.',
+    };
+    const assignedRole = (item) => plan.roleAssignments?.[item.id] || item.currentRole || 'Unknown';
+    return `<section class="card pe-card pe-media-studio" id="pe-media-studio">
+      <div class="card-head"><div><span class="eyebrow">AI Media Studio v1 · Workflow foundation</span><h2>Reference images → governed asset plan</h2><p>Plan media production without generating or modifying any image.</p></div><div class="pe-ms-state"><span>${esc(plan.state.replaceAll('_', ' '))}</span><strong>${analysis?.coveragePercentage ?? 0}% coverage</strong></div></div>
+      <div class="pe-ms-notice"><strong>No image provider connected</strong><span>This sprint makes no image API calls. Analysis below uses confirmed roles and existing product metadata only.</span></div>
+      <div class="pe-ms-modes" role="radiogroup" aria-label="Image source workflow">
+        ${studio.constants.sourceModes.map((mode) => `<label class="${plan.mode === mode ? 'active' : ''}"><input type="radio" name="mediaStudio.mode" value="${mode}" ${plan.mode === mode ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><strong>${esc(modeLabel[mode])}</strong><span>${esc(modeDescription[mode])}</span></label>`).join('')}
+      </div>
+      <div class="pe-ms-grid">
+        <div>
+          <div class="card-head compact"><div><h3>Reference images</h3><p>Choose images and confirm the role of every reference.</p></div><span>${plan.referenceMediaIds.length} selected</span></div>
+          <div class="pe-ms-references">
+            ${studio.referenceMedia.length ? studio.referenceMedia.map((item) => `<article class="pe-ms-reference" draggable="true" data-ms-reference="${item.id}">
+              <label class="pe-ms-select"><input type="checkbox" data-ms-image="${item.id}" ${plan.referenceMediaIds.includes(item.id) ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><span>Use reference</span></label>
+              <img src="${esc(mediaUrl(item.path) || '')}" alt="${esc(item.title)}">
+              <strong>${esc(item.title)}</strong>
+              <select data-ms-role="${item.id}" ${!canPrepare ? 'disabled' : ''}>${studio.constants.referenceRoles.map((role) => `<option ${assignedRole(item) === role ? 'selected' : ''}>${esc(role)}</option>`).join('')}</select>
+            </article>`).join('') : '<div class="pe-empty">Upload product images in the Media card to begin.</div>'}
+          </div>
+          <div class="button-row"><button class="btn" id="pe-ms-save" type="button" ${!canPrepare ? 'disabled' : ''}>Save Media Plan</button><button class="btn primary" id="pe-ms-analyze" type="button" ${!studio.permissions.analyze || !plan.referenceMediaIds.length ? 'disabled' : ''}>Analyze Images</button></div>
+        </div>
+        <aside class="pe-ms-analysis">
+          <h3>Image analysis</h3>
+          ${analysis ? `
+            <div class="pe-ms-metric"><strong>${analysis.coveragePercentage}%</strong><span>Role coverage</span></div>
+            ${status('Detected angles', analysis.detectedAngles.join(', ') || 'None confirmed')}
+            ${status('Missing angles', analysis.missingAngles.join(', ') || 'None')}
+            ${status('Detected color', analysis.detectedColor)}
+            ${status('Detected style', analysis.detectedStyle)}
+            ${status('Product type', analysis.detectedProductType)}
+            ${status('Detected quality', analysis.detectedQuality)}
+            <small>${esc(analysis.notice)}</small>
+          ` : '<div class="pe-empty">Save the plan, then analyze confirmed roles and coverage.</div>'}
+        </aside>
+      </div>
+      <div class="pe-ms-section">
+        <div class="card-head compact"><div><h3>Image coverage</h3><p>See what exists and what remains for the selected production workflow.</p></div></div>
+        <div class="pe-ms-coverage">${(analysis?.coverage || ['Front', 'Back', 'Left', 'Right', 'Interior', 'Detail', 'Hardware', 'Lifestyle'].map((role) => ({ role, available: plan.referenceMediaIds.some((id) => plan.roleAssignments?.[id] === role) }))).map((item) => `<div class="${item.available ? 'complete' : 'missing'}"><span>${item.available ? '✓' : '✕'}</span><strong>${esc(item.role)}</strong></div>`).join('')}<div class="${plan.selectedAssets.includes('Ghost Mannequin') ? 'planned' : 'missing'}"><span>${plan.selectedAssets.includes('Ghost Mannequin') ? '◷' : '✕'}</span><strong>Ghost</strong></div></div>
+      </div>
+      <div class="pe-ms-section">
+        <h3>Asset plan <small>Generate later</small></h3>
+        <div class="pe-ms-choices">${studio.constants.assetTypes.map((asset) => `<label><input type="checkbox" data-ms-asset="${esc(asset)}" ${plan.selectedAssets.includes(asset) ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><span>${esc(asset)}</span></label>`).join('')}</div>
+      </div>
+      <div class="pe-ms-section">
+        <h3>Design lock <small>Future generation constraints</small></h3>
+        <div class="pe-ms-locks">${studio.constants.designLocks.map((lock) => `<label><input type="checkbox" data-ms-lock="${esc(lock)}" ${plan.designLocks.includes(lock) ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><span>🔒 ${esc(lock)}</span></label>`).join('')}</div>
+      </div>
+      <div class="pe-ms-bottom">
+        <label class="pe-field"><span>Image instructions</span><textarea name="mediaStudio.instructions" placeholder="Keep exact leather color. Keep exact zipper. Use premium USA lifestyle.">${esc(plan.instructions)}</textarea><small>Stored with this versioned plan. No instruction is executed in this sprint.</small></label>
+        <aside><h3>Estimated cost</h3><strong>—</strong><p>${esc(plan.estimatedCost.message)}</p>${studio.permissions.configureProvider ? '<span class="pe-ms-owner">Owner may configure a provider in a future approved sprint.</span>' : '<span>Provider configuration is unavailable for this role.</span>'}</aside>
+      </div>
+    </section>`;
+  }
+
   function media(product) {
     if (!product.media.length) return `<label class="pe-drop" id="pe-drop"><input id="pe-files" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden><strong>Drop product images here</strong><span>or choose JPG, PNG or WEBP files up to 5 MB</span><span class="btn">Choose files</span></label>`;
     return `<div class="pe-media-grid">${[...product.media].sort((a, b) => a.order - b.order).map((item) => `
@@ -200,6 +272,7 @@
       ${!product.id ? '<div class="alert info"><strong>New governed product</strong><p>Save the draft first. Product DNA and automatic identities are created only after explicit Owner approval.</p></div>' : ''}
       <form id="pe-form" class="pe-layout">
         <main class="pe-main">
+          ${mediaStudioPanel(product, workspace)}
           ${copilotPanel(product, workspace)}
           <section class="card pe-card"><h2>Product content</h2>${input('Product title', 'title', product.title, 'text', 'required maxlength="300"')}
             <div class="pe-content-contract"><p><strong>Permanent website content contract</strong> — the Rich description and four supporting sections publish in this exact order on every factual PDP.</p>
@@ -345,6 +418,42 @@
       workspace.aiCopilot = response.workspace;
       context.update(product, workspace);
     };
+    const mediaStudioPayload = () => ({
+      expectedRevision: workspace.aiMediaStudio.storeRevision,
+      mode: document.querySelector('[name="mediaStudio.mode"]:checked')?.value || 'uploaded_only',
+      referenceMediaIds: [...document.querySelectorAll('[data-ms-image]:checked')].map((item) => item.dataset.msImage),
+      roleAssignments: Object.fromEntries([...document.querySelectorAll('[data-ms-role]')].map((item) => [item.dataset.msRole, item.value])),
+      selectedAssets: [...document.querySelectorAll('[data-ms-asset]:checked')].map((item) => item.dataset.msAsset),
+      designLocks: [...document.querySelectorAll('[data-ms-lock]:checked')].map((item) => item.dataset.msLock),
+      instructions: document.getElementById('pe-form')?.elements.namedItem('mediaStudio.instructions')?.value || '',
+    });
+    const refreshMediaStudio = (response, message) => {
+      workspace.aiMediaStudio = response.workspace;
+      context.update(product, workspace);
+      context.toast(message);
+    };
+    document.getElementById('pe-ms-save')?.addEventListener('click', async () => {
+      try {
+        const response = await context.api(`/api/admin/ai-media-studio/products/${product.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(mediaStudioPayload()),
+        });
+        refreshMediaStudio(response, 'Media production plan saved');
+      } catch (error) { context.toast(error.message); }
+    });
+    document.getElementById('pe-ms-analyze')?.addEventListener('click', async () => {
+      try {
+        const saved = await context.api(`/api/admin/ai-media-studio/products/${product.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(mediaStudioPayload()),
+        });
+        const response = await context.api(`/api/admin/ai-media-studio/products/${product.id}/analyze`, {
+          method: 'POST',
+          body: JSON.stringify({ expectedRevision: saved.workspace.storeRevision }),
+        });
+        refreshMediaStudio(response, 'Coverage analysis complete — no image API was called');
+      } catch (error) { context.toast(error.message); }
+    });
     document.getElementById('pe-ai-analyze')?.addEventListener('click', async () => {
       try {
         context.toast('Analyzing product images…');

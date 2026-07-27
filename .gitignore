@@ -44,6 +44,8 @@ data/product-editor-v2.json
 data/product-editor-v2.json.*.tmp
 data/ai-product-copilot.json
 data/ai-product-copilot.json.*.tmp
+data/ai-media-studio.json
+data/ai-media-studio.json.*.tmp
 data/team-permissions.json
 data/team-permissions.json.*.tmp
 data/product-editor-media/

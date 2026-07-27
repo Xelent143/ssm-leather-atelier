@@ -33,6 +33,8 @@ const { createTeamPermissionsService } = require('./team-permissions-service');
 const { createAiProductCopilotStore } = require('./ai-product-copilot-store');
 const { createAiProductCopilotService } = require('./ai-product-copilot-service');
 const { createOpenAiVisionProvider } = require('./ai-product-copilot-provider');
+const { createAiMediaStudioStore } = require('./ai-media-studio-store');
+const { createAiMediaStudioService } = require('./ai-media-studio-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -144,6 +146,13 @@ const aiProductCopilotService = createAiProductCopilotService({
   rootDir: root,
   authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
+const aiMediaStudioStore = createAiMediaStudioStore({ dataDir });
+const aiMediaStudioService = createAiMediaStudioService({
+  store: aiMediaStudioStore,
+  identity: adminIdentity,
+  productStore: productEditorV2Store,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
+});
 const productManagementGridService = createProductManagementGridService({
   store: productEditorV2Store,
   identity: adminIdentity,
@@ -185,6 +194,11 @@ function productEditorWorkspace(session, productId = null) {
       .map(({ id, name, hierarchyPath, slug }) => ({ id, name, hierarchyPath, slug }));
   } catch { workspace.taxonomy = []; }
   if (workspace.product) {
+    try { workspace.aiMediaStudio = aiMediaStudioService.workspace(session, workspace.product.id); }
+    catch (error) {
+      if (error.code !== 'FORBIDDEN') throw error;
+      workspace.aiMediaStudio = null;
+    }
     try { workspace.aiCopilot = aiProductCopilotService.workspace(session, workspace.product.id); }
     catch (error) {
       if (error.code !== 'FORBIDDEN') throw error;
@@ -1551,6 +1565,8 @@ function safePlmError(error) {
     AI_IMAGE_UNAVAILABLE: 400,
     AI_IMAGE_TOO_LARGE: 400,
     AI_DAILY_LIMIT: 429,
+    AI_MEDIA_STORE_UNAVAILABLE: 503,
+    AI_MEDIA_PLAN_REQUIRED: 400,
   };
   return {
     status: statuses[error.code] || 500,
@@ -2297,6 +2313,33 @@ async function handleApi(req, res, pathname) {
           cancel: () => aiProductCopilotService.cancel(session, { ...body, productId }),
         };
         sendJson(res, operation === 'analyze' ? 201 : 200, await actions[operation]());
+      } else {
+        sendJson(res, 405, { error: 'Method not allowed.' });
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const mediaStudioMatch = pathname.match(
+    /^\/api\/admin\/ai-media-studio\/products\/([0-9a-f-]+)(?:\/(analyze))?$/i,
+  );
+  if (mediaStudioMatch) {
+    try {
+      const productId = mediaStudioMatch[1];
+      const operation = mediaStudioMatch[2] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, aiMediaStudioService.workspace(session, productId));
+      } else if (req.method === 'PUT' && !operation) {
+        sendJson(res, 200, await aiMediaStudioService.save(session, {
+          ...(await readBody(req)), productId,
+        }));
+      } else if (req.method === 'POST' && operation === 'analyze') {
+        sendJson(res, 200, await aiMediaStudioService.analyze(session, {
+          ...(await readBody(req)), productId,
+        }));
       } else {
         sendJson(res, 405, { error: 'Method not allowed.' });
       }
