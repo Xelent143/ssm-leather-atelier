@@ -16,7 +16,13 @@
   const empty = () => ({
     id: null, revision: 0, workflowState: 'draft', ownerReviewStatus: 'not_submitted',
     websiteSyncStatus: 'not_published', title: '', descriptionHtml: '', sections: {}, media: [],
-    organization: { brand: 'MOTOGRIP GEAR', vendor: 'MOTOGRIP GEAR', productType: 'Leather Vest', category: '', gender: 'Men', collections: [], tags: [], themeTemplate: 'default', status: 'draft' },
+    websiteContent: { description: [], features: [], specifications: [], perfectFor: '', whyYouWillLoveIt: '' },
+    classification: {
+      gender: { value: '', confidence: 'low', status: 'needs_confirmation', evidence: [] },
+      ageGroup: { value: '', confidence: 'low', status: 'needs_confirmation', evidence: [] },
+    },
+    merchantAttributes: {}, merchantReadiness: { percentage: 0, status: 'Not Ready', missing: [], needsConfirmation: [], invalid: [] },
+    organization: { brand: 'MOTOGRIP GEAR', vendor: 'MOTOGRIP GEAR', productType: 'Leather Vest', category: '', gender: 'Unisex', ageGroup: '', collections: [], tags: [], themeTemplate: 'default', status: 'draft' },
     pricing: { price: 0, compareAtPrice: null, cost: null, taxable: true },
     inventory: { trackInventory: true, continueSellingWhenOutOfStock: false },
     shipping: { physicalProduct: true, weight: 0, weightUnit: 'lb', packagePreset: '', countryOfOrigin: 'PK', hsCode: '', processingTime: '' },
@@ -75,20 +81,23 @@
       title: product.title,
       'organization.productType': product.organization.productType,
       'organization.category': product.organization.category,
+      'classification.gender': product.classification?.gender?.value,
+      'classification.ageGroup': product.classification?.ageGroup?.value,
       'organization.tags': product.organization.tags,
       'section.shortDescription': product.sections.shortDescription,
-      'section.fullDescription': product.sections.fullDescription,
-      'section.features': product.sections.features,
-      'section.specifications': product.sections.specifications,
-      'section.perfectFor': product.sections.perfectFor,
-      'section.whyYouWillLoveIt': product.sections.whyYouWillLoveIt,
+      'websiteContent.description': product.websiteContent?.description,
+      'websiteContent.features': product.websiteContent?.features,
+      'websiteContent.specifications': product.websiteContent?.specifications?.map((item) => `${item.label}: ${item.value}`),
+      'websiteContent.perfectFor': product.websiteContent?.perfectFor,
+      'websiteContent.whyYouWillLoveIt': product.websiteContent?.whyYouWillLoveIt,
       'section.faq': product.sections.faq,
       'section.buyingGuide': product.sections.buyingGuide,
       'seo.title': product.seo.title,
       'seo.metaDescription': product.seo.metaDescription,
       'seo.handle': product.seo.handle,
     };
-    const value = paths[field];
+    const value = paths[field] ?? (field.startsWith('merchant.') ?
+      product.merchantAttributes?.[field.slice('merchant.'.length)] : '');
     return Array.isArray(value) ? value.join(', ') : String(value || '');
   }
 
@@ -136,13 +145,44 @@
         </article>`).join('')}</div>
         <div class="button-row"><button class="btn primary" id="pe-ai-apply-selected" type="button">Apply Selected Suggestions</button><button class="btn" id="pe-ai-apply-safe" type="button">Apply All Safe Suggestions</button><button class="btn" id="pe-ai-reject-uncertain" type="button">Reject All Uncertain</button></div>
         <div class="pe-ai-review-grid">
-          <section><h3>Fact confidence & evidence</h3>${[...result.visualAnalysis, ...result.productFacts].map((fact) => `<article class="pe-fact ${fact.status}"><strong>${esc(fact.field)}: ${esc(fact.value || 'Not visible')}</strong><span>${esc(fact.confidence)} · ${esc(fact.status.replaceAll('_', ' '))}</span><small>${fact.evidence.map((evidence) => esc(imageName(evidence.imageId))).join(', ') || 'No visual evidence claimed'}</small></article>`).join('')}</section>
+          <section><h3>Fact confidence & evidence</h3>${[...result.visualAnalysis, ...result.productFacts, result.audienceClassification.gender, result.audienceClassification.ageGroup, ...result.merchantAttributes].map((fact) => `<article class="pe-fact ${fact.status}"><strong>${esc(fact.field)}: ${esc(fact.value || 'Not visible')}</strong><span>${esc(fact.confidence)} · ${esc(fact.status.replaceAll('_', ' '))}</span><small>${fact.evidence.map((evidence) => esc(imageName(evidence.imageId))).join(', ') || 'No visual evidence claimed'}</small></article>`).join('')}<div class="pe-merchant-score"><strong>${result.merchantReadiness?.percentage || 0}%</strong><span>${esc(result.merchantReadiness?.status || 'Not Ready')}</span></div></section>
           <section><h3>Missing information</h3>${result.missingInformation.map((item) => `<label class="pe-question"><span>${esc(item.question)} ${item.critical ? '<b>Critical</b>' : ''}</span><select data-ai-answer="${esc(item.field)}"><option value="">Select an answer</option>${item.options.map((option) => `<option>${esc(option)}</option>`).join('')}</select></label>`).join('') || '<p>No unanswered questions.</p>'}</section>
           <section><h3>Image coverage</h3>${result.imageCoverage.map((item) => `<div class="pe-coverage ${item.available ? 'available' : 'missing'}"><strong>${item.available ? '✓' : '✗'} ${esc(item.role)}</strong><span>${esc(item.recommendation)}</span></div>`).join('')}</section>
           <section><h3>Secondary drafts</h3><details><summary>eBay (${result.ebayDraft.title.length}/80)</summary><p>${esc(result.ebayDraft.title)}</p><p>${esc(result.ebayDraft.description)}</p></details><details><summary>Etsy (${result.etsyDraft.title.length}/140 · 13 tags)</summary><p>${esc(result.etsyDraft.title)}</p><p>${esc(result.etsyDraft.description)}</p><p>${result.etsyDraft.tags.map(esc).join(' · ')}</p></details><details><summary>AEO / GEO answers</summary>${[...result.aeo, ...result.geo].map((item) => `<p><strong>${esc(item.question)}</strong><br>${esc(item.answer)}</p>`).join('')}</details></section>
         </div>
       </div>` : ''}
       ${copilot.analyses?.length > 1 ? `<details><summary>Analysis history (${copilot.analyses.length})</summary><div class="activity-list">${copilot.analyses.map((item) => `<div><strong>Analysis ${item.version}</strong><span>${esc(item.status.replaceAll('_', ' '))} · ${new Date(item.generatedAt).toLocaleString()}</span></div>`).join('')}</div></details>` : ''}
+    </section>`;
+  }
+
+  function merchantPanel(product) {
+    const merchant = product.merchantAttributes || {};
+    const readiness = product.merchantReadiness || { percentage: 0, status: 'Not Ready', missing: [], needsConfirmation: [], invalid: [] };
+    const attr = (label, key, choices = null) => choices
+      ? select(label, `merchant.${key}`, merchant[key] ?? '', [['', 'Select…'], ...choices])
+      : input(label, `merchant.${key}`, merchant[key] ?? '');
+    return `<section class="card pe-card pe-merchant">
+      <div class="card-head"><div><span class="eyebrow">Google Merchant</span><h2>Attribute workspace</h2><p>Website publishing remains governed separately. Merchant readiness stays blocked until required attributes are valid and confirmed.</p></div><div class="pe-merchant-score"><strong>${readiness.percentage}%</strong><span>${esc(readiness.status)}</span></div></div>
+      <div class="pe-merchant-progress"><span style="width:${Math.max(0, Math.min(100, readiness.percentage))}%"></span></div>
+      <div class="pe-grid-3">
+        ${select('Target gender', 'classification.gender', product.classification?.gender?.value || '', [['', 'Needs confirmation'], ['male', 'Men'], ['female', 'Women'], ['unisex', 'Unisex']])}
+        ${select('Target age group', 'classification.ageGroup', product.classification?.ageGroup?.value || '', [['', 'Needs confirmation'], ['newborn', 'Newborn'], ['infant', 'Infant / Baby'], ['toddler', 'Toddler'], ['kids', 'Kids'], ['adult', 'Adult']])}
+        ${attr('Condition', 'condition', [['new', 'New'], ['used', 'Used'], ['refurbished', 'Refurbished']])}
+        ${attr('Color', 'color')}${attr('Material', 'material')}${attr('Pattern', 'pattern')}
+        ${attr('Availability', 'availability', [['in_stock', 'In stock'], ['out_of_stock', 'Out of stock'], ['preorder', 'Preorder'], ['backorder', 'Backorder']])}
+        ${attr('Brand', 'brand')}${attr('Size', 'size')}
+        ${attr('Size system', 'size_system', [['US', 'US'], ['UK', 'UK'], ['EU', 'EU'], ['AU', 'AU'], ['JP', 'JP'], ['CN', 'CN'], ['BR', 'BR'], ['MEX', 'MEX']])}
+        ${attr('Size type', 'size_type', [['regular', 'Regular'], ['petite', 'Petite'], ['plus', 'Plus'], ['tall', 'Tall'], ['big', 'Big'], ['maternity', 'Maternity']])}
+        ${attr('Product type', 'product_type')}${attr('Google product category', 'google_product_category')}
+        ${attr('MPN (when factual)', 'mpn')}${attr('GTIN (when factual)', 'gtin')}
+        ${select('Identifier exists', 'merchant.identifier_exists', merchant.identifier_exists === true ? 'true' : merchant.identifier_exists === false ? 'false' : '', [['', 'Needs confirmation'], ['true', 'Yes — valid GTIN or MPN'], ['false', 'No identifier exists']])}
+        ${attr('Item group ID', 'item_group_id')}${attr('Shipping weight', 'shipping_weight')}
+      </div>
+      <div class="pe-merchant-statuses">
+        ${readiness.missing?.length ? `<div class="alert warning"><strong>Missing required</strong><p>${readiness.missing.map(esc).join(', ')}</p></div>` : ''}
+        ${readiness.needsConfirmation?.length ? `<div class="alert warning"><strong>Needs confirmation</strong><p>${readiness.needsConfirmation.map(esc).join(', ')}</p></div>` : ''}
+        ${readiness.invalid?.length ? `<div class="alert danger"><strong>Invalid or conflicting</strong><p>${readiness.invalid.map(esc).join(', ')}</p></div>` : ''}
+      </div>
     </section>`;
   }
 
@@ -162,16 +202,23 @@
         <main class="pe-main">
           ${copilotPanel(product, workspace)}
           <section class="card pe-card"><h2>Product content</h2>${input('Product title', 'title', product.title, 'text', 'required maxlength="300"')}
-            <label class="pe-field"><span>Rich description</span><div class="pe-toolbar">${[['bold', 'B'], ['italic', 'I'], ['underline', 'U'], ['formatBlock:h2', 'H2'], ['insertUnorderedList', '• List'], ['insertOrderedList', '1. List'], ['justifyLeft', 'Left'], ['justifyCenter', 'Center'], ['undo', 'Undo'], ['redo', 'Redo']].map(([cmd, label]) => `<button type="button" data-rich="${cmd}">${label}</button>`).join('')}<button type="button" id="pe-link">Link</button><button type="button" id="pe-table">Table</button></div><div id="pe-rich" class="pe-rich" contenteditable="${editable}">${product.descriptionHtml || ''}</div></label>
-            <details open><summary>Structured website listing sections</summary><div class="pe-grid-2">${[['shortDescription', 'Short Description'], ['fullDescription', 'Full Description'], ['features', 'Features'], ['specifications', 'Specifications'], ['perfectFor', 'Perfect For'], ['whyYouWillLoveIt', 'Why You’ll Love It'], ['faq', 'FAQ'], ['buyingGuide', 'Buying Guide']].map(([key, label]) => textarea(label, `section.${key}`, product.sections[key])).join('')}</div></details>
+            <div class="pe-content-contract"><p><strong>Permanent website content contract</strong> — the Rich description and four supporting sections publish in this exact order on every factual PDP.</p>
+              ${textarea('1. Description — separate 1–3 paragraphs with blank lines', 'websiteContent.description', (product.websiteContent?.description || []).join('\n\n'))}
+              ${textarea('2. Features — one factual bullet per line', 'websiteContent.features', (product.websiteContent?.features || []).join('\n'))}
+              ${textarea('3. Specifications — Label: Value, one per line', 'websiteContent.specifications', (product.websiteContent?.specifications || []).map((item) => `${item.label}: ${item.value}`).join('\n'))}
+              ${textarea('4. Perfect for', 'websiteContent.perfectFor', product.websiteContent?.perfectFor)}
+              ${textarea('5. Why you’ll love it', 'websiteContent.whyYouWillLoveIt', product.websiteContent?.whyYouWillLoveIt)}
+            </div>
+            <details><summary>Additional SEO/AEO content</summary><div class="pe-grid-2">${textarea('FAQ', 'section.faq', product.sections.faq)}${textarea('Buying Guide', 'section.buyingGuide', product.sections.buyingGuide)}</div></details>
           </section>
           <section class="card pe-card"><div class="card-head"><div><h2>Media</h2><p>Upload, reorder, classify and describe product images.</p></div><button class="btn" id="pe-library" type="button">Media Library</button></div>${media(product)}</section>
-          <section class="card pe-card"><h2>Category</h2><div class="pe-grid-2">${workspace?.taxonomy?.length ? `<label>Primary category<input name="organization.category" required list="pe-taxonomy-options" value="${esc(product.organization.category)}" placeholder="Select synced category"><datalist id="pe-taxonomy-options">${workspace.taxonomy.map((item) => `<option value="${esc(item.name)}" label="${esc(item.hierarchyPath)}"></option>`).join('')}</datalist><small>Published MOTOGRIP taxonomy · searchable hierarchy path</small></label>` : input('Category', 'organization.category', product.organization.category, 'text', 'required')}${select('Gender', 'organization.gender', product.organization.gender, ['Men', 'Women', 'Unisex'])}</div>${workspace?.assignedTaxonomy?.length ? `<div class="pe-taxonomy-assignments"><strong>Category Manager assignments</strong>${workspace.assignedTaxonomy.map((item) => `<span>${esc(item.hierarchyPath)}</span>`).join('')}</div>` : ''}</section>
+          <section class="card pe-card"><h2>Category</h2><div class="pe-grid-2">${workspace?.taxonomy?.length ? `<label>Primary category<input name="organization.category" required list="pe-taxonomy-options" value="${esc(product.organization.category)}" placeholder="Select synced category"><datalist id="pe-taxonomy-options">${workspace.taxonomy.map((item) => `<option value="${esc(item.name)}" label="${esc(item.hierarchyPath)}"></option>`).join('')}</datalist><small>Published MOTOGRIP taxonomy · searchable hierarchy path</small></label>` : input('Category', 'organization.category', product.organization.category, 'text', 'required')}<div class="pe-field"><span>Audience classification</span><p>${esc(product.organization.gender || 'Needs confirmation')} · ${esc(product.organization.ageGroup || 'Needs confirmation')}</p><small>Manage canonical gender and age group in Google Merchant attributes below.</small></div></div>${workspace?.assignedTaxonomy?.length ? `<div class="pe-taxonomy-assignments"><strong>Category Manager assignments</strong>${workspace.assignedTaxonomy.map((item) => `<span>${esc(item.hierarchyPath)}</span>`).join('')}</div>` : ''}</section>
           <section class="card pe-card"><h2>Pricing</h2><div class="pe-grid-3">${input('Base price', 'pricing.price', product.pricing.price, 'number', 'min="0" step=".01" required')}${input('Compare-at price', 'pricing.compareAtPrice', product.pricing.compareAtPrice, 'number', 'min="0" step=".01"')}${input('Cost per item', 'pricing.cost', product.pricing.cost, 'number', 'min="0" step=".01"')}</div><label class="pe-toggle"><input name="pricing.taxable" type="checkbox" ${product.pricing.taxable ? 'checked' : ''}> Taxable</label><p>${margin}</p></section>
           <section class="card pe-card"><h2>Inventory & identity</h2><div class="pe-grid-4">${input('Product SKU', 'identity.productSku', identity?.productSku || 'Generated after approval', 'text', 'readonly')}${input('Internal Product Code', 'identity.internalProductCode', identity?.internalProductCode || 'Generated automatically', 'text', 'readonly')}${input('Factory Code', 'identity.factoryCode', identity?.factoryCode || 'Generated automatically', 'text', 'readonly')}${input('Total inventory', 'inventory.total', inventory, 'number', 'readonly')}</div><div class="button-row"><label class="pe-toggle"><input name="inventory.trackInventory" type="checkbox" ${product.inventory.trackInventory ? 'checked' : ''}> Track inventory</label><label class="pe-toggle"><input name="inventory.continueSellingWhenOutOfStock" type="checkbox" ${product.inventory.continueSellingWhenOutOfStock ? 'checked' : ''}> Continue selling when out of stock</label></div></section>
           <section class="card pe-card"><h2>Variants</h2><p>Add up to three options. Disable combinations that are not sold.</p>${options(product)}${variants(product)}</section>
           <section class="card pe-card"><h2>Shipping</h2><label class="pe-toggle"><input name="shipping.physicalProduct" type="checkbox" ${product.shipping.physicalProduct ? 'checked' : ''}> Physical product</label><div class="pe-grid-3">${input('Weight', 'shipping.weight', product.shipping.weight, 'number', 'min="0" step=".01"')}${select('Weight unit', 'shipping.weightUnit', product.shipping.weightUnit, ['lb', 'oz', 'kg', 'g'])}${input('Package preset', 'shipping.packagePreset', product.shipping.packagePreset)}${input('Country of origin', 'shipping.countryOfOrigin', product.shipping.countryOfOrigin, 'text', 'maxlength="2"')}${input('HS code', 'shipping.hsCode', product.shipping.hsCode)}${input('Processing time', 'shipping.processingTime', product.shipping.processingTime)}</div></section>
           <section class="card pe-card"><h2>Product metafields</h2><div class="pe-grid-2">${metafields.map(([key, label]) => input(label, `metafield.${key}`, product.metafields[key] ?? '')).join('')}</div></section>
+          ${merchantPanel(product)}
           <section class="card pe-card"><h2>Search engine listing</h2><div class="pe-search-preview"><strong>${esc(product.seo.title || product.title || 'Product SEO title')}</strong><span>${esc(`${location.origin}/products/${product.seo.handle || 'product-handle'}`)}</span><p>${esc(product.seo.metaDescription || 'Add a useful meta description for customers in search.')}</p></div>${input(`SEO title (${product.seo.title.length}/60)`, 'seo.title', product.seo.title)}${product.seo.title.length && (product.seo.title.length < 50 || product.seo.title.length > 60) ? '<p class="pe-warning">Recommended target: 50–60 characters.</p>' : ''}${textarea(`Meta description (${product.seo.metaDescription.length}/160)`, 'seo.metaDescription', product.seo.metaDescription)}${product.seo.metaDescription.length && (product.seo.metaDescription.length < 150 || product.seo.metaDescription.length > 160) ? '<p class="pe-warning">Recommended target: 150–160 characters.</p>' : ''}${input('URL handle', 'seo.handle', product.seo.handle)}${product.workflowState === 'live' ? '<p class="pe-warning">Changing a live handle needs explicit confirmation and a future redirect.</p>' : ''}</section>
         </main>
         <aside class="pe-side">
@@ -209,12 +256,43 @@
     });
     return {
       expectedRevision: product.id ? window.__peWorkspace.storeRevision : undefined,
-      title: value('title'), descriptionHtml: document.getElementById('pe-rich').innerHTML,
-      sections: Object.fromEntries(['shortDescription', 'fullDescription', 'features', 'specifications', 'perfectFor', 'whyYouWillLoveIt', 'faq', 'buyingGuide'].map((key) => [key, value(`section.${key}`)])),
+      title: value('title'), descriptionHtml: '',
+      websiteContent: {
+        description: value('websiteContent.description').split(/\n{2,}/).map((item) => item.trim()).filter(Boolean),
+        features: value('websiteContent.features').split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
+        specifications: value('websiteContent.specifications').split(/\r?\n/).map((line) => {
+          const [label, entry] = line.split(/:(.*)/s);
+          return { label: label?.trim(), value: entry?.trim() };
+        }).filter((item) => item.label && item.value),
+        perfectFor: value('websiteContent.perfectFor'),
+        whyYouWillLoveIt: value('websiteContent.whyYouWillLoveIt'),
+      },
+      sections: { faq: value('section.faq'), buyingGuide: value('section.buyingGuide') },
+      classification: {
+        gender: {
+          value: value('classification.gender'), confidence: 'high',
+          status: value('classification.gender') ? 'confirmed' : 'needs_confirmation',
+          evidence: [], source: 'manual_product_editor',
+        },
+        ageGroup: {
+          value: value('classification.ageGroup'), confidence: 'high',
+          status: value('classification.ageGroup') ? 'confirmed' : 'needs_confirmation',
+          evidence: [], source: 'manual_product_editor',
+        },
+      },
+      merchantAttributes: {
+        ...Object.fromEntries(['condition', 'color', 'material', 'pattern', 'availability', 'brand', 'size',
+          'size_system', 'size_type', 'product_type', 'google_product_category', 'mpn', 'gtin',
+          'item_group_id', 'shipping_weight'].map((key) => [key, value(`merchant.${key}`)])),
+        gender: value('classification.gender'), age_group: value('classification.ageGroup'),
+        identifier_exists: value('merchant.identifier_exists') === '' ? null : value('merchant.identifier_exists') === 'true',
+      },
       organization: {
         brand: value('organization.brand'), vendor: value('organization.vendor'),
         productType: value('organization.productType'), category: value('organization.category'),
-        gender: value('organization.gender'), collections: csv(value('organization.collections')),
+        gender: value('classification.gender') === 'male' ? 'Men' :
+          value('classification.gender') === 'female' ? 'Women' : 'Unisex',
+        ageGroup: value('classification.ageGroup'), collections: csv(value('organization.collections')),
         tags: csv(value('organization.tags')), themeTemplate: value('organization.themeTemplate'),
         status: value('organization.status'),
       },

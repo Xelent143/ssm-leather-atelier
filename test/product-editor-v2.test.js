@@ -444,8 +444,10 @@ test('factual PDP does not use generic leather, review, fit, or merchandising fa
     'selectedVariant?.imageId',
     'selectedVariant?.price',
     'p.metafields',
-    'p.sections?.faq',
+    'p.sections?.description',
+    'publishedSpecifications',
   ]) assert.equal(factual.includes(required), true, required);
+  assert.equal(factual.includes('p.sections?.faq'), false, 'permanent five-section contract');
 });
 
 test('published Product Editor schema uses factual variants and omits unsupported review fallbacks', () => {

@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { analyzeCopy } = require('./copy-intelligence-service');
 const { IMAGE_ROLES, validateResponse } = require('./ai-product-copilot-schema');
+const {
+  merchantReadiness, normalizeAgeGroup, normalizeGender, normalizeMerchantAttributes,
+} = require('./product-listing-contract');
 
 const DEFAULT_LIMITS = Object.freeze({
   maxImages: 8, maxRequestsPerUserDay: 20, maxImageBytes: 5 * 1024 * 1024,
@@ -43,12 +46,12 @@ function safeInstruction(value) {
 function flattenCopyContent(result) {
   return {
     shopify: {
-      title: result.websiteContent.title, description: result.websiteContent.fullDescription,
+      title: result.suggestedTitle, description: result.websiteContent.description.join('\n\n'),
       seoTitle: result.seo.title, metaDescription: result.seo.metaDescription,
     },
     ebay: result.ebayDraft, etsy: result.etsyDraft,
     seo: { title: result.seo.title, metaDescription: result.seo.metaDescription },
-    faq: result.websiteContent.faq, buyingGuide: result.websiteContent.buyingGuide,
+    faq: result.aeo, buyingGuide: result.geo.map((item) => `${item.question}\n${item.answer}`).join('\n\n'),
   };
 }
 function supportedFacts(product, trustedProduct = null) {
@@ -57,9 +60,31 @@ function supportedFacts(product, trustedProduct = null) {
     productType: product.organization?.productType || '',
     category: product.organization?.category || '',
     gender: product.organization?.gender || '',
+    ageGroup: product.organization?.ageGroup || product.classification?.ageGroup?.value || '',
+    sizeSystem: product.merchantAttributes?.size_system || '',
     ...Object.fromEntries(Object.entries(product.metafields || {}).filter(([, value]) => clean(value))),
     trustedProductId: trustedProduct?.id || product.productUuid,
   };
+}
+function audienceConsistencyIssues(result) {
+  const text = [
+    ...result.websiteContent.description, ...result.websiteContent.features,
+    result.websiteContent.perfectFor, result.websiteContent.whyYouWillLoveIt,
+    result.seo.title, result.seo.metaDescription, result.ebayDraft.description,
+    result.etsyDraft.description,
+  ].join(' ').toLowerCase();
+  const gender = result.audienceClassification.gender.value;
+  const ageGroup = result.audienceClassification.ageGroup.value;
+  const conflicts = [];
+  if (gender === 'male' && /\b(women|woman|girls|girl)\b/.test(text)) conflicts.push(['gender_inconsistency', 'Copy conflicts with the confirmed male classification.']);
+  if (gender === 'female' && /\b(men|man|boys|boy)\b/.test(text)) conflicts.push(['gender_inconsistency', 'Copy conflicts with the confirmed female classification.']);
+  if (ageGroup === 'adult' && /\b(kids|children|child|toddler|infant|baby)\b/.test(text)) conflicts.push(['age_group_inconsistency', 'Copy conflicts with the confirmed adult classification.']);
+  if (['newborn', 'infant', 'toddler', 'kids'].includes(ageGroup) && /\badult(?:s)?\b/.test(text)) conflicts.push(['age_group_inconsistency', 'Copy conflicts with the confirmed child age group.']);
+  return conflicts.map(([code, message]) => ({
+    code, severity: 'error', category: 'factual_consistency',
+    location: { field: 'websiteContent', start: 0, end: 0, excerpt: '' },
+    message, suggestion: 'Align the copy with the confirmed Merchant audience classification.',
+  }));
 }
 function evidenceImage(item) {
   return {
@@ -68,19 +93,22 @@ function evidenceImage(item) {
   };
 }
 function outputFields(result) {
+  const merchant = Object.fromEntries(result.merchantAttributes.map((item) => [item.field, item.value]));
   return {
-    title: result.websiteContent.title,
+    title: result.suggestedTitle,
     'organization.productType': result.productFacts.find((fact) => fact.field === 'productType')?.value || '',
     'organization.category': result.categorySuggestions[0] || '',
-    'organization.tags': result.websiteContent.tags,
-    'section.shortDescription': result.websiteContent.shortDescription,
-    'section.fullDescription': result.websiteContent.fullDescription,
-    'section.features': result.websiteContent.features.map((item) => `✔ ${item}`).join('\n'),
-    'section.specifications': result.websiteContent.specifications.join('\n'),
-    'section.perfectFor': result.websiteContent.perfectFor,
-    'section.whyYouWillLoveIt': result.websiteContent.whyYouWillLoveIt,
-    'section.faq': result.websiteContent.faq.map((item) => `${item.question}\n${item.answer}`).join('\n\n'),
-    'section.buyingGuide': result.websiteContent.buyingGuide,
+    'classification.gender': result.audienceClassification.gender.value,
+    'classification.ageGroup': result.audienceClassification.ageGroup.value,
+    'websiteContent.description': result.websiteContent.description.join('\n\n'),
+    'websiteContent.features': result.websiteContent.features.join('\n'),
+    'websiteContent.specifications': result.websiteContent.specifications
+      .map((item) => `${item.label}: ${item.value}`).join('\n'),
+    'websiteContent.perfectFor': result.websiteContent.perfectFor,
+    'websiteContent.whyYouWillLoveIt': result.websiteContent.whyYouWillLoveIt,
+    ...Object.fromEntries(Object.entries(merchant).map(([key, value]) => [`merchant.${key}`, value])),
+    'section.faq': result.aeo.map((item) => `${item.question}\n${item.answer}`).join('\n\n'),
+    'section.buyingGuide': result.geo.map((item) => `${item.question}\n${item.answer}`).join('\n\n'),
     'seo.title': result.seo.title,
     'seo.metaDescription': result.seo.metaDescription,
     'seo.handle': result.seo.handle,
@@ -221,14 +249,58 @@ function createAiProductCopilotService(options = {}) {
       if (UNSAFE_FACT_FIELDS.has(fact.field) && !trustedValue) return { ...fact, status: 'needs_confirmation', confidence: 'low' };
       return fact;
     });
+    const classificationPairs = [
+      ['gender', validated.audienceClassification.gender, normalizeGender(knownFacts.gender)],
+      ['ageGroup', validated.audienceClassification.ageGroup, normalizeAgeGroup(knownFacts.ageGroup)],
+    ];
+    classificationPairs.forEach(([field, fact, trustedValue]) => {
+      const normalizedAi = field === 'gender' ? normalizeGender(fact.value) : normalizeAgeGroup(fact.value);
+      fact.value = normalizedAi;
+      if (trustedValue && normalizedAi && trustedValue !== normalizedAi) {
+        trustedConflicts.push({ field, trustedValue, aiValue: normalizedAi, resolution: 'trusted_data_wins' });
+        fact.value = trustedValue;
+        fact.status = 'needs_confirmation';
+      } else if (!trustedValue || fact.confidence !== 'high' || fact.status !== 'confirmed') {
+        fact.status = 'needs_confirmation';
+      }
+    });
+    validated.merchantAttributes = validated.merchantAttributes.map((fact) => {
+      const trustedValue = clean(knownFacts[fact.field], 500);
+      const protectedField = ['gtin', 'mpn', 'material'].includes(fact.field);
+      if (trustedValue && fact.value && trustedValue.toLowerCase() !== fact.value.toLowerCase()) {
+        trustedConflicts.push({ field: `merchant.${fact.field}`, trustedValue, aiValue: fact.value, resolution: 'trusted_data_wins' });
+        return { ...fact, value: trustedValue, status: 'needs_confirmation' };
+      }
+      if (protectedField && !trustedValue) return { ...fact, value: '', confidence: 'low', status: 'needs_confirmation' };
+      return fact;
+    });
+    const merchantProjection = normalizeMerchantAttributes({
+      ...Object.fromEntries(validated.merchantAttributes.map((item) => [item.field, item.value])),
+      gender: validated.audienceClassification.gender.value,
+      age_group: validated.audienceClassification.ageGroup.value,
+    }, product);
+    validated.merchantReadiness = merchantReadiness(merchantProjection, {
+      gender: validated.audienceClassification.gender,
+      ageGroup: validated.audienceClassification.ageGroup,
+    });
     const copyAnalysis = analyzeCopy({
       content: flattenCopyContent(validated), facts: knownFacts,
       supportedClaims: Object.values(knownFacts).filter(Boolean),
       analyzedAt: new Date(now()).toISOString(),
     });
+    const audienceIssues = audienceConsistencyIssues(validated);
+    copyAnalysis.issues.push(...audienceIssues);
+    copyAnalysis.suggestions.push(...audienceIssues.map((item) => ({
+      issueCode: item.code, location: item.location, suggestion: item.suggestion,
+      automaticChangeApplied: false,
+    })));
+    copyAnalysis.issueCount = copyAnalysis.issues.length;
     const record = {
       id: crypto.randomUUID(), version: prior.length + 1, productId: product.id,
-      productUuid: product.productUuid, status: validated.missingInformation.some((item) => item.critical)
+      productUuid: product.productUuid, status:
+        validated.missingInformation.some((item) => item.critical) ||
+        validated.merchantReadiness.status !== 'Google Merchant Ready' ||
+        audienceIssues.length
         ? 'needs_confirmation' : 'analysis_complete',
       imageIds: images.map((image) => image.id),
       imageRoles: Object.fromEntries(images.map((image) => [image.id, image.role])),
@@ -238,7 +310,15 @@ function createAiProductCopilotService(options = {}) {
       result: validated, trustedConflicts, copyAnalysis,
       suggestions: Object.entries(outputFields(validated)).map(([field, value]) => ({
         id: crypto.randomUUID(), field, value, status: 'pending',
-        confidence: ['title', 'seo.title', 'seo.metaDescription'].includes(field) ? 'medium' : 'high',
+        confidence: field === 'classification.gender' ?
+          (validated.audienceClassification.gender.status === 'confirmed' ? validated.audienceClassification.gender.confidence : 'low') :
+          field === 'classification.ageGroup' ?
+            (validated.audienceClassification.ageGroup.status === 'confirmed' ? validated.audienceClassification.ageGroup.confidence : 'low') :
+            field.startsWith('merchant.') ? (() => {
+              const fact = validated.merchantAttributes.find((item) => `merchant.${item.field}` === field);
+              return fact?.status === 'confirmed' ? fact.confidence : 'low';
+            })() :
+              ['title', 'seo.title', 'seo.metaDescription'].includes(field) ? 'medium' : 'high',
         evidence: validated.productFacts.filter((fact) => fact.status !== 'rejected').flatMap((fact) => fact.evidence).slice(0, 10),
       })),
       acceptedFields: [], rejectedFields: [], finalAppliedDraftVersion: null,

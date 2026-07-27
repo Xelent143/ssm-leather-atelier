@@ -24,21 +24,30 @@ function fixture(images) {
       { field: 'productType', value: 'Leather Vest', confidence: 'high', status: 'confirmed', evidence },
       { field: 'leatherType', value: 'Possible cowhide', confidence: 'low', status: 'needs_confirmation', evidence },
     ],
+    audienceClassification: {
+      gender: { field: 'gender', value: 'male', confidence: 'high', status: 'confirmed', evidence },
+      ageGroup: { field: 'ageGroup', value: 'adult', confidence: 'high', status: 'confirmed', evidence },
+    },
+    merchantAttributes: [
+      { field: 'color', value: 'Brown', confidence: 'high', status: 'confirmed', evidence },
+      { field: 'material', value: '', confidence: 'low', status: 'needs_confirmation', evidence: [] },
+      { field: 'condition', value: 'new', confidence: 'medium', status: 'suggested', evidence: [] },
+      { field: 'size_system', value: 'US', confidence: 'medium', status: 'suggested', evidence: [] },
+      { field: 'size_type', value: 'regular', confidence: 'medium', status: 'suggested', evidence: [] },
+      { field: 'google_product_category', value: 'Apparel & Accessories > Clothing > Vests', confidence: 'medium', status: 'suggested', evidence: [] },
+      { field: 'identifier_exists', value: 'false', confidence: 'low', status: 'needs_confirmation', evidence: [] },
+    ],
+    suggestedTitle: 'Men’s Brown Leather Vest',
     missingInformation: [
       { field: 'leatherType', question: 'What leather type is used?', options: ['Cowhide', 'Buffalo', 'Unknown'], critical: true },
     ],
     categorySuggestions: ['Leather Vests'],
     websiteContent: {
-      title: 'Men’s Brown Leather Vest',
-      shortDescription: 'A brown leather vest with a clean rider-focused silhouette.',
-      fullDescription: 'A premium brown leather vest described only from confirmed visible details.',
+      description: ['A premium brown leather vest described only from confirmed visible details.'],
       features: ['Brown finish', 'Sleeveless vest construction'],
-      specifications: ['Color: Brown', 'Product type: Leather Vest'],
+      specifications: [{ label: 'Color', value: 'Brown' }, { label: 'Gender', value: 'Men' }, { label: 'Age group', value: 'Adult' }],
       perfectFor: 'Riders seeking a versatile leather layering piece.',
       whyYouWillLoveIt: 'A clean design that keeps the visible product details central.',
-      faq: [{ question: 'What color is this vest?', answer: 'The supplied images show a brown finish.' }],
-      buyingGuide: 'Confirm leather type, lining and measurements before purchase.',
-      tags,
     },
     seo: {
       title: 'Men’s Brown Leather Vest | MOTOGRIP GEAR',
@@ -75,6 +84,7 @@ function harness({ allowed = true, trustedType = 'Western Vest', owner = true } 
     productUuid: '22222222-2222-4222-8222-222222222222',
     title: '', organization: {
       brand: 'MOTOGRIP GEAR', productType: trustedType, category: '', gender: 'Men', tags: [],
+      ageGroup: 'adult',
     },
     metafields: {}, revision: 1,
     media: [
@@ -99,6 +109,9 @@ test('schema accepts factual evidence and exactly 13 Etsy tags', () => {
   const result = validateResponse(fixture(images), images);
   assert.equal(result.etsyDraft.tags.length, 13);
   assert.equal(result.productFacts[1].status, 'needs_confirmation');
+  assert.deepEqual(Object.keys(result.websiteContent), [
+    'description', 'features', 'specifications', 'perfectFor', 'whyYouWillLoveIt',
+  ]);
 });
 
 test('schema rejects malformed output and unknown evidence', () => {
@@ -135,6 +148,28 @@ test('trusted product facts win and conflicts are visible', async () => {
   assert.equal(result.analysis.trustedConflicts[0].resolution, 'trusted_data_wins');
 });
 
+test('trusted audience classification wins and ambiguous classification blocks Merchant readiness', async () => {
+  const { service, session, product } = harness();
+  const result = await service.analyze(session, {
+    productId: product.id,
+    knownFacts: { gender: 'Men', ageGroup: 'adult' },
+  });
+  assert.equal(result.analysis.result.audienceClassification.gender.value, 'male');
+  assert.equal(result.analysis.result.audienceClassification.ageGroup.value, 'adult');
+
+  const ambiguous = fixture(product.media);
+  ambiguous.audienceClassification.gender = {
+    field: 'gender', value: 'unisex', confidence: 'low',
+    status: 'suggested', evidence: [ambiguous.visualAnalysis[0].evidence[0]],
+  };
+  ambiguous.audienceClassification.ageGroup = {
+    field: 'ageGroup', value: '', confidence: 'low', status: 'needs_confirmation', evidence: [],
+  };
+  const validated = validateResponse(ambiguous, product.media);
+  assert.equal(validated.audienceClassification.gender.status, 'suggested');
+  assert.equal(validated.audienceClassification.ageGroup.status, 'needs_confirmation');
+});
+
 test('review records accepted fields without overwriting previous analysis', async () => {
   const { service, store, session, product } = harness();
   const first = await service.analyze(session, { productId: product.id });
@@ -164,4 +199,6 @@ test('Product Editor exposes manual and AI modes without automatic application',
   assert.match(source, /Analyze with AI/);
   assert.match(source, /Apply Selected Suggestions/);
   assert.match(source, /Nothing is applied or published without your action/);
+  assert.match(source, /Google Merchant/);
+  assert.match(source, /Permanent website content contract/);
 });

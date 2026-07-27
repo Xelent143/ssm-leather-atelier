@@ -10,6 +10,10 @@ const {
 } = require('./product-plm-hierarchy');
 const { emptyProductBrainReferences } = require('./product-plm-schema');
 const { canonicalMediaUrl } = require('./media-url');
+const {
+  genderLabel, merchantReadiness, normalizeClassification, normalizeMerchantAttributes,
+  normalizeWebsiteContent,
+} = require('./product-listing-contract');
 
 const PRODUCT_TYPES = Object.freeze([
   'Leather Jacket', 'Motorcycle Jacket', 'Leather Vest', 'Biker Vest', 'Western Vest',
@@ -128,6 +132,19 @@ function createProductEditorV2Service(options = {}) {
   }
   function productView(product) {
     const view = structuredClone(product);
+    view.websiteContent = normalizeWebsiteContent(view.websiteContent, {
+      description: view.descriptionHtml || view.sections?.fullDescription,
+      features: view.sections?.features,
+      specifications: view.sections?.specifications,
+      perfectFor: view.sections?.perfectFor,
+      whyYouWillLoveIt: view.sections?.whyYouWillLoveIt,
+    });
+    view.classification = normalizeClassification(view.classification, {
+      gender: view.organization?.gender,
+      ageGroup: view.organization?.ageGroup,
+    });
+    view.merchantAttributes = normalizeMerchantAttributes(view.merchantAttributes, view);
+    view.merchantReadiness = merchantReadiness(view.merchantAttributes, view.classification);
     view.identity = productIdentityService.view(product.productUuid).identity || view.identity;
     if (view.identity) {
       const skuByAttributes = new Map((view.identity.variantSkus || []).map((item) => [
@@ -194,17 +211,33 @@ function createProductEditorV2Service(options = {}) {
     });
     const handle = slugify(input.seo?.handle || input.title);
     if (!handle) throw Object.assign(new Error('A product title and URL handle are required.'), { code: 'VALIDATION' });
-    return {
+    const websiteContent = normalizeWebsiteContent(input.websiteContent, {
+      description: input.descriptionHtml || input.sections?.fullDescription,
+      features: input.sections?.features,
+      specifications: input.sections?.specifications,
+      perfectFor: input.sections?.perfectFor,
+      whyYouWillLoveIt: input.sections?.whyYouWillLoveIt,
+    });
+    const classification = normalizeClassification(input.classification, {
+      gender: input.organization?.gender,
+      ageGroup: input.organization?.ageGroup,
+    });
+    const organizationGender = genderLabel(classification.gender.value, classification.ageGroup.value) ||
+      clean(input.organization?.gender, 40) || 'Unisex';
+    const base = {
       title: clean(input.title, 300),
       descriptionHtml: safeHtml(input.descriptionHtml),
+      websiteContent,
       sections: Object.fromEntries(['shortDescription', 'fullDescription', 'features', 'specifications',
         'perfectFor', 'whyYouWillLoveIt', 'faq', 'buyingGuide'].map((key) => [key, safeHtml(input.sections?.[key])])),
+      classification,
       organization: {
         brand: clean(input.organization?.brand, 160) || 'MOTOGRIP GEAR',
         vendor: clean(input.organization?.vendor, 160) || clean(input.organization?.brand, 160) || 'MOTOGRIP GEAR',
         productType: clean(input.organization?.productType, 100) || 'Other',
         category: clean(input.organization?.category, 100),
-        gender: clean(input.organization?.gender, 40) || 'Unisex',
+        gender: organizationGender,
+        ageGroup: classification.ageGroup.value,
         collections: [...new Set((input.organization?.collections || []).map((item) => clean(item, 80)).filter(Boolean))],
         tags: [...new Set((input.organization?.tags || []).map((item) => clean(item, 80)).filter(Boolean))],
         themeTemplate: clean(input.organization?.themeTemplate, 80) || 'default',
@@ -240,6 +273,15 @@ function createProductEditorV2Service(options = {}) {
       options,
       variants,
     };
+    base.sections.fullDescription = websiteContent.description.join('\n\n');
+    base.sections.features = websiteContent.features.join('\n');
+    base.sections.specifications = websiteContent.specifications
+      .map((item) => `${item.label}: ${item.value}`).join('\n');
+    base.sections.perfectFor = websiteContent.perfectFor;
+    base.sections.whyYouWillLoveIt = websiteContent.whyYouWillLoveIt;
+    base.merchantAttributes = normalizeMerchantAttributes(input.merchantAttributes, base);
+    base.merchantReadiness = merchantReadiness(base.merchantAttributes, classification);
+    return base;
   }
 
   async function create(session, input) {
@@ -325,7 +367,8 @@ function createProductEditorV2Service(options = {}) {
       organization: {
         brand: source.brand || 'MOTOGRIP GEAR', vendor: source.maker || source.brand,
         productType: source.productType || 'Other', category: source.category || '',
-        gender: source.gender || 'Unisex', collections: source.collections || [],
+        gender: source.gender || 'Unisex', ageGroup: source.ageGroup || '',
+        collections: source.collections || [],
         tags: source.tags || (source.tag ? [source.tag] : []),
         themeTemplate: source.themeTemplate || 'default', status: source.status || 'draft',
       },
@@ -344,6 +387,18 @@ function createProductEditorV2Service(options = {}) {
         manufacturer: source.maker,
       },
       seo: { title: source.seoTitle, metaDescription: source.metaDescription || source.seoDescription, handle: source.slug },
+      classification: source.classification || {
+        gender: { value: source.gender, confidence: 'low', status: 'needs_confirmation', source: 'website_import' },
+        ageGroup: { value: source.ageGroup, confidence: 'low', status: 'needs_confirmation', source: 'website_import' },
+      },
+      merchantAttributes: source.merchantAttributes || {
+        gender: source.gender, age_group: source.ageGroup, color: source.color,
+        material: source.material || source.leatherType, pattern: source.pattern,
+        condition: source.condition, availability: source.availability,
+        brand: source.brand, size_system: source.sizeSystem, size_type: source.sizeType,
+        product_type: source.productType, google_product_category: source.googleProductCategory,
+        mpn: source.mpn, gtin: source.gtin, identifier_exists: source.identifierExists,
+      },
       options: sourceOptions,
       variants: Array.isArray(source.variants) ? source.variants :
         Object.entries(source.stock || {}).map(([size, quantity]) => ({
@@ -708,8 +763,9 @@ function createProductEditorV2Service(options = {}) {
       expectedWebsiteRevision: input.expectedWebsiteRevision || website.revision,
       fields: {
         title: product.title,
-        description: product.sections.fullDescription || product.descriptionHtml,
+        description: product.websiteContent.description.join('\n\n'),
         descriptionHtml: product.descriptionHtml,
+        websiteContent: product.websiteContent,
         shortDescription: product.sections.shortDescription,
         features: product.sections.features,
         specifications: product.sections.specifications,
@@ -725,6 +781,10 @@ function createProductEditorV2Service(options = {}) {
         productType: product.organization.productType,
         category: product.organization.category,
         gender: product.organization.gender,
+        ageGroup: product.classification.ageGroup.value,
+        classification: product.classification,
+        merchantAttributes: product.merchantAttributes,
+        merchantReadiness: product.merchantReadiness,
         collections: product.organization.collections,
         tags: product.organization.tags,
         status: product.organization.status === 'draft' ? 'active' : product.organization.status,

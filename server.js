@@ -1087,12 +1087,12 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
       internalProductCode: product.internalProductCode || '',
       factoryCode: product.factoryCode || '',
       sections: {
-        features: product.features || [],
-        specifications: product.specifications || [],
-        perfectFor: product.perfectFor || '',
-        whyYouWillLoveIt: product.whyYouWillLoveIt || '',
-        faq: product.faq || [],
-        buyingGuide: product.buyingGuide || '',
+        description: product.websiteContent?.description ||
+          (product.description ? [product.description] : []),
+        features: product.websiteContent?.features || product.features || [],
+        specifications: product.websiteContent?.specifications || product.specifications || [],
+        perfectFor: product.websiteContent?.perfectFor || product.perfectFor || '',
+        whyYouWillLoveIt: product.websiteContent?.whyYouWillLoveIt || product.whyYouWillLoveIt || '',
       },
       tags: product.tags || [],
       factualProjection: product.factualProjection === true,
@@ -1264,6 +1264,8 @@ function serveMetaCatalogFeed(req, res) {
 
   const rows = store.products
     .filter((product) => product.status === 'active')
+    .filter((product) => !product.merchantReadiness ||
+      product.merchantReadiness.status === 'Google Merchant Ready')
     .map((product) => {
       const sku = product.sku || product.id;
       const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
@@ -1308,6 +1310,8 @@ function serveMerchantFeed(req, res) {
 
   store.products
     .filter((product) => product.status === 'active')
+    .filter((product) => !product.merchantReadiness ||
+      product.merchantReadiness.status === 'Google Merchant Ready')
     .forEach((product) => {
       const variants = Object.keys(product.stock || {}).length
         ? Object.entries(product.stock)
@@ -1330,18 +1334,21 @@ function serveMerchantFeed(req, res) {
           ['price', `${Number(product.price || 0).toFixed(2)} ${currency}`],
           ['condition', merchantCondition(product.condition)],
           ['brand', product.brand || store.settings.storeName || 'MOTOGRIP GEAR'],
-          ['mpn', product.mpn || sku],
-          ['identifier_exists', 'true'],
-          ['google_product_category', product.googleProductCategory],
+          ['mpn', product.merchantAttributes?.mpn || product.mpn],
+          ['gtin', product.merchantAttributes?.gtin || product.gtin],
+          ['identifier_exists', product.merchantAttributes?.identifier_exists ??
+            Boolean(product.mpn || product.gtin)],
+          ['google_product_category', product.merchantAttributes?.google_product_category ||
+            product.googleProductCategory],
           ['product_type', product.productType || product.category],
-          ['age_group', String(product.ageGroup || 'adult').toLowerCase()],
-          ['gender', merchantGender(product.gender)],
+          ['age_group', product.merchantAttributes?.age_group || String(product.ageGroup || '').toLowerCase()],
+          ['gender', product.merchantAttributes?.gender || merchantGender(product.gender)],
           ['size', size],
-          ['size_system', String(product.sizeSystem || 'US').toUpperCase()],
-          ['size_type', String(product.sizeType || 'regular').toLowerCase()],
+          ['size_system', product.merchantAttributes?.size_system || product.sizeSystem],
+          ['size_type', product.merchantAttributes?.size_type || product.sizeType],
           ['item_group_id', groupId],
-          ['color', product.color],
-          ['material', product.material || product.leatherType],
+          ['color', product.merchantAttributes?.color || product.color],
+          ['material', product.merchantAttributes?.material || product.material || product.leatherType],
           ['shipping_weight', product.shippingWeight],
           ['custom_label_0', product.category],
           ['custom_label_1', product.madeToMeasureEnabled ? 'Made to measure available' : 'Standard sizing'],

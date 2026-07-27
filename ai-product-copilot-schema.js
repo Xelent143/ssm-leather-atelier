@@ -12,12 +12,19 @@ const IMAGE_ROLES = new Set([
 const RESPONSE_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['visualAnalysis', 'productFacts', 'missingInformation', 'categorySuggestions',
+  required: ['visualAnalysis', 'productFacts', 'audienceClassification', 'merchantAttributes',
+    'suggestedTitle', 'missingInformation', 'categorySuggestions',
     'websiteContent', 'seo', 'aeo', 'geo', 'ebayDraft', 'etsyDraft', 'imageCoverage',
     'risks', 'unsupportedClaims'],
   properties: {
     visualAnalysis: { type: 'array', items: { $ref: '#/$defs/fact' } },
     productFacts: { type: 'array', items: { $ref: '#/$defs/fact' } },
+    audienceClassification: {
+      type: 'object', additionalProperties: false, required: ['gender', 'ageGroup'],
+      properties: { gender: { $ref: '#/$defs/fact' }, ageGroup: { $ref: '#/$defs/fact' } },
+    },
+    merchantAttributes: { type: 'array', items: { $ref: '#/$defs/fact' } },
+    suggestedTitle: { type: 'string' },
     missingInformation: { type: 'array', items: { $ref: '#/$defs/question' } },
     categorySuggestions: { type: 'array', items: { type: 'string' } },
     websiteContent: { $ref: '#/$defs/content' },
@@ -62,16 +69,17 @@ const RESPONSE_SCHEMA = {
     },
     content: {
       type: 'object', additionalProperties: false,
-      required: ['title', 'shortDescription', 'fullDescription', 'features',
-        'specifications', 'perfectFor', 'whyYouWillLoveIt', 'faq', 'buyingGuide', 'tags'],
+      required: ['description', 'features', 'specifications', 'perfectFor', 'whyYouWillLoveIt'],
       properties: {
-        title: { type: 'string' }, shortDescription: { type: 'string' },
-        fullDescription: { type: 'string' },
+        description: { type: 'array', minItems: 1, maxItems: 3, items: { type: 'string' } },
         features: { type: 'array', items: { type: 'string' } },
-        specifications: { type: 'array', items: { type: 'string' } },
+        specifications: {
+          type: 'array', items: {
+            type: 'object', additionalProperties: false, required: ['label', 'value'],
+            properties: { label: { type: 'string' }, value: { type: 'string' } },
+          },
+        },
         perfectFor: { type: 'string' }, whyYouWillLoveIt: { type: 'string' },
-        faq: { type: 'array', items: { $ref: '#/$defs/qa' } },
-        buyingGuide: { type: 'string' }, tags: { type: 'array', items: { type: 'string' } },
       },
     },
     seo: {
@@ -129,7 +137,17 @@ function validateResponse(value, images) {
   const allowed = new Set(required);
   if (Object.keys(value).some((key) => !allowed.has(key))) throw Object.assign(new Error('AI response contains unsupported fields.'), { code: 'AI_SCHEMA_INVALID' });
   const imageIds = new Set(images.map((image) => image.id));
-  const facts = [...(value.visualAnalysis || []), ...(value.productFacts || [])].map((fact) => validateFact(fact, imageIds));
+  const visualFacts = (value.visualAnalysis || []).map((fact) => validateFact(fact, imageIds));
+  const productFacts = (value.productFacts || []).map((fact) => validateFact(fact, imageIds));
+  const gender = validateFact(value.audienceClassification?.gender, imageIds);
+  const ageGroup = validateFact(value.audienceClassification?.ageGroup, imageIds);
+  if (!['male', 'female', 'unisex', ''].includes(gender.value.toLowerCase())) {
+    throw Object.assign(new Error('AI gender classification is invalid.'), { code: 'AI_SCHEMA_INVALID' });
+  }
+  if (!['newborn', 'infant', 'toddler', 'kids', 'adult', ''].includes(ageGroup.value.toLowerCase())) {
+    throw Object.assign(new Error('AI age-group classification is invalid.'), { code: 'AI_SCHEMA_INVALID' });
+  }
+  const merchantAttributes = (value.merchantAttributes || []).map((fact) => validateFact(fact, imageIds));
   const content = value.websiteContent || {};
   const seo = value.seo || {};
   const etsyTags = Array.isArray(value.etsyDraft?.tags) ? value.etsyDraft.tags.map((tag) => cleanString(tag, 40)) : [];
@@ -140,8 +158,11 @@ function validateResponse(value, images) {
   const etsyLength = cleanString(value.etsyDraft?.title || '', 200).length;
   if (etsyLength < 100 || etsyLength > 140) throw Object.assign(new Error('Etsy title must contain 100–140 characters.'), { code: 'AI_SCHEMA_INVALID' });
   return {
-    visualAnalysis: facts.slice(0, (value.visualAnalysis || []).length),
-    productFacts: facts.slice((value.visualAnalysis || []).length),
+    visualAnalysis: visualFacts,
+    productFacts,
+    audienceClassification: { gender, ageGroup },
+    merchantAttributes,
+    suggestedTitle: cleanString(value.suggestedTitle || '', 300),
     missingInformation: (value.missingInformation || []).slice(0, 50).map((item) => ({
       field: cleanString(item.field, 100), question: cleanString(item.question, 500),
       options: (item.options || []).slice(0, 20).map((option) => cleanString(option, 100)),
@@ -149,18 +170,13 @@ function validateResponse(value, images) {
     })),
     categorySuggestions: (value.categorySuggestions || []).slice(0, 20).map((item) => cleanString(item, 120)),
     websiteContent: {
-      title: cleanString(content.title || '', 300),
-      shortDescription: cleanString(content.shortDescription || ''),
-      fullDescription: cleanString(content.fullDescription || ''),
-      features: (content.features || []).slice(0, 30).map((item) => cleanString(item, 500)),
-      specifications: (content.specifications || []).slice(0, 50).map((item) => cleanString(item, 500)),
+      description: (content.description || []).slice(0, 3).map((item) => cleanString(item, 3000)),
+      features: (content.features || []).slice(0, 8).map((item) => cleanString(item, 500)),
+      specifications: (content.specifications || []).slice(0, 50).map((item) => ({
+        label: cleanString(item.label, 100), value: cleanString(item.value, 500),
+      })).filter((item) => item.label && item.value),
       perfectFor: cleanString(content.perfectFor || ''),
       whyYouWillLoveIt: cleanString(content.whyYouWillLoveIt || ''),
-      faq: (content.faq || []).slice(0, 20).map((item) => ({
-        question: cleanString(item.question, 500), answer: cleanString(item.answer, 2000),
-      })),
-      buyingGuide: cleanString(content.buyingGuide || ''),
-      tags: (content.tags || []).slice(0, 50).map((item) => cleanString(item, 80)),
     },
     seo: {
       title: cleanString(seo.title || '', 100), metaDescription: cleanString(seo.metaDescription || '', 300),

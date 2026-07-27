@@ -82,22 +82,27 @@ function FactualPDP({ product: p, go, addToCart }) {
     customSizingAvailable: 'Custom sizing available',
     personalizationAvailable: 'Personalization available',
   };
-  const productDetails = Object.entries(metafieldLabels)
+  const factualMetafieldSpecifications = Object.entries(metafieldLabels)
     .filter(([key]) => factual(p.metafields?.[key]))
-    .map(([key, label]) => [label, displayValue(p.metafields[key])]);
-  if (factual(p.shippingWeight)) productDetails.push(['Shipping weight', p.shippingWeight]);
-  if (factual(p.shipping?.countryOfOrigin)) productDetails.push(['Country of origin', p.shipping.countryOfOrigin]);
+    .map(([key, label]) => ({ label, value: displayValue(p.metafields[key]) }));
+  if (factual(p.shippingWeight)) factualMetafieldSpecifications.push({ label: 'Shipping weight', value: p.shippingWeight });
+  if (factual(p.shipping?.countryOfOrigin)) factualMetafieldSpecifications.push({ label: 'Country of origin', value: p.shipping.countryOfOrigin });
+  const publishedSpecifications = Array.isArray(p.sections?.specifications) && p.sections.specifications.length
+    ? p.sections.specifications : factualMetafieldSpecifications;
   const sectionValue = value => {
     if (Array.isArray(value)) {
       if (!value.length) return null;
-      if (Array.isArray(value[0])) return (
+      if (Array.isArray(value[0]) || (value[0] && typeof value[0] === 'object' && 'label' in value[0])) return (
         <div style={{ borderTop: '1px solid var(--line-2)' }}>
-          {value.map(([label, content]) => (
+          {value.map(item => {
+            const [label, content] = Array.isArray(item) ? item : [item.label, item.value];
+            return (
             <div key={`${label}-${content}`} style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 18, padding: '12px 0', borderBottom: '1px solid var(--line)' }}>
               <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>{String(label).toUpperCase()}</div>
               <div>{displayValue(content)}</div>
             </div>
-          ))}
+            );
+          })}
         </div>
       );
       if (typeof value[0] === 'object') return (
@@ -118,14 +123,11 @@ function FactualPDP({ product: p, go, addToCart }) {
       : <div>{displayValue(value)}</div>;
   };
   const sections = [
-    ['description', 'Description', p.publicDescription],
+    ['description', 'Description', p.sections?.description],
     ['features', 'Features', p.sections?.features],
-    ['specifications', 'Specifications', p.sections?.specifications],
-    ['details', 'Product details', productDetails],
+    ['specifications', 'Specifications', publishedSpecifications],
     ['perfect-for', 'Perfect for', p.sections?.perfectFor],
     ['why', 'Why you’ll love it', p.sections?.whyYouWillLoveIt],
-    ['faq', 'FAQ', p.sections?.faq],
-    ['guide', 'Buying guide', p.sections?.buyingGuide],
   ].filter(([, , content]) => Array.isArray(content) ? content.length : factual(content));
 
   return (
