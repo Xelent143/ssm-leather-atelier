@@ -159,7 +159,7 @@ function createProductIdentityService(options = {}) {
           attributes: Object.fromEntries(Object.entries(attributes)
             .filter(([, value]) => clean(value))),
           signature: parts.join('-'),
-          sku: parts.length ? `${productSku}-${parts.join('-')}` : productSku,
+          sku: parts.length ? `${productSku}-${parts.join('-')}` : `${productSku}-DEFAULT`,
           barcodeId: null,
           qrId: null,
         };
@@ -212,7 +212,7 @@ function createProductIdentityService(options = {}) {
       record.productSku = nextSku;
       record.variantSkus = record.variantSkus.map((variant) => ({
         ...variant,
-        sku: variant.signature ? `${nextSku}-${variant.signature}` : nextSku,
+        sku: variant.signature ? `${nextSku}-${variant.signature}` : `${nextSku}-DEFAULT`,
       }));
       assertUnique(state, record, record.id);
       audit(state, 'product_sku_overridden', user, record, {

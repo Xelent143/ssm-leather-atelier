@@ -26,7 +26,7 @@ test('private draft preview is authenticated and excluded from indexing', () => 
   assert.match(server, /Location: '\/admin'/);
   assert.match(editor, /product\.revision/);
   assert.ok(editor.includes('/admin/product-preview/'));
-  assert.match(admin, /product-editor-v2-ui\.js\?v=5/);
+  assert.match(admin, /product-editor-v2-ui\.js\?v=6/);
   assert.match(server, /'product-editor-v2-ui\.js'/);
   for (const source of [storefront, bundledStorefront]) {
     assert.match(source, /SSM_PRIVATE_PREVIEW/);

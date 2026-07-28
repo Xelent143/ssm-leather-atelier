@@ -98,6 +98,20 @@ test('preserves Dean existing SKU and creates MOTOGRIP OS identities', async () 
   assert.match(result.identity.factoryCode, /^F-2026-/);
 });
 
+test('allocates a distinct SKU for the Product Editor default variant', async () => {
+  const { service, session } = harness();
+  const result = await service.generate(session, {
+    productUuid: 'abababab-abab-4bab-8bab-abababababab',
+    title: 'Quick Listing Leather Vest',
+    brand: 'MOTOGRIP GEAR',
+    productType: 'Leather Vest',
+    variants: [{}],
+  });
+  assert.equal(result.identity.productSku, 'MG-VST-0001');
+  assert.equal(result.identity.variantSkus[0].sku, 'MG-VST-0001-DEFAULT');
+  assert.notEqual(result.identity.variantSkus[0].sku, result.identity.productSku);
+});
+
 test('Owner can override before approval, approve, lock and audited unlock', async () => {
   const { service, session } = harness();
   const productUuid = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
