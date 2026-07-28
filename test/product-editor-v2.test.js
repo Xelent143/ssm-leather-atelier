@@ -241,7 +241,7 @@ test('Quick Listing Mode requires only name, category, positive price, primary i
   assert.deepEqual(current.service.criticalFields(result.product), []);
   assert.equal(result.product.seo.handle, 'men-s-black-leather-cafe-racer-jacket');
   const beforeRevision = current.store.read().storeRevision;
-  const preview = current.service.preview(current.ownerSession, result.product.id);
+  const preview = current.service.preview(current.ownerSession, result.product.id, result.product.revision);
   assert.equal(preview.previewOnly, true);
   assert.deepEqual(preview.missingQuickListingFields, []);
   assert.equal(preview.product.price, 229);
@@ -251,6 +251,25 @@ test('Quick Listing Mode requires only name, category, positive price, primary i
     'description', 'features', 'specifications', 'perfectFor', 'whyYouWillLoveIt',
   ]);
   assert.equal(current.store.read().storeRevision, beforeRevision);
+});
+
+test('private preview is Owner-only and bound to the current draft revision', async (t) => {
+  const current = fixture();
+  t.after(() => fs.rmSync(current.dataDir, { recursive: true, force: true }));
+  const created = await current.service.create(current.ownerSession, current.product());
+  const preview = current.service.preview(
+    current.ownerSession, created.product.id, created.product.revision,
+  );
+  assert.equal(preview.previewOnly, true);
+  assert.equal(preview.product.title, created.product.title);
+  assert.throws(
+    () => current.service.preview(current.editorSession, created.product.id, created.product.revision),
+    (error) => error.code === 'FORBIDDEN',
+  );
+  assert.throws(
+    () => current.service.preview(current.ownerSession, created.product.id, created.product.revision - 1),
+    (error) => error.code === 'REVISION_CONFLICT',
+  );
 });
 
 test('Media Library safely attaches an existing asset by reference without duplicating files', async () => {

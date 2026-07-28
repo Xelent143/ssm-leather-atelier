@@ -948,7 +948,10 @@
     document.getElementById('pe-revise')?.addEventListener('click', () =>
       action(`/api/admin/product-editor-v2/products/${product.id}/revise`, 'POST', { expectedRevision: workspace.storeRevision }));
     document.getElementById('pe-preview')?.addEventListener('click', () => {
-      if (product.id) window.open(`/admin/product-preview/${encodeURIComponent(product.id)}`, '_blank', 'noopener');
+      if (product.id) {
+        const previewUrl = `/admin/product-preview/${encodeURIComponent(product.id)}?revision=${encodeURIComponent(product.revision)}`;
+        window.open(previewUrl, '_blank', 'noopener');
+      }
       else context.toast('Save the product draft before previewing');
     });
     document.getElementById('pe-library')?.addEventListener('click', async () => {

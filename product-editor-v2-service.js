@@ -776,10 +776,15 @@ function createProductEditorV2Service(options = {}) {
     };
   }
 
-  function preview(session, productId) {
-    actor(session);
+  function preview(session, productId, expectedRevision) {
+    actor(session, ['owner']);
     const product = store.read().products.find((item) => item.id === productId);
     if (!product) throw Object.assign(new Error('Product draft was not found.'), { code: 'NOT_FOUND' });
+    if (!Number.isInteger(expectedRevision) || expectedRevision !== product.revision) {
+      throw Object.assign(new Error('A newer draft revision is available. Reopen Preview Website.'), {
+        code: 'REVISION_CONFLICT',
+      });
+    }
     const identityRecord = productIdentityService.view(product.productUuid).identity;
     return {
       product: {

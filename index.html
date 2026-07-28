@@ -7506,6 +7506,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
 const SSM_PRODUCT_OVERRIDE = window.__SSM_PRODUCT_OVERRIDE__ || null;
+const SSM_PRIVATE_PREVIEW = window.__SSM_PRIVATE_PREVIEW__ === true;
 const productFromSlug = (slug) => {
   const product = SSM_PRODUCTS.find(p => p.slug === slug) || null;
   if (SSM_PRODUCT_OVERRIDE?.slug !== slug) return product;
@@ -7580,6 +7581,11 @@ function applySEO(view, params) {
     document.head.appendChild(m);
   }
   m.setAttribute('content', desc || 'Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options.');
+  if (SSM_PRIVATE_PREVIEW) {
+    document.querySelector('link[rel="canonical"]')?.remove();
+    document.querySelector('meta[property="og:url"]')?.remove();
+    return;
+  }
   const canonicalUrl = `${window.location.origin}${cleanPathForView(view, params)}`;
   let canonical = document.querySelector('link[rel="canonical"]');
   if (!canonical) {
@@ -7690,6 +7696,7 @@ function App() {
 
   // URL sync uses one clean, crawlable path for every public page.
   React.useEffect(() => {
+    if (SSM_PRIVATE_PREVIEW) return;
     const path = cleanPathForView(view, params);
     if (window.location.pathname !== path || window.location.hash) window.history.replaceState(null, '', path);
   }, [view, params]);

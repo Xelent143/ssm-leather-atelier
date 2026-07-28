@@ -1222,10 +1222,10 @@ function serveProductPage(req, res, slug) {
   });
 }
 
-function serveProductEditorPreview(req, res, session, productId) {
+function serveProductEditorPreview(req, res, session, productId, expectedRevision) {
   let projection;
   try {
-    projection = productEditorV2Service.preview(session, productId);
+    projection = productEditorV2Service.preview(session, productId, expectedRevision);
   } catch (error) {
     const safe = safePlmError(error);
     send(res, safe.status, safe.message);
@@ -1239,7 +1239,10 @@ function serveProductEditorPreview(req, res, session, productId) {
     const previewProduct = projection.product;
     let body = injectProductHead(html, previewProduct, readPublicStore(), req)
       .replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex,nofollow,noarchive" />')
-      .replace('<body>', `<body><div style="position:relative;z-index:9999;padding:10px 20px;background:#2d3b28;color:#fff;text-align:center;font:700 13px/1.4 Arial">Private draft preview · Not published · ${escapeHtml(projection.missingQuickListingFields.length ? `Missing: ${projection.missingQuickListingFields.join(', ')}` : 'Quick listing fields complete')}</div>`);
+      .replace(/<meta property="og:url" content=".*?" \/>/gs, '')
+      .replace(/<script type="application\/ld\+json">.*?<\/script>/gs, '')
+      .replace('</head>', '<script>window.__SSM_PRIVATE_PREVIEW__ = true;</script>\n</head>')
+      .replace('<body>', `<body><div role="status" style="position:relative;z-index:9999;padding:10px 20px;background:#2d3b28;color:#fff;text-align:center;font:700 13px/1.4 Arial">NOT PUBLISHED · Preview Mode · Owner Only · ${escapeHtml(projection.missingQuickListingFields.length ? `Missing: ${projection.missingQuickListingFields.join(', ')}` : 'Quick listing fields complete')}</div>`);
     body = body.replace(/<link rel="canonical" href=".*?" \/>/s, '');
     send(res, 200, body, 'text/html; charset=utf-8', {
       'Cache-Control': 'no-store, max-age=0',
@@ -3269,7 +3272,7 @@ function serveFile(req, res, filePath) {
       }
       const ext = path.extname(finalPath).toLowerCase();
       const relativePath = path.relative(root, finalPath);
-      const isAdminAsset = relativePath === 'admin.js' || relativePath === 'admin.css';
+      const isAdminAsset = ['admin.js', 'admin.css', 'product-editor-v2-ui.js'].includes(relativePath);
       res.writeHead(200, {
         'Content-Type': types[ext] || 'application/octet-stream',
         'Cache-Control': ext === '.html' || isAdminAsset ? 'no-cache' : 'public, max-age=31536000, immutable',
@@ -3334,10 +3337,16 @@ const server = http.createServer(async (req, res) => {
       }
       const session = adminSecurity.getSession(req);
       if (!session) {
-        send(res, 401, 'Authentication required');
+        res.writeHead(302, {
+          Location: '/admin',
+          'Cache-Control': 'no-store, max-age=0',
+          'X-Robots-Tag': 'noindex, nofollow, noarchive',
+        });
+        res.end();
         return;
       }
-      serveProductEditorPreview(req, res, session, productPreviewMatch[1]);
+      const revision = Number.parseInt(new URL(req.url || '/', 'http://localhost').searchParams.get('revision'), 10);
+      serveProductEditorPreview(req, res, session, productPreviewMatch[1], revision);
       return;
     }
 

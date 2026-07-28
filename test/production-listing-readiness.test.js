@@ -13,11 +13,26 @@ test('Product Editor exposes Quick Listing readiness without bypassing governanc
 
 test('private draft preview is authenticated and excluded from indexing', () => {
   const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  const storefront = fs.readFileSync(path.join(__dirname, '..', 'ssm-app.jsx'), 'utf8');
+  const bundledStorefront = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const editor = fs.readFileSync(path.join(__dirname, '..', 'product-editor-v2-ui.js'), 'utf8');
+  const admin = fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8');
   assert.match(server, /admin\\\/product-preview/);
-  assert.match(server, /Private draft preview/);
+  assert.match(server, /NOT PUBLISHED · Preview Mode · Owner Only/);
   assert.match(server, /noindex,nofollow,noarchive/);
+  assert.match(server, /window\.__SSM_PRIVATE_PREVIEW__ = true/);
   assert.match(server, /adminSecurity\.getSession/);
   assert.match(server, /productEditorV2Service\.preview/);
+  assert.match(server, /Location: '\/admin'/);
+  assert.match(editor, /product\.revision/);
+  assert.ok(editor.includes('/admin/product-preview/'));
+  assert.match(admin, /product-editor-v2-ui\.js\?v=5/);
+  assert.match(server, /'product-editor-v2-ui\.js'/);
+  for (const source of [storefront, bundledStorefront]) {
+    assert.match(source, /SSM_PRIVATE_PREVIEW/);
+    assert.match(source, /document\.querySelector\('link\[rel="canonical"\]'\)\?\.remove\(\)/);
+    assert.match(source, /if \(SSM_PRIVATE_PREVIEW\) return;/);
+  }
 });
 
 test('Owner guide follows the implemented workflow and permanent website contract', () => {
