@@ -365,7 +365,12 @@
   /* Product page gallery: broad landscape image stage with vertical thumbnails. */
   .pdp-commerce-layout { align-items: start; }
   .pdp-thumb-rail { overflow-y: auto; max-height: min(860px, calc(100vh - 190px)); scrollbar-width: thin; }
-  .pdp-main-image { background-position: center top; }
+  .pdp-main-image {
+    background-position: center center;
+    background-size: contain !important;
+    background-repeat: no-repeat;
+    background-color: var(--bg-2);
+  }
   .pdp-details-panel { min-width: 0; }
 
   /* scroll snap helpers (for editorial sections) */
