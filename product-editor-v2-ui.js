@@ -43,6 +43,56 @@
   const code = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
   const mediaUrl = (value) => window.MotogripMediaUrl.canonicalMediaUrl(value, { fallback: null });
 
+  function visionPanel(product, workspace) {
+    if (!product.id) return `<section class="card pe-card pe-vision">
+      <div class="card-head"><div><span class="eyebrow">AI Vision Engine v1</span><h2>Product image intelligence</h2><p>Save the product before creating a governed Vision analysis.</p></div><span class="pe-ai-state">Draft required</span></div>
+    </section>`;
+    const vision = workspace.aiVision;
+    if (!vision) return '';
+    const analysis = vision.latest;
+    const selected = analysis?.selectedMediaIds || [];
+    const roleFor = (item) => analysis?.imageRoles?.[item.id] || item.currentRole || 'Unknown';
+    const badge = (fact) => `<span class="pe-v-confidence ${fact.confidenceLabel.toLowerCase()}">${fact.confidenceScore}% · ${esc(fact.confidenceLabel)}</span>`;
+    return `<section class="card pe-card pe-vision" id="pe-vision">
+      <div class="card-head"><div><span class="eyebrow">AI Vision Engine v1 · Intelligence foundation</span><h2>Images → evidence-backed product facts</h2><p>Suggestions remain separate from trusted Product DNA until explicitly approved and applied.</p></div><div class="pe-v-state"><span>${esc(analysis?.status?.replaceAll('_', ' ') || 'No analysis')}</span><strong>${analysis ? `Version ${analysis.version}` : 'Start'}</strong></div></div>
+      <div class="pe-v-provider-row">${vision.providers.map((provider) => `<article class="${provider.available ? 'available' : 'unavailable'}"><strong>${esc(provider.displayName)}</strong><span>${esc(provider.status || (provider.available ? 'Available' : 'Unavailable'))}</span><small>${provider.developmentOnly ? 'Development/test only' : provider.executionEnabled ? 'Local, non-billable analysis' : 'Execution disabled'}</small></article>`).join('')}</div>
+      <div class="pe-v-create">
+        <label class="pe-field"><span>Analysis provider</span><select id="pe-v-provider">${vision.providers.map((provider) => `<option value="${provider.id}" ${analysis?.providerId === provider.id ? 'selected' : ''} ${!provider.available ? 'disabled' : ''}>${esc(provider.displayName)} — ${esc(provider.status || (provider.available ? 'Available' : 'Unavailable'))}</option>`).join('')}</select></label>
+        <label class="pe-field"><span>Analysis note</span><input id="pe-v-note" value="${esc(analysis?.note || '')}" placeholder="Analyze factual visible construction only."></label>
+      </div>
+      <div class="card-head compact"><div><h3>Selected images and roles</h3><p>Multiple images per role are allowed. Unchecked images are excluded.</p></div><span>${selected.length} selected</span></div>
+      <div class="pe-v-images">${vision.media.length ? vision.media.map((item) => `<article>
+        <label><input type="checkbox" data-v-image="${item.id}" ${selected.includes(item.id) ? 'checked' : ''}> Include</label>
+        <img src="${esc(mediaUrl(item.path) || '')}" alt="${esc(item.title)}">
+        <strong>${esc(item.title)}</strong>
+        <select data-v-role="${item.id}">${vision.roles.map((role) => `<option ${roleFor(item) === role ? 'selected' : ''}>${esc(role)}</option>`).join('')}</select>
+        ${analysis?.suggestedRoles?.[item.id] ? `<small>AI suggestion: ${esc(analysis.suggestedRoles[item.id])}</small>` : ''}
+      </article>`).join('') : '<div class="pe-empty">Upload images in the Media section first.</div>'}</div>
+      <div class="button-row"><button class="btn" id="pe-v-save-draft" type="button" ${!vision.permissions.prepare ? 'disabled' : ''}>Create Analysis Draft</button><button class="btn primary" id="pe-v-run" type="button" ${!analysis || !vision.permissions.run ? 'disabled' : ''}>Run Vision Analysis</button><button class="btn" id="pe-v-history" type="button">Analysis History (${vision.history.length})</button></div>
+      ${analysis?.facts?.length ? `<div class="pe-v-results">
+        <div>
+          <div class="card-head compact"><div><h3>Product classification and visible facts</h3><p>Approve, correct, or reject each observation independently.</p></div></div>
+          <div class="pe-v-facts">${analysis.facts.map((fact) => `<article class="${fact.status}">
+            <header><div><strong>${esc(fact.key.replace(/([A-Z])/g, ' $1'))}</strong><span>${esc(fact.status)}</span></div>${badge(fact)}</header>
+            <p>${esc(fact.userConfirmedValue ?? fact.value)}</p>
+            <small>${esc(fact.evidenceNotes || 'Evidence-linked observation')} · ${fact.evidenceMediaIds.length} image reference(s)</small>
+            ${fact.needsConfirmation ? '<b>Needs Confirmation</b>' : ''}${fact.conflict ? '<b class="conflict">Conflict</b>' : ''}
+            <div class="button-row"><button class="btn" type="button" data-v-fact-approve="${fact.factId}" ${!vision.permissions.approve ? 'disabled' : ''}>Approve</button><button class="btn" type="button" data-v-fact-correct="${fact.factId}" ${!vision.permissions.approve ? 'disabled' : ''}>Edit & Approve</button><button class="btn danger" type="button" data-v-fact-reject="${fact.factId}" ${!vision.permissions.approve ? 'disabled' : ''}>Reject</button></div>
+          </article>`).join('')}</div>
+        </div>
+        <aside>
+          <h3>Merchant readiness</h3><div class="pe-v-score"><strong>${vision.merchantReadiness.score}%</strong><span>${esc(vision.merchantReadiness.status)}</span></div>
+          ${vision.merchantReadiness.blockers.length ? `<ul>${vision.merchantReadiness.blockers.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>` : '<p>Trusted attributes are ready for review.</p>'}
+          <h3>Missing-image plan</h3><div class="pe-v-coverage"><strong>${analysis.coverage?.percentage || 0}%</strong><span>${esc((analysis.coverage?.missing || []).join(', ') || 'Complete')}</span></div>
+          <ul>${(analysis.recommendations || []).map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
+          <div class="button-row"><button class="btn" id="pe-v-share-coverage" type="button" ${!vision.permissions.prepare ? 'disabled' : ''}>Update Media Coverage Plan</button><button class="btn primary" id="pe-v-apply-dna" type="button" ${!vision.permissions.apply ? 'disabled' : ''}>Apply Approved Facts to Product DNA</button></div>
+        </aside>
+      </div>` : ''}
+      ${analysis?.conflicts?.length ? `<div class="pe-v-conflicts"><h3>Conflict-resolution queue</h3>${analysis.conflicts.map((item) => `<article class="${item.status}"><strong>${esc(item.key)}</strong><p>Trusted: ${esc(item.trustedValue)} · Observed: ${esc(item.observedValue)}</p><small>${esc(item.status)}</small>${item.status === 'unresolved' ? `<div class="button-row"><button class="btn" type="button" data-v-resolve="${item.conflictId}" data-choice="keep_trusted">Keep Product DNA</button><button class="btn" type="button" data-v-resolve="${item.conflictId}" data-choice="accept_observed">Accept AI Suggestion</button><button class="btn" type="button" data-v-resolve="${item.conflictId}" data-choice="variation">Confirm Variation</button></div>` : ''}</article>`).join('')}</div>` : ''}
+      ${analysis?.quality?.length ? `<details class="pe-v-quality"><summary>Image-quality assessment (${analysis.quality.length})</summary><div>${analysis.quality.map((item) => `<article><strong>${esc(vision.media.find((media) => media.id === item.mediaId)?.title || item.mediaId)}</strong><span>${esc(item.status)}</span><p>${esc(item.recommendations.join(' ') || 'No corrective recommendation.')}</p></article>`).join('')}</div></details>` : ''}
+    </section>`;
+  }
+
   function mediaStudioPanel(product, workspace) {
     if (!product.id) return `<section class="card pe-card pe-media-studio">
       <div class="card-head"><div><span class="eyebrow">AI Media Studio v2 · V1-compatible</span><h2>Product media workflow</h2><p>Save the product draft before preparing its reference-image and asset plan.</p></div><span class="pe-ai-state">Draft required</span></div>
@@ -113,6 +163,7 @@
       </div>
       <div class="pe-ms-section">
         <div class="card-head compact"><div><h3>Image coverage</h3><p>See what exists and what remains for the selected production workflow.</p></div></div>
+        ${studio.visionCoverage ? `<div class="pe-ms-vision-coverage"><strong>Approved Vision coverage update</strong><span>Confirmed: ${esc(studio.visionCoverage.confirmed.join(', ') || 'None')} · Missing: ${esc(studio.visionCoverage.missing.join(', ') || 'None')}</span><small>No source selection or approved asset was changed.</small></div>` : ''}
         <div class="pe-ms-coverage">${(analysis?.coverage || ['Front', 'Back', 'Left', 'Right', 'Interior', 'Detail', 'Hardware', 'Lifestyle'].map((role) => ({ role, available: plan.referenceMediaIds.some((id) => plan.roleAssignments?.[id] === role) }))).map((item) => `<div class="${item.available ? 'complete' : 'missing'}"><span>${item.available ? '✓' : '✕'}</span><strong>${esc(item.role)}</strong></div>`).join('')}<div class="${plan.selectedAssets.includes('Ghost Mannequin') ? 'planned' : 'missing'}"><span>${plan.selectedAssets.includes('Ghost Mannequin') ? '◷' : '✕'}</span><strong>Ghost</strong></div></div>
       </div>
       <div class="pe-ms-section">
@@ -319,6 +370,7 @@
       ${!product.id ? '<div class="alert info"><strong>New governed product</strong><p>Save the draft first. Product DNA and automatic identities are created only after explicit Owner approval.</p></div>' : ''}
       <form id="pe-form" class="pe-layout">
         <main class="pe-main">
+          ${visionPanel(product, workspace)}
           ${mediaStudioPanel(product, workspace)}
           ${copilotPanel(product, workspace)}
           <section class="card pe-card"><h2>Product content</h2>${input('Product title', 'title', product.title, 'text', 'required maxlength="300"')}
@@ -465,6 +517,69 @@
       workspace.aiCopilot = response.workspace;
       context.update(product, workspace);
     };
+    const refreshVision = (response, message) => {
+      workspace.aiVision = response.workspace;
+      if (response.coverage && workspace.aiMediaStudio) workspace.aiMediaStudio.visionCoverage = response.coverage;
+      if (response.application && workspace.aiCopilot) {
+        workspace.aiCopilot.approvedVisionFacts = response.workspace.approvedFacts;
+      }
+      context.update(product, workspace);
+      context.toast(message);
+    };
+    const visionAction = async (path, payload = {}, message = 'Vision workflow updated') => {
+      try {
+        const response = await context.api(path, {
+          method: 'POST',
+          body: JSON.stringify({ expectedRevision: workspace.aiVision.storeRevision, ...payload }),
+        });
+        refreshVision(response, message);
+      } catch (error) { context.toast(error.message); }
+    };
+    document.getElementById('pe-v-save-draft')?.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/draft`,
+      {
+        providerId: document.getElementById('pe-v-provider')?.value || 'metadata_only',
+        selectedMediaIds: [...document.querySelectorAll('[data-v-image]:checked')].map((item) => item.dataset.vImage),
+        imageRoles: Object.fromEntries([...document.querySelectorAll('[data-v-role]')].map((item) => [item.dataset.vRole, item.value])),
+        excludedMediaIds: [...document.querySelectorAll('[data-v-image]:not(:checked)')].map((item) => item.dataset.vImage),
+        note: document.getElementById('pe-v-note')?.value || '',
+      },
+      'Versioned Vision analysis draft created',
+    ));
+    document.getElementById('pe-v-run')?.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/run`,
+      {},
+      'Vision analysis complete — no external provider call was made',
+    ));
+    document.querySelectorAll('[data-v-fact-approve]').forEach((button) => button.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/facts/${button.dataset.vFactApprove}/approve`,
+      {}, 'Vision fact approved',
+    )));
+    document.querySelectorAll('[data-v-fact-reject]').forEach((button) => button.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/facts/${button.dataset.vFactReject}/reject`,
+      { note: prompt('Rejection note') || '' }, 'Vision fact rejected',
+    )));
+    document.querySelectorAll('[data-v-fact-correct]').forEach((button) => button.addEventListener('click', () => {
+      const value = prompt('Correct factual value');
+      if (value != null) visionAction(
+        `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/facts/${button.dataset.vFactCorrect}/correct`,
+        { value }, 'Corrected Vision fact approved',
+      );
+    }));
+    document.querySelectorAll('[data-v-resolve]').forEach((button) => button.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/conflicts/${button.dataset.vResolve}/resolve`,
+      { choice: button.dataset.choice }, 'Vision conflict resolved',
+    )));
+    document.getElementById('pe-v-share-coverage')?.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/update-media-coverage`,
+      {}, 'Missing-image plan shared with AI Media Studio',
+    ));
+    document.getElementById('pe-v-apply-dna')?.addEventListener('click', () => visionAction(
+      `/api/admin/ai-vision/products/${product.id}/analyses/${workspace.aiVision.latest.id}/apply-product-dna`,
+      {}, 'Approved facts applied to the governed Product DNA overlay',
+    ));
+    document.getElementById('pe-v-history')?.addEventListener('click', () =>
+      context.toast(`${workspace.aiVision.history.length} Vision analysis version${workspace.aiVision.history.length === 1 ? '' : 's'}`));
     const mediaStudioPayload = () => ({
       expectedRevision: workspace.aiMediaStudio.storeRevision,
       mode: document.querySelector('[name="mediaStudio.mode"]:checked')?.value || 'uploaded_only',

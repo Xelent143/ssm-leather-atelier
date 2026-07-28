@@ -35,6 +35,8 @@ const { createAiProductCopilotService } = require('./ai-product-copilot-service'
 const { createOpenAiVisionProvider } = require('./ai-product-copilot-provider');
 const { createAiMediaStudioStore } = require('./ai-media-studio-store');
 const { createAiMediaStudioService } = require('./ai-media-studio-service');
+const { createAiVisionStore } = require('./ai-vision-store');
+const { createAiVisionService } = require('./ai-vision-service');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
@@ -153,6 +155,14 @@ const aiMediaStudioService = createAiMediaStudioService({
   productStore: productEditorV2Store,
   authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
 });
+const aiVisionStore = createAiVisionStore({ dataDir });
+const aiVisionService = createAiVisionService({
+  store: aiVisionStore,
+  identity: adminIdentity,
+  productStore: productEditorV2Store,
+  plmStore: productPlmStore,
+  authorizeUser: (user, module, action) => teamPermissionsService.hasUserPermission(user, module, action),
+});
 const productManagementGridService = createProductManagementGridService({
   store: productEditorV2Store,
   identity: adminIdentity,
@@ -203,6 +213,15 @@ function productEditorWorkspace(session, productId = null) {
     catch (error) {
       if (error.code !== 'FORBIDDEN') throw error;
       workspace.aiCopilot = null;
+    }
+    try {
+      workspace.aiVision = aiVisionService.workspace(session, workspace.product.id);
+      const projection = aiVisionService.integrationProjection(workspace.product.id);
+      if (workspace.aiMediaStudio) workspace.aiMediaStudio.visionCoverage = projection.coverage;
+      if (workspace.aiCopilot) workspace.aiCopilot.approvedVisionFacts = projection.approvedFacts;
+    } catch (error) {
+      if (error.code !== 'FORBIDDEN') throw error;
+      workspace.aiVision = null;
     }
   }
   return workspace;
@@ -1569,6 +1588,9 @@ function safePlmError(error) {
     AI_MEDIA_PLAN_REQUIRED: 400,
     PROVIDER_UNAVAILABLE: 409,
     PROVIDER_EXECUTION_DISABLED: 409,
+    AI_VISION_STORE_UNAVAILABLE: 503,
+    VISION_PROVIDER_EXECUTION_DISABLED: 409,
+    VISION_PROVIDER_FAILED: 503,
   };
   return {
     status: statuses[error.code] || 500,
@@ -2318,6 +2340,89 @@ async function handleApi(req, res, pathname) {
       } else {
         sendJson(res, 405, { error: 'Method not allowed.' });
       }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const visionProductMatch = pathname.match(/^\/api\/admin\/ai-vision\/products\/([0-9a-f-]+)(?:\/(draft|history))?$/i);
+  if (visionProductMatch) {
+    try {
+      const productId = visionProductMatch[1];
+      const operation = visionProductMatch[2] || null;
+      if (req.method === 'GET' && !operation) {
+        sendJson(res, 200, aiVisionService.workspace(session, productId));
+      } else if (req.method === 'GET' && operation === 'history') {
+        sendJson(res, 200, { events: aiVisionService.auditHistory(session, productId) });
+      } else if (req.method === 'POST' && operation === 'draft') {
+        sendJson(res, 201, await aiVisionService.createDraft(session, { ...(await readBody(req)), productId }));
+      } else sendJson(res, 405, { error: 'Method not allowed.' });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const visionAnalysisMatch = pathname.match(
+    /^\/api\/admin\/ai-vision\/products\/([0-9a-f-]+)\/analyses\/([0-9a-f-]+)\/(run|cancel|apply-product-dna|update-media-coverage)$/i,
+  );
+  if (visionAnalysisMatch) {
+    try {
+      const [, productId, analysisId, operation] = visionAnalysisMatch;
+      if (req.method !== 'POST') sendJson(res, 405, { error: 'Method not allowed.' });
+      else {
+        const body = await readBody(req);
+        const actions = {
+          run: aiVisionService.run,
+          cancel: aiVisionService.cancel,
+          'apply-product-dna': aiVisionService.applyToProductDna,
+          'update-media-coverage': aiVisionService.updateMediaCoverage,
+        };
+        sendJson(res, 200, await actions[operation](session, { ...body, productId, analysisId }));
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const visionFactMatch = pathname.match(
+    /^\/api\/admin\/ai-vision\/products\/([0-9a-f-]+)\/analyses\/([0-9a-f-]+)\/facts\/([0-9a-f-]+)\/(approve|reject|correct)$/i,
+  );
+  if (visionFactMatch) {
+    try {
+      const [, productId, analysisId, factId, operation] = visionFactMatch;
+      if (req.method !== 'POST') sendJson(res, 405, { error: 'Method not allowed.' });
+      else {
+        const body = await readBody(req);
+        const actions = {
+          approve: aiVisionService.approveFact,
+          reject: aiVisionService.rejectFact,
+          correct: aiVisionService.correctFact,
+        };
+        sendJson(res, 200, await actions[operation](session, { ...body, productId, analysisId, factId }));
+      }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const visionConflictMatch = pathname.match(
+    /^\/api\/admin\/ai-vision\/products\/([0-9a-f-]+)\/analyses\/([0-9a-f-]+)\/conflicts\/([0-9a-f-]+)\/resolve$/i,
+  );
+  if (visionConflictMatch) {
+    try {
+      const [, productId, analysisId, conflictId] = visionConflictMatch;
+      if (req.method !== 'POST') sendJson(res, 405, { error: 'Method not allowed.' });
+      else sendJson(res, 200, await aiVisionService.resolveConflict(session, {
+        ...(await readBody(req)), productId, analysisId, conflictId,
+      }));
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });
