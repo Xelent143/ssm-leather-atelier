@@ -1420,6 +1420,74 @@ const SSM_PRODUCTS = [
     },
   },
   {
+    id: 'p16', slug: 'unisex-black-lambskin-flared-leather-trousers',
+    name: 'Unisex Black Lambskin Flared Leather Trousers', cat: 'Pants', gender: 'Unisex',
+    price: 249, hue: 0, tag: 'New',
+    blurb: 'Premium lambskin · utility pockets · bootcut flare',
+    img: A('pants/black-flared-leather-trousers/04-model-front.png'),
+    alt: A('pants/black-flared-leather-trousers/01-product-front.png'),
+    images: [
+      A('pants/black-flared-leather-trousers/01-product-front.png'),
+      A('pants/black-flared-leather-trousers/04-model-front.png'),
+      A('pants/black-flared-leather-trousers/02-product-side.png'),
+      A('pants/black-flared-leather-trousers/03-product-back.png'),
+      A('pants/black-flared-leather-trousers/05-model-back.png'),
+      A('pants/black-flared-leather-trousers/06-lifestyle.png'),
+      A('pants/black-flared-leather-trousers/07-infographic.png'),
+      A('pants/black-flared-leather-trousers/08-black-leather-swatch.png'),
+    ],
+    material: 'Premium lambskin leather',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    stock: { '26': 50, '28': 50, '30': 50, '32': 50, '34': 50, '36': 50, '38': 50, '40': 50, '42': 50, '44': 50 },
+    options: [
+      { name: 'Waist', values: ['26','28','30','32','34','36','38','40','42','44'] },
+      { name: 'Inseam', values: ['26','27','28','29','30','31','32','33','34','35','36'] },
+    ],
+    variants: [
+      { id: 'p16-waist-26', sku: 'MG-P16-W26', attributes: { waist: '26' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-28', sku: 'MG-P16-W28', attributes: { waist: '28' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-30', sku: 'MG-P16-W30', attributes: { waist: '30' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-32', sku: 'MG-P16-W32', attributes: { waist: '32' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-34', sku: 'MG-P16-W34', attributes: { waist: '34' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-36', sku: 'MG-P16-W36', attributes: { waist: '36' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-38', sku: 'MG-P16-W38', attributes: { waist: '38' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-40', sku: 'MG-P16-W40', attributes: { waist: '40' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-42', sku: 'MG-P16-W42', attributes: { waist: '42' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-44', sku: 'MG-P16-W44', attributes: { waist: '44' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+    ],
+    publicDescription: 'Cut from premium lambskin leather, these unisex black trousers combine a structured waist, angular utility pockets and a clean bootcut flare. Choose a waist from 26 to 44 inches and an inseam from 26 to 36 inches for a considered fit.',
+    sections: {
+      features: [
+        'Premium lambskin leather with a natural-grain finish',
+        'Structured waistband with belt loops and button-and-fly closure',
+        'Oversized angular front pockets and shaped rear patch pockets',
+        'Full-length bootcut silhouette',
+        'Waist and inseam selected separately',
+      ],
+      specifications: [
+        ['Color', 'Black'],
+        ['Fit', 'Unisex bootcut'],
+        ['Waist', '26–44 inches in 2-inch increments'],
+        ['Inseam', '26–36 inches in 1-inch increments'],
+        ['Inventory', '50 pieces per waist, shared across inseam selections'],
+      ],
+      perfectFor: 'Premium everyday styling, travel and motorcycle-lifestyle wardrobes.',
+      whyYouWillLoveIt: 'A precise waist-and-inseam selection pairs with soft lambskin and a confident flared profile.',
+    },
+    metafields: {
+      outerMaterial: 'Premium lambskin leather',
+      leatherType: 'Lambskin',
+      closure: 'Button-and-fly front',
+      pocketCount: 4,
+      fit: 'Unisex bootcut',
+      careInstructions: 'Professional leather clean only. Store away from direct heat and prolonged sunlight.',
+      customSizingAvailable: false,
+      personalizationAvailable: false,
+    },
+    factualProjection: true,
+    reviews: [],
+  },
+  {
     id: 'p3', slug: 'marlowe-moto-vest',
     name: 'Marlowe Moto Vest', cat: 'Vests', gender: 'Men',
     price: 640, hue: 30, tag: null,
@@ -2861,7 +2929,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{item.name}</div>
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
-                  {item.leather} · SIZE {item.size}
+                  {item.leather} · {item.measurements?.inseam ? 'WAIST' : 'SIZE'} {item.size}
                 </div>
                 {item.productColor && (
                   <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 5 }}>
@@ -3893,8 +3961,236 @@ Object.assign(window, { Shop });
 // a "notify when restocked" affordance, a Piece Story panel, a Press &
 // Reviews block, and a sticky bottom add-to-bag bar on narrow screens.
 
+function FactualPDP({ product: p, go, addToCart }) {
+  const sellableVariants = (p.variants || []).filter(variant =>
+    variant.status !== 'disabled' && variant.availableForSale !== false);
+  const initialVariant = sellableVariants.find(variant => Number(variant.quantity || 0) > 0)
+    || sellableVariants[0] || null;
+  const initialSelection = Object.fromEntries((p.options || []).map(option => {
+    const key = option.name.toLowerCase();
+    return [key, initialVariant?.attributes?.[key] || option.values?.[0] || ''];
+  }));
+  const [selection, setSelection] = React.useState(initialSelection);
+  const [imgIdx, setImgIdx] = React.useState(0);
+  const [openSection, setOpenSection] = React.useState('description');
+  const images = (p.images || [p.img, p.alt]).filter(Boolean).map((src, index) => ({
+    src,
+    label: p.imageMetadata?.find(item => item.path === src)?.altText ||
+      (index === 0 ? `${p.name} featured image` : `${p.name} image ${index + 1}`),
+  }));
+  const selectedVariant = sellableVariants.find(variant =>
+    Object.entries(selection).every(([key, value]) =>
+      !value || !variant.attributes?.[key] || variant.attributes[key] === value)) || null;
+  const selectedPrice = Number(selectedVariant?.price ?? p.price ?? 0);
+  const selectedCompareAt = Number(selectedVariant?.compareAtPrice ?? p.compareAtPrice ?? 0);
+  const validCompareAt = selectedCompareAt > selectedPrice;
+  const discount = validCompareAt && selectedCompareAt > 0
+    ? Math.round(((selectedCompareAt - selectedPrice) / selectedCompareAt) * 100) : 0;
+  const selectedAvailable = Boolean(selectedVariant &&
+    Number(selectedVariant.quantity || 0) > 0 &&
+    selectedVariant.status !== 'disabled' && selectedVariant.availableForSale !== false);
+  const selectedMedia = p.imageMetadata?.find(item => item.id === selectedVariant?.imageId);
+
+  React.useEffect(() => {
+    if (!selectedMedia?.path) return;
+    const nextIndex = images.findIndex(image => image.src === selectedMedia.path);
+    if (nextIndex >= 0) setImgIdx(nextIndex);
+  }, [selectedVariant?.id]);
+
+  const optionAvailable = (optionName, value) => {
+    const key = optionName.toLowerCase();
+    const candidate = { ...selection, [key]: value };
+    return sellableVariants.some(variant =>
+      Number(variant.quantity || 0) > 0 &&
+      Object.entries(candidate).every(([candidateKey, candidateValue]) =>
+        !candidateValue || !variant.attributes?.[candidateKey] ||
+        variant.attributes[candidateKey] === candidateValue));
+  };
+  const chooseOption = (optionName, value) => {
+    const key = optionName.toLowerCase();
+    const candidate = { ...selection, [key]: value };
+    const compatible = sellableVariants.find(variant =>
+      Object.entries(candidate).every(([candidateKey, candidateValue]) =>
+        !candidateValue || !variant.attributes?.[candidateKey] ||
+        variant.attributes[candidateKey] === candidateValue));
+    setSelection(compatible ? {
+      ...candidate,
+      ...Object.fromEntries(Object.entries(compatible.attributes || {})),
+    } : candidate);
+  };
+  const factual = value => value !== undefined && value !== null && value !== '';
+  const displayValue = value => typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+  const metafieldLabels = {
+    outerMaterial: 'Outer material',
+    leatherType: 'Leather type',
+    leatherThickness: 'Leather thickness',
+    liningMaterial: 'Lining',
+    closure: 'Closure',
+    hardware: 'Hardware',
+    pocketCount: 'Pocket count',
+    concealedCarryPockets: 'Concealed-carry pockets',
+    armorCompatibility: 'Armor compatibility',
+    collar: 'Collar',
+    sleeveType: 'Sleeve type',
+    fit: 'Fit',
+    countryOfManufacture: 'Country of manufacture',
+    careInstructions: 'Care instructions',
+    customSizingAvailable: 'Custom sizing available',
+    personalizationAvailable: 'Personalization available',
+  };
+  const productDetails = Object.entries(metafieldLabels)
+    .filter(([key]) => factual(p.metafields?.[key]))
+    .map(([key, label]) => [label, displayValue(p.metafields[key])]);
+  if (factual(p.shippingWeight)) productDetails.push(['Shipping weight', p.shippingWeight]);
+  if (factual(p.shipping?.countryOfOrigin)) productDetails.push(['Country of origin', p.shipping.countryOfOrigin]);
+  const sectionValue = value => {
+    if (Array.isArray(value)) {
+      if (!value.length) return null;
+      if (Array.isArray(value[0])) return (
+        <div style={{ borderTop: '1px solid var(--line-2)' }}>
+          {value.map(([label, content]) => (
+            <div key={`${label}-${content}`} style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 18, padding: '12px 0', borderBottom: '1px solid var(--line)' }}>
+              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)' }}>{String(label).toUpperCase()}</div>
+              <div>{displayValue(content)}</div>
+            </div>
+          ))}
+        </div>
+      );
+      if (typeof value[0] === 'object') return (
+        <div style={{ display: 'grid', gap: 14 }}>
+          {value.map((item, index) => (
+            <div key={item.question || index}>
+              <strong>{item.question || item.title}</strong>
+              <div style={{ marginTop: 5 }}>{item.answer || item.content}</div>
+            </div>
+          ))}
+        </div>
+      );
+      return <ul>{value.map(item => <li key={String(item)}>{displayValue(item)}</li>)}</ul>;
+    }
+    if (!factual(value)) return null;
+    return String(value).includes('<')
+      ? <div dangerouslySetInnerHTML={{ __html: String(value) }} />
+      : <div>{displayValue(value)}</div>;
+  };
+  const sections = [
+    ['description', 'Description', p.publicDescription],
+    ['features', 'Features', p.sections?.features],
+    ['specifications', 'Specifications', p.sections?.specifications],
+    ['details', 'Product details', productDetails],
+    ['perfect-for', 'Perfect for', p.sections?.perfectFor],
+    ['why', 'Why you’ll love it', p.sections?.whyYouWillLoveIt],
+    ['faq', 'FAQ', p.sections?.faq],
+    ['guide', 'Buying guide', p.sections?.buyingGuide],
+  ].filter(([, , content]) => Array.isArray(content) ? content.length : factual(content));
+
+  return (
+    <div className="page-fade factual-pdp">
+      <nav style={{ padding: '20px 48px', display: 'flex', gap: 8 }} className="mono">
+        <button onClick={() => go('home')} style={{ fontSize: 10, color: 'var(--fg-4)', cursor: 'pointer', background: 'transparent', border: 0, padding: 0 }}>HOME</button>
+        <span>/</span>
+        <button onClick={() => go('shop', { cat: p.cat })} style={{ fontSize: 10, color: 'var(--fg-4)', cursor: 'pointer', background: 'transparent', border: 0, padding: 0 }}>{p.cat.toUpperCase()}</button>
+        <span>/</span>
+        <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
+      </nav>
+      <div className="factual-pdp-grid" style={{ display: 'grid', gridTemplateColumns: '80px minmax(0, 1fr) 480px', padding: '0 48px 80px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
+          {images.map((image, index) => (
+            <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
+              className="ph tiny" data-img="1" data-label=""
+              style={{ width: 64, aspectRatio: '3/4', cursor: 'pointer', '--img': `url(${image.src})`, outline: imgIdx === index ? '1px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.65, background: 'transparent', border: 0 }} />
+          ))}
+        </div>
+        <div style={{ paddingLeft: 24 }}>
+          {images.length > 0 && <div className="ph grain" data-img="1" data-label=""
+            role="img" aria-label={images[imgIdx]?.label}
+            style={{ aspectRatio: '4/5', '--img': `url(${images[imgIdx]?.src})` }} />}
+        </div>
+        <div style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
+            {[p.brand || p.vendor, p.productType || p.cat, p.category].filter(Boolean).join(' · ').toUpperCase()}
+          </div>
+          <h1 className="display" style={{ fontSize: 48, lineHeight: 1, margin: 0, fontWeight: 400 }}>{p.name}</h1>
+          {p.blurb && <div style={{ color: 'var(--fg-3)', fontSize: 14, marginTop: 12, lineHeight: 1.6 }}>{p.blurb}</div>}
+          {Array.isArray(p.tags) && p.tags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14 }}>
+              {p.tags.map(tag => <span key={tag} className="mono" style={{ fontSize: 8, border: '1px solid var(--line-2)', padding: '5px 8px' }}>{tag.toUpperCase()}</span>)}
+            </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 12, margin: '24px 0 28px' }}>
+            <span className="display" style={{ fontSize: 32 }}>${selectedPrice.toLocaleString()}</span>
+            {validCompareAt && <span className="display" style={{ fontSize: 20, color: 'var(--fg-4)', textDecoration: 'line-through' }}>${selectedCompareAt.toLocaleString()}</span>}
+            {discount > 0 && <span className="mono" style={{ fontSize: 9, color: 'var(--accent-2)' }}>SAVE {discount}%</span>}
+          </div>
+
+          {(p.options || []).map(option => (
+            <div key={option.name} style={{ marginBottom: 24 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
+                {option.name.toUpperCase()} · {String(selection[option.name.toLowerCase()] || '').toUpperCase()}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {(option.values || []).map(value => {
+                  const active = selection[option.name.toLowerCase()] === value;
+                  const available = optionAvailable(option.name, value);
+                  return <button key={value} onClick={() => chooseOption(option.name, value)}
+                    disabled={!available} aria-pressed={active}
+                    aria-label={`${option.name} ${value}${available ? '' : ', unavailable'}`}
+                    style={{ minHeight: 40, padding: '0 14px', border: `1px solid ${active ? 'var(--fg)' : 'var(--line-2)'}`, background: active ? 'var(--fg)' : 'transparent', color: active ? 'var(--bg)' : available ? 'var(--fg-2)' : 'var(--fg-4)', opacity: available ? 1 : 0.45, textDecoration: available ? 'none' : 'line-through', cursor: available ? 'pointer' : 'not-allowed' }}>
+                    {value}
+                  </button>;
+                })}
+              </div>
+            </div>
+          ))}
+
+          <div className="mono" style={{ fontSize: 9, color: selectedAvailable ? 'var(--accent-2)' : 'var(--fg-4)', marginBottom: 12 }}>
+            {selectedAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}
+            {selectedVariant?.sku ? ` · SKU ${selectedVariant.sku}` : ''}
+          </div>
+          <button className="btn" disabled={!selectedAvailable}
+            style={{ width: '100%', justifyContent: 'center', marginBottom: 24, opacity: selectedAvailable ? 1 : 0.55 }}
+            onClick={() => selectedAvailable && addToCart(p, {
+              ...selection,
+              size: selection.size || selection.waist,
+              leather: p.material || p.metafields?.outerMaterial || 'Leather',
+              fitLabel: selection.inseam ? `Inseam ${selection.inseam} inches` : null,
+              measurements: selection.inseam ? { inseam: `${selection.inseam} inches` } : null,
+              variantId: selectedVariant?.id,
+              sku: selectedVariant?.sku,
+              price: selectedPrice,
+            })}>
+            {selectedAvailable ? `Add to Bag — ${selectedPrice.toLocaleString()}` : 'Currently unavailable'}
+          </button>
+
+          {sections.map(([id, title, content]) => (
+            <div key={id} style={{ borderTop: '1px solid var(--line)' }}>
+              <button onClick={() => setOpenSection(openSection === id ? null : id)}
+                style={{ display: 'flex', justifyContent: 'space-between', padding: '18px 0', cursor: 'pointer', width: '100%', background: 'transparent', border: 0, color: 'var(--fg)', textAlign: 'left' }}>
+                <span style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{title}</span>
+                <span>{openSection === id ? '−' : '+'}</span>
+              </button>
+              {openSection === id && <div className="page-fade" style={{ paddingBottom: 18, color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.75 }}>{sectionValue(content)}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+      {Array.isArray(p.reviews) && p.reviews.length > 0 && (
+        <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
+          <h2 className="display" style={{ fontSize: 32, fontWeight: 400 }}>Verified product reviews</h2>
+          <div style={{ display: 'grid', gap: 24 }}>
+            {p.reviews.map(review => <blockquote key={review.id || review.author}>{review.body}</blockquote>)}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
 function PDP({ product, go, addToCart, onQuickView }) {
   const p = product || SSM_PRODUCTS[0];
+  if (p.factualProjection) {
+    return <FactualPDP product={p} go={go} addToCart={addToCart} />;
+  }
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
   const [productColor, setProductColor] = React.useState(p.defaultColor || p.colors?.[0]?.id || null);
@@ -5082,7 +5378,9 @@ function Checkout({ go, items, setItems }) {
               style={{ width: 64, height: 80, flexShrink: 0, '--img': it.img ? `url(${it.img})` : null }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
+                {it.leather} · {it.size}{it.measurements?.inseam ? ` WAIST · ${it.measurements.inseam} INSEAM` : ''} · QTY {it.qty}
+              </div>
               {it.productColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLOR · {it.productColor.toUpperCase()}</div>}
               {it.collarColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLLAR · {it.collarColor.toUpperCase()}</div>}
             </div>
