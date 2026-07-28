@@ -373,6 +373,23 @@
   }
   .pdp-details-panel { min-width: 0; }
 
+  /* Keep the full product stage and purchase panel inside narrower desktop viewports. */
+  @media (max-width: 1500px) {
+    .pdp-commerce-layout {
+      grid-template-columns: 76px minmax(0, 1fr) minmax(340px, 0.58fr) !important;
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+      box-sizing: border-box;
+    }
+    .pdp-thumb-rail { max-height: min(780px, calc(100vh - 190px)); }
+    .pdp-main-media { padding-left: 14px !important; }
+    .pdp-details-panel { padding-left: 28px !important; }
+    .pdp-main-image {
+      min-height: 0 !important;
+      height: min(760px, calc(100vh - 190px)) !important;
+    }
+  }
+
   /* scroll snap helpers (for editorial sections) */
   .h-scroll {
     display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory;
