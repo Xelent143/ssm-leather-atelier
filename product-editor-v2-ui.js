@@ -494,6 +494,17 @@
     });
   }
 
+  async function fileAsBase64(file) {
+    if (!(file instanceof Blob)) throw new Error('The selected image could not be read.');
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    }
+    return btoa(binary);
+  }
+
   function bind(productInput, workspace, context) {
     const product = productInput || empty();
     window.__peWorkspace = workspace || { storeRevision: 0 };
@@ -848,15 +859,44 @@
     document.getElementById('pe-variant-search')?.addEventListener('input', (event) =>
       document.querySelectorAll('tr[data-variant]').forEach((row) => { row.hidden = !row.textContent.toLowerCase().includes(event.target.value.toLowerCase()); }));
     document.getElementById('pe-files')?.addEventListener('change', async (event) => {
-      if (!product.id) return context.toast('Save the product draft before uploading media');
-      for (const file of event.target.files) {
-        const dataBase64 = await new Promise((resolve) => {
-          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.readAsDataURL(file);
-        });
-        await action(`/api/admin/product-editor-v2/products/${product.id}/media`, 'POST', {
-          expectedRevision: window.__peWorkspace.storeRevision, fileName: file.name,
-          mimeType: file.type, dataBase64, role: 'Other', altText: product.title,
-        });
+      const input = event.currentTarget;
+      const files = [...(input.files || [])];
+      if (!files.length) return;
+      if (!product.id) {
+        input.value = '';
+        return context.toast('Save the product draft before uploading media');
+      }
+      input.disabled = true;
+      context.toast(`Uploading ${files.length} image${files.length === 1 ? '' : 's'}…`);
+      try {
+        let currentProduct = product;
+        let currentWorkspace = window.__peWorkspace;
+        for (const file of files) {
+          const mimeType = file.type || ({
+            jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+          })[String(file.name).split('.').pop().toLowerCase()] || '';
+          const dataBase64 = await fileAsBase64(file);
+          const uploaded = await context.api(`/api/admin/product-editor-v2/products/${product.id}/media`, {
+            method: 'POST',
+            body: JSON.stringify({
+              expectedRevision: currentWorkspace.storeRevision,
+              fileName: file.name,
+              mimeType,
+              dataBase64,
+              role: 'Other',
+              altText: product.title,
+            }),
+          });
+          currentProduct = uploaded.product;
+          currentWorkspace = uploaded;
+        }
+        context.update(currentProduct, currentWorkspace);
+        context.toast(`${files.length} product image${files.length === 1 ? '' : 's'} uploaded`);
+      } catch (error) {
+        context.toast(error.message || 'Product image upload failed');
+      } finally {
+        input.disabled = false;
+        input.value = '';
       }
     });
     document.querySelectorAll('[data-feature]').forEach((button) => button.addEventListener('click', () => {

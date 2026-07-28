@@ -470,9 +470,12 @@ test('Product Editor v2 UI exposes required business controls and legacy compati
     'Create New Revision', 'Trusted Product Release', 'Valid Knowledge Lock',
     'Apply status', 'sourceMediaId', 'data-v="imageId"',
   ]) assert.equal(ui.includes(marker), true, marker);
+  assert.match(ui, /file\.arrayBuffer\(\)/);
+  assert.match(ui, /Uploading \$\{files\.length\} image/);
   assert.equal(admin.includes('Legacy Product Manager'), true);
   assert.equal(admin.includes('This legacy editor is retained for compatibility.'), true);
   assert.equal(admin.includes('id="open-product-editor">Add Product'), true);
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8'), /product-editor-v2-ui\.js\?v=6/);
   assert.equal(css.includes('@media(max-width:720px)'), true);
   assert.equal(css.includes('.pe-table-scroll{overflow:auto;max-width:100%'), true);
   assert.equal(server.includes('variants: product.variants || []'), true);

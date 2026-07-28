@@ -74,16 +74,18 @@ test('website content contract has exactly five ordered fields and structured sp
 });
 
 test('public factual PDP renders only the permanent five-section accordion in order', () => {
-  const source = fs.readFileSync(path.join(__dirname, '..', 'ssm-pdp.jsx'), 'utf8');
-  const start = source.indexOf('const sections = [');
-  const end = source.indexOf('].filter', start);
-  const contract = source.slice(start, end);
-  const labels = ['Description', 'Features', 'Specifications', 'Perfect for', 'Why you’ll love it'];
-  labels.reduce((prior, label) => {
-    const index = contract.indexOf(`'${label}'`);
-    assert.ok(index > prior, `${label} must follow the permanent order`);
-    return index;
-  }, -1);
-  assert.doesNotMatch(contract, /Product details|FAQ|Buying guide/);
-  assert.match(source, /openSection === id \? '−' : '\+'/);
+  for (const file of ['ssm-pdp.jsx', 'index.html']) {
+    const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    const start = source.indexOf('const sections = [');
+    const end = source.indexOf('].filter', start);
+    const contract = source.slice(start, end);
+    const labels = ['Description', 'Features', 'Specifications', 'Perfect for', 'Why you’ll love it'];
+    labels.reduce((prior, label) => {
+      const index = contract.indexOf(`'${label}'`);
+      assert.ok(index > prior, `${file}: ${label} must follow the permanent order`);
+      return index;
+    }, -1);
+    assert.doesNotMatch(contract, /Product details|FAQ|Buying guide/);
+    assert.match(source, /openSection === id \? '−' : '\+'/);
+  }
 });
