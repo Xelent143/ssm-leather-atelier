@@ -198,7 +198,7 @@ function createProductEditorV2Service(options = {}) {
         attributes,
         sku: clean(supplied.sku, 100),
         imageId: clean(supplied.imageId, 80) || null,
-        price: number(supplied.price, number(pricing.price)),
+        price: number(supplied.price) > 0 ? number(supplied.price) : number(pricing.price),
         compareAtPrice: supplied.compareAtPrice === '' || supplied.compareAtPrice == null
           ? null : number(supplied.compareAtPrice),
         cost: supplied.cost === '' || supplied.cost == null ? null : number(supplied.cost),
@@ -250,7 +250,7 @@ function createProductEditorV2Service(options = {}) {
         taxable: pricing.taxable !== false,
       },
       inventory: {
-        trackInventory: input.inventory?.trackInventory !== false,
+        trackInventory: input.inventory?.trackInventory === true,
         continueSellingWhenOutOfStock: input.inventory?.continueSellingWhenOutOfStock === true,
       },
       shipping: {
@@ -713,14 +713,82 @@ function createProductEditorV2Service(options = {}) {
   function criticalFields(product) {
     return [
       ['title', product.title],
-      ['description', product.descriptionHtml || product.sections.fullDescription],
-      ['media', product.media.length],
-      ['brand', product.organization.brand],
-      ['product type', product.organization.productType],
+      ['primary image', product.media.some((item) => item.featured) || product.media.length === 1],
       ['category', product.organization.category],
-      ['price', Number.isFinite(product.pricing.price)],
-      ['handle', product.seo.handle],
+      ['price', Number.isFinite(product.pricing.price) && product.pricing.price > 0],
+      ['product status', STATUS_VALUES.has(product.organization.status) && product.organization.status !== 'archived'],
     ].filter(([, present]) => !present).map(([label]) => label);
+  }
+
+  function publicationFields(product, identityRecord = null) {
+    const featured = product.media.find((item) => item.featured) || product.media[0];
+    const stock = Object.fromEntries(product.variants.map((variant) => [variant.sku, variant.quantity]));
+    return {
+      title: product.title,
+      description: product.websiteContent.description.join('\n\n'),
+      descriptionHtml: product.descriptionHtml,
+      websiteContent: product.websiteContent,
+      shortDescription: product.sections.shortDescription,
+      features: product.sections.features,
+      specifications: product.sections.specifications,
+      perfectFor: product.sections.perfectFor,
+      whyYouWillLoveIt: product.sections.whyYouWillLoveIt,
+      faq: product.sections.faq,
+      buyingGuide: product.sections.buyingGuide,
+      seoTitle: product.seo.title,
+      metaDescription: product.seo.metaDescription,
+      slug: product.seo.handle,
+      brand: product.organization.brand,
+      maker: product.organization.vendor,
+      productType: product.organization.productType,
+      category: product.organization.category,
+      gender: product.organization.gender,
+      ageGroup: product.classification.ageGroup.value,
+      classification: product.classification,
+      merchantAttributes: product.merchantAttributes,
+      merchantReadiness: product.merchantReadiness,
+      collections: product.organization.collections,
+      tags: product.organization.tags,
+      status: product.organization.status === 'draft' ? 'active' : product.organization.status,
+      price: product.pricing.price,
+      compareAtPrice: product.pricing.compareAtPrice,
+      costPerItem: product.pricing.cost,
+      taxable: product.pricing.taxable,
+      image: featured?.path || '',
+      primaryImage: featured?.path || '',
+      galleryImages: product.media.filter((item) => item.id !== featured?.id).map((item) => item.path),
+      imageMetadata: product.media,
+      options: product.options,
+      variants: product.variants,
+      variantOptions: product.options.map((option) => option.name),
+      availableColors: product.options.find((option) => option.name.toLowerCase() === 'color')?.values || [],
+      stock,
+      inventory: product.variants.reduce((total, variant) => total + variant.quantity, 0),
+      trackInventory: product.inventory.trackInventory,
+      continueSellingWhenOutOfStock: product.inventory.continueSellingWhenOutOfStock,
+      sku: identityRecord?.productSku || product.identity?.productSku || '',
+      internalProductCode: identityRecord?.internalProductCode || product.identity?.internalProductCode || '',
+      factoryCode: identityRecord?.factoryCode || product.identity?.factoryCode || '',
+      shipping: product.shipping,
+      shippingWeight: `${product.shipping.weight} ${product.shipping.weightUnit}`,
+      metafields: product.metafields,
+      factualProjection: true,
+    };
+  }
+
+  function preview(session, productId) {
+    actor(session);
+    const product = store.read().products.find((item) => item.id === productId);
+    if (!product) throw Object.assign(new Error('Product draft was not found.'), { code: 'NOT_FOUND' });
+    const identityRecord = productIdentityService.view(product.productUuid).identity;
+    return {
+      product: {
+        id: product.websiteProductId || product.productUuid,
+        ...publicationFields(productView(product), identityRecord),
+      },
+      missingQuickListingFields: criticalFields(product),
+      previewOnly: true,
+    };
   }
 
   async function publish(session, input) {
@@ -755,61 +823,11 @@ function createProductEditorV2Service(options = {}) {
       throw Object.assign(new Error('A trusted Product Release and valid Knowledge Lock are required.'), { code: 'UNTRUSTED_RELEASE' });
     }
     const website = websiteAdapter.inspect(product.websiteProductId, product.sourceHandle || product.seo.handle);
-    const featured = product.media.find((item) => item.featured) || product.media[0];
-    const stock = Object.fromEntries(product.variants.map((variant) => [variant.sku, variant.quantity]));
     const publication = await websiteAdapter.publish({
       websiteProductId: product.websiteProductId || product.productUuid,
       currentHandle: product.sourceHandle || product.seo.handle,
       expectedWebsiteRevision: input.expectedWebsiteRevision || website.revision,
-      fields: {
-        title: product.title,
-        description: product.websiteContent.description.join('\n\n'),
-        descriptionHtml: product.descriptionHtml,
-        websiteContent: product.websiteContent,
-        shortDescription: product.sections.shortDescription,
-        features: product.sections.features,
-        specifications: product.sections.specifications,
-        perfectFor: product.sections.perfectFor,
-        whyYouWillLoveIt: product.sections.whyYouWillLoveIt,
-        faq: product.sections.faq,
-        buyingGuide: product.sections.buyingGuide,
-        seoTitle: product.seo.title,
-        metaDescription: product.seo.metaDescription,
-        slug: product.seo.handle,
-        brand: product.organization.brand,
-        maker: product.organization.vendor,
-        productType: product.organization.productType,
-        category: product.organization.category,
-        gender: product.organization.gender,
-        ageGroup: product.classification.ageGroup.value,
-        classification: product.classification,
-        merchantAttributes: product.merchantAttributes,
-        merchantReadiness: product.merchantReadiness,
-        collections: product.organization.collections,
-        tags: product.organization.tags,
-        status: product.organization.status === 'draft' ? 'active' : product.organization.status,
-        price: product.pricing.price,
-        compareAtPrice: product.pricing.compareAtPrice,
-        costPerItem: product.pricing.cost,
-        taxable: product.pricing.taxable,
-        image: featured?.path || '',
-        primaryImage: featured?.path || '',
-        galleryImages: product.media.filter((item) => item.id !== featured?.id).map((item) => item.path),
-        imageMetadata: product.media,
-        options: product.options,
-        variants: product.variants,
-        variantOptions: product.options.map((option) => option.name),
-        availableColors: product.options.find((option) => option.name.toLowerCase() === 'color')?.values || [],
-        stock,
-        inventory: product.variants.reduce((total, variant) => total + variant.quantity, 0),
-        sku: identityRecord.productSku,
-        internalProductCode: identityRecord.internalProductCode,
-        factoryCode: identityRecord.factoryCode,
-        shipping: product.shipping,
-        shippingWeight: `${product.shipping.weight} ${product.shipping.weightUnit}`,
-        metafields: product.metafields,
-        factualProjection: true,
-      },
+      fields: publicationFields(product, identityRecord),
     });
     await store.mutate((next) => {
       const target = next.products.find((item) => item.id === product.id);
@@ -889,7 +907,7 @@ function createProductEditorV2Service(options = {}) {
     workspace, create, importWebsite, save, uploadMedia, updateMedia, attachMedia, removeMedia, backfillMediaPaths, submit,
     approve: (session, input) => review(session, input, 'approve'),
     requestChanges: (session, input) => review(session, input, 'request_changes'),
-    publish, revise, criticalFields,
+    publish, revise, preview, criticalFields,
   };
 }
 

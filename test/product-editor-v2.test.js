@@ -211,6 +211,48 @@ test('secure multi-image upload validates content, order, featured media and per
   }), (error) => error.code === 'VALIDATION');
 });
 
+test('Quick Listing Mode requires only name, category, positive price, primary image and usable status', async () => {
+  const current = fixture();
+  let result = await current.service.create(current.ownerSession, current.product({
+    title: 'Men’s Black Leather Cafe Racer Jacket',
+    descriptionHtml: '',
+    websiteContent: {
+      description: [], features: [], specifications: [], perfectFor: '', whyYouWillLoveIt: '',
+    },
+    sections: {},
+    organization: {
+      brand: 'MOTOGRIP GEAR', vendor: 'MOTOGRIP GEAR', productType: 'Leather Jacket',
+      category: 'Cafe Racer Jackets', gender: 'Unisex', collections: [], tags: [],
+      themeTemplate: 'default', status: 'draft',
+    },
+    pricing: { price: 229, compareAtPrice: null, cost: null, taxable: true },
+    inventory: { trackInventory: false, continueSellingWhenOutOfStock: false },
+    seo: { title: '', metaDescription: '', handle: '' },
+    options: [],
+    variants: [],
+  }));
+  assert.deepEqual(current.service.criticalFields(result.product), ['primary image']);
+  result = await current.service.uploadMedia(current.ownerSession, {
+    productId: result.product.id, expectedRevision: result.storeRevision,
+    fileName: 'cafe-racer-front.png', mimeType: 'image/png',
+    dataBase64: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]).toString('base64'),
+    altText: 'Black leather cafe racer jacket front', role: 'Front',
+  });
+  assert.deepEqual(current.service.criticalFields(result.product), []);
+  assert.equal(result.product.seo.handle, 'men-s-black-leather-cafe-racer-jacket');
+  const beforeRevision = current.store.read().storeRevision;
+  const preview = current.service.preview(current.ownerSession, result.product.id);
+  assert.equal(preview.previewOnly, true);
+  assert.deepEqual(preview.missingQuickListingFields, []);
+  assert.equal(preview.product.price, 229);
+  assert.equal(preview.product.variants[0].price, 229);
+  assert.equal(preview.product.trackInventory, false);
+  assert.deepEqual(Object.keys(preview.product.websiteContent), [
+    'description', 'features', 'specifications', 'perfectFor', 'whyYouWillLoveIt',
+  ]);
+  assert.equal(current.store.read().storeRevision, beforeRevision);
+});
+
 test('Media Library safely attaches an existing asset by reference without duplicating files', async () => {
   const current = fixture();
   let source = await current.service.create(current.editorSession, current.product());

@@ -768,7 +768,9 @@ function checkoutLineItems(rawItems) {
       throw new Error(`Select an available collar color for ${product.title}.`);
     }
     const stockForSize = Number(product.stock?.[selectedSize]);
-    if (fitMode === 'standard' && Number.isFinite(stockForSize) && quantity > stockForSize) {
+    if (fitMode === 'standard' && product.trackInventory !== false &&
+        product.continueSellingWhenOutOfStock !== true &&
+        Number.isFinite(stockForSize) && quantity > stockForSize) {
       throw new Error(`Only ${stockForSize} of ${product.title} in size ${selectedSize} is available.`);
     }
 
@@ -926,8 +928,10 @@ function productMeta(product, store, req) {
   const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
   const sellableVariants = (Array.isArray(product.variants) ? product.variants : [])
     .filter((variant) => variant.status !== 'disabled' && variant.availableForSale !== false);
+  const inventoryAvailable = (variant) => product.trackInventory === false ||
+    product.continueSellingWhenOutOfStock === true || Number(variant.quantity || 0) > 0;
   const availability = (sellableVariants.length
-    ? sellableVariants.some((variant) => Number(variant.quantity || 0) > 0)
+    ? sellableVariants.some(inventoryAvailable)
     : Number(product.inventory || 0) > 0)
     ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
   const metafields = product.metafields && typeof product.metafields === 'object' ? product.metafields : {};
@@ -1002,7 +1006,7 @@ function productMeta(product, store, req) {
         url: canonical,
         priceCurrency: currency,
         price: Number(variant.price ?? product.price ?? 0).toFixed(2),
-        availability: Number(variant.quantity || 0) > 0
+        availability: inventoryAvailable(variant)
           ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         itemCondition: `https://schema.org/${product.condition || 'NewCondition'}`,
       },
@@ -1103,6 +1107,8 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
       images: [product.primaryImage || product.image, ...(product.galleryImages || [])]
         .filter(Boolean).map((imagePath) => productImageUrl(req, imagePath)),
       stock: product.stock || {},
+      trackInventory: product.trackInventory !== false,
+      continueSellingWhenOutOfStock: product.continueSellingWhenOutOfStock === true,
       options: product.options || [],
       variants: product.variants || [],
       availableColors: product.availableColors || [],
@@ -1213,6 +1219,32 @@ function serveProductPage(req, res, slug) {
     }
     const body = injectProductHead(html, product, store, req);
     send(res, 200, body, 'text/html; charset=utf-8', { 'Cache-Control': 'no-cache' });
+  });
+}
+
+function serveProductEditorPreview(req, res, session, productId) {
+  let projection;
+  try {
+    projection = productEditorV2Service.preview(session, productId);
+  } catch (error) {
+    const safe = safePlmError(error);
+    send(res, safe.status, safe.message);
+    return;
+  }
+  fs.readFile(path.join(root, 'index.html'), 'utf8', (readErr, html) => {
+    if (readErr) {
+      send(res, 500, 'Preview unavailable');
+      return;
+    }
+    const previewProduct = projection.product;
+    let body = injectProductHead(html, previewProduct, readPublicStore(), req)
+      .replace(/<meta name="robots" content=".*?" \/>/s, '<meta name="robots" content="noindex,nofollow,noarchive" />')
+      .replace('<body>', `<body><div style="position:relative;z-index:9999;padding:10px 20px;background:#2d3b28;color:#fff;text-align:center;font:700 13px/1.4 Arial">Private draft preview · Not published · ${escapeHtml(projection.missingQuickListingFields.length ? `Missing: ${projection.missingQuickListingFields.join(', ')}` : 'Quick listing fields complete')}</div>`);
+    body = body.replace(/<link rel="canonical" href=".*?" \/>/s, '');
+    send(res, 200, body, 'text/html; charset=utf-8', {
+      'Cache-Control': 'no-store, max-age=0',
+      'X-Robots-Tag': 'noindex, nofollow, noarchive',
+    });
   });
 }
 
@@ -3291,6 +3323,21 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       sendJson(res, 200, adminStagingBootstrap.status());
+      return;
+    }
+
+    const productPreviewMatch = requestPath.match(/^\/admin\/product-preview\/([0-9a-f-]+)$/i);
+    if (productPreviewMatch) {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        send(res, 405, 'Method not allowed');
+        return;
+      }
+      const session = adminSecurity.getSession(req);
+      if (!session) {
+        send(res, 401, 'Authentication required');
+        return;
+      }
+      serveProductEditorPreview(req, res, session, productPreviewMatch[1]);
       return;
     }
 

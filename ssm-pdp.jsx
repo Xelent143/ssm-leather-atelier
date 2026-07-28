@@ -8,7 +8,9 @@
 function FactualPDP({ product: p, go, addToCart }) {
   const sellableVariants = (p.variants || []).filter(variant =>
     variant.status !== 'disabled' && variant.availableForSale !== false);
-  const initialVariant = sellableVariants.find(variant => Number(variant.quantity || 0) > 0)
+  const inventoryAvailable = variant => p.trackInventory === false ||
+    p.continueSellingWhenOutOfStock === true || Number(variant.quantity || 0) > 0;
+  const initialVariant = sellableVariants.find(inventoryAvailable)
     || sellableVariants[0] || null;
   const initialSelection = Object.fromEntries((p.options || []).map(option => {
     const key = option.name.toLowerCase();
@@ -31,7 +33,7 @@ function FactualPDP({ product: p, go, addToCart }) {
   const discount = validCompareAt && selectedCompareAt > 0
     ? Math.round(((selectedCompareAt - selectedPrice) / selectedCompareAt) * 100) : 0;
   const selectedAvailable = Boolean(selectedVariant &&
-    Number(selectedVariant.quantity || 0) > 0 &&
+    inventoryAvailable(selectedVariant) &&
     selectedVariant.status !== 'disabled' && selectedVariant.availableForSale !== false);
   const selectedMedia = p.imageMetadata?.find(item => item.id === selectedVariant?.imageId);
 
@@ -45,7 +47,7 @@ function FactualPDP({ product: p, go, addToCart }) {
     const key = optionName.toLowerCase();
     const candidate = { ...selection, [key]: value };
     return sellableVariants.some(variant =>
-      Number(variant.quantity || 0) > 0 &&
+      inventoryAvailable(variant) &&
       Object.entries(candidate).every(([candidateKey, candidateValue]) =>
         !candidateValue || !variant.attributes?.[candidateKey] ||
         variant.attributes[candidateKey] === candidateValue));
