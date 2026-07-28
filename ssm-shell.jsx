@@ -233,7 +233,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{item.name}</div>
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
-                  {item.leather} · SIZE {item.size}
+                  {item.leather} · {item.measurements?.inseam ? 'WAIST' : 'SIZE'} {item.size}
                 </div>
                 {item.fitLabel && (
                   <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 5 }}>

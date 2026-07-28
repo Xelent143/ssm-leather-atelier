@@ -694,6 +694,7 @@ function checkoutLineItems(rawItems) {
     }
 
     const selectedSize = String(rawItem.size || '').trim().slice(0, 40);
+    const selectedInseam = String(rawItem.measurements?.inseam || '').trim().slice(0, 40);
     const selectedLeather = String(rawItem.leather || '').trim().slice(0, 80);
     const colorOptions = Array.isArray(product.availableColors) ? product.availableColors : [];
     const requestedColor = String(rawItem.productColor || product.color || '').trim().slice(0, 40);
@@ -726,7 +727,8 @@ function checkoutLineItems(rawItems) {
     }
 
     const details = [
-      selectedSize ? `Size: ${selectedSize}` : '',
+      selectedSize ? `${product.slug === 'unisex-black-lambskin-flared-leather-trousers' ? 'Waist' : 'Size'}: ${selectedSize}` : '',
+      selectedInseam ? `Inseam: ${selectedInseam}` : '',
       selectedLeather ? `Leather: ${selectedLeather}` : '',
       selectedColor ? `Color: ${selectedColor}` : '',
       selectedCollar ? `Collar: ${selectedCollar}` : '',

@@ -195,6 +195,10 @@ function FactualPDP({ product: p, go, addToCart }) {
             style={{ width: '100%', justifyContent: 'center', marginBottom: 24, opacity: selectedAvailable ? 1 : 0.55 }}
             onClick={() => selectedAvailable && addToCart(p, {
               ...selection,
+              size: selection.size || selection.waist,
+              leather: p.material || p.metafields?.outerMaterial || 'Leather',
+              fitLabel: selection.inseam ? `Inseam ${selection.inseam} inches` : null,
+              measurements: selection.inseam ? { inseam: `${selection.inseam} inches` } : null,
               variantId: selectedVariant?.id,
               sku: selectedVariant?.sku,
               price: selectedPrice,

@@ -1397,6 +1397,74 @@ const SSM_PRODUCTS = [
     },
   },
   {
+    id: 'p16', slug: 'unisex-black-lambskin-flared-leather-trousers',
+    name: 'Unisex Black Lambskin Flared Leather Trousers', cat: 'Pants', gender: 'Unisex',
+    price: 249, hue: 0, tag: 'New',
+    blurb: 'Premium lambskin · utility pockets · bootcut flare',
+    img: A('pants/black-flared-leather-trousers/04-model-front.png'),
+    alt: A('pants/black-flared-leather-trousers/01-product-front.png'),
+    images: [
+      A('pants/black-flared-leather-trousers/01-product-front.png'),
+      A('pants/black-flared-leather-trousers/04-model-front.png'),
+      A('pants/black-flared-leather-trousers/02-product-side.png'),
+      A('pants/black-flared-leather-trousers/03-product-back.png'),
+      A('pants/black-flared-leather-trousers/05-model-back.png'),
+      A('pants/black-flared-leather-trousers/06-lifestyle.png'),
+      A('pants/black-flared-leather-trousers/07-infographic.png'),
+      A('pants/black-flared-leather-trousers/08-black-leather-swatch.png'),
+    ],
+    material: 'Premium lambskin leather',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    stock: { '26': 50, '28': 50, '30': 50, '32': 50, '34': 50, '36': 50, '38': 50, '40': 50, '42': 50, '44': 50 },
+    options: [
+      { name: 'Waist', values: ['26','28','30','32','34','36','38','40','42','44'] },
+      { name: 'Inseam', values: ['26','27','28','29','30','31','32','33','34','35','36'] },
+    ],
+    variants: [
+      { id: 'p16-waist-26', sku: 'MG-P16-W26', attributes: { waist: '26' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-28', sku: 'MG-P16-W28', attributes: { waist: '28' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-30', sku: 'MG-P16-W30', attributes: { waist: '30' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-32', sku: 'MG-P16-W32', attributes: { waist: '32' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-34', sku: 'MG-P16-W34', attributes: { waist: '34' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-36', sku: 'MG-P16-W36', attributes: { waist: '36' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-38', sku: 'MG-P16-W38', attributes: { waist: '38' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-40', sku: 'MG-P16-W40', attributes: { waist: '40' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-42', sku: 'MG-P16-W42', attributes: { waist: '42' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+      { id: 'p16-waist-44', sku: 'MG-P16-W44', attributes: { waist: '44' }, quantity: 50, price: 249, status: 'active', availableForSale: true },
+    ],
+    publicDescription: 'Cut from premium lambskin leather, these unisex black trousers combine a structured waist, angular utility pockets and a clean bootcut flare. Choose a waist from 26 to 44 inches and an inseam from 26 to 36 inches for a considered fit.',
+    sections: {
+      features: [
+        'Premium lambskin leather with a natural-grain finish',
+        'Structured waistband with belt loops and button-and-fly closure',
+        'Oversized angular front pockets and shaped rear patch pockets',
+        'Full-length bootcut silhouette',
+        'Waist and inseam selected separately',
+      ],
+      specifications: [
+        ['Color', 'Black'],
+        ['Fit', 'Unisex bootcut'],
+        ['Waist', '26–44 inches in 2-inch increments'],
+        ['Inseam', '26–36 inches in 1-inch increments'],
+        ['Inventory', '50 pieces per waist, shared across inseam selections'],
+      ],
+      perfectFor: 'Premium everyday styling, travel and motorcycle-lifestyle wardrobes.',
+      whyYouWillLoveIt: 'A precise waist-and-inseam selection pairs with soft lambskin and a confident flared profile.',
+    },
+    metafields: {
+      outerMaterial: 'Premium lambskin leather',
+      leatherType: 'Lambskin',
+      closure: 'Button-and-fly front',
+      pocketCount: 4,
+      fit: 'Unisex bootcut',
+      careInstructions: 'Professional leather clean only. Store away from direct heat and prolonged sunlight.',
+      customSizingAvailable: false,
+      personalizationAvailable: false,
+    },
+    factualProjection: true,
+    reviews: [],
+  },
+  {
     id: 'p3', slug: 'marlowe-moto-vest',
     name: 'Marlowe Moto Vest', cat: 'Vests', gender: 'Men',
     price: 640, hue: 30, tag: null,
@@ -2838,7 +2906,7 @@ function CartDrawer({ open, onClose, items, setItems, go }) {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{item.name}</div>
                 <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
-                  {item.leather} · SIZE {item.size}
+                  {item.leather} · {item.measurements?.inseam ? 'WAIST' : 'SIZE'} {item.size}
                 </div>
                 {item.productColor && (
                   <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 5 }}>
@@ -4060,6 +4128,10 @@ function FactualPDP({ product: p, go, addToCart }) {
             style={{ width: '100%', justifyContent: 'center', marginBottom: 24, opacity: selectedAvailable ? 1 : 0.55 }}
             onClick={() => selectedAvailable && addToCart(p, {
               ...selection,
+              size: selection.size || selection.waist,
+              leather: p.material || p.metafields?.outerMaterial || 'Leather',
+              fitLabel: selection.inseam ? `Inseam ${selection.inseam} inches` : null,
+              measurements: selection.inseam ? { inseam: `${selection.inseam} inches` } : null,
               variantId: selectedVariant?.id,
               sku: selectedVariant?.sku,
               price: selectedPrice,
@@ -5300,7 +5372,9 @@ function Checkout({ go, items, setItems }) {
               style={{ width: 64, height: 80, flexShrink: 0, '--img': it.img ? `url(${it.img})` : null }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
+                {it.leather} · {it.size}{it.measurements?.inseam ? ` WAIST · ${it.measurements.inseam} INSEAM` : ''} · QTY {it.qty}
+              </div>
               {it.productColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLOR · {it.productColor.toUpperCase()}</div>}
               {it.collarColor && <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>COLLAR · {it.collarColor.toUpperCase()}</div>}
             </div>

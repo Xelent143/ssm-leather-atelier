@@ -327,7 +327,9 @@ function Checkout({ go, items, setItems }) {
               style={{ width: 64, height: 80, flexShrink: 0, '--img': it.img ? `url(${it.img})` : null }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>{it.name}</div>
-              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>{it.leather} · {it.size} · QTY {it.qty}</div>
+              <div className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', marginTop: 4 }}>
+                {it.leather} · {it.size}{it.measurements?.inseam ? ` WAIST · ${it.measurements.inseam} INSEAM` : ''} · QTY {it.qty}
+              </div>
             </div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 16 }}>${(it.price * it.qty).toLocaleString()}</div>
           </div>
