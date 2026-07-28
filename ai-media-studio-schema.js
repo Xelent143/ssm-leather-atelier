@@ -19,19 +19,33 @@ const REFERENCE_IMAGE_ROLES = Object.freeze([
 ]);
 
 const ASSET_TYPES = Object.freeze([
-  'White Background',
-  'Ghost Mannequin',
-  'Lifestyle',
   'Front',
   'Back',
-  'Left',
-  'Right',
+  'Left Side',
+  'Right Side',
+  'Interior',
   'Detail',
-  'Hardware',
+  'Hardware Close-up',
+  'Logo Close-up',
+  'White Background',
+  'Ghost Mannequin Front',
+  'Ghost Mannequin Back',
+  'Ghost Mannequin Side',
+  'Lifestyle',
   'Infographic',
-  'Video Prompt',
   'Social Banner',
+  'Size Chart',
+  'Video Prompt',
+  'Ghost Mannequin',
 ]);
+
+const ASSET_SOURCES = Object.freeze(['uploaded', 'openai', 'google_flow', 'none']);
+const ASSET_STATUSES = Object.freeze([
+  'planned', 'source_selected', 'ready', 'awaiting_configuration', 'prompt_ready',
+  'generating', 'generated', 'awaiting_upload', 'awaiting_approval', 'approved',
+  'rejected', 'failed', 'cancelled', 'not_required',
+]);
+const REFERENCE_KINDS = Object.freeze(['product_identity', 'style_composition']);
 
 const DESIGN_LOCKS = Object.freeze([
   'Stitching',
@@ -82,10 +96,13 @@ function validatePlanInput(input = {}, validMediaIds = []) {
 }
 
 module.exports = {
+  ASSET_SOURCES,
+  ASSET_STATUSES,
   ASSET_TYPES,
   DESIGN_LOCKS,
   IMAGE_SOURCE_MODES,
   PLAN_STATES,
+  REFERENCE_KINDS,
   REFERENCE_IMAGE_ROLES,
   validatePlanInput,
 };

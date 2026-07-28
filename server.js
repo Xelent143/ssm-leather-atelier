@@ -1567,6 +1567,8 @@ function safePlmError(error) {
     AI_DAILY_LIMIT: 429,
     AI_MEDIA_STORE_UNAVAILABLE: 503,
     AI_MEDIA_PLAN_REQUIRED: 400,
+    PROVIDER_UNAVAILABLE: 409,
+    PROVIDER_EXECUTION_DISABLED: 409,
   };
   return {
     status: statuses[error.code] || 500,
@@ -2316,6 +2318,47 @@ async function handleApi(req, res, pathname) {
       } else {
         sendJson(res, 405, { error: 'Method not allowed.' });
       }
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/admin/ai-media-studio/providers') {
+    try {
+      if (req.method === 'GET') {
+        sendJson(res, 200, aiMediaStudioService.providerStatus(session));
+      } else if (req.method === 'PUT') {
+        sendJson(res, 200, await aiMediaStudioService.updateProviderSettings(session, await readBody(req)));
+      } else sendJson(res, 405, { error: 'Method not allowed.' });
+    } catch (error) {
+      const safe = safePlmError(error);
+      sendJson(res, safe.status, { error: safe.message });
+    }
+    return true;
+  }
+
+  const mediaAssetMatch = pathname.match(
+    /^\/api\/admin\/ai-media-studio\/products\/([0-9a-f-]+)\/assets\/([0-9a-f-]+)\/(source|prompt|result|approve|reject|restore|history)$/i,
+  );
+  if (mediaAssetMatch) {
+    try {
+      const [, productId, assetId, operation] = mediaAssetMatch;
+      if (req.method === 'GET' && operation === 'history') {
+        sendJson(res, 200, { events: aiMediaStudioService.assetHistory(session, productId, assetId) });
+      } else if (req.method === 'POST' && operation !== 'history') {
+        const body = await readBody(req);
+        const actions = {
+          source: aiMediaStudioService.updateAssetSource,
+          prompt: aiMediaStudioService.generatePrompt,
+          result: aiMediaStudioService.attachResult,
+          approve: aiMediaStudioService.approveAsset,
+          reject: aiMediaStudioService.rejectAsset,
+          restore: aiMediaStudioService.restoreAsset,
+        };
+        sendJson(res, 200, await actions[operation](session, { ...body, productId, assetId }));
+      } else sendJson(res, 405, { error: 'Method not allowed.' });
     } catch (error) {
       const safe = safePlmError(error);
       sendJson(res, safe.status, { error: safe.message });

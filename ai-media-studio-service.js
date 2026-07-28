@@ -1,11 +1,14 @@
 const crypto = require('crypto');
 const {
+  ASSET_SOURCES,
   ASSET_TYPES,
   DESIGN_LOCKS,
   IMAGE_SOURCE_MODES,
   REFERENCE_IMAGE_ROLES,
   validatePlanInput,
 } = require('./ai-media-studio-schema');
+const { createProviderRegistry } = require('./ai-media-provider-adapters');
+const { deterministicAssetId } = require('./ai-media-studio-store');
 
 const COVERAGE_ROLES = ['Front', 'Back', 'Left', 'Right', 'Interior', 'Detail', 'Hardware', 'Lifestyle'];
 
@@ -24,6 +27,7 @@ function createAiMediaStudioService(options = {}) {
     identity,
     productStore,
     authorizeUser = () => false,
+    env = process.env,
     now = () => Date.now(),
   } = options;
 
@@ -41,6 +45,7 @@ function createAiMediaStudioService(options = {}) {
       view: ['ai', 'view'],
       prepare: ['ai', 'edit'],
       analyze: ['ai', 'create'],
+      approve: ['ai', 'approve'],
     };
     const permission = mapping[action];
     return Boolean(permission && authorizeUser(user, permission[0], permission[1]));
@@ -62,6 +67,7 @@ function createAiMediaStudioService(options = {}) {
   }
 
   function defaultPlan(product) {
+    const timestamp = new Date(now()).toISOString();
     return {
       id: null,
       productId: product.id,
@@ -75,6 +81,26 @@ function createAiMediaStudioService(options = {}) {
         normalizedReferenceRole(item.role),
       ])),
       selectedAssets: [],
+      assets: ASSET_TYPES.map((assetType) => ({
+        assetId: deterministicAssetId(product.id, assetType),
+        productId: product.id,
+        assetType,
+        source: 'uploaded',
+        provider: 'uploaded',
+        status: 'planned',
+        productReferenceMediaIds: [],
+        styleReferenceMediaIds: [],
+        designLocks: [...DESIGN_LOCKS],
+        instructions: '',
+        promptPackage: null,
+        generatedMediaId: null,
+        approvedMediaId: null,
+        approval: null,
+        replacedAssetReference: null,
+        revision: 1,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })),
       designLocks: [...DESIGN_LOCKS],
       instructions: '',
       analysis: null,
@@ -90,14 +116,24 @@ function createAiMediaStudioService(options = {}) {
     };
   }
 
+  function completeAssets(product, plan) {
+    const existing = Array.isArray(plan.assets) ? plan.assets : [];
+    const byType = new Map(existing.map((asset) => [asset.assetType, asset]));
+    const defaults = defaultPlan(product).assets;
+    return ASSET_TYPES.map((assetType) => byType.get(assetType) ||
+      defaults.find((asset) => asset.assetType === assetType));
+  }
+
   function planFor(state, product) {
-    return state.plans.find((item) => item.productId === product.id) || defaultPlan(product);
+    const plan = state.plans.find((item) => item.productId === product.id) || defaultPlan(product);
+    return { ...plan, assets: completeAssets(product, plan) };
   }
 
   function safeWorkspace(user, product, state) {
     const plan = planFor(state, product);
+    const registry = createProviderRegistry({ settings: state.providerSettings, env });
     return {
-      schemaVersion: 1,
+      schemaVersion: 2,
       storeRevision: state.storeRevision,
       productId: product.id,
       plan,
@@ -118,13 +154,39 @@ function createAiMediaStudioService(options = {}) {
         view: allowed(user, 'view'),
         prepare: allowed(user, 'prepare'),
         analyze: allowed(user, 'analyze'),
+        approve: allowed(user, 'approve'),
         configureProvider: user.accountType === 'owner',
       },
+      providers: registry.list(),
       provider: {
-        integrated: false,
-        status: 'not_integrated',
-        message: 'No image-generation provider is connected in this sprint.',
+        integrated: false, status: 'not_integrated',
+        message: 'Provider planning is available. Automated image execution remains disabled.',
       },
+      costEstimate: estimatePlan(plan, registry),
+    };
+  }
+
+  function estimatePlan(plan, registry) {
+    const assets = completeAssets({ id: plan.productId }, plan);
+    const items = assets.map((asset) => ({
+      assetId: asset.assetId,
+      assetType: asset.assetType,
+      provider: asset.provider,
+      ...registry.estimate(asset.provider),
+    }));
+    const byProvider = Object.values(items.reduce((groups, item) => {
+      groups[item.provider] ||= { provider: item.provider, count: 0, amount: 0, tracked: true };
+      groups[item.provider].count += 1;
+      if (item.amount == null) groups[item.provider].tracked = false;
+      else groups[item.provider].amount += item.amount;
+      return groups;
+    }, {}));
+    return {
+      items,
+      byProvider,
+      total: items.every((item) => item.amount != null)
+        ? { amount: items.reduce((sum, item) => sum + item.amount, 0), currency: 'USD' }
+        : { amount: null, currency: null, label: 'Contains untracked or unavailable provider costs' },
     };
   }
 
@@ -157,6 +219,7 @@ function createAiMediaStudioService(options = {}) {
         updatedAt: timestamp,
         updatedBy: user.id,
       };
+      plan.assets = completeAssets(product, plan);
       const index = state.plans.findIndex((item) => item.productId === product.id);
       if (index >= 0) state.plans[index] = plan;
       else state.plans.push(plan);
@@ -176,6 +239,204 @@ function createAiMediaStudioService(options = {}) {
       plan: result.value,
       workspace: safeWorkspace(user, product, result.store),
     };
+  }
+
+  function assetFor(plan, assetId) {
+    const asset = plan.assets.find((item) => item.assetId === assetId);
+    if (!asset) throw Object.assign(new Error('Media asset plan item was not found.'), { code: 'NOT_FOUND' });
+    return asset;
+  }
+
+  function providerFor(state, providerId) {
+    const registry = createProviderRegistry({ settings: state.providerSettings, env });
+    const provider = registry.get(providerId);
+    if (!provider) throw Object.assign(new Error('Media provider is not supported.'), { code: 'VALIDATION' });
+    return { provider, registry };
+  }
+
+  function safeRefs(values, product) {
+    const valid = new Set((product.media || []).map((item) => item.id));
+    return [...new Set(Array.isArray(values) ? values.map(String).filter((id) => valid.has(id)) : [])];
+  }
+
+  function promptPackage(product, plan, asset, provider) {
+    const lockText = asset.designLocks.length
+      ? `Preserve exactly: ${asset.designLocks.join(', ')}. Do not invent, remove, relocate, or materially alter locked product features.`
+      : 'Do not invent product features.';
+    return {
+      schemaVersion: 1,
+      packageId: crypto.randomUUID(),
+      provider: provider.id,
+      providerMode: provider.mode,
+      productIdentity: { productId: product.id, productUuid: product.productUuid },
+      productCategory: product.organization?.category || '',
+      productTitle: product.title || '',
+      confirmedColor: product.merchantAttributes?.color || product.organization?.color || '',
+      confirmedMaterial: product.merchantAttributes?.material || product.metafields?.leatherType || '',
+      assetType: asset.assetType,
+      targetAngle: asset.assetType,
+      productReferenceMediaIds: [...asset.productReferenceMediaIds],
+      styleReferenceMediaIds: [...asset.styleReferenceMediaIds],
+      designLocks: [...asset.designLocks],
+      userInstructions: asset.instructions || plan.instructions || '',
+      negativeConstraints: [
+        lockText,
+        'Style and composition references must not override factual garment details.',
+        'Do not add unsupported logos, hardware, pockets, stitching, materials, colors, or certification marks.',
+      ],
+      backgroundRequirement: asset.assetType.includes('White Background') ? 'Clean white background' : '',
+      compositionRequirement: asset.assetType,
+      outputOrientation: asset.assetType.includes('Banner') ? 'landscape' : 'portrait_or_square',
+      outputQuality: 'future_provider_setting',
+      approvalRequirement: 'Explicit approval is required before activation.',
+      providerNotes: provider.id === 'google_flow'
+        ? 'Manual Prompt Workflow. Copy/export this package, run it manually in Google Flow, then upload the returned result.'
+        : 'Execution is disabled. This package is ready for a future approved provider executor.',
+      editablePrompt: [
+        `Create ${asset.assetType} media for ${product.title || 'this product'}.`,
+        lockText,
+        asset.instructions || plan.instructions || '',
+      ].filter(Boolean).join('\n\n'),
+      generatedAt: new Date(now()).toISOString(),
+    };
+  }
+
+  async function mutateAsset(session, input = {}, operation) {
+    const user = userFor(session);
+    requirePermission(user, operation === 'approve' || operation === 'reject' ? 'approve' : 'prepare');
+    const product = productFor(input.productId);
+    const timestamp = new Date(now()).toISOString();
+    const result = await store.mutate(async (state) => {
+      const index = state.plans.findIndex((item) => item.productId === product.id);
+      if (index < 0) throw Object.assign(new Error('Save the Media Studio plan first.'), { code: 'AI_MEDIA_PLAN_REQUIRED' });
+      const plan = { ...state.plans[index], assets: completeAssets(product, state.plans[index]) };
+      const assetIndex = plan.assets.findIndex((item) => item.assetId === input.assetId);
+      const current = assetFor(plan, input.assetId);
+      let asset = { ...current };
+      let action = `media_asset_${operation}`;
+      if (operation === 'source') {
+        const source = ASSET_SOURCES.includes(input.source) ? input.source : null;
+        if (!source) throw Object.assign(new Error('Select a supported asset source.'), { code: 'VALIDATION' });
+        const { provider } = providerFor(state, source);
+        if (!provider.available && source !== 'openai') {
+          throw Object.assign(new Error('Selected provider is unavailable.'), { code: 'PROVIDER_UNAVAILABLE' });
+        }
+        asset = {
+          ...asset,
+          source,
+          provider: source,
+          status: source === 'none' ? 'not_required'
+            : source === 'google_flow' ? 'source_selected'
+              : source === 'openai' && !provider.available ? 'awaiting_configuration' : 'ready',
+          productReferenceMediaIds: safeRefs(input.productReferenceMediaIds, product),
+          styleReferenceMediaIds: safeRefs(input.styleReferenceMediaIds, product),
+          designLocks: Array.isArray(input.designLocks)
+            ? input.designLocks.filter((lock) => DESIGN_LOCKS.includes(lock)) : asset.designLocks,
+          instructions: typeof input.instructions === 'string' ? input.instructions.slice(0, 4000) : asset.instructions,
+          promptPackage: null,
+        };
+      } else if (operation === 'prompt') {
+        const { provider } = providerFor(state, asset.provider);
+        if (!['openai', 'google_flow'].includes(asset.provider)) {
+          throw Object.assign(new Error('Prompt packages apply only to provider-planned assets.'), { code: 'VALIDATION' });
+        }
+        asset.promptPackage = promptPackage(product, plan, asset, provider);
+        asset.status = 'prompt_ready';
+      } else if (operation === 'result') {
+        const mediaId = safeRefs([input.mediaId], product)[0];
+        if (!mediaId) throw Object.assign(new Error('Select a valid uploaded result.'), { code: 'VALIDATION' });
+        if (asset.approvedMediaId && asset.approvedMediaId !== mediaId) {
+          asset.replacedAssetReference = asset.approvedMediaId;
+        }
+        asset.generatedMediaId = mediaId;
+        asset.status = 'awaiting_approval';
+      } else if (operation === 'approve') {
+        const mediaId = asset.generatedMediaId ||
+          (asset.provider === 'uploaded' ? asset.productReferenceMediaIds[0] : null);
+        if (!mediaId) throw Object.assign(new Error('Attach or select a media result before approval.'), { code: 'VALIDATION' });
+        asset.approvedMediaId = mediaId;
+        asset.status = 'approved';
+        asset.approval = { status: 'approved', approverId: user.id, timestamp, rejectionReason: '' };
+      } else if (operation === 'reject') {
+        asset.status = 'rejected';
+        asset.approval = {
+          status: 'rejected', approverId: user.id, timestamp,
+          rejectionReason: String(input.reason || '').slice(0, 500),
+        };
+      } else if (operation === 'restore') {
+        if (!asset.replacedAssetReference) throw Object.assign(new Error('No previous approved asset is available.'), { code: 'VALIDATION' });
+        asset.approvedMediaId = asset.replacedAssetReference;
+        asset.status = 'approved';
+      }
+      asset.revision = Number(asset.revision || 0) + 1;
+      asset.updatedAt = timestamp;
+      plan.assets[assetIndex] = asset;
+      plan.revision = Number(plan.revision || 0) + 1;
+      plan.updatedAt = timestamp;
+      plan.updatedBy = user.id;
+      state.plans[index] = plan;
+      state.auditEvents.push({
+        id: crypto.randomUUID(), timestamp, action, actorId: user.id,
+        productId: product.id, assetId: asset.assetId, assetType: asset.assetType,
+        provider: asset.provider, status: asset.status, assetRevision: asset.revision,
+      });
+      return { store: state, value: asset };
+    }, input.expectedRevision);
+    return { asset: result.value, workspace: safeWorkspace(user, product, result.store) };
+  }
+
+  async function updateProviderSettings(session, input = {}) {
+    const user = userFor(session);
+    if (user.accountType !== 'owner') throw Object.assign(new Error('Named Owner permission is required.'), { code: 'FORBIDDEN' });
+    const result = await store.mutate(async (state) => {
+      const openai = input.openai || {};
+      const flow = input.googleFlow || {};
+      state.providerSettings = {
+        ...state.providerSettings,
+        openai: {
+          ...state.providerSettings.openai,
+          enabled: openai.enabled === true,
+          defaultQuality: String(openai.defaultQuality || '').slice(0, 80),
+          defaultSize: String(openai.defaultSize || '').slice(0, 80),
+        },
+        google_flow: {
+          ...state.providerSettings.google_flow,
+          enabled: flow.enabled !== false,
+          promptExportEnabled: true,
+          manualResultUploadEnabled: true,
+        },
+      };
+      state.auditEvents.push({
+        id: crypto.randomUUID(), timestamp: new Date(now()).toISOString(),
+        action: 'media_provider_settings_updated', actorId: user.id,
+        changedProviders: ['openai', 'google_flow'],
+      });
+      return { store: state, value: null };
+    }, input.expectedRevision);
+    return {
+      storeRevision: result.store.storeRevision,
+      providers: createProviderRegistry({ settings: result.store.providerSettings, env }).list(),
+    };
+  }
+
+  function providerStatus(session) {
+    const user = userFor(session);
+    requirePermission(user, 'view');
+    const state = store.read();
+    return {
+      storeRevision: state.storeRevision,
+      providers: createProviderRegistry({ settings: state.providerSettings, env }).list(),
+      canConfigure: user.accountType === 'owner',
+    };
+  }
+
+  function assetHistory(session, productId, assetId) {
+    const user = userFor(session);
+    requirePermission(user, 'view');
+    productFor(productId);
+    return store.read().auditEvents.filter((event) => event.assetId === assetId)
+      .map(({ id, timestamp, action, actorId, productId: pid, assetId: aid, assetType, provider, status, assetRevision }) =>
+        ({ id, timestamp, action, actorId, productId: pid, assetId: aid, assetType, provider, status, assetRevision }));
   }
 
   function metadataAnalysis(product, plan) {
@@ -253,7 +514,20 @@ function createAiMediaStudioService(options = {}) {
     };
   }
 
-  return { analyze, save, workspace };
+  return {
+    analyze,
+    approveAsset: (session, input) => mutateAsset(session, input, 'approve'),
+    assetHistory,
+    attachResult: (session, input) => mutateAsset(session, input, 'result'),
+    generatePrompt: (session, input) => mutateAsset(session, input, 'prompt'),
+    providerStatus,
+    rejectAsset: (session, input) => mutateAsset(session, input, 'reject'),
+    restoreAsset: (session, input) => mutateAsset(session, input, 'restore'),
+    save,
+    updateAssetSource: (session, input) => mutateAsset(session, input, 'source'),
+    updateProviderSettings,
+    workspace,
+  };
 }
 
 module.exports = { createAiMediaStudioService };

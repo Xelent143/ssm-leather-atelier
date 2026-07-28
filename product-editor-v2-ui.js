@@ -45,7 +45,7 @@
 
   function mediaStudioPanel(product, workspace) {
     if (!product.id) return `<section class="card pe-card pe-media-studio">
-      <div class="card-head"><div><span class="eyebrow">AI Media Studio v1</span><h2>Product media workflow</h2><p>Save the product draft before preparing its reference-image and asset plan.</p></div><span class="pe-ai-state">Draft required</span></div>
+      <div class="card-head"><div><span class="eyebrow">AI Media Studio v2 · V1-compatible</span><h2>Product media workflow</h2><p>Save the product draft before preparing its reference-image and asset plan.</p></div><span class="pe-ai-state">Draft required</span></div>
     </section>`;
     const studio = workspace.aiMediaStudio;
     if (!studio) return '';
@@ -64,8 +64,23 @@
     };
     const assignedRole = (item) => plan.roleAssignments?.[item.id] || item.currentRole || 'Unknown';
     return `<section class="card pe-card pe-media-studio" id="pe-media-studio">
-      <div class="card-head"><div><span class="eyebrow">AI Media Studio v1 · Workflow foundation</span><h2>Reference images → governed asset plan</h2><p>Plan media production without generating or modifying any image.</p></div><div class="pe-ms-state"><span>${esc(plan.state.replaceAll('_', ' '))}</span><strong>${analysis?.coveragePercentage ?? 0}% coverage</strong></div></div>
-      <div class="pe-ms-notice"><strong>No image provider connected</strong><span>This sprint makes no image API calls. Analysis below uses confirmed roles and existing product metadata only.</span></div>
+      <div class="card-head"><div><span class="eyebrow">AI Media Studio v2 · V1-compatible multi-source foundation</span><h2>Reference images → governed asset plan</h2><p>Mix uploaded, OpenAI-planned, and Google Flow manual assets without changing stable asset identities.</p></div><div class="pe-ms-state"><span>${esc(plan.state.replaceAll('_', ' '))}</span><strong>${analysis?.coveragePercentage ?? 0}% coverage</strong></div></div>
+      <div class="pe-ms-notice"><strong>Provider-neutral planning</strong><span>AI Media Studio v1 plans remain compatible. No image provider connected for execution; uploaded media stays the default and Google Flow is manual.</span></div>
+      <div class="pe-ms-providers">
+        ${studio.providers.map((provider) => `<article class="${provider.available ? 'available' : 'unavailable'}">
+          <div><strong>${esc(provider.displayName)}</strong><span>${esc(provider.mode.replaceAll('_', ' '))}</span></div>
+          <b>${esc(provider.status)}</b>
+          ${provider.id === 'openai' ? `<small>Target model: ${esc(provider.targetModel || 'gpt-image-2')} · API key value is never exposed.</small>` : ''}
+          ${provider.id === 'google_flow' ? '<small>Manual Prompt Workflow · Direct API: unsupported · Prompt export and manual result upload only.</small>' : ''}
+        </article>`).join('')}
+      </div>
+      ${studio.permissions.configureProvider ? `<details class="pe-ms-settings"><summary>Owner provider settings</summary>
+        <div class="pe-ms-settings-grid">
+          <label><input type="checkbox" id="pe-ms-openai-enabled" ${studio.providers.find((item) => item.id === 'openai')?.enabled ? 'checked' : ''}> Enable OpenAI planning option</label>
+          <label><input type="checkbox" id="pe-ms-flow-enabled" ${studio.providers.find((item) => item.id === 'google_flow')?.enabled ? 'checked' : ''}> Enable Google Flow manual workflow</label>
+          <button class="btn" type="button" id="pe-ms-provider-save">Save provider settings</button>
+        </div>
+      </details>` : ''}
       <div class="pe-ms-modes" role="radiogroup" aria-label="Image source workflow">
         ${studio.constants.sourceModes.map((mode) => `<label class="${plan.mode === mode ? 'active' : ''}"><input type="radio" name="mediaStudio.mode" value="${mode}" ${plan.mode === mode ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><strong>${esc(modeLabel[mode])}</strong><span>${esc(modeDescription[mode])}</span></label>`).join('')}
       </div>
@@ -101,8 +116,40 @@
         <div class="pe-ms-coverage">${(analysis?.coverage || ['Front', 'Back', 'Left', 'Right', 'Interior', 'Detail', 'Hardware', 'Lifestyle'].map((role) => ({ role, available: plan.referenceMediaIds.some((id) => plan.roleAssignments?.[id] === role) }))).map((item) => `<div class="${item.available ? 'complete' : 'missing'}"><span>${item.available ? '✓' : '✕'}</span><strong>${esc(item.role)}</strong></div>`).join('')}<div class="${plan.selectedAssets.includes('Ghost Mannequin') ? 'planned' : 'missing'}"><span>${plan.selectedAssets.includes('Ghost Mannequin') ? '◷' : '✕'}</span><strong>Ghost</strong></div></div>
       </div>
       <div class="pe-ms-section">
-        <h3>Asset plan <small>Generate later</small></h3>
-        <div class="pe-ms-choices">${studio.constants.assetTypes.map((asset) => `<label><input type="checkbox" data-ms-asset="${esc(asset)}" ${plan.selectedAssets.includes(asset) ? 'checked' : ''} ${!canPrepare ? 'disabled' : ''}><span>${esc(asset)}</span></label>`).join('')}</div>
+        <div class="card-head compact"><div><h3>Per-asset source plan</h3><p>Each stable asset identity may use a different source. Generated or returned assets require approval.</p></div><strong>${esc(studio.costEstimate.total.label || `$${Number(studio.costEstimate.total.amount || 0).toFixed(2)}`)}</strong></div>
+        <div class="pe-ms-assets">${plan.assets.map((asset) => {
+          const estimate = studio.costEstimate.items.find((item) => item.assetId === asset.assetId);
+          const provider = studio.providers.find((item) => item.id === asset.provider);
+          const options = [
+            ['uploaded', 'Use Uploaded Image'],
+            ['openai', 'Generate with OpenAI'],
+            ['google_flow', 'Prepare for Google Flow'],
+            ['none', 'Not Required'],
+          ];
+          const mediaOptions = (selected = []) => studio.referenceMedia.map((item) =>
+            `<option value="${item.id}" ${selected.includes(item.id) ? 'selected' : ''}>${esc(item.title)}</option>`).join('');
+          return `<article class="pe-ms-asset" data-ms-asset-id="${asset.assetId}">
+            <header><div><strong>${esc(asset.assetType)}</strong><span>${esc(asset.status.replaceAll('_', ' '))}</span></div><b>${esc(estimate?.label || '—')}</b></header>
+            <label class="pe-field"><span>Asset source</span><select data-ms-source="${asset.assetId}" ${!canPrepare ? 'disabled' : ''}>${options.map(([value, label]) => `<option value="${value}" ${asset.provider === value ? 'selected' : ''} ${value !== 'uploaded' && value !== 'none' && !studio.providers.find((item) => item.id === value)?.enabled ? 'disabled' : ''}>${label}</option>`).join('')}</select></label>
+            <div class="pe-ms-ref-selectors">
+              <label class="pe-field"><span>Product identity references</span><select multiple data-ms-product-refs="${asset.assetId}">${mediaOptions(asset.productReferenceMediaIds)}</select><small>Factual garment details.</small></label>
+              <label class="pe-field"><span>Style / composition references</span><select multiple data-ms-style-refs="${asset.assetId}">${mediaOptions(asset.styleReferenceMediaIds)}</select><small>Must never override product facts.</small></label>
+            </div>
+            <label class="pe-field"><span>Asset instructions</span><input data-ms-asset-instructions="${asset.assetId}" value="${esc(asset.instructions)}" placeholder="Keep exact color, stitching and hardware."></label>
+            <button class="btn" type="button" data-ms-save-asset="${asset.assetId}" ${!canPrepare ? 'disabled' : ''}>Save Asset Plan</button>
+            ${asset.promptPackage ? `<details class="pe-ms-prompt"><summary>Prompt package preview</summary><textarea data-ms-prompt-edit="${asset.assetId}">${esc(asset.promptPackage.editablePrompt)}</textarea><div class="button-row"><button class="btn" type="button" data-ms-copy-prompt="${asset.assetId}">Copy</button><button class="btn" type="button" data-ms-export-prompt="${asset.assetId}">Export text</button></div><small>${esc(asset.promptPackage.providerNotes)}</small></details>` : ''}
+            ${['openai', 'google_flow'].includes(asset.provider) ? `<button class="btn" type="button" data-ms-prompt="${asset.assetId}" ${!canPrepare ? 'disabled' : ''}>${asset.promptPackage ? 'Regenerate Prompt' : asset.provider === 'google_flow' ? 'Prepare Flow Prompt' : 'Prepare OpenAI Prompt'}</button>` : ''}
+            ${asset.provider === 'google_flow' ? `<label class="pe-field"><span>Attach manually returned result</span><select data-ms-result="${asset.assetId}"><option value="">Select uploaded media…</option>${mediaOptions()}</select></label>` : ''}
+            <div class="button-row">
+              ${asset.provider === 'google_flow' ? `<button class="btn" type="button" data-ms-attach="${asset.assetId}">Attach Result</button>` : ''}
+              <button class="btn primary" type="button" data-ms-approve="${asset.assetId}" ${!studio.permissions.approve ? 'disabled' : ''}>Approve</button>
+              <button class="btn danger" type="button" data-ms-reject="${asset.assetId}" ${!studio.permissions.approve ? 'disabled' : ''}>Reject</button>
+              ${asset.replacedAssetReference ? `<button class="btn" type="button" data-ms-restore="${asset.assetId}" ${!studio.permissions.approve ? 'disabled' : ''}>Restore Previous Approved Asset</button>` : ''}
+              <button class="btn" type="button" data-ms-history="${asset.assetId}">History</button>
+            </div>
+            ${!provider?.available && asset.provider === 'openai' ? '<p class="pe-ms-warning">OpenAI is unavailable or disabled. The stable asset plan remains saved; execution is not attempted.</p>' : ''}
+          </article>`;
+        }).join('')}</div>
       </div>
       <div class="pe-ms-section">
         <h3>Design lock <small>Future generation constraints</small></h3>
@@ -110,7 +157,7 @@
       </div>
       <div class="pe-ms-bottom">
         <label class="pe-field"><span>Image instructions</span><textarea name="mediaStudio.instructions" placeholder="Keep exact leather color. Keep exact zipper. Use premium USA lifestyle.">${esc(plan.instructions)}</textarea><small>Stored with this versioned plan. No instruction is executed in this sprint.</small></label>
-        <aside><h3>Estimated cost</h3><strong>—</strong><p>${esc(plan.estimatedCost.message)}</p>${studio.permissions.configureProvider ? '<span class="pe-ms-owner">Owner may configure a provider in a future approved sprint.</span>' : '<span>Provider configuration is unavailable for this role.</span>'}</aside>
+        <aside><h3>Estimated cost</h3><strong>${esc(studio.costEstimate.total.label || `$${Number(studio.costEstimate.total.amount || 0).toFixed(2)}`)}</strong><p>Uploaded assets cost $0.00. Google Flow is external/manual. OpenAI pricing remains configuration-driven.</p>${studio.permissions.configureProvider ? '<span class="pe-ms-owner">Owner provider controls are available above.</span>' : '<span>Provider configuration is unavailable for this role.</span>'}</aside>
       </div>
     </section>`;
   }
@@ -452,6 +499,75 @@
           body: JSON.stringify({ expectedRevision: saved.workspace.storeRevision }),
         });
         refreshMediaStudio(response, 'Coverage analysis complete — no image API was called');
+      } catch (error) { context.toast(error.message); }
+    });
+    const mediaAssetAction = async (assetId, operation, payload = {}) => {
+      try {
+        const response = await context.api(`/api/admin/ai-media-studio/products/${product.id}/assets/${assetId}/${operation}`, {
+          method: 'POST',
+          body: JSON.stringify({ expectedRevision: workspace.aiMediaStudio.storeRevision, ...payload }),
+        });
+        refreshMediaStudio(response, `Media asset ${operation.replaceAll('_', ' ')} complete`);
+      } catch (error) { context.toast(error.message); }
+    };
+    const saveAssetSource = (assetId) => {
+      const control = document.querySelector(`[data-ms-source="${assetId}"]`);
+      const selected = (name) => [...(document.querySelector(`[${name}="${assetId}"]`)?.selectedOptions || [])].map((item) => item.value);
+      return mediaAssetAction(assetId, 'source', {
+        source: control.value,
+        productReferenceMediaIds: selected('data-ms-product-refs'),
+        styleReferenceMediaIds: selected('data-ms-style-refs'),
+        designLocks: [...document.querySelectorAll('[data-ms-lock]:checked')].map((item) => item.dataset.msLock),
+        instructions: document.querySelector(`[data-ms-asset-instructions="${assetId}"]`)?.value || '',
+      });
+    };
+    document.querySelectorAll('[data-ms-source]').forEach((control) => control.addEventListener('change',
+      () => saveAssetSource(control.dataset.msSource)));
+    document.querySelectorAll('[data-ms-save-asset]').forEach((button) => button.addEventListener('click',
+      () => saveAssetSource(button.dataset.msSaveAsset)));
+    document.querySelectorAll('[data-ms-prompt]').forEach((button) => button.addEventListener('click',
+      () => mediaAssetAction(button.dataset.msPrompt, 'prompt')));
+    document.querySelectorAll('[data-ms-attach]').forEach((button) => button.addEventListener('click', () => {
+      const mediaId = document.querySelector(`[data-ms-result="${button.dataset.msAttach}"]`)?.value;
+      mediaAssetAction(button.dataset.msAttach, 'result', { mediaId });
+    }));
+    document.querySelectorAll('[data-ms-approve]').forEach((button) => button.addEventListener('click',
+      () => mediaAssetAction(button.dataset.msApprove, 'approve')));
+    document.querySelectorAll('[data-ms-reject]').forEach((button) => button.addEventListener('click',
+      () => mediaAssetAction(button.dataset.msReject, 'reject', { reason: prompt('Rejection reason') || '' })));
+    document.querySelectorAll('[data-ms-restore]').forEach((button) => button.addEventListener('click',
+      () => mediaAssetAction(button.dataset.msRestore, 'restore')));
+    document.querySelectorAll('[data-ms-history]').forEach((button) => button.addEventListener('click', async () => {
+      try {
+        const result = await context.api(`/api/admin/ai-media-studio/products/${product.id}/assets/${button.dataset.msHistory}/history`);
+        context.toast(`${result.events.length} safe audit event${result.events.length === 1 ? '' : 's'} recorded`);
+      } catch (error) { context.toast(error.message); }
+    }));
+    document.querySelectorAll('[data-ms-copy-prompt]').forEach((button) => button.addEventListener('click', async () => {
+      const text = document.querySelector(`[data-ms-prompt-edit="${button.dataset.msCopyPrompt}"]`)?.value || '';
+      await navigator.clipboard.writeText(text);
+      context.toast('Prompt copied');
+    }));
+    document.querySelectorAll('[data-ms-export-prompt]').forEach((button) => button.addEventListener('click', () => {
+      const text = document.querySelector(`[data-ms-prompt-edit="${button.dataset.msExportPrompt}"]`)?.value || '';
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+      link.download = `motogrip-media-prompt-${button.dataset.msExportPrompt}.txt`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }));
+    document.getElementById('pe-ms-provider-save')?.addEventListener('click', async () => {
+      try {
+        await context.api('/api/admin/ai-media-studio/providers', {
+          method: 'PUT',
+          body: JSON.stringify({
+            expectedRevision: workspace.aiMediaStudio.storeRevision,
+            openai: { enabled: document.getElementById('pe-ms-openai-enabled')?.checked === true },
+            googleFlow: { enabled: document.getElementById('pe-ms-flow-enabled')?.checked !== false },
+          }),
+        });
+        const response = await context.api(`/api/admin/ai-media-studio/products/${product.id}`);
+        refreshMediaStudio({ workspace: response }, 'Provider settings saved without exposing credentials');
       } catch (error) { context.toast(error.message); }
     });
     document.getElementById('pe-ai-analyze')?.addEventListener('click', async () => {
