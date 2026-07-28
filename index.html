@@ -1126,8 +1126,9 @@ const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
     sizes: PAGE_ONE_MENS_JACKET_SIZES,
     madeToMeasureSurcharge: 50,
     gallery: [
-      { label: 'Front · on model', src: modelFront },
+      // Open on the clean, straight-on product image; model shots remain one click away.
       { label: 'Front · product studio', src: A(`${base}-product-front.png`) },
+      { label: 'Front · on model', src: modelFront },
       { label: 'Back · product studio', src: A(`${base}-product-back.png`) },
       { label: 'Side · product studio', src: A(`${base}-product-side.png`) },
       { label: 'Detail · leather and hardware', src: A(`${base}-close-up.png`) },
