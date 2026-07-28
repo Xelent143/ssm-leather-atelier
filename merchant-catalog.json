@@ -1262,6 +1262,118 @@
       "perfectFor": "Premium everyday styling, travel and motorcycle-lifestyle wardrobes.",
       "whyYouWillLoveIt": "A precise waist-and-inseam selection pairs with soft lambskin and a confident flared profile.",
       "reviews": []
+    },
+    {
+      "id": "p17",
+      "slug": "heritage-crazy-horse-leather-laptop-backpack",
+      "title": "Heritage Crazy Horse Leather Laptop Backpack",
+      "category": "Bags",
+      "gender": "Unisex",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 100,
+      "madeToMeasureEnabled": false,
+      "madeToMeasureSurcharge": 0,
+      "tag": "New",
+      "description": "A structured Crazy Horse cowhide leather backpack available in black or distressed brown, with organized storage, padded carrying support and antiqued brass-tone hardware. Its 37 × 28 × 16 cm profile includes a compartment sized for laptops up to 15.6 inches.",
+      "descriptionHtml": "<p>A structured Crazy Horse cowhide leather backpack available in black or distressed brown, with organized storage, padded carrying support and antiqued brass-tone hardware.</p><p>Its 37 × 28 × 16 cm profile includes a compartment sized for laptops up to 15.6 inches.</p>",
+      "shortDescription": "Crazy Horse cowhide · Black or Brown · 15.6-inch laptop compartment",
+      "image": "assets/generated/bags/heritage-crazy-horse-backpack/01-front.jpg",
+      "primaryImage": "assets/generated/bags/heritage-crazy-horse-backpack/01-front.jpg",
+      "galleryImages": [
+        "assets/generated/bags/heritage-crazy-horse-backpack/02-lifestyle-front.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/03-side.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/04-three-quarter.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/05-back.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/06-profile.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/07-main-compartment.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/08-open-construction.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/09-leather-detail.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/10-buckle-detail.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/11-feature-infographic.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/12-material-infographic.jpg",
+        "assets/generated/bags/heritage-crazy-horse-backpack/13-dimensions.jpg"
+      ],
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "One Size": 100
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": ["One Size"]
+        },
+        {
+          "name": "Color",
+          "values": ["Black", "Brown"]
+        }
+      ],
+      "variants": [
+        {
+          "id": "p17-one-size",
+          "sku": "MG-P17-OS",
+          "attributes": {
+            "size": "One Size"
+          },
+          "quantity": 100,
+          "price": 250,
+          "status": "active",
+          "availableForSale": true
+        }
+      ],
+      "seoTitle": "Crazy Horse Leather Laptop Backpack | MOTOGRIP",
+      "seoDescription": "Discover the MOTOGRIP Heritage Crazy Horse cowhide leather backpack in black or brown, with padded 15.6-inch laptop storage and brass-tone hardware.",
+      "canonicalUrl": "https://motogripgear.com/products/heritage-crazy-horse-leather-laptop-backpack",
+      "schemaDescription": "MOTOGRIP Crazy Horse cowhide leather backpack in black or brown, with organized storage and a padded compartment for laptops up to 15.6 inches.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MG-P17-OS",
+      "mpn": "MOTOGRIP-HERITAGE-CRAZY-HORSE-BACKPACK",
+      "gtin": "",
+      "googleProductCategory": "Luggage & Bags > Backpacks",
+      "productType": "Leather bags > Backpacks",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP Heritage brown Crazy Horse cowhide leather backpack, front view",
+      "material": "Crazy Horse cowhide leather",
+      "color": "Black, Brown",
+      "sizeSystem": "",
+      "sizeType": "",
+      "ageGroup": "Adult",
+      "itemGroupId": "heritage-crazy-horse-leather-laptop-backpack",
+      "variantOptions": ["Size", "Color"],
+      "shippingWeight": "",
+      "shippingPolicy": "Worldwide express delivery available at checkout",
+      "returnPolicy": "Returns and refunds are subject to the published MOTOGRIP GEAR policy",
+      "careInstructions": "Wipe gently with a dry soft cloth. Store away from direct heat, prolonged sunlight and excess moisture.",
+      "fitNotes": "One size. Exterior dimensions are 37 cm high × 28 cm wide × 16 cm deep.",
+      "leatherType": "Crazy Horse cowhide leather",
+      "leatherOrigin": "",
+      "leatherThickness": "",
+      "lining": "Brown textile lining with padded laptop compartment",
+      "hardware": "Antiqued brass-tone buckles and zippers",
+      "closureType": "Zipped main compartment with dual-buckle front flap",
+      "factualProjection": true,
+      "features": [
+        "Crazy Horse cowhide leather with a naturally varied distressed finish",
+        "Padded compartment sized for laptops up to 15.6 inches",
+        "Dual-buckle front flap with a large front utility pocket",
+        "Two buckle-fastened side pockets and a rear zipper pocket",
+        "Adjustable padded shoulder straps and a top carry handle",
+        "Antiqued brass-tone buckles and zipper hardware"
+      ],
+      "specifications": [
+        ["Material", "Crazy Horse cowhide leather"],
+        ["Color", "Black or distressed brown"],
+        ["Dimensions", "37 cm high × 28 cm wide × 16 cm deep"],
+        ["Laptop compatibility", "Up to 15.6 inches"],
+        ["Carry system", "Adjustable padded shoulder straps and top handle"],
+        ["Availability", "100 pieces total, shared across both color selections"]
+      ],
+      "perfectFor": "Daily commuting, work, study and organized travel.",
+      "whyYouWillLoveIt": "A practical multi-pocket layout meets the character of distressed Crazy Horse cowhide in a balanced everyday backpack.",
+      "reviews": []
     }
   ]
 }

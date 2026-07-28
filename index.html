@@ -1488,6 +1488,96 @@ const SSM_PRODUCTS = [
     reviews: [],
   },
   {
+    id: 'p17', slug: 'heritage-crazy-horse-leather-laptop-backpack',
+    name: 'Heritage Crazy Horse Leather Laptop Backpack', cat: 'Bags', gender: 'Unisex',
+    price: 250, hue: 28, tag: 'New',
+    blurb: 'Crazy Horse cowhide · Black or Brown · 15.6-inch laptop compartment',
+    img: A('bags/heritage-crazy-horse-backpack/02-lifestyle-front.jpg'),
+    alt: A('bags/heritage-crazy-horse-backpack/01-front.jpg'),
+    images: [
+      A('bags/heritage-crazy-horse-backpack/01-front.jpg'),
+      A('bags/heritage-crazy-horse-backpack/02-lifestyle-front.jpg'),
+      A('bags/heritage-crazy-horse-backpack/03-side.jpg'),
+      A('bags/heritage-crazy-horse-backpack/04-three-quarter.jpg'),
+      A('bags/heritage-crazy-horse-backpack/05-back.jpg'),
+      A('bags/heritage-crazy-horse-backpack/06-profile.jpg'),
+      A('bags/heritage-crazy-horse-backpack/07-main-compartment.jpg'),
+      A('bags/heritage-crazy-horse-backpack/08-open-construction.jpg'),
+      A('bags/heritage-crazy-horse-backpack/09-leather-detail.jpg'),
+      A('bags/heritage-crazy-horse-backpack/10-buckle-detail.jpg'),
+      A('bags/heritage-crazy-horse-backpack/11-feature-infographic.jpg'),
+      A('bags/heritage-crazy-horse-backpack/12-material-infographic.jpg'),
+      A('bags/heritage-crazy-horse-backpack/13-dimensions.jpg'),
+    ],
+    material: 'Crazy Horse cowhide leather',
+    materialLocked: true,
+    colors: [
+      {
+        id: 'black',
+        name: 'Black',
+        color: '#171717',
+        image: A('bags/heritage-crazy-horse-backpack/14-black-leather-swatch.png'),
+      },
+      {
+        id: 'distressed-brown',
+        name: 'Brown',
+        color: '#754526',
+        image: A('bags/heritage-crazy-horse-backpack/09-leather-detail.jpg'),
+      },
+    ],
+    defaultColor: 'distressed-brown',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    stock: { 'One Size': 100 },
+    options: [
+      { name: 'Size', values: ['One Size'] },
+      { name: 'Color', values: ['Black', 'Brown'] },
+    ],
+    variants: [
+      {
+        id: 'p17-one-size',
+        sku: 'MG-P17-OS',
+        attributes: { size: 'One Size' },
+        quantity: 100,
+        price: 250,
+        status: 'active',
+        availableForSale: true,
+      },
+    ],
+    publicDescription: 'A structured Crazy Horse cowhide leather backpack available in black or distressed brown, with organized storage, padded carrying support and antiqued brass-tone hardware. Its 37 × 28 × 16 cm profile includes a compartment sized for laptops up to 15.6 inches.',
+    sections: {
+      features: [
+        'Crazy Horse cowhide leather with a naturally varied distressed finish',
+        'Padded compartment sized for laptops up to 15.6 inches',
+        'Dual-buckle front flap with a large front utility pocket',
+        'Two buckle-fastened side pockets and a rear zipper pocket',
+        'Adjustable padded shoulder straps and a top carry handle',
+        'Antiqued brass-tone buckles and zipper hardware',
+      ],
+      specifications: [
+        ['Material', 'Crazy Horse cowhide leather'],
+        ['Color', 'Black or distressed brown'],
+        ['Dimensions', '37 cm high × 28 cm wide × 16 cm deep'],
+        ['Laptop compatibility', 'Up to 15.6 inches'],
+        ['Carry system', 'Adjustable padded shoulder straps and top handle'],
+        ['Availability', '100 pieces total, shared across both color selections'],
+      ],
+      perfectFor: 'Daily commuting, work, study and organized travel.',
+      whyYouWillLoveIt: 'A practical multi-pocket layout meets the character of distressed Crazy Horse cowhide in a balanced everyday backpack.',
+    },
+    metafields: {
+      outerMaterial: 'Crazy Horse cowhide leather',
+      leatherType: 'Crazy Horse cowhide',
+      closure: 'Zipped main compartment with dual-buckle front flap',
+      pocketCount: 4,
+      fit: 'One size',
+      careInstructions: 'Wipe gently with a dry soft cloth. Store away from direct heat, prolonged sunlight and excess moisture.',
+      customSizingAvailable: false,
+      personalizationAvailable: false,
+    },
+    factualProjection: true,
+    reviews: [],
+  },
+  {
     id: 'p3', slug: 'marlowe-moto-vest',
     name: 'Marlowe Moto Vest', cat: 'Vests', gender: 'Men',
     price: 640, hue: 30, tag: null,
@@ -2051,7 +2141,8 @@ const SSM_MEGA_MENUS = {
     {
       title: 'Bags',
       links: ['Leather Bags', 'Vintage Leather Bags', 'Laptop Bags', 'Travel Bags', 'Business Bags', 'Leather Backpacks'],
-      cat: 'Vests',
+      cat: 'Bags',
+      allGenders: true,
     },
     {
       title: 'Gifts',
@@ -2088,7 +2179,8 @@ const SSM_MEGA_MENUS = {
     {
       title: 'Bags',
       links: ['Leather Bags', 'Vintage Leather Bags', 'Laptop Bags', 'Travel Bags', 'Crossbody Bags', 'Leather Backpacks'],
-      cat: 'Vests',
+      cat: 'Bags',
+      allGenders: true,
     },
     {
       title: 'Gifts',
@@ -2689,7 +2781,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
   const navigate = (item, section) => {
     const destination = section?.view || item.view;
     const params = destination === 'shop'
-      ? { gender: item.filter || null, cat: section?.cat || null }
+      ? { gender: section?.allGenders ? null : (item.filter || null), cat: section?.cat || null }
       : null;
     setOpenMega(null);
     go(destination, params);
@@ -3019,6 +3111,11 @@ function QuickView({ product, onClose, addToCart, go }) {
   const quickSizes = product.sizes || ['XS','S','M','L','XL'];
   const selectedQuickColor = product.colors?.find(c => c.id === productColor);
   const selectedQuickCollar = product.collarColors?.find(c => c.id === collarColor);
+  const quickAvailable = !product.factualProjection || (product.variants || []).some(variant =>
+    Number(variant.quantity || 0) > 0 &&
+    variant.status !== 'disabled' &&
+    variant.status !== 'draft' &&
+    variant.availableForSale !== false);
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div className="drawer-overlay" onClick={onClose}
@@ -3106,9 +3203,10 @@ function QuickView({ product, onClose, addToCart, go }) {
 
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn" style={{ flex: 1, justifyContent: 'center' }}
+            <button className="btn" disabled={!quickAvailable}
+              style={{ flex: 1, justifyContent: 'center', opacity: quickAvailable ? 1 : 0.45, cursor: quickAvailable ? 'pointer' : 'not-allowed' }}
               onClick={() => { addToCart(product, { leather: quickLeather, size, productColor: selectedQuickColor?.name || null, collarColor: selectedQuickCollar?.name || null }); onClose(); }}>
-              Add to Bag
+              {quickAvailable ? 'Add to Bag' : 'Currently unavailable'}
             </button>
             <button className="btn btn-ghost" onClick={() => { onClose(); go && go('pdp', { product }); }}>Full Details</button>
           </div>
@@ -3727,6 +3825,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Pants')   return "Tailored from the central panels. High-rise, straight, riding.";
+    if (cat === 'Bags')    return "Structured leather carry for work, travel, and the road between.";
     return "Twelve silhouettes, hand-numbered. Each piece signed by the hand that made it.";
   })();
 
@@ -3769,7 +3868,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
               }}>{g.toUpperCase()}</button>
           ))}
           <div style={{ width: 1, height: 16, background: 'var(--line-2)', margin: '0 12px' }} />
-          {['All', 'Jackets', 'Vests', 'Pants'].map(c => (
+          {['All', 'Jackets', 'Vests', 'Pants', 'Bags'].map(c => (
             <button key={c} onClick={() => setCat(c)} className="mono"
               style={{
                 fontSize: 10, padding: '8px 14px', cursor: 'pointer',
@@ -4132,11 +4231,24 @@ function FactualPDP({ product: p, go, addToCart }) {
                 {(option.values || []).map(value => {
                   const active = selection[option.name.toLowerCase()] === value;
                   const available = optionAvailable(option.name, value);
+                  const colorSpec = option.name.toLowerCase() === 'color'
+                    ? (p.colors || []).find(color => color.name === value)
+                    : null;
                   return <button key={value} onClick={() => chooseOption(option.name, value)}
                     disabled={!available} aria-pressed={active}
                     aria-label={`${option.name} ${value}${available ? '' : ', unavailable'}`}
-                    style={{ minHeight: 40, padding: '0 14px', border: `1px solid ${active ? 'var(--fg)' : 'var(--line-2)'}`, background: active ? 'var(--fg)' : 'transparent', color: active ? 'var(--bg)' : available ? 'var(--fg-2)' : 'var(--fg-4)', opacity: available ? 1 : 0.45, textDecoration: available ? 'none' : 'line-through', cursor: available ? 'pointer' : 'not-allowed' }}>
-                    {value}
+                    style={{ minHeight: 40, padding: colorSpec ? '5px 12px 5px 6px' : '0 14px', border: `1px solid ${active ? 'var(--fg)' : 'var(--line-2)'}`, background: active ? 'var(--fg)' : 'transparent', color: active ? 'var(--bg)' : available ? 'var(--fg-2)' : 'var(--fg-4)', opacity: available ? 1 : 0.45, textDecoration: available ? 'none' : 'line-through', cursor: available ? 'pointer' : 'not-allowed', display: 'inline-flex', alignItems: 'center', gap: colorSpec ? 9 : 0 }}>
+                    {colorSpec && <span aria-hidden="true" style={{
+                      width: 30,
+                      height: 30,
+                      flex: '0 0 30px',
+                      borderRadius: '50%',
+                      border: `1px solid ${active ? 'var(--bg)' : 'var(--line-2)'}`,
+                      backgroundImage: `url(${colorSpec.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }} />}
+                    <span>{value}</span>
                   </button>;
                 })}
               </div>

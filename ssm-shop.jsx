@@ -73,6 +73,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Pants')   return "Tailored from the central panels. High-rise, straight, riding.";
+    if (cat === 'Bags')    return "Structured leather carry for work, travel, and the road between.";
     return "Twelve silhouettes, hand-numbered. Each piece signed by the hand that made it.";
   })();
 
@@ -115,7 +116,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
               }}>{g.toUpperCase()}</button>
           ))}
           <div style={{ width: 1, height: 16, background: 'var(--line-2)', margin: '0 12px' }} />
-          {['All', 'Jackets', 'Vests', 'Pants'].map(c => (
+          {['All', 'Jackets', 'Vests', 'Pants', 'Bags'].map(c => (
             <button key={c} onClick={() => setCat(c)} className="mono"
               style={{
                 fontSize: 10, padding: '8px 14px', cursor: 'pointer',
