@@ -81,8 +81,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
       </nav>
 
       <div className="pdp-commerce-layout" style={{
-        display: 'grid', gridTemplateColumns: '76px minmax(0, 0.96fr) minmax(440px, 0.72fr)', gap: 18,
-        padding: '0 0 64px', maxWidth: 1640, margin: '0 auto', width: '100%',
+        display: 'grid', gridTemplateColumns: '76px minmax(520px, 620px) minmax(500px, 1fr)', gap: 24,
+        padding: '0 0 64px', maxWidth: 1480, margin: '0 auto', width: '100%',
       }}>
         {/* Thumbnails */}
         <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 0 }}>
