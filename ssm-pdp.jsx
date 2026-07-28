@@ -102,7 +102,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
         {/* Main image */}
         <div className="pdp-main-media" style={{ paddingLeft: 0 }}>
           <div className="ph grain pdp-main-image" data-img="1" data-label=""
-            style={{ height: 'min(720px, calc(100vh - 330px))', minHeight: 560, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
+            style={{ aspectRatio: '1 / 1', height: 'auto', minHeight: 0, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8 }}>
               <button aria-label="Save to wishlist"
                 style={{ width: 36, height: 36, background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(10px)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 0, color: 'var(--fg)' }}>
