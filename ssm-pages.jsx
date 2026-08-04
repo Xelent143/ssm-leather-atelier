@@ -117,16 +117,6 @@ function BrandedEditorialImage({ src, alt, caption, eager = false, ratio = '3 / 
           decoding="async"
           style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
         />
-        <img
-          src="/assets/motogrip-logo-transparent-v2.png"
-          alt=""
-          aria-hidden="true"
-          style={{
-            position: 'absolute', left: 22, top: 18, width: 'clamp(108px, 15vw, 190px)',
-            height: 'auto', opacity: .92, filter: 'drop-shadow(0 2px 6px rgba(245,241,232,.55))',
-            pointerEvents: 'none',
-          }}
-        />
       </div>
       {caption && (
         <figcaption className="mono" style={{ fontSize: 9, lineHeight: 1.6, color: 'var(--fg-4)', marginTop: 10 }}>
