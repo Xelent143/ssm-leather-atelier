@@ -47,6 +47,44 @@ const cleanPathForView = (view, params = {}) => {
   return SSM_VIEW_PATHS[view] || '/';
 };
 
+const SSM_HISTORY_MARKER = 'motogrip-spa-route';
+const historyStateFor = (view, params = {}) => ({
+  __motogripRoute: SSM_HISTORY_MARKER,
+  view,
+  params,
+});
+const routeStateFromLocation = () => {
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+  const productSlug = pathProductSlug();
+  if (productSlug) {
+    const product = productFromSlug(productSlug);
+    if (product) return { view: 'pdp', params: { product } };
+  }
+
+  const articleMatch = pathname.match(/^\/blog\/([a-z0-9-]+)$/);
+  if (articleMatch) {
+    const article = SSM_JOURNAL.find(candidate => candidate.id === articleMatch[1]);
+    if (article) return { view: 'article', params: { article } };
+  }
+
+  const cleanRoutes = {
+    '/': { view: 'home', params: {} },
+    '/shop': { view: 'shop', params: {} },
+    '/women': { view: 'shop', params: { gender: 'Women' } },
+    '/men': { view: 'shop', params: { gender: 'Men' } },
+    '/jackets': { view: 'shop', params: { cat: 'Jackets' } },
+    '/vests': { view: 'shop', params: { cat: 'Vests' } },
+    '/pants': { view: 'shop', params: { cat: 'Pants' } },
+  };
+  if (cleanRoutes[pathname]) return cleanRoutes[pathname];
+
+  const matchedView = Object.entries(SSM_VIEW_PATHS)
+    .find(([, routePath]) => routePath === pathname)?.[0];
+  return matchedView
+    ? { view: matchedView, params: {} }
+    : { view: 'notfound', params: {} };
+};
+
 function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
     : (view === 'shop' && params?.gender === 'Men') ? SSM_SEO.shopMen
@@ -181,13 +219,34 @@ function App() {
   // SEO sync
   React.useEffect(() => { applySEO(view, params); }, [view, params]);
 
-  // URL sync uses one clean, crawlable path for every public page.
+  // Keep the active entry canonical and attach enough state for Back/Forward.
   React.useEffect(() => {
     const path = cleanPathForView(view, params);
-    if (window.location.pathname !== path || window.location.hash) window.history.replaceState(null, '', path);
+    window.history.replaceState(historyStateFor(view, params), '', path);
   }, [view, params]);
 
+  React.useEffect(() => {
+    const onPopState = (event) => {
+      const savedRoute = event.state?.__motogripRoute === SSM_HISTORY_MARKER
+        ? event.state
+        : routeStateFromLocation();
+      setView(savedRoute.view);
+      setParams(savedRoute.params || {});
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   const go = (v, p = {}) => {
+    const path = cleanPathForView(v, p);
+    const nextState = historyStateFor(v, p);
+    const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (currentPath === path && !window.location.hash) {
+      window.history.replaceState(nextState, '', path);
+    } else {
+      window.history.pushState(nextState, '', path);
+    }
     setView(v);
     setParams(p);
     window.scrollTo({ top: 0, behavior: 'auto' });
