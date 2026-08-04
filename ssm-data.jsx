@@ -1260,6 +1260,495 @@ const SSM_JOURNAL = [
     nextPrimary: 'Shop motorcycle jackets',
     nextPrimaryCat: 'Jackets',
   },
+  {
+    id: 'how-to-clean-vegan-leather-jacket',
+    cat: 'Material Care',
+    title: 'How should you clean a vegan leather jacket without damaging the finish?',
+    seoTitle: 'How to Clean a Vegan Leather Jacket Safely | MOTOGRIP GEAR',
+    metaDescription: 'Clean a vegan leather jacket safely with a care-label-first method for PU and faux leather, including spot testing, drying and storage guidance.',
+    dek: 'A finish-first routine for lifting everyday dust and marks from PU or faux leather without soaking, stripping or overheating the surface.',
+    duration: '8 min',
+    date: 'August 4, 2026',
+    isoDate: '2026-08-04',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/clean-vegan-leather-jacket-card.jpg',
+    heroAlt: 'Leather-care specialist gently wiping the exterior of a black vegan leather motorcycle jacket',
+    cardImage: '/assets/generated/blog/clean-vegan-leather-jacket-card.jpg',
+    cardImageAlt: 'Clean vegan leather safely editorial cover with a specialist wiping a black jacket exterior',
+    quickAnswer: 'Check the care label, remove loose dust with a dry microfiber cloth, then spot-test a barely damp cloth with a small amount of mild soap only if the manufacturer permits it. Wipe one panel at a time, remove any residue with a second clean damp cloth, and dry the jacket naturally away from heat and direct sun. Do not soak, machine-wash, scrub, steam or apply genuine-leather conditioner unless the jacket maker specifically approves it for that synthetic finish.',
+    body: [
+      '“Vegan leather” can describe several synthetic constructions, including polyurethane-coated fabrics and other faux-leather finishes. They can look similar to genuine leather but react differently to moisture, heat, solvents and conditioning products.',
+      'The safest routine is therefore material-specific and conservative. Start with the label, use the least moisture that will do the job, and stop if colour, gloss or texture changes during a hidden-area test.'
+    ],
+    sections: [
+      {
+        title: '1. Identify the material and read the label',
+        paragraphs: [
+          'Find the fibre and care label before choosing a cleaner. PU, PVC, plant-based composites and coated textiles can have different topcoats, so a method that suits one jacket may dull or soften another.',
+          'Follow the garment manufacturer when its instructions differ from general advice. If the label permits professional cleaning only, or the material is unknown, use a cleaner experienced with coated synthetic garments.'
+        ]
+      },
+      {
+        title: '2. Remove surface dust before adding moisture',
+        paragraphs: [
+          'Lay the zipped jacket on a clean towel or support it on a broad hanger. Empty the pockets, close exposed hardware and lift dust with a soft, dry microfiber cloth.',
+          'Pay attention to collar edges, cuffs, seams and pocket openings. Removing grit first reduces the chance of dragging abrasive particles across the finish during wet wiping.'
+        ]
+      },
+      {
+        title: '3. Test a hidden area',
+        paragraphs: [
+          'Dampen a white cloth with clean lukewarm water, wring it thoroughly and test the inside of a hem or another concealed finished area. Let the spot dry completely before comparing colour, sheen and feel.',
+          'If the label permits mild soap, repeat the test with a highly diluted amount. Stop if pigment transfers, the surface becomes tacky, the gloss changes or the coating begins to lift.'
+        ]
+      },
+      {
+        title: '4. Wipe gently, one small panel at a time',
+        paragraphs: [
+          'Use light, overlapping passes rather than pressure. Work from cleaner areas toward the mark and keep water away from open seams, damaged coatings and absorbent textile panels.',
+          'For an isolated mark, hold the damp cloth on the area briefly and lift it instead of scrubbing. Repeated friction can polish a matte finish or accelerate peeling on an older jacket.'
+        ]
+      },
+      {
+        title: '5. Remove residue and dry naturally',
+        paragraphs: [
+          'Wipe the treated panel with a second clean, barely damp cloth so no soap film remains. Blot with a dry towel and reshape the jacket on a broad hanger.',
+          'Allow it to air-dry at room temperature with space around it. Keep it away from hair dryers, radiators, tumble dryers and direct sunlight, which can harden, warp or weaken a synthetic coating.'
+        ]
+      },
+      {
+        title: '6. Avoid products designed for genuine leather',
+        paragraphs: [
+          'Leather oils, waxes and conditioners are made for animal hide and may leave a synthetic surface greasy, uneven or sticky. Use a finish product only when the jacket manufacturer identifies it as compatible with the exact material.',
+          'Avoid bleach, acetone, alcohol-heavy sprays, abrasive pads, furniture polish and fragranced household wipes. Never mix cleaners or attempt to mask a stain with dye before testing compatibility.'
+        ]
+      },
+      {
+        title: '7. Store the jacket without crushing the coating',
+        paragraphs: [
+          'When completely dry, hang the jacket on a broad, smooth hanger in a cool, ventilated wardrobe. Leave space around sleeves and lapels and use a breathable cover rather than sealed plastic.',
+          'Do not fold it under heavy garments for long periods. Permanent creases, heat and friction can stress the coating, especially once it has started to crack or peel.'
+        ]
+      },
+      {
+        title: '8. Know what cleaning cannot repair',
+        paragraphs: [
+          'Cleaning can remove surface soil, but it cannot reverse delamination, flaking, bubbling or deep cracking. Aggressive treatment may enlarge those areas.',
+          'If the surface is actively peeling, stop wiping and ask a garment repair specialist whether a panel repair is practical. Replacement may be more reliable when deterioration is widespread.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'VEGAN LEATHER CARE CHECKLIST',
+    checklistTitle: 'Use the least aggressive method that works.',
+    checklist: [
+      'The care label and material type are checked first.',
+      'Loose dust is removed before any damp cleaning.',
+      'Water and any permitted soap are tested on a hidden area.',
+      'The cloth is barely damp and the finish is never soaked or scrubbed.',
+      'All residue is removed with a second clean cloth.',
+      'The jacket dries naturally away from heat and direct sun.',
+      'No genuine-leather conditioner is used without manufacturer approval.',
+      'Peeling or cracked coatings are referred for repair assessment.'
+    ],
+    faqEyebrow: 'VEGAN LEATHER CLEANING FAQ',
+    faq: [
+      {
+        q: 'Can a vegan leather jacket go in the washing machine?',
+        a: 'Only if the care label explicitly allows it. Machine agitation, soaking and spin cycles can crease or separate many coated finishes, so hand wiping is the safer default.'
+      },
+      {
+        q: 'Can I use real-leather conditioner on faux leather?',
+        a: 'Not by default. Oils and waxes intended for hide may sit on the synthetic coating or change its appearance. Use only a product approved for the jacket’s exact material.'
+      },
+      {
+        q: 'How do I remove a stubborn stain?',
+        a: 'Do not escalate straight to solvent or scrubbing. Check the manufacturer’s stain guidance and test any approved product in a concealed area; use professional help for ink, dye transfer or unknown marks.'
+      },
+      {
+        q: 'Why is my vegan leather jacket peeling?',
+        a: 'Peeling usually means the surface coating is breaking down through age, heat, friction, moisture or material fatigue. Cleaning cannot bond the coating back to its base fabric.'
+      },
+      {
+        q: 'How often should vegan leather be cleaned?',
+        a: 'Wipe dust and fresh marks as needed rather than following an aggressive schedule. A gentle clean after heavy wear and correct dry storage usually does more good than frequent product application.'
+      }
+    ],
+    pull: 'Synthetic leather needs less moisture and less product—not a genuine-leather care routine.',
+    nextTitle: 'Match the care method to the material.',
+    nextBody: 'Explore MOTOGRIP GEAR care guides for smooth leather, suede, denim and coated materials before cleaning your next riding layer.',
+    nextPrimary: 'More care guides',
+    nextPrimaryCat: 'Leather Care',
+  },
+  {
+    id: 'how-to-style-leather-jacket',
+    cat: 'Style Guide',
+    title: 'How should you style a leather jacket for everyday wear?',
+    seoTitle: 'How to Style a Leather Jacket: 4 Practical Outfits | MOTOGRIP GEAR',
+    metaDescription: 'Build four practical leather-jacket outfits with balanced proportions, simple layers and footwear that works from casual days to smarter evenings.',
+    dek: 'A leather jacket already carries visual weight. The strongest outfits give it space, balance its proportions and keep the rest of the look intentional.',
+    duration: '9 MIN',
+    date: 'August 4, 2026',
+    isoDate: '2026-08-04',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/style-leather-jacket-card.jpg',
+    heroAlt: 'Man styling a black leather jacket over a cream knit in a warm MOTOGRIP studio',
+    cardImage: '/assets/generated/blog/style-leather-jacket-card.jpg',
+    cardImageAlt: 'Style a leather jacket editorial guide cover',
+    quickAnswer: 'Start with the jacket silhouette, then use clean base layers, controlled colour and trousers that balance its length. A café racer works naturally with knitwear and tailored trousers; a biker jacket suits denim or monochrome layers; a bomber looks best when the waistband meets rather than fights the trouser rise.',
+    body: [
+      'The goal is not to make every item compete with the jacket. Leather has texture, shine and structure, so simple supporting pieces usually create the most confident result.',
+      'These combinations are starting points, not rules. Fit, climate and the specific leather finish should decide the final layer and footwear.'
+    ],
+    sections: [
+      {
+        title: '1. Begin with the jacket silhouette',
+        paragraphs: [
+          'A close café racer creates a clean, streamlined line. A double-rider jacket brings stronger hardware and asymmetry, while a bomber adds volume at the waist. Identify that shape before choosing the rest of the outfit.',
+          'Keep layers slim enough to sit comfortably beneath the jacket without stretching the zip, shoulders or armholes. If a sweater makes the leather pull or the sleeves bind, use a lighter knit or a roomier jacket.'
+        ]
+      },
+      {
+        title: '2. Outfit one: refined everyday layers',
+        paragraphs: [
+          'Pair a black or deep-brown café racer with a cream merino knit, charcoal trousers and clean leather boots. The soft knit reduces the visual hardness of the leather while the trousers keep the outfit polished.',
+          'Choose a crew neck or mock neck that sits neatly inside the collar. Keep belts and footwear close in tone so the jacket remains the focal point.'
+        ]
+      },
+      {
+        title: '3. Outfit two: denim without costume',
+        paragraphs: [
+          'Wear the jacket with a plain T-shirt and straight or tapered denim. Create clear contrast between the jacket and jeans—black leather with mid-blue denim, or brown leather with dark indigo works more easily than several near-identical dark surfaces.',
+          'Finish with understated boots or leather sneakers. Avoid stacking too many biker references at once unless that is the deliberate context of the outfit.'
+        ]
+      },
+      {
+        title: '4. Outfit three: tonal evening dressing',
+        paragraphs: [
+          'Build a near-monochrome base with a black knit, black or charcoal trousers and dark footwear, then let the leather texture separate the layers. Tonal dressing looks considered when fabrics differ in surface and weight.',
+          'A clean zip front and restrained hardware suit this approach best. One metal watch or simple ring is usually enough accessory detail.'
+        ]
+      },
+      {
+        title: '5. Outfit four: relaxed weekend balance',
+        paragraphs: [
+          'Combine a bomber or trucker-style leather jacket with a heavyweight T-shirt, relaxed straight trousers and low-profile sneakers. The wider trouser line balances a jacket with more body through the chest and waistband.',
+          'Let the jacket finish around the belt line. An excessively long top beneath a cropped jacket can divide the body awkwardly unless the layering is intentional.'
+        ]
+      },
+      {
+        title: '6. Use colour and footwear to finish the outfit',
+        paragraphs: [
+          'Black leather works naturally with charcoal, cream, olive, navy and washed denim. Brown leather pairs well with ecru, tobacco, forest green, navy and dark indigo. These are dependable combinations, not limits.',
+          'Choose footwear by the outfit’s level of formality: polished boots for tailored trousers, service boots for denim and minimal sneakers for relaxed looks. Clean, well-maintained footwear makes the entire leather outfit feel more deliberate.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'LEATHER JACKET STYLE CHECKLIST',
+    checklistTitle: 'Build the outfit around proportion, not noise.',
+    checklist: [
+      'The base layer fits comfortably beneath the jacket.',
+      'The trouser rise and jacket length create a balanced line.',
+      'Only one or two pieces carry strong texture or hardware.',
+      'Leather and denim have enough tonal contrast to read clearly.',
+      'Footwear matches the formality of the trousers.',
+      'Accessories support the look instead of competing with it.',
+      'The jacket is clean, conditioned appropriately and free of overloaded pockets.'
+    ],
+    faqEyebrow: 'LEATHER JACKET STYLING FAQ',
+    faq: [
+      { q: 'Can a leather jacket be worn with tailored trousers?', a: 'Yes. A clean café racer or minimal zip jacket works especially well with wool trousers, a fine knit and leather boots.' },
+      { q: 'Should shoes match the leather jacket exactly?', a: 'No. They should relate in formality and colour temperature, but an exact colour match is not required.' },
+      { q: 'Can black leather be worn with brown footwear?', a: 'Yes when the rest of the palette connects them. Dark brown boots with black leather, charcoal trousers and a cream knit can look intentional.' },
+      { q: 'What should be worn under a leather jacket?', a: 'A fitted T-shirt, knit, shirt or lightweight hoodie can work. Choose a layer that does not distort the jacket at the shoulders or zip.' },
+      { q: 'How can a leather jacket look less aggressive?', a: 'Use soft knitwear, lighter neutral colours, tailored trousers and restrained footwear rather than stacking heavy hardware and biker references.' }
+    ],
+    pull: 'Let the leather provide the character; let the rest of the outfit provide the balance.',
+    nextTitle: 'Choose a silhouette that earns repeat wear.',
+    nextBody: 'Explore MOTOGRIP GEAR jackets, measured fits and custom options built for everyday rotation.',
+    nextPrimary: 'Shop jackets',
+    nextPrimaryCat: 'Jackets',
+  },
+  {
+    id: 'how-to-style-leather-vest',
+    cat: 'Style Guide',
+    title: 'How should you style a leather vest without overcomplicating the outfit?',
+    seoTitle: 'How to Style a Leather Vest: Layering Guide | MOTOGRIP GEAR',
+    metaDescription: 'Style a leather vest with balanced base layers, trousers and footwear while understanding the difference between fashion and protective riding gear.',
+    dek: 'A leather vest works best as a deliberate outer layer: clean through the shoulder, controlled at the waist and paired with a base layer that supports its purpose.',
+    duration: '8 MIN',
+    date: 'August 4, 2026',
+    isoDate: '2026-08-04',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/style-leather-vest-card.jpg',
+    heroAlt: 'Man wearing a black leather vest over a cream knit in a MOTOGRIP studio',
+    cardImage: '/assets/generated/blog/style-leather-vest-card.jpg',
+    cardImageAlt: 'Style a leather vest layering guide cover',
+    quickAnswer: 'Choose a vest that sits cleanly at the shoulder and closes without pulling, then pair it with one simple base layer and trousers that balance its length. A T-shirt keeps the look direct, a fine knit makes it more refined and a shirt adds structure. A fashion vest is not automatically protective motorcycle equipment.',
+    body: [
+      'The vest should look like part of the outfit rather than an accessory added at the end. Its shape, pockets and closure determine how casual, tailored or rider-led the result feels.',
+      'Because the arms remain visible, the colour and fit of the base layer matter more than they do beneath a full jacket.'
+    ],
+    sections: [
+      {
+        title: '1. Check shoulder and body fit first',
+        paragraphs: [
+          'The shoulder edge should sit close to the natural shoulder without extending outward or cutting into the arm. The front should close without the leather bowing between fasteners.',
+          'Leave enough room for the layer you actually intend to wear. A vest fitted over a T-shirt may feel restrictive over a heavy hoodie or knit.'
+        ]
+      },
+      {
+        title: '2. Keep the base layer simple',
+        paragraphs: [
+          'A plain white, black or ecru T-shirt creates a direct, casual combination. A fine-gauge crew neck or long-sleeve thermal adds depth in cooler weather without competing with the vest.',
+          'If the vest has strong quilting, contrast stitching or multiple pockets, use a quieter base layer. If the vest is minimal, subtle texture in the knit or shirt can add interest.'
+        ]
+      },
+      {
+        title: '3. Balance vest length with trouser rise',
+        paragraphs: [
+          'A waist-length vest works naturally with mid- or higher-rise trousers because the two pieces meet cleanly. Very low-rise trousers can leave an awkward gap or make the torso appear longer.',
+          'Straight denim, fatigue trousers and tailored wool trousers can all work. Match the trouser structure to the vest: rugged with rugged, or minimal with refined.'
+        ]
+      },
+      {
+        title: '4. Build a restrained rider-inspired look',
+        paragraphs: [
+          'Pair a zip-front leather vest with a long-sleeve knit, dark straight denim and service boots. Keep logos and accessories limited so the materials and fit carry the outfit.',
+          'For actual riding, assess abrasion resistance, impact protection, visibility and certification separately. A leather fashion vest or heritage biker vest does not replace a properly selected protective jacket.'
+        ]
+      },
+      {
+        title: '5. Make the vest work away from the motorcycle',
+        paragraphs: [
+          'A clean vest over a cream knit with charcoal trousers and Chelsea boots creates a more refined everyday look. Brown leather can soften the outfit further when paired with navy, ecru or olive.',
+          'Keep the vest open for a relaxed vertical line or closed for a sharper silhouette. Do not overfill pockets; bulk changes the drape and can pull the front out of shape.'
+        ]
+      },
+      {
+        title: '6. Finish with proportionate footwear and accessories',
+        paragraphs: [
+          'Heavier boots suit a substantial motorcycle-style vest, while minimal boots or sneakers suit a cleaner fashion vest. Avoid footwear that feels visually lighter than every other part of the outfit.',
+          'One belt, watch or simple chain can complete the look. Too many metal details often compete with zips, snaps and buckles already present on the vest.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'LEATHER VEST STYLE CHECKLIST',
+    checklistTitle: 'Layer with purpose and keep the line clean.',
+    checklist: [
+      'The shoulder edge sits cleanly without flaring or pinching.',
+      'The vest closes comfortably over the chosen base layer.',
+      'The shirt or knit is simple enough for the vest details.',
+      'The hem works with the trouser rise.',
+      'Pocket bulk does not distort the silhouette.',
+      'Footwear matches the weight and purpose of the vest.',
+      'Protective riding requirements are assessed separately from appearance.'
+    ],
+    faqEyebrow: 'LEATHER VEST STYLING FAQ',
+    faq: [
+      { q: 'What shirt looks best under a leather vest?', a: 'A plain fitted T-shirt, thermal, fine knit or clean casual shirt is the most dependable starting point.' },
+      { q: 'Should a leather vest be worn open or closed?', a: 'Both work. Open creates a relaxed vertical line; closed looks sharper and shows whether the body fit is correct.' },
+      { q: 'Can a leather vest be worn with tailored trousers?', a: 'Yes, especially when the vest has minimal hardware and a clean hem. Use a fine knit or shirt and understated boots.' },
+      { q: 'Is every leather vest suitable for motorcycle protection?', a: 'No. Appearance and leather content alone do not confirm protective performance, abrasion resistance or impact protection.' },
+      { q: 'How long should a leather vest be?', a: 'Most styles look balanced when the hem meets the waistband or upper hip, though the intended silhouette and riding position can change the ideal length.' }
+    ],
+    pull: 'A strong vest outfit is built on fit and proportion, not added decoration.',
+    nextTitle: 'Find the vest that fits your layer and your purpose.',
+    nextBody: 'Compare MOTOGRIP GEAR vest silhouettes, materials and measured-fit options.',
+    nextPrimary: 'Shop vests',
+    nextPrimaryCat: 'Vests',
+  },
+  {
+    id: 'how-to-clean-leather-jacket',
+    cat: 'Leather Care',
+    title: 'How should you clean a smooth leather jacket safely at home?',
+    seoTitle: 'How to Clean a Leather Jacket Safely at Home | MOTOGRIP GEAR',
+    metaDescription: 'Clean a smooth finished leather jacket with a care-label-first, low-moisture method and learn when specialist leather cleaning is the safer choice.',
+    dek: 'Safe leather cleaning is controlled cleaning: identify the finish, remove dry soil first, test every product and use less moisture than you think you need.',
+    duration: '10 MIN',
+    date: 'August 4, 2026',
+    isoDate: '2026-08-04',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/clean-leather-jacket-card.jpg',
+    heroAlt: 'Leather care specialist gently wiping the exterior of a black leather jacket',
+    cardImage: '/assets/generated/blog/clean-leather-jacket-card.jpg',
+    cardImageAlt: 'Clean leather safely editorial care guide cover',
+    quickAnswer: 'Read the care label, confirm the jacket is smooth finished leather, remove dust with a soft cloth and test an approved leather cleaner in a hidden area. Work in small sections with minimal moisture, remove residue, reshape and air-dry away from heat. Suede, nubuck, aniline leather and difficult stains need their own methods or professional care.',
+    body: [
+      'Leather types do not respond to water and cleaners in the same way. A method that is acceptable for protected pigmented leather may permanently mark suede or absorbent aniline leather.',
+      'If the label prohibits home cleaning, the finish is unknown or the jacket has valuable decoration, stop before applying product and consult a leather specialist.'
+    ],
+    sections: [
+      {
+        title: '1. Identify the leather and read the care label',
+        paragraphs: [
+          'This guide is for smooth, finished leather. Suede and nubuck have a raised nap; aniline leather is more absorbent and can darken rapidly when wet. Coated synthetic materials require a different routine.',
+          'Follow the manufacturer’s instructions over general advice. Check detachable armour, trims, painted panels, patches and lining materials before cleaning.'
+        ]
+      },
+      {
+        title: '2. Prepare the jacket and remove dry soil',
+        paragraphs: [
+          'Empty the pockets, close zips and support the jacket on a broad hanger or clean flat surface. Use a dry microfiber cloth or very soft brush to lift dust from seams, folds and hardware.',
+          'Dry soil can become abrasive mud when liquid is added. Removing it first reduces rubbing and helps the cleaner work evenly.'
+        ]
+      },
+      {
+        title: '3. Test the cleaner before treating visible areas',
+        paragraphs: [
+          'Choose a pH-appropriate product identified for the jacket’s leather type. Apply a tiny amount to a concealed area and let it dry completely before judging colour, sheen or texture change.',
+          'Do not use household disinfectant, alcohol, bleach, acetone, furniture polish, fragranced wipes or an unverified DIY mixture. These can strip finish, stain leather or weaken coatings.'
+        ]
+      },
+      {
+        title: '4. Clean in small sections with minimal moisture',
+        paragraphs: [
+          'Apply the approved cleaner to the cloth rather than pouring it onto the jacket. Use light, overlapping passes and avoid scrubbing one spot aggressively.',
+          'Work panel by panel so moisture does not sit on the surface. Use a second clean cloth to remove any residue according to the product instructions.'
+        ]
+      },
+      {
+        title: '5. Dry naturally and restore the shape',
+        paragraphs: [
+          'Blot excess moisture, smooth the collar and seams, and hang the jacket on a broad hanger in moving room-temperature air. Keep it away from radiators, hair dryers, direct sun and tumble dryers.',
+          'Do not wear or fold the jacket while damp. Allow thicker seams and pocket areas to dry fully before storage.'
+        ]
+      },
+      {
+        title: '6. Condition only when compatible and necessary',
+        paragraphs: [
+          'A compatible leather conditioner can help maintain flexibility after cleaning, but too much product can darken leather, attract dust or leave a greasy surface. Test first and apply sparingly.',
+          'Do not condition suede, nubuck or coated materials with a smooth-leather conditioner. Follow the tannery, manufacturer or care-product instructions for frequency.'
+        ]
+      },
+      {
+        title: '7. Know when professional care is safer',
+        paragraphs: [
+          'Use a leather specialist for ink, paint, dye transfer, oil saturation, mould, widespread water marks, unknown finishes or garments with mixed materials. Early assessment is safer than repeated home experiments.',
+          'Cleaning cannot repair cracked finish, torn leather or failed seams. Those problems need restoration or repair rather than stronger cleaner.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'SMOOTH LEATHER CLEANING CHECKLIST',
+    checklistTitle: 'Less water, less friction, more control.',
+    checklist: [
+      'The care label and leather type are confirmed.',
+      'Pockets are empty and loose soil is removed first.',
+      'Every cleaner is tested in a concealed area.',
+      'Cleaner is applied to the cloth, not poured on the jacket.',
+      'The leather is never soaked or aggressively scrubbed.',
+      'The jacket dries naturally away from heat and direct sun.',
+      'Complex stains or unknown finishes go to a leather specialist.'
+    ],
+    faqEyebrow: 'LEATHER JACKET CLEANING FAQ',
+    faq: [
+      { q: 'Can a leather jacket be washed in a washing machine?', a: 'Not unless the manufacturer explicitly permits it. Soaking, detergent, agitation and spinning can damage leather, finish, structure and lining.' },
+      { q: 'Can dish soap be used on leather?', a: 'Do not assume it is safe. Use a product approved for the specific leather and test it first; household soaps can alter finish or leave residue.' },
+      { q: 'How often should a leather jacket be cleaned?', a: 'Remove dust and fresh marks as needed. Deep cleaning should be occasional and based on actual soil, the care label and professional advice.' },
+      { q: 'Can a leather jacket be dried with a hair dryer?', a: 'No. Concentrated heat can harden, shrink or distort leather and damage adhesives or finish.' },
+      { q: 'Should leather be conditioned after every clean?', a: 'Not automatically. Use a compatible conditioner only when the leather and product guidance support it, and apply a small tested amount.' }
+    ],
+    pull: 'The safest cleaner is the one matched to the leather, tested first and used sparingly.',
+    nextTitle: 'Care for the finish you actually own.',
+    nextBody: 'Explore MOTOGRIP GEAR guides for smooth leather, suede, denim and coated materials.',
+    nextPrimary: 'More care guides',
+    nextPrimaryCat: 'Leather Care',
+  },
+  {
+    id: 'how-to-remove-odor-from-leather',
+    cat: 'Leather Care',
+    title: 'How can odor be removed from a leather jacket or vest safely?',
+    seoTitle: 'How to Remove Odor from a Leather Jacket or Vest | MOTOGRIP GEAR',
+    metaDescription: 'Remove odor from a leather jacket or vest with ventilation, source-specific cleaning and safe absorbents while avoiding perfume, soaking and heat.',
+    dek: 'Odor is a symptom. The lasting solution is to identify moisture, smoke, sweat, storage or mould as the source and treat it without saturating or disguising the leather.',
+    duration: '9 MIN',
+    date: 'August 4, 2026',
+    isoDate: '2026-08-04',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/remove-odor-leather-card.jpg',
+    heroAlt: 'Black leather jacket airing on a broad hanger in a bright ventilated room',
+    cardImage: '/assets/generated/blog/remove-odor-leather-card.jpg',
+    cardImageAlt: 'Remove odor from leather editorial care guide cover',
+    quickAnswer: 'First make sure the jacket is dry and free of active mould. Air it in a shaded, ventilated room, then clean the appropriate exterior or lining area according to its care label. A breathable enclosed space with an odor absorber placed nearby—not rubbed onto the leather—can help. Persistent smoke, mould or unknown odors need professional leather cleaning.',
+    body: [
+      'Perfume can briefly cover odor, but it does not remove the source and may leave residue. Leather also absorbs moisture and chemicals unevenly, so aggressive deodorising can create a second problem.',
+      'Treat the jacket as a combination of leather exterior, textile lining, foam or armour, hardware and adhesives. Each component may require a different approach.'
+    ],
+    sections: [
+      {
+        title: '1. Identify the likely source',
+        paragraphs: [
+          'A musty odor may indicate damp storage or mould; smoke can settle into both leather and lining; sweat often concentrates at the collar, underarms and back. Chemical smells may come from a recent coating, solvent or storage environment.',
+          'If you see fuzzy growth, spreading spots or experience respiratory irritation, isolate the garment and seek professional advice rather than brushing it indoors.'
+        ]
+      },
+      {
+        title: '2. Air the garment safely',
+        paragraphs: [
+          'Place the dry jacket on a broad hanger in a shaded room with good air movement. Open zips and pockets so trapped air can escape, but do not expose the leather to prolonged direct sun.',
+          'Avoid radiators, hair dryers and tumble dryers. Heat can harden leather and may set some odors more deeply into the lining or finish.'
+        ]
+      },
+      {
+        title: '3. Clean the affected material, not just the smell',
+        paragraphs: [
+          'Follow the care label and use the correct method for smooth leather, suede, synthetic coating or textile lining. Test every product in a concealed area and use minimal moisture.',
+          'For sweat-related odor, the lining may need more attention than the leather shell. Do not saturate the lining while it remains attached; a leather cleaner can advise on safe localized treatment.'
+        ]
+      },
+      {
+        title: '4. Use odor absorbers without direct contact',
+        paragraphs: [
+          'Once the garment is completely dry, place it in a large breathable garment enclosure or clean ventilated space with activated charcoal or baking soda in a separate open container. Keep powder off the leather, lining and hardware.',
+          'Allow time, then remove the absorber and air the jacket again. Never sprinkle powder directly inside the jacket; residue can lodge in seams and combine with moisture.'
+        ]
+      },
+      {
+        title: '5. Avoid perfume, solvent and improvised sprays',
+        paragraphs: [
+          'Fragrance, essential oils, alcohol-heavy sprays and household disinfectants can stain leather, change sheen or create a persistent mixed odor. Vinegar and other DIY solutions are not universally safe across leather finishes.',
+          'Do not seal a damp or freshly sprayed jacket in plastic. Trapped moisture creates conditions for further odor and possible mould growth.'
+        ]
+      },
+      {
+        title: '6. Store only when fully dry',
+        paragraphs: [
+          'Use a broad hanger, a cool ventilated wardrobe and a breathable cover. Leave space around the garment and keep it away from damp walls, floors and heavily fragranced products.',
+          'Check storage periodically in humid conditions. Address leaks, condensation and poor airflow—the environment can reintroduce odor even after the jacket is cleaned.'
+        ]
+      },
+      {
+        title: '7. Escalate persistent or hazardous odors',
+        paragraphs: [
+          'Professional leather cleaning is the safer route for heavy smoke, fuel, chemical contamination, widespread mould or odor that returns after drying and appropriate cleaning.',
+          'Tell the specialist what caused the odor and which products have already been used. That information reduces the risk of incompatible treatment.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'LEATHER ODOR REMOVAL CHECKLIST',
+    checklistTitle: 'Air it, absorb it and remove the source.',
+    checklist: [
+      'The source is identified before treatment begins.',
+      'Visible mould or chemical contamination is isolated.',
+      'The garment airs in shade with good ventilation.',
+      'Cleaning follows the care label and material type.',
+      'Odor absorbers remain in a separate container.',
+      'Perfume, heat, soaking and direct powder contact are avoided.',
+      'The jacket is completely dry before breathable storage.'
+    ],
+    faqEyebrow: 'LEATHER ODOR FAQ',
+    faq: [
+      { q: 'Can baking soda be sprinkled directly on leather?', a: 'It is safer to keep it in a separate open container near the dry garment. Direct powder can lodge in seams, abrade finishes or combine with moisture.' },
+      { q: 'Can perfume remove leather odor?', a: 'No. Perfume masks odor temporarily and may stain the finish or create a stronger mixed smell.' },
+      { q: 'How long should a leather jacket be aired?', a: 'There is no universal time. Air it in shade until fully dry and reassess; persistent odor indicates that the source or lining still needs treatment.' },
+      { q: 'What should I do if the jacket smells mouldy?', a: 'Isolate it, avoid brushing it indoors and seek specialist help if mould is visible, widespread or associated with health symptoms.' },
+      { q: 'Can smoke odor be removed at home?', a: 'Light odor may improve with ventilation and material-appropriate cleaning, but heavy smoke often penetrates lining and leather and is better handled professionally.' }
+    ],
+    pull: 'Do not fight leather odor with stronger fragrance; remove the moisture, residue or contamination causing it.',
+    nextTitle: 'Protect leather between wears.',
+    nextBody: 'Use breathable storage, controlled humidity and the correct care method for every finish.',
+    nextPrimary: 'Leather care',
+    nextPrimaryCat: 'Leather Care',
+  },
 ];
 
 // ── FAQ data (used by /faq) ─────────────────────────────────────────────────
