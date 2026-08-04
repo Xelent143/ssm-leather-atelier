@@ -155,8 +155,8 @@ function Journal({ go }) {
           className="journal-feature-grid"
           style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40, cursor: 'pointer' }}>
           <BrandedEditorialImage
-            src={feature.hero}
-            alt="Man wearing a fitted espresso leather cafe racer jacket in the MOTOGRIP GEAR studio"
+            src={feature.cardImage || feature.hero}
+            alt={feature.cardImageAlt || feature.heroAlt || feature.title}
             eager={true}
           />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -185,7 +185,7 @@ function Journal({ go }) {
           <div className="journal-archive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
             {rest.map(j => (
               <div key={j.id} onClick={() => go('article', { article: j })} style={{ cursor: 'pointer' }} className="card">
-                <BrandedEditorialImage src={j.hero} alt={j.title} ratio="3 / 2" />
+                <BrandedEditorialImage src={j.cardImage || j.hero} alt={j.cardImageAlt || j.title} ratio="3 / 2" />
                 <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginTop: 16 }}>
                   {j.cat.toUpperCase()} · {j.duration.toUpperCase()}
                 </div>
@@ -305,7 +305,7 @@ function JournalArticle({ article, go }) {
                   src={section.image}
                   alt={section.imageAlt}
                   caption={section.imageCaption}
-                  ratio={index === 1 ? '4 / 3' : '3 / 2'}
+                  ratio={section.imageRatio || (index === 1 ? '4 / 3' : '3 / 2')}
                 />
               </div>
             )}
