@@ -338,6 +338,108 @@ function redirect(res, location) {
   res.end();
 }
 
+function permanentRedirect(res, location) {
+  res.writeHead(301, {
+    Location: location,
+    'Cache-Control': 'public, max-age=86400',
+  });
+  res.end();
+}
+
+function sendGone(res) {
+  send(
+    res,
+    410,
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Page retired | MOTOGRIP GEAR</title></head><body><main><h1>This page has been retired</h1><p>The requested legacy store page is no longer available.</p><a href="/shop">Shop MOTOGRIP GEAR</a></main></body></html>',
+    'text/html; charset=utf-8',
+    {
+      'Cache-Control': 'public, max-age=86400',
+      'X-Robots-Tag': 'noindex, nofollow, noarchive',
+    },
+  );
+}
+
+const legacyWooQueryNames = new Set([
+  'stock_status',
+  'product_cat',
+  'product_tag',
+  'orderby',
+  'min_price',
+  'max_price',
+  'rating_filter',
+  'add-to-cart',
+  'remove_item',
+  'wc-ajax',
+  'post_type',
+]);
+
+function hasLegacyWooQuery(url) {
+  return [...url.searchParams.keys()].some((key) => {
+    const normalized = key.toLowerCase();
+    return legacyWooQueryNames.has(normalized)
+      || normalized.startsWith('filter_')
+      || normalized.startsWith('query_type_')
+      || normalized.startsWith('woocommerce_');
+  });
+}
+
+function legacyWooCategoryDestination(requestPath) {
+  const segments = requestPath.toLowerCase().split('/').filter(Boolean).slice(1);
+  const joined = segments.join('-');
+  if (segments.some((segment) => ['mens', 'men', 'male'].includes(segment))) return '/men';
+  if (segments.some((segment) => ['womens', 'women', 'female'].includes(segment))) return '/women';
+  if (/vest|waistcoat/.test(joined)) return '/vests';
+  if (/jacket|coat|bomber|cafe-racer/.test(joined)) return '/jackets';
+  if (/pant|trouser|chap/.test(joined)) return '/pants';
+  return '/shop';
+}
+
+function handleLegacyWooRequest(url, requestPath, res) {
+  const normalizedPath = requestPath !== '/' ? requestPath.replace(/\/+$/, '') : '/';
+  const lowerPath = normalizedPath.toLowerCase();
+
+  if (lowerPath.startsWith('/product-category/')) {
+    permanentRedirect(res, legacyWooCategoryDestination(lowerPath));
+    return true;
+  }
+
+  if (lowerPath.startsWith('/product-tag/')
+    || lowerPath === '/woocommerce'
+    || lowerPath.startsWith('/woocommerce/')
+    || lowerPath.startsWith('/woocommerce-api/')
+    || lowerPath.startsWith('/wc-api/')
+    || lowerPath.startsWith('/wp-json/wc/')
+    || lowerPath.startsWith('/wp-content/plugins/woocommerce/')) {
+    sendGone(res);
+    return true;
+  }
+
+  const legacyProductMatch = lowerPath.match(/^\/product\/([a-z0-9-]+)$/);
+  if (legacyProductMatch) {
+    const slug = legacyProductMatch[1];
+    const product = readPublicStore().products.find((item) => item.slug === slug
+      && !['archived', 'hidden', 'draft'].includes(item.status));
+    if (product) permanentRedirect(res, `/products/${slug}`);
+    else sendGone(res);
+    return true;
+  }
+
+  if (hasLegacyWooQuery(url)) {
+    if (normalizedPath === '/' && url.searchParams.get('post_type') === 'product') {
+      permanentRedirect(res, '/shop');
+      return true;
+    }
+    if (publicRoutes[normalizedPath]
+      || /^\/products\/[a-z0-9-]+$/.test(normalizedPath)
+      || /^\/collections\/[a-z0-9-]+$/.test(normalizedPath)) {
+      permanentRedirect(res, normalizedPath);
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function escapeHtml(value = '') {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -1448,7 +1550,15 @@ function serveFile(req, res, filePath) {
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-    const requestPath = decodeURIComponent(url.pathname);
+    let requestPath;
+    try {
+      requestPath = decodeURIComponent(url.pathname);
+    } catch {
+      send(res, 400, 'Malformed URL', 'text/plain; charset=utf-8', {
+        'X-Robots-Tag': 'noindex, nofollow, noarchive',
+      });
+      return;
+    }
 
     if (requestPath.startsWith('/api/')) {
       const handled = await handleApi(req, res, requestPath);
@@ -1459,6 +1569,8 @@ const server = http.createServer(async (req, res) => {
       send(res, 405, 'Method not allowed');
       return;
     }
+
+    if (handleLegacyWooRequest(url, requestPath, res)) return;
 
     if (assetCdnBase && requestPath.startsWith('/assets/generated/')) {
       res.writeHead(302, {
@@ -1475,8 +1587,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (requestPath === '/sitemap_index.xml' || requestPath === '/product-sitemap1.xml') {
-      res.writeHead(301, { Location: '/sitemap.xml', 'Cache-Control': 'public, max-age=86400' });
-      res.end();
+      permanentRedirect(res, '/sitemap.xml');
       return;
     }
 
