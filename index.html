@@ -1436,6 +1436,43 @@ const SSM_PRODUCTS = [
     },
   },
   {
+    id: 'p17', slug: 'mens-black-white-mustard-lambskin-leather-tshirt',
+    name: "Men's Black, White & Mustard Lambskin Leather T-Shirt", cat: 'Shirts', gender: 'Men',
+    price: 179, hue: 45, tag: 'New',
+    blurb: 'Genuine lambskin · diagonal color-block design · short sleeves',
+    img: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/01-motogrip-mens-color-block-lambskin-leather-tshirt-model-front.png'),
+    alt: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/02-motogrip-mens-color-block-lambskin-leather-tshirt-front.png'),
+    material: 'Genuine lambskin leather', materialLocked: true,
+    materialNote: 'Soft lambskin construction with black, white and mustard color-block panels',
+    colors: [
+      {
+        id: 'black-white-mustard',
+        name: 'Black, White & Mustard',
+        color: '#d6a50c',
+        image: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/07-motogrip-black-white-mustard-lambskin-leather-swatch.png'),
+      },
+    ],
+    defaultColor: 'black-white-mustard',
+    maker: 'MOTOGRIP Workshop', signedSince: 2026,
+    sizes: ['XS','S','M','L','XL','XXL','3XL','4XL','5XL'],
+    stock: { XS: 100, S: 100, M: 100, L: 100, XL: 100, XXL: 100, '3XL': 100, '4XL': 100, '5XL': 100 },
+    reviews: [],
+    gallery: [
+      { label: 'Front · on model', alt: 'Male model wearing a MOTOGRIP black, white and mustard lambskin leather T-shirt, front view', src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/01-motogrip-mens-color-block-lambskin-leather-tshirt-model-front.png') },
+      { label: 'Front · product studio', alt: "MOTOGRIP men's black, white and mustard lambskin leather T-shirt, front view", src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/02-motogrip-mens-color-block-lambskin-leather-tshirt-front.png') },
+      { label: 'Back · product studio', alt: "MOTOGRIP men's black, white and mustard lambskin leather T-shirt, rear view", src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/03-motogrip-mens-color-block-lambskin-leather-tshirt-back.png') },
+      { label: 'Side · product studio', alt: "MOTOGRIP men's color-block lambskin leather T-shirt shown from the side", src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/04-motogrip-mens-color-block-lambskin-leather-tshirt-side.png') },
+      { label: 'Detail · leather and stitching', alt: 'Close-up of the lambskin panels and stitching on a MOTOGRIP color-block leather T-shirt', src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/05-motogrip-mens-color-block-lambskin-leather-tshirt-detail.png') },
+      { label: 'Features · infographic', alt: 'MOTOGRIP lambskin leather T-shirt infographic highlighting its color-block design and custom sizing', src: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/06-motogrip-mens-color-block-lambskin-leather-tshirt-infographic.png') },
+    ],
+    story: {
+      piece: "A short-sleeve leather T-shirt that brings MOTOGRIP's material focus into a clean streetwear silhouette. Black, white and mustard panels form a crisp diagonal composition without distracting from the natural character of the leather.",
+      craft: 'Genuine lambskin leather with a black upper panel, white diagonal accent and mustard lower panel. The shirt is finished with a crew neckline, short sleeves, aligned panel seams and a clean straight hem.',
+      fit: "Slim-to-regular men's fit designed for a clean line through the chest and waist. Offered in XS through 5XL.",
+      origin: 'Produced by the MOTOGRIP GEAR workshop with original product imagery, construction-focused detail photography and consistent studio presentation.',
+    },
+  },
+  {
     id: 'p16', slug: 'unisex-black-lambskin-flared-leather-trousers',
     name: 'Unisex Black Lambskin Flared Leather Trousers', cat: 'Pants', gender: 'Unisex',
     price: 249, hue: 0, tag: 'New',
@@ -4922,6 +4959,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Pants')   return "Tailored from the central panels. High-rise, straight, riding.";
+    if (cat === 'Shirts')  return "Soft leather, clean lines, and short-sleeve silhouettes for distinctive everyday wear.";
     if (cat === 'Bags')    return "Structured leather carry for work, travel, and the road between.";
     return "Twelve silhouettes, hand-numbered. Each piece signed by the hand that made it.";
   })();
@@ -4965,7 +5003,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
               }}>{g.toUpperCase()}</button>
           ))}
           <div style={{ width: 1, height: 16, background: 'var(--line-2)', margin: '0 12px' }} />
-          {['All', 'Jackets', 'Vests', 'Pants', 'Bags'].map(c => (
+          {['All', 'Jackets', 'Vests', 'Shirts', 'Pants', 'Bags'].map(c => (
             <button key={c} onClick={() => setCat(c)} className="mono"
               style={{
                 fontSize: 10, padding: '8px 14px', cursor: 'pointer',
@@ -5529,7 +5567,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
         </div>
         {/* Main image */}
         <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
-          <div className="ph grain pdp-main-image" data-img="1" data-label=""
+          <div className="ph grain pdp-main-image" data-img="1" data-label="" role="img" aria-label={images[imgIdx].alt || images[imgIdx].label}
             style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8 }}>
               <button aria-label="Save to wishlist"
