@@ -1437,7 +1437,7 @@ const SSM_PRODUCTS = [
   },
   {
     id: 'p17', slug: 'mens-black-white-mustard-lambskin-leather-tshirt',
-    name: "Men's Black, White & Mustard Lambskin Leather T-Shirt", cat: 'Shirts', gender: 'Men',
+    name: "Men's Black, White & Mustard Lambskin Leather T-Shirt", cat: 'Leather Shirts', gender: 'Men',
     price: 179, hue: 45, tag: 'New',
     blurb: 'Genuine lambskin · diagonal color-block design · short sleeves',
     img: A('mens-shirts/black-white-mustard-lambskin-leather-tshirt/01-motogrip-mens-color-block-lambskin-leather-tshirt-model-front.png'),
@@ -2211,7 +2211,7 @@ const SSM_MEGA_MENUS = {
   Men: [
     {
       title: 'Leather Jackets',
-      links: ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Suede Jackets', 'Varsity Jackets', 'Leather Vests', 'Leather Blazers', 'Fur & Shearling', 'Aviator Jackets', 'Puffer Jackets', 'Hooded Leather Jackets', 'Best Seller', 'Clearance - 50% OFF', 'Factory Seconds - 40% Off', 'Winter Jackets'],
+      links: ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Suede Jackets', 'Varsity Jackets', 'Leather Shirts', 'Leather Blazers', 'Fur & Shearling', 'Aviator Jackets', 'Puffer Jackets', 'Hooded Leather Jackets', 'Best Seller', 'Clearance - 50% OFF', 'Factory Seconds - 40% Off', 'Winter Jackets'],
       cat: 'Jackets',
     },
     {
@@ -4066,7 +4066,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
                   {section.links.map((label) => (
                     <button key={label} onClick={() => navigate(
                       SSM_NAV.find(item => item.mega === openMega),
-                      label === 'Puffer Vests' ? { ...section, cat: 'Puffer Vests' } : section
+                      ['Puffer Vests', 'Leather Shirts'].includes(label) ? { ...section, cat: label } : section
                     )} className="ulink" style={{
                       color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0,
                       fontSize: 13, lineHeight: 1.25, textAlign: 'left', cursor: 'pointer',
@@ -4998,6 +4998,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Puffer Vests') return "Quilted leather layers designed for warmth, movement, and clean everyday versatility.";
+    if (cat === 'Leather Shirts') return "Leather shirts and T-shirts cut in genuine hides for clean, versatile everyday wear.";
     if (cat === 'Pants')   return "Tailored from the central panels. High-rise, straight, riding.";
     if (cat === 'Shirts')  return "Soft leather, clean lines, and short-sleeve silhouettes for distinctive everyday wear.";
     if (cat === 'Bags')    return "Structured leather carry for work, travel, and the road between.";
@@ -5043,7 +5044,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
               }}>{g.toUpperCase()}</button>
           ))}
           <div style={{ width: 1, height: 16, background: 'var(--line-2)', margin: '0 12px' }} />
-          {['All', 'Jackets', 'Vests', 'Puffer Vests', 'Shirts', 'Pants', 'Bags'].map(c => (
+          {['All', 'Jackets', 'Vests', 'Puffer Vests', 'Leather Shirts', 'Pants', 'Bags'].map(c => (
             <button key={c} onClick={() => setCat(c)} className="mono"
               style={{
                 fontSize: 10, padding: '8px 14px', cursor: 'pointer',
