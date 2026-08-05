@@ -270,10 +270,15 @@ function EditorialBlock({ go }) {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8, marginBottom: 8 }}>
         <div className="ph grain" data-img="1" data-label=""
           style={{ aspectRatio: '16/9', '--img': `url(${SSM_IMAGES.edWide})` }} />
-        <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 8 }}>
-          <div className="ph" data-img="1" data-label="" style={{ '--img': `url(${SSM_IMAGES.edDetail1})` }} />
-          <div className="ph" data-img="1" data-label="" style={{ '--img': `url(${SSM_IMAGES.edDetail2})` }} />
-        </div>
+        <button
+          type="button"
+          className="ph grain"
+          data-img="1"
+          data-label=""
+          aria-label="Shop men's leather vests"
+          onClick={() => go('shop', { gender: 'Men', cat: 'Vests' })}
+          style={{ width: '100%', minHeight: 0, border: 0, padding: 0, cursor: 'pointer', '--img': `url(${SSM_IMAGES.edVestBanner})` }}
+        />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
         <div className="ph" data-img="1" data-label="" style={{ aspectRatio: '3/4', '--img': `url(${SSM_IMAGES.edPortrait})` }} />

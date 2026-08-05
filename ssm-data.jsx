@@ -207,6 +207,7 @@ const SSM_IMAGES = {
   catAtelier: SSM_ASSETS.atelier,
   atelier:    SSM_ASSETS.atelier,
   edWide:     SSM_ASSETS.lookbook,
+  edVestBanner: A('home/motogrip-tan-leather-vest-riding-gear-banner.png'),
   edDetail1:  SSM_ASSETS.detail,
   edDetail2:  SSM_ASSETS.atelier,
   edPortrait: SSM_ASSETS.coat,
