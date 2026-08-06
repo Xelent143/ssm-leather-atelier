@@ -370,7 +370,7 @@ function productEditor(product) {
           <div class="field full">
             <label>Size stock</label>
             <div class="form-grid">
-              ${['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => `
+              ${['XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL', '4XL', '5XL'].map((size) => `
                 <div class="field">
                   <label>${size}</label>
                   <input data-stock-size="${size}" value="${Number(stock[size] || 0)}" type="number" min="0">
@@ -678,7 +678,7 @@ function bindShell() {
       tag: '',
       description: '',
       image: 'assets/generated/leather-detail.png',
-      stock: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
+      stock: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, '2XL': 0, '3XL': 0, '4XL': 0, '5XL': 0 },
       maker: '',
       seoTitle: '',
       seoDescription: '',
