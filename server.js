@@ -902,6 +902,113 @@ function publicCatalog(store) {
   };
 }
 
+function publicProductForPdp(product) {
+  const assetPath = (value) => {
+    const source = String(value || '').trim();
+    if (!source || /^(?:https?:|data:|\/)/i.test(source)) return source;
+    return `/${source}`;
+  };
+  const slugPart = (value) => String(value || '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const images = [...new Set([
+    product.primaryImage || product.image,
+    ...(Array.isArray(product.galleryImages) ? product.galleryImages : []),
+  ].map(assetPath).filter(Boolean))];
+  const options = (Array.isArray(product.options) ? product.options : []).map((option) => ({
+    name: String(option.name || ''),
+    values: Array.isArray(option.values) ? option.values.map(String) : [],
+  })).filter((option) => option.name && option.values.length);
+  const optionMap = Object.fromEntries(options.map((option) => [option.name.toLowerCase(), option.values]));
+  const stock = product.stock && typeof product.stock === 'object' ? product.stock : {};
+  const sizes = optionMap.size?.length ? optionMap.size : Object.keys(stock);
+  const colorNames = optionMap.color?.length
+    ? optionMap.color
+    : (Array.isArray(product.colors) ? product.colors : [product.color]).filter(Boolean).map(String);
+  const variantSizes = sizes.length ? sizes : ['One Size'];
+  const variantColors = colorNames.length ? colorNames : ['Default'];
+  const variants = variantSizes.flatMap((size) => variantColors.map((color) => {
+    const quantity = Number(stock[size] ?? product.inventory ?? 0);
+    const id = `${product.id || product.slug}-${slugPart(size)}-${slugPart(color)}`;
+    return {
+      id,
+      sku: `${product.sku || product.id || product.slug}-${String(size).toUpperCase()}-${String(color).toUpperCase()}`,
+      price: Number(product.price || 0),
+      compareAtPrice: product.compareAtPrice == null ? null : Number(product.compareAtPrice),
+      quantity,
+      status: quantity > 0 ? 'active' : 'disabled',
+      availableForSale: quantity > 0,
+      attributes: { size, color },
+    };
+  }));
+  const swatches = { black: '#111111', blue: '#2554b8', red: '#c9252d', white: '#f4f1e8' };
+  const colors = colorNames.map((name) => ({
+    id: slugPart(name),
+    name,
+    color: swatches[String(name).toLowerCase()] || '#777777',
+    image: assetPath(product.colorImages?.[name] || images[0]),
+  }));
+  const concealedCarry = (product.features || []).some((feature) => /concealed[- ]carry/i.test(String(feature)));
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.title,
+    title: product.title,
+    cat: product.category || 'Shop',
+    category: product.category || 'Shop',
+    gender: product.gender || 'Unisex',
+    brand: product.brand || 'MOTOGRIP GEAR',
+    vendor: product.brand || 'MOTOGRIP GEAR',
+    productType: product.productType || product.category,
+    price: Number(product.price || 0),
+    compareAtPrice: product.compareAtPrice == null ? null : Number(product.compareAtPrice),
+    img: images[0] || '',
+    alt: images[1] || images[0] || '',
+    images,
+    imageMetadata: images.map((image, index) => ({
+      id: `${product.id || product.slug}-image-${index + 1}`,
+      path: image,
+      altText: index === 0 && product.imageAltText
+        ? product.imageAltText
+        : `${product.title} ${index === 0 ? 'featured image' : `image ${index + 1}`}`,
+    })),
+    blurb: product.shortDescription || '',
+    publicDescription: product.description || product.schemaDescription || '',
+    material: product.material || product.leatherType || 'Leather',
+    stock,
+    options,
+    variants,
+    colors,
+    defaultColor: colors[0]?.id || '',
+    maker: product.maker || 'MOTOGRIP Workshop',
+    madeToMeasureEnabled: Boolean(product.madeToMeasureEnabled),
+    madeToMeasureSurcharge: Number(product.madeToMeasureSurcharge || 0),
+    tags: [product.tag, product.material, product.ridingUseCase].filter(Boolean),
+    shippingWeight: product.shippingWeight || '',
+    sections: {
+      features: product.features || [],
+      specifications: product.specifications || [],
+      perfectFor: product.perfectFor || '',
+      whyYouWillLoveIt: product.whyYouWillLoveIt || '',
+    },
+    metafields: {
+      outerMaterial: product.material || product.leatherType || '',
+      leatherType: product.leatherType || '',
+      leatherThickness: product.leatherThickness || '',
+      liningMaterial: product.lining || '',
+      closure: product.closureType || '',
+      hardware: product.hardware || '',
+      concealedCarryPockets: concealedCarry,
+      armorCompatibility: product.armorCompatibility || '',
+      fit: product.fitNotes || '',
+      careInstructions: product.careInstructions || '',
+      customSizingAvailable: Boolean(product.madeToMeasureEnabled),
+    },
+    reviews: Array.isArray(product.reviews) ? product.reviews : [],
+    factualProjection: true,
+  };
+}
+
 function productMeta(product, store, req) {
   const currency = store.settings.currency || 'USD';
   const title = product.seoTitle || `${product.title} | ${product.category}, ${product.gender} | MOTOGRIP GEAR`;
@@ -1003,11 +1110,13 @@ function productMeta(product, store, req) {
 
 function injectProductHead(html, product, store, req) {
   const meta = productMeta(product, store, req);
+  const publicProduct = publicProductForPdp(product);
   const extraHead = `
 <meta property="product:price:amount" content="${escapeHtml(product.price)}" />
 <meta property="product:price:currency" content="${escapeHtml(store.settings.currency || 'USD')}" />
 <script type="application/ld+json">${escapeScriptJson(meta.jsonLd)}</script>
-<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: product.slug })};</script>`;
+<script>window.__SSM_INITIAL_PRODUCT__ = ${escapeScriptJson(publicProduct)};
+window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: product.slug })};</script>`;
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(meta.desc)}" />`)
@@ -1752,5 +1861,6 @@ module.exports = {
   publicRoutes,
   indexablePublicPaths,
   readPublicStore,
+  publicProductForPdp,
   merchantSeedProducts,
 };

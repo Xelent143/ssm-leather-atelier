@@ -9491,7 +9491,11 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
 // SSM_SEO comes from ssm-data.jsx
 const SSM_INITIAL_ROUTE = window.__SSM_INITIAL_ROUTE__ || null;
-const productFromSlug = (slug) => SSM_PRODUCTS.find(p => p.slug === slug) || null;
+const SSM_INITIAL_PRODUCT = window.__SSM_INITIAL_PRODUCT__ || null;
+const productFromSlug = (slug) =>
+  (SSM_INITIAL_PRODUCT?.slug === slug ? SSM_INITIAL_PRODUCT : null)
+  || SSM_PRODUCTS.find(p => p.slug === slug)
+  || null;
 const articleFromParams = (params = {}) => params.article
   || SSM_JOURNAL.find(article => article.id === params.articleId)
   || null;
