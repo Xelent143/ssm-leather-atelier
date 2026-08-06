@@ -290,21 +290,21 @@ function EditorialBlock({ go }) {
 }
 
 function TestimonialBlock() {
-  const reviews = [
-    { q: 'The Voltaire arrived. I have not taken it off in three weeks.', a: 'Vogue Paris · Editor at Large' },
-    { q: 'A house that understands restraint is the truest form of luxury.', a: 'Mr Porter · Journal' },
-    { q: 'You can feel the patience in the leather.', a: 'The Gentleman\'s Journal' },
+  const principles = [
+    { q: 'Measured fit', a: 'STANDARD SIZING · MADE TO MEASURE' },
+    { q: 'Material clarity', a: 'LEATHER, LINING & HARDWARE DISCLOSED' },
+    { q: 'Repair assessment', a: 'WORKMANSHIP SUPPORT · QUOTED RESTORATION' },
   ];
   return (
     <section style={{ padding: '120px 48px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>IN THE PRESS</div>
+      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>WHAT WE STAND BEHIND</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 64 }}>
-        {reviews.map((r, i) => (
+        {principles.map((r, i) => (
           <div key={i} style={{ textAlign: 'center' }}>
             <div className="display" style={{ fontSize: 26, lineHeight: 1.4, fontStyle: 'italic', marginBottom: 24, color: 'var(--fg)' }}>
-              &ldquo;{r.q}&rdquo;
+              {r.q}
             </div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>— {r.a}</div>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>{r.a}</div>
           </div>
         ))}
       </div>
@@ -316,7 +316,7 @@ function Home({ go, onQuickView, heroVariant }) {
   return (
     <div className="page-fade">
       <Hero variant={heroVariant} />
-      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
+      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'ONE-YEAR WORKMANSHIP WARRANTY', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
       <CategoryStrip go={go} />
       <FeaturedRow products={SSM_PRODUCTS} onQuickView={onQuickView} go={go} />
       <AtelierFeature go={go} />

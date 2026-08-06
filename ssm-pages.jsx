@@ -450,16 +450,16 @@ function Repairs({ go }) {
     <div className="page-fade">
       <PageHero
         eyebrow="REPAIRS & RESTORATION"
-        title="Bring it back"
-        italic="at fifty."
-        dek="Every piece carries a lifetime repair promise. Stitching, hardware, lining, edge burnishing, conditioning — for as long as the workshop stands."
+        title="Keep it"
+        italic="on the road."
+        dek="MOTOGRIP products include a one-year workmanship warranty. Repair and restoration requests outside warranty are assessed individually before any work begins."
         image={SSM_IMAGES.repairs}
       />
 
       <PrincipleTriad items={[
         { n: 'I', t: 'Post', c: 'Use the Contact page with photos. We respond with the next steps after reviewing the repair request.' },
-        { n: 'II', t: 'Assess', c: 'Your piece is examined by the maker who signed it, where possible. We send a quote and a timeline. Most work is included; some is not. We are honest about both.' },
-        { n: 'III', t: 'Return', c: 'Approximately six weeks from receipt. We ship it back signed-for, conditioned, with a small handwritten note from the bench.' },
+        { n: 'II', t: 'Assess', c: 'We review the photos and order details, then confirm whether the request is covered by the workmanship warranty or requires a paid repair quote.' },
+        { n: 'III', t: 'Approve', c: 'No repair begins until the scope, price, shipping responsibility, and estimated timeline have been confirmed with you.' },
       ]} />
 
       <section style={{ padding: '0 48px 96px' }}>
@@ -469,12 +469,11 @@ function Repairs({ go }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
           <div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 16 }}>
-              Included for life
+              One-year workmanship warranty
             </div>
             {[
-              'Restitching of any seam', 'Hardware replacement (zips, snaps, D-rings)',
-              'Lining repair or full replacement', 'Edge burnishing & conditioning',
-              'Patch repair on burns or tears under 2cm', 'Annual check-up at the studio',
+              'Verified workmanship defects', 'Stitching failures caused by workmanship',
+              'Eligible hardware faults', 'Assessment and fit support for made-to-measure orders',
             ].map(t => (
               <div key={t} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
                 <span style={{ color: 'var(--accent-2)' }}>✦</span>
@@ -497,7 +496,7 @@ function Repairs({ go }) {
               </div>
             ))}
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 24, lineHeight: 1.7 }}>
-              QUOTED WORK STARTS AT $80 · MEDIAN INVOICE FOR THE LAST YEAR · $185
+              PRICE AND TIMELINE ARE CONFIRMED AFTER PHOTO AND ORDER REVIEW
             </div>
           </div>
         </div>
@@ -505,7 +504,7 @@ function Repairs({ go }) {
 
       <CTAStrip
         title="Begin a repair"
-        body="Send a few photos and a short note. We'll write back with a label and a timeline. Most pieces leave the workshop within six weeks of receipt."
+        body="Send photos, your order reference, and a short description. We will confirm eligibility, shipping instructions, price if applicable, and an estimated timeline before work begins."
         primary="Write to the workshop"
         ghost="Care guide"
         onPrimary={() => go('contact')}
@@ -605,7 +604,7 @@ function Sustainability({ go }) {
       <PrincipleTriad items={[
         { n: 'I', t: 'Vegetable, not chrome', c: 'All hides are oak- and chestnut-bark tanned in pits, ten to fourteen months. No chromium salts; no heavy-metal effluent. Slower; lower-impact; every year on record.' },
         { n: 'II', t: 'A by-product, not a cause', c: 'Every hide we cut is a by-product of the Italian beef and lamb trade. We do not commission hides; we do not raise animals. We cut what would otherwise be discarded.' },
-        { n: 'III', t: 'Repaired for life', c: 'A jacket repaired is a jacket not replaced. Ours come back at year five and at year twenty-five. Lifetime repair is built into the price, not added to it.' },
+        { n: 'III', t: 'Designed to be repairable', c: 'We assess repair and restoration requests case by case so suitable pieces can remain in use for longer.' },
       ]} />
 
       <section style={{ padding: '0 48px 96px' }}>

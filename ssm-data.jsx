@@ -1784,8 +1784,8 @@ const SSM_FAQ = [
     { q: 'How long do refunds take?', a: 'We normally inspect a return within 72 hours of delivery. If approved, the refund is initiated within 7 business days to the original payment method; your bank or card provider may take up to 10 working days to show the credit.' },
   ] },
   { group: 'Repairs', items: [
-    { q: 'Do you offer lifetime repairs?', a: 'Yes — every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
-    { q: 'What does the lifetime repair cover?', a: 'Stitching, hardware, lining, edge burnishing, conditioning. We do not cover damage from misuse — see Repairs & Restoration for the full scope.' },
+    { q: 'What warranty do you offer?', a: 'Each product includes a one-year workmanship warranty. Eligibility is confirmed after reviewing the order and issue.' },
+    { q: 'Can you repair an item outside warranty?', a: 'Yes, suitable repair and restoration requests can be assessed. Scope, price, shipping responsibility, and timing are confirmed before work begins.' },
     { q: 'How long does a repair take?', a: 'Approximately six weeks from receipt at the workshop. We write when the piece arrives, when work begins, and when it ships back.' },
   ] },
   { group: 'Account', items: [
@@ -1825,14 +1825,7 @@ const SSM_STOCKISTS = [
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
 
-const SSM_PRESS = [
-  { o: 'Vogue Paris',         q: 'The Voltaire arrived. I have not taken it off in three weeks.', who: 'Editor at Large', date: 'MMXXVI · February' },
-  { o: 'Mr Porter Journal',   q: 'A house that understands restraint is the truest form of luxury.', who: 'Style Council', date: 'MMXXV · November' },
-  { o: 'The Gentleman\'s Journal', q: 'You can feel the patience in the leather.', who: 'Features', date: 'MMXXV · September' },
-  { o: 'AnOther Magazine',    q: 'Brooklyn\'s smallest house, with the longest patience.', who: 'Profile', date: 'MMXXV · July' },
-  { o: 'Monocle',             q: 'A study in slow.', who: 'Quality of Life', date: 'MMXXV · April' },
-  { o: 'The Financial Times', q: 'The kind of leather goods that argue for themselves.', who: 'How to Spend It', date: 'MMXXV · February' },
-];
+const SSM_PRESS = [];
 
 // ── SEO defaults (used by ssm-app to set <title> + meta) ────────────────────
 

@@ -2500,7 +2500,7 @@ const SSM_NAV = [
   { label: 'Women', view: 'shop', filter: 'Women', mega: 'Women' },
   { label: 'Customize', view: 'mto' },
   { label: 'Brand', view: 'about' },
-  { label: 'Corporate Gifts', view: 'contact' },
+  { label: 'Gift', view: 'contact' },
   { label: 'Gifting', view: 'giftcard' },
   { label: 'Sale', view: 'shop' },
   { label: 'Design Your Own', view: 'mto' },
@@ -4102,8 +4102,8 @@ const SSM_FAQ = [
     { q: 'How long do refunds take?', a: 'We normally inspect a return within 72 hours of delivery. If approved, the refund is initiated within 7 business days to the original payment method; your bank or card provider may take up to 10 working days to show the credit.' },
   ] },
   { group: 'Repairs', items: [
-    { q: 'Do you offer lifetime repairs?', a: 'Yes — every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
-    { q: 'What does the lifetime repair cover?', a: 'Stitching, hardware, lining, edge burnishing, conditioning. We do not cover damage from misuse — see Repairs & Restoration for the full scope.' },
+    { q: 'What warranty do you offer?', a: 'Each product includes a one-year workmanship warranty. Eligibility is confirmed after reviewing the order and issue.' },
+    { q: 'Can you repair an item outside warranty?', a: 'Yes, suitable repair and restoration requests can be assessed. Scope, price, shipping responsibility, and timing are confirmed before work begins.' },
     { q: 'How long does a repair take?', a: 'Approximately six weeks from receipt at the workshop. We write when the piece arrives, when work begins, and when it ships back.' },
   ] },
   { group: 'Account', items: [
@@ -4143,14 +4143,7 @@ const SSM_STOCKISTS = [
 
 // ── Press (used by /press) ──────────────────────────────────────────────────
 
-const SSM_PRESS = [
-  { o: 'Vogue Paris',         q: 'The Voltaire arrived. I have not taken it off in three weeks.', who: 'Editor at Large', date: 'MMXXVI · February' },
-  { o: 'Mr Porter Journal',   q: 'A house that understands restraint is the truest form of luxury.', who: 'Style Council', date: 'MMXXV · November' },
-  { o: 'The Gentleman\'s Journal', q: 'You can feel the patience in the leather.', who: 'Features', date: 'MMXXV · September' },
-  { o: 'AnOther Magazine',    q: 'Brooklyn\'s smallest house, with the longest patience.', who: 'Profile', date: 'MMXXV · July' },
-  { o: 'Monocle',             q: 'A study in slow.', who: 'Quality of Life', date: 'MMXXV · April' },
-  { o: 'The Financial Times', q: 'The kind of leather goods that argue for themselves.', who: 'How to Spend It', date: 'MMXXV · February' },
-];
+const SSM_PRESS = [];
 
 // ── SEO defaults (used by ssm-app to set <title> + meta) ────────────────────
 
@@ -5188,21 +5181,21 @@ function EditorialBlock({ go }) {
 }
 
 function TestimonialBlock() {
-  const reviews = [
-    { q: 'The Voltaire arrived. I have not taken it off in three weeks.', a: 'Vogue Paris · Editor at Large' },
-    { q: 'A house that understands restraint is the truest form of luxury.', a: 'Mr Porter · Journal' },
-    { q: 'You can feel the patience in the leather.', a: 'The Gentleman\'s Journal' },
+  const principles = [
+    { q: 'Measured fit', a: 'STANDARD SIZING · MADE TO MEASURE' },
+    { q: 'Material clarity', a: 'LEATHER, LINING & HARDWARE DISCLOSED' },
+    { q: 'Repair assessment', a: 'WORKMANSHIP SUPPORT · QUOTED RESTORATION' },
   ];
   return (
     <section style={{ padding: '120px 48px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>IN THE PRESS</div>
+      <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 48, textAlign: 'center' }}>WHAT WE STAND BEHIND</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 64 }}>
-        {reviews.map((r, i) => (
+        {principles.map((r, i) => (
           <div key={i} style={{ textAlign: 'center' }}>
             <div className="display" style={{ fontSize: 26, lineHeight: 1.4, fontStyle: 'italic', marginBottom: 24, color: 'var(--fg)' }}>
-              &ldquo;{r.q}&rdquo;
+              {r.q}
             </div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>— {r.a}</div>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)' }}>{r.a}</div>
           </div>
         ))}
       </div>
@@ -5214,7 +5207,7 @@ function Home({ go, onQuickView, heroVariant }) {
   return (
     <div className="page-fade">
       <Hero variant={heroVariant} />
-      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'LIFETIME REPAIR PROMISE', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
+      <Marquee items={['ROAD-CUT LEATHER', 'MADE TO MEASURE +$50', 'WORLDWIDE SHIPPING AVAILABLE', 'ONE-YEAR WORKMANSHIP WARRANTY', 'REINFORCED HARDWARE', 'MOTOGRIP MMXXVI']} />
       <CategoryStrip go={go} />
       <FeaturedRow products={SSM_PRODUCTS} onQuickView={onQuickView} go={go} />
       <AtelierFeature go={go} />
@@ -5875,11 +5868,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
     ['Customization', 'Available by leather, size, measurements, and custom fit request'],
   ];
 
-  const reviews = p.reviews || [
-    { who: 'Iola V., Brooklyn',  rating: 5, date: 'March MMXXVI',  body: `My ${p.name.split(' ')[0]} arrived with a small note from ${p.maker}. Three weeks in, the placket has softened just where I hoped.` },
-    { who: 'Theo M., Paris',     rating: 5, date: 'February MMXXVI', body: 'The fit is exact. The hide is heavier than I expected, in the best way. I have not taken it off.' },
-    { who: 'Sigrid K., London',  rating: 4, date: 'January MMXXVI',  body: 'A real piece. Sized up over a knit, which I would recommend. The brass darkened beautifully after two weeks.' },
-  ];
+  const reviews = p.reviews || [];
 
   return (
     <div className="page-fade">
@@ -5953,7 +5942,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             {[
               { i: '✦', t: 'Hand-numbered' },
               { i: '⌖', t: 'Worldwide shipping' },
-              { i: '↻', t: 'Lifetime repair' },
+              { i: '↻', t: 'Warranty support' },
             ].map(b => (
               <div key={b.t} style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: 14, color: 'var(--accent-2)', marginBottom: 4 }}>{b.i}</div>
@@ -6687,7 +6676,7 @@ function About({ go }) {
         {[
           { n: 'I', t: 'Patience', c: 'Twelve months in the tanning pit. Two weeks per garment. Nothing is hurried; nothing is hidden.' },
           { n: 'II', t: 'Single-maker', c: 'One craftsperson sees a piece from cut to finish. They sign the inside placket. You write to them by name.' },
-          { n: 'III', t: 'Forever', c: 'Every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
+          { n: 'III', t: 'Supported', c: 'Each piece includes a one-year workmanship warranty. Repairs outside warranty are assessed and quoted before work begins.' },
         ].map(p => (
           <div key={p.t}>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>{p.t}</div>
@@ -7494,16 +7483,16 @@ function Repairs({ go }) {
     <div className="page-fade">
       <PageHero
         eyebrow="REPAIRS & RESTORATION"
-        title="Bring it back"
-        italic="at fifty."
-        dek="Every piece carries a lifetime repair promise. Stitching, hardware, lining, edge burnishing, conditioning — for as long as the workshop stands."
+        title="Keep it"
+        italic="on the road."
+        dek="MOTOGRIP products include a one-year workmanship warranty. Repair and restoration requests outside warranty are assessed individually before any work begins."
         image={SSM_IMAGES.repairs}
       />
 
       <PrincipleTriad items={[
         { n: 'I', t: 'Post', c: 'Use the Contact page with photos. We respond with the next steps after reviewing the repair request.' },
-        { n: 'II', t: 'Assess', c: 'Your piece is examined by the maker who signed it, where possible. We send a quote and a timeline. Most work is included; some is not. We are honest about both.' },
-        { n: 'III', t: 'Return', c: 'Approximately six weeks from receipt. We ship it back signed-for, conditioned, with a small handwritten note from the bench.' },
+        { n: 'II', t: 'Assess', c: 'We review the photos and order details, then confirm whether the request is covered by the workmanship warranty or requires a paid repair quote.' },
+        { n: 'III', t: 'Approve', c: 'No repair begins until the scope, price, shipping responsibility, and estimated timeline have been confirmed with you.' },
       ]} />
 
       <section style={{ padding: '0 48px 96px' }}>
@@ -7513,12 +7502,11 @@ function Repairs({ go }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
           <div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 16 }}>
-              Included for life
+              One-year workmanship warranty
             </div>
             {[
-              'Restitching of any seam', 'Hardware replacement (zips, snaps, D-rings)',
-              'Lining repair or full replacement', 'Edge burnishing & conditioning',
-              'Patch repair on burns or tears under 2cm', 'Annual check-up at the studio',
+              'Verified workmanship defects', 'Stitching failures caused by workmanship',
+              'Eligible hardware faults', 'Assessment and fit support for made-to-measure orders',
             ].map(t => (
               <div key={t} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
                 <span style={{ color: 'var(--accent-2)' }}>✦</span>
@@ -7541,7 +7529,7 @@ function Repairs({ go }) {
               </div>
             ))}
             <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 24, lineHeight: 1.7 }}>
-              QUOTED WORK STARTS AT $80 · MEDIAN INVOICE FOR THE LAST YEAR · $185
+              PRICE AND TIMELINE ARE CONFIRMED AFTER PHOTO AND ORDER REVIEW
             </div>
           </div>
         </div>
@@ -7549,7 +7537,7 @@ function Repairs({ go }) {
 
       <CTAStrip
         title="Begin a repair"
-        body="Send a few photos and a short note. We'll write back with a label and a timeline. Most pieces leave the workshop within six weeks of receipt."
+        body="Send photos, your order reference, and a short description. We will confirm eligibility, shipping instructions, price if applicable, and an estimated timeline before work begins."
         primary="Write to the workshop"
         ghost="Care guide"
         onPrimary={() => go('contact')}
@@ -7649,7 +7637,7 @@ function Sustainability({ go }) {
       <PrincipleTriad items={[
         { n: 'I', t: 'Vegetable, not chrome', c: 'All hides are oak- and chestnut-bark tanned in pits, ten to fourteen months. No chromium salts; no heavy-metal effluent. Slower; lower-impact; every year on record.' },
         { n: 'II', t: 'A by-product, not a cause', c: 'Every hide we cut is a by-product of the Italian beef and lamb trade. We do not commission hides; we do not raise animals. We cut what would otherwise be discarded.' },
-        { n: 'III', t: 'Repaired for life', c: 'A jacket repaired is a jacket not replaced. Ours come back at year five and at year twenty-five. Lifetime repair is built into the price, not added to it.' },
+        { n: 'III', t: 'Designed to be repairable', c: 'We assess repair and restoration requests case by case so suitable pieces can remain in use for longer.' },
       ]} />
 
       <section style={{ padding: '0 48px 96px' }}>
