@@ -2790,6 +2790,864 @@
       "perfectFor": "Daily commuting, work, study and organized travel.",
       "whyYouWillLoveIt": "A practical multi-pocket layout meets the character of distressed Crazy Horse cowhide in a balanced everyday backpack.",
       "reviews": []
+    },
+    {
+          "id": "p28",
+          "slug": "mens-metallic-gold-lambskin-leather-shirt",
+          "title": "Men's Metallic Gold Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A statement men's shirt in metallic gold genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/01-motogrip-mens-metallic-gold-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/01-motogrip-mens-metallic-gold-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/02-motogrip-mens-metallic-gold-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/03-motogrip-mens-metallic-gold-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/04-motogrip-mens-metallic-gold-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/05-motogrip-mens-metallic-gold-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/06-motogrip-mens-metallic-gold-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/07-motogrip-mens-metallic-gold-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Metallic Gold": "assets/generated/mens-shirts/metallic-gold-lambskin-leather-shirt/01-motogrip-mens-metallic-gold-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Metallic Gold"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Metallic Gold Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's metallic gold lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-metallic-gold-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine metallic gold lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P28-GLD",
+          "mpn": "MOTOGRIP-METALLIC-GOLD-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's metallic gold lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Metallic Gold",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-metallic-gold-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine metallic gold lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Metallic Gold"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine metallic gold lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
+    },
+    {
+          "id": "p29",
+          "slug": "mens-forest-green-lambskin-leather-shirt",
+          "title": "Men's Forest Green Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A refined men's shirt in forest green genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/01-motogrip-mens-forest-green-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/01-motogrip-mens-forest-green-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/02-motogrip-mens-forest-green-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/03-motogrip-mens-forest-green-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/04-motogrip-mens-forest-green-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/05-motogrip-mens-forest-green-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/06-motogrip-mens-forest-green-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/07-motogrip-mens-forest-green-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Forest Green": "assets/generated/mens-shirts/forest-green-lambskin-leather-shirt/01-motogrip-mens-forest-green-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Forest Green"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Forest Green Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's forest green lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-forest-green-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine forest green lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P29-FGR",
+          "mpn": "MOTOGRIP-FOREST-GREEN-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's forest green lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Forest Green",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-forest-green-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine forest green lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Forest Green"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine forest green lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
+    },
+    {
+          "id": "p30",
+          "slug": "mens-navy-lambskin-leather-shirt",
+          "title": "Men's Navy Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A versatile men's shirt in navy genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/navy-lambskin-leather-shirt/01-motogrip-mens-navy-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/navy-lambskin-leather-shirt/01-motogrip-mens-navy-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/02-motogrip-mens-navy-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/03-motogrip-mens-navy-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/04-motogrip-mens-navy-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/05-motogrip-mens-navy-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/06-motogrip-mens-navy-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/navy-lambskin-leather-shirt/07-motogrip-mens-navy-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Navy": "assets/generated/mens-shirts/navy-lambskin-leather-shirt/01-motogrip-mens-navy-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Navy"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Navy Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's navy lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-navy-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine navy lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P30-NVY",
+          "mpn": "MOTOGRIP-NAVY-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's navy lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Navy",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-navy-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine navy lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Navy"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine navy lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
+    },
+    {
+          "id": "p31",
+          "slug": "mens-orange-lambskin-leather-shirt",
+          "title": "Men's Orange Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A bold men's shirt in orange genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/orange-lambskin-leather-shirt/01-motogrip-mens-orange-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/orange-lambskin-leather-shirt/01-motogrip-mens-orange-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/02-motogrip-mens-orange-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/03-motogrip-mens-orange-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/04-motogrip-mens-orange-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/05-motogrip-mens-orange-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/06-motogrip-mens-orange-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/orange-lambskin-leather-shirt/07-motogrip-mens-orange-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Orange": "assets/generated/mens-shirts/orange-lambskin-leather-shirt/01-motogrip-mens-orange-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Orange"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Orange Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's orange lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-orange-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine orange lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P31-ORG",
+          "mpn": "MOTOGRIP-ORANGE-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's orange lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Orange",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-orange-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine orange lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Orange"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine orange lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
+    },
+    {
+          "id": "p32",
+          "slug": "mens-metallic-silver-lambskin-leather-shirt",
+          "title": "Men's Metallic Silver Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A statement men's shirt in metallic silver genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/01-motogrip-mens-metallic-silver-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/01-motogrip-mens-metallic-silver-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/02-motogrip-mens-metallic-silver-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/03-motogrip-mens-metallic-silver-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/04-motogrip-mens-metallic-silver-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/05-motogrip-mens-metallic-silver-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/06-motogrip-mens-metallic-silver-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/07-motogrip-mens-metallic-silver-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Metallic Silver": "assets/generated/mens-shirts/metallic-silver-lambskin-leather-shirt/01-motogrip-mens-metallic-silver-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Metallic Silver"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Metallic Silver Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's metallic silver lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-metallic-silver-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine metallic silver lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P32-SLV",
+          "mpn": "MOTOGRIP-METALLIC-SILVER-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's metallic silver lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Metallic Silver",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-metallic-silver-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine metallic silver lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Metallic Silver"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine metallic silver lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
+    },
+    {
+          "id": "p33",
+          "slug": "mens-yellow-lambskin-leather-shirt",
+          "title": "Men's Yellow Lambskin Leather Shirt",
+          "category": "Leather Shirts",
+          "gender": "Men",
+          "price": 280,
+          "compareAtPrice": null,
+          "status": "active",
+          "inventory": 209,
+          "madeToMeasureEnabled": false,
+          "madeToMeasureSurcharge": 0,
+          "tag": "New",
+          "description": "A distinctive men's shirt in yellow genuine lambskin leather, finished with a pointed collar, snap-button front and two snap-flap chest pockets.",
+          "shortDescription": "Genuine lambskin · snap-button front · dual chest pockets",
+          "image": "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/01-motogrip-mens-yellow-lambskin-leather-shirt-model-front.jpg",
+          "primaryImage": "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/01-motogrip-mens-yellow-lambskin-leather-shirt-model-front.jpg",
+          "galleryImages": [
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/02-motogrip-mens-yellow-lambskin-leather-shirt-model-back.jpg",
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/03-motogrip-mens-yellow-lambskin-leather-shirt-product-front.jpg",
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/04-motogrip-mens-yellow-lambskin-leather-shirt-product-back.jpg",
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/05-motogrip-mens-yellow-lambskin-leather-shirt-side-angle.jpg",
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/06-motogrip-mens-yellow-lambskin-leather-shirt-close-up.jpg",
+                "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/07-motogrip-mens-yellow-lambskin-leather-shirt-infographic.jpg"
+          ],
+          "colorImages": {
+                "Yellow": "assets/generated/mens-shirts/yellow-lambskin-leather-shirt/01-motogrip-mens-yellow-lambskin-leather-shirt-model-front.jpg"
+          },
+          "maker": "MOTOGRIP Workshop",
+          "stock": {
+                "XS": 19,
+                "S": 19,
+                "M": 19,
+                "L": 19,
+                "XL": 19,
+                "XXL": 19,
+                "3XL": 19,
+                "4XL": 19,
+                "5XL": 19,
+                "6XL": 19,
+                "7XL": 19
+          },
+          "options": [
+                {
+                      "name": "Size",
+                      "values": [
+                            "XS",
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL",
+                            "4XL",
+                            "5XL",
+                            "6XL",
+                            "7XL"
+                      ]
+                },
+                {
+                      "name": "Color",
+                      "values": [
+                            "Yellow"
+                      ]
+                }
+          ],
+          "seoTitle": "Men's Yellow Lambskin Leather Shirt | MOTOGRIP GEAR",
+          "seoDescription": "Shop the MOTOGRIP GEAR men's yellow lambskin leather shirt with a snap-button front, two chest pockets and sizes XS–7XL.",
+          "canonicalUrl": "https://motogripgear.com/products/mens-yellow-lambskin-leather-shirt",
+          "schemaDescription": "MOTOGRIP GEAR men's genuine yellow lambskin leather shirt with a snap-button front, two chest pockets and sizes XS through 7XL.",
+          "brand": "MOTOGRIP GEAR",
+          "sku": "MG-P33-YLW",
+          "mpn": "MOTOGRIP-YELLOW-LAMBSKIN-LEATHER-SHIRT",
+          "gtin": "",
+          "googleProductCategory": "Apparel & Accessories > Clothing > Shirts & Tops",
+          "productType": "Leather apparel > Men's leather shirts",
+          "condition": "NewCondition",
+          "availability": "InStock",
+          "priceValidUntil": "2027-12-31",
+          "imageAltText": "Men's yellow lambskin leather shirt shown from the front on a model.",
+          "material": "Genuine lambskin leather",
+          "color": "Yellow",
+          "sizeSystem": "US",
+          "sizeType": "Regular",
+          "ageGroup": "Adult",
+          "itemGroupId": "mens-yellow-lambskin-leather-shirt",
+          "variantOptions": [
+                "Size",
+                "Color"
+          ],
+          "shippingWeight": "",
+          "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+          "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+          "ratingValue": 0,
+          "reviewCount": 0,
+          "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store away from direct heat and sunlight.",
+          "fitNotes": "Available in men's sizes XS–7XL; consult the MOTOGRIP size guide before ordering.",
+          "leatherType": "Lambskin leather",
+          "leatherOrigin": "Not specified",
+          "leatherThickness": "Not specified",
+          "lining": "Not specified",
+          "hardware": "Snap buttons",
+          "closureType": "Full snap-button front",
+          "armorCompatibility": "Not designed as protective motorcycle armor",
+          "weatherResistance": "No weather-resistance claim",
+          "ridingUseCase": "Lifestyle and casual layering",
+          "season": "Transitional layering",
+          "craftMethod": "Panelled lambskin shirt construction with snap-button details",
+          "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+          "features": [
+                "Genuine yellow lambskin leather",
+                "Classic pointed shirt collar",
+                "Full snap-button front closure",
+                "Two functional snap-flap chest pockets",
+                "Long sleeves with snap cuffs and curved shirt-style hem",
+                "Available in men's sizes XS through 7XL"
+          ],
+          "specifications": [
+                [
+                      "Material",
+                      "Genuine lambskin leather"
+                ],
+                [
+                      "Color",
+                      "Yellow"
+                ],
+                [
+                      "Closure",
+                      "Full snap-button front"
+                ],
+                [
+                      "Pockets",
+                      "Two snap-flap chest pockets"
+                ],
+                [
+                      "Sizes",
+                      "XS–7XL"
+                ]
+          ],
+          "perfectFor": "Casual wear and layered outfits.",
+          "whyYouWillLoveIt": "Genuine yellow lambskin, clean shirt construction and practical snap pockets create a distinctive leather layer.",
+          "reviews": []
     }
   ]
 }
