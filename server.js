@@ -372,7 +372,16 @@ const types = {
   '.md': 'text/markdown; charset=utf-8',
 };
 
-function defaultStore() {
+function merchantSeedProducts() {
+  try {
+    const catalog = JSON.parse(fs.readFileSync(merchantStorePath, 'utf8'));
+    return Array.isArray(catalog.products) ? catalog.products : [];
+  } catch {
+    return [];
+  }
+}
+
+function defaultStore(products = []) {
   return {
     settings: {
       storeName: 'MOTOGRIP GEAR',
@@ -383,7 +392,7 @@ function defaultStore() {
       brandVoice: 'Direct, road-tested, fit-aware, and precise.',
       imageryPrompt: 'Premium light-theme studio product photography for MOTOGRIP GEAR: warm ivory backdrop, road-ready leather jackets, crisp grain detail, natural daylight, soft shadow, editorial ecommerce crop, no dark background.',
     },
-    products: [],
+    products,
     orders: [],
     returnRequests: [],
     activity: [
@@ -393,13 +402,48 @@ function defaultStore() {
         type: 'system',
         message: 'Admin backend initialized',
       },
+      ...(products.length ? [{
+        id: `act-catalog-bootstrap-${Date.now()}`,
+        at: new Date().toISOString(),
+        type: 'system',
+        message: `Admin catalog initialized from ${products.length} verified website products`,
+      }] : []),
     ],
   };
 }
 
 function ensureStore() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(storePath)) writeStore(defaultStore());
+  const catalogBootstrapEnabled = dataDir === path.join(root, 'data')
+    || Boolean(process.env.RAILWAY_ENVIRONMENT_NAME)
+    || process.env.ADMIN_CATALOG_BOOTSTRAP === '1';
+  const seedProducts = merchantSeedProducts();
+  if (!fs.existsSync(storePath)) {
+    writeStore(defaultStore(catalogBootstrapEnabled ? seedProducts : []));
+    return;
+  }
+
+  const store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+  const activity = Array.isArray(store.activity) ? store.activity : [];
+  const pristineEmptyStore = (!Array.isArray(store.products) || store.products.length === 0)
+    && (!Array.isArray(store.orders) || store.orders.length === 0)
+    && activity.length <= 1
+    && (!activity[0] || activity[0].message === 'Admin backend initialized');
+  if (!catalogBootstrapEnabled || !pristineEmptyStore || seedProducts.length === 0) return;
+
+  writeStore({
+    ...store,
+    products: seedProducts,
+    activity: [
+      ...activity,
+      {
+        id: `act-catalog-bootstrap-${Date.now()}`,
+        at: new Date().toISOString(),
+        type: 'system',
+        message: `Admin catalog initialized from ${seedProducts.length} verified website products`,
+      },
+    ],
+  });
 }
 
 function readStore() {
@@ -3363,4 +3407,5 @@ module.exports = {
   publicRoutes,
   indexablePublicPaths,
   readPublicStore,
+  merchantSeedProducts,
 };

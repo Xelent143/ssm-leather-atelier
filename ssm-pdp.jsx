@@ -301,12 +301,6 @@ function PDP({ product, go, addToCart, onQuickView }) {
     ['Customization', 'Available by leather, size, measurements, and custom fit request'],
   ];
 
-  const reviews = [
-    { who: 'Iola V., Brooklyn',  rating: 5, date: 'March MMXXVI',  body: `My ${p.name.split(' ')[0]} arrived with a small note from ${p.maker}. Three weeks in, the placket has softened just where I hoped.` },
-    { who: 'Theo M., Paris',     rating: 5, date: 'February MMXXVI', body: 'The fit is exact. The hide is heavier than I expected, in the best way. I have not taken it off.' },
-    { who: 'Sigrid K., London',  rating: 4, date: 'January MMXXVI',  body: 'A real piece. Sized up over a knit, which I would recommend. The brass darkened beautifully after two weeks.' },
-  ];
-
   return (
     <div className="page-fade">
       {/* Breadcrumb */}
@@ -378,7 +372,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
             {[
               { i: '✦', t: 'Hand-numbered' },
               { i: '⌖', t: 'Worldwide shipping' },
-              { i: '↻', t: 'Lifetime repair' },
+              { i: '↻', t: 'Warranty support' },
             ].map(b => (
               <div key={b.t} style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: 14, color: 'var(--accent-2)', marginBottom: 4 }}>{b.i}</div>
@@ -676,33 +670,21 @@ function PDP({ product, go, addToCart, onQuickView }) {
         </div>
       </section>
 
-      {/* Reviews */}
+      {/* Verified reviews only */}
       <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
           <div>
             <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>
-              REVIEWS · 4.9 / 5 · {reviews.length} VOICES
+              VERIFIED CUSTOMER REVIEWS
             </div>
             <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400 }}>
-              From people who wear it.
+              Built on genuine feedback.
             </h2>
           </div>
           <button className="btn btn-ghost">Write a review</button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
-          {reviews.map(r => (
-            <div key={r.who} style={{ padding: 24, border: '1px solid var(--line)' }}>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--accent-2)' }}>
-                {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
-              </div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontStyle: 'italic', lineHeight: 1.5, marginTop: 16, color: 'var(--fg-2)' }}>
-                &ldquo;{r.body}&rdquo;
-              </div>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-4)', marginTop: 16 }}>
-                — {r.who.toUpperCase()} · {r.date.toUpperCase()}
-              </div>
-            </div>
-          ))}
+        <div style={{ padding: 24, border: '1px solid var(--line)', color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>
+          Customer feedback appears here only after it has been linked to a verified purchase. No verified review has been published for this product yet.
         </div>
       </section>
 

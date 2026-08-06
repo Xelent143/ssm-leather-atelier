@@ -67,7 +67,7 @@ function About({ go }) {
         {[
           { n: 'I', t: 'Patience', c: 'Twelve months in the tanning pit. Two weeks per garment. Nothing is hurried; nothing is hidden.' },
           { n: 'II', t: 'Single-maker', c: 'One craftsperson sees a piece from cut to finish. They sign the inside placket. You write to them by name.' },
-          { n: 'III', t: 'Forever', c: 'Every piece carries a lifetime repair promise. Bring it back at fifty; we will know how it was made.' },
+          { n: 'III', t: 'Supported', c: 'Each piece includes a one-year workmanship warranty. Repairs outside warranty are assessed and quoted before work begins.' },
         ].map(p => (
           <div key={p.t}>
             <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 12 }}>{p.t}</div>
