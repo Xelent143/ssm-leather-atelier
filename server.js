@@ -1223,6 +1223,12 @@ function serveMerchantFeed(req, res) {
       const groupId = product.itemGroupId || product.slug || product.id;
       const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
       const image = productImageUrl(req, product.primaryImage || product.image);
+      const additionalImages = [...new Set((product.galleryImages || [])
+        .map((entry) => (typeof entry === 'string' ? entry : entry?.url || entry?.src || entry?.path))
+        .filter(Boolean)
+        .map((entry) => productImageUrl(req, entry))
+        .filter((entry) => entry && entry !== image))]
+        .slice(0, 10);
       const description = merchantDescription(product);
 
       variants.forEach(([size, quantity]) => {
@@ -1233,6 +1239,7 @@ function serveMerchantFeed(req, res) {
           ['description', description],
           ['link', link],
           ['image_link', image],
+          ...additionalImages.map((additionalImage) => ['additional_image_link', additionalImage]),
           ['availability', Number(quantity) > 0 ? 'in_stock' : 'out_of_stock'],
           ['price', `${Number(product.price || 0).toFixed(2)} ${currency}`],
           ['condition', merchantCondition(product.condition)],
