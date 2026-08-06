@@ -287,6 +287,42 @@ function defaultStore(products = []) {
   };
 }
 
+function applyApprovedOperationalDefaults(store) {
+  const activity = Array.isArray(store.activity) ? store.activity : [];
+  const migrationId = 'act-approved-stock-mto-normalization-20260806';
+  if (!Array.isArray(store.products) || store.products.length === 0
+    || activity.some((event) => event.id === migrationId)) return store;
+
+  const products = (Array.isArray(store.products) ? store.products : []).map((product) => {
+    const stock = Object.fromEntries(
+      Object.keys(product.stock || {}).map((size) => [size, 19]),
+    );
+    return {
+      ...product,
+      madeToMeasureEnabled: true,
+      madeToMeasureSurcharge: 50,
+      ...(Object.keys(stock).length ? {
+        stock,
+        inventory: Object.values(stock).reduce((sum, value) => sum + value, 0),
+      } : {}),
+    };
+  });
+
+  return {
+    ...store,
+    products,
+    activity: [
+      ...activity,
+      {
+        id: migrationId,
+        at: new Date().toISOString(),
+        type: 'system',
+        message: `Applied approved ready-stock quantity 19 per listed size and enabled +$50 made-to-measure for ${products.length} products`,
+      },
+    ],
+  };
+}
+
 function ensureStore() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   const catalogBootstrapEnabled = dataDir === path.join(root, 'data')
@@ -294,31 +330,36 @@ function ensureStore() {
     || process.env.ADMIN_CATALOG_BOOTSTRAP === '1';
   const seedProducts = merchantSeedProducts();
   if (!fs.existsSync(storePath)) {
-    writeStore(defaultStore(catalogBootstrapEnabled ? seedProducts : []));
+    const initialStore = defaultStore(catalogBootstrapEnabled ? seedProducts : []);
+    writeStore(catalogBootstrapEnabled ? applyApprovedOperationalDefaults(initialStore) : initialStore);
     return;
   }
 
-  const store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+  let store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
   const activity = Array.isArray(store.activity) ? store.activity : [];
   const pristineEmptyStore = (!Array.isArray(store.products) || store.products.length === 0)
     && (!Array.isArray(store.orders) || store.orders.length === 0)
     && activity.length <= 1
     && (!activity[0] || activity[0].message === 'Admin backend initialized');
-  if (!catalogBootstrapEnabled || !pristineEmptyStore || seedProducts.length === 0) return;
-
-  writeStore({
-    ...store,
-    products: seedProducts,
-    activity: [
-      ...activity,
-      {
-        id: `act-catalog-bootstrap-${Date.now()}`,
-        at: new Date().toISOString(),
-        type: 'system',
-        message: `Admin catalog initialized from ${seedProducts.length} verified website products`,
-      },
-    ],
-  });
+  if (catalogBootstrapEnabled && pristineEmptyStore && seedProducts.length > 0) {
+    store = {
+      ...store,
+      products: seedProducts,
+      activity: [
+        ...activity,
+        {
+          id: `act-catalog-bootstrap-${Date.now()}`,
+          at: new Date().toISOString(),
+          type: 'system',
+          message: `Admin catalog initialized from ${seedProducts.length} verified website products`,
+        },
+      ],
+    };
+  }
+  if (catalogBootstrapEnabled) {
+    const normalizedStore = applyApprovedOperationalDefaults(store);
+    if (normalizedStore !== store) writeStore(normalizedStore);
+  }
 }
 
 function readStore() {

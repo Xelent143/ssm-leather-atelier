@@ -23,7 +23,10 @@ test('a pristine admin store is seeded from the verified website catalog', () =>
 
   assert.equal(store.products.length, catalog.products.length);
   assert.equal(store.orders.length, 0);
-  assert.match(store.activity.at(-1).message, /verified website products/);
+  assert.match(store.activity.at(-1).message, /quantity 19 per listed size/);
+  assert.ok(store.products.every((product) => product.madeToMeasureEnabled === true));
+  assert.ok(store.products.every((product) => product.madeToMeasureSurcharge === 50));
+  assert.ok(store.products.every((product) => Object.values(product.stock || {}).every((quantity) => quantity === 19)));
 
 });
 
