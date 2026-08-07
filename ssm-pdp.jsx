@@ -60,6 +60,13 @@ function FactualPDP({ product: p, go, addToCart }) {
     if (nextIndex >= 0) setImgIdx(nextIndex);
   }, [selectedVariant?.id]);
 
+  React.useEffect(() => {
+    const selectedColorImage = (p.colors || []).find(color => color.name === selection.color)?.image;
+    if (!selectedColorImage) return;
+    const nextIndex = images.findIndex(image => image.src === selectedColorImage);
+    if (nextIndex >= 0) setImgIdx(nextIndex);
+  }, [selection.color]);
+
   const optionAvailable = (optionName, value) => {
     const key = optionName.toLowerCase();
     const candidate = { ...selection, [key]: value };

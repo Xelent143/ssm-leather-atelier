@@ -20,6 +20,7 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
     assert.match(source, /className=\{option\.name\.toLowerCase\(\) === 'size' \? 'pdp-size-option-grid'/);
     assert.match(source, /'pdp-size-option-button'/);
     assert.match(source, /surcharge: isMadeToMeasure \? madeToMeasureSurcharge : 0/);
+    assert.match(source, /selectedColorImage/);
     assert.match(source, /className="pdp-editorial-story"/);
     assert.match(source, /className="pdp-category-size-chart"/);
     assert.match(source, /SSM_MENS_VEST_SIZE_CHART/);
@@ -56,6 +57,21 @@ test('all newly released SWAT vests retain made-to-measure support', () => {
     assert.equal(vest.madeToMeasureEnabled, true, `${vest.id} should support made to measure`);
     assert.equal(vest.madeToMeasureSurcharge, 50, `${vest.id} should use the approved surcharge`);
   }
+});
+
+test('the distressed cowhide Western fringe jacket keeps its approved two-color listing contract', () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));
+  const jacket = catalog.products.find(product => product.id === 'p44');
+  assert.ok(jacket);
+  assert.equal(jacket.price, 450);
+  assert.deepEqual(jacket.colors, ['Distressed Brown', 'Distressed Black']);
+  assert.deepEqual(jacket.options.find(option => option.name === 'Size').values, ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL']);
+  assert.equal(jacket.galleryImages.length, 6);
+  assert.match(jacket.galleryImages[3], /close-up/);
+  assert.ok(jacket.colors.every(color => jacket.colorImages[color]));
+  const publicJacket = publicProductForPdp(jacket);
+  assert.ok(publicJacket.images.includes(`/${jacket.colorImages['Distressed Brown']}`));
+  assert.ok(publicJacket.images.includes(`/${jacket.colorImages['Distressed Black']}`));
 });
 
 test('every active catalog product can supply the editorial close-up slot', () => {

@@ -2461,6 +2461,14 @@ const SSM_MERCHANT_COLLECTION_PRODUCTS = [
     img: A('jackets/mens-western-fringe-sheepskin-leather-jacket/brown/01-brown-western-fringe-sheepskin-leather-jacket-model-front.png'),
     stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19 },
   },
+  {
+    id: 'p44', slug: 'mens-distressed-cowhide-western-fringe-jacket',
+    name: "Men's Distressed Cowhide Western Fringe Jacket", cat: 'Jackets', gender: 'Men',
+    price: 450, tag: 'New', serverCatalog: true,
+    blurb: 'Genuine cowhide · embroidered Western yoke · hand-cut fringe',
+    img: A('jackets/mens-distressed-cowhide-western-fringe-jacket/brown/01-brown-fringe-jacket-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19 },
+  },
 ];
 
 const SSM_COLLECTION_PRODUCTS = [...SSM_PRODUCTS, ...SSM_MERCHANT_COLLECTION_PRODUCTS];
@@ -6058,6 +6066,13 @@ function FactualPDP({ product: p, go, addToCart }) {
     const nextIndex = images.findIndex(image => image.src === selectedMedia.path);
     if (nextIndex >= 0) setImgIdx(nextIndex);
   }, [selectedVariant?.id]);
+
+  React.useEffect(() => {
+    const selectedColorImage = (p.colors || []).find(color => color.name === selection.color)?.image;
+    if (!selectedColorImage) return;
+    const nextIndex = images.findIndex(image => image.src === selectedColorImage);
+    if (nextIndex >= 0) setImgIdx(nextIndex);
+  }, [selection.color]);
 
   const optionAvailable = (optionName, value) => {
     const key = optionName.toLowerCase();

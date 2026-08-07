@@ -926,6 +926,7 @@ function publicProductForPdp(product) {
   const images = [...new Set([
     product.primaryImage || product.image,
     ...(Array.isArray(product.galleryImages) ? product.galleryImages : []),
+    ...Object.values(product.colorImages || {}),
   ].map(assetPath).filter(Boolean))];
   const options = (Array.isArray(product.options) ? product.options : []).map((option) => ({
     name: String(option.name || ''),
