@@ -5908,6 +5908,7 @@ function FactualPDP({ product: p, go, addToCart }) {
   const [selection, setSelection] = React.useState(initialSelection);
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('description');
+  const [fitChartUnit, setFitChartUnit] = React.useState('inch');
   const [fitMode, setFitMode] = React.useState('standard');
   const [measurements, setMeasurements] = React.useState({
     height: '', chest: '', naturalWaist: '', lowerWaist: '',
@@ -5968,6 +5969,15 @@ function FactualPDP({ product: p, go, addToCart }) {
     ['shoulder', 'Shoulder', 'in/cm'], ['hips', 'Hips', 'in/cm'],
     ['sleeves', 'Sleeves', 'in/cm'], ['weight', 'Weight', 'lbs'],
   ];
+  const categoryText = `${p.cat || ''} ${p.category || ''} ${p.productType || ''}`.toLowerCase();
+  const isVest = categoryText.includes('vest');
+  const isPants = categoryText.includes('pant') || categoryText.includes('trouser') || categoryText.includes('chap');
+  const isChaps = categoryText.includes('chap');
+  const isUpperBody = categoryText.includes('jacket') || categoryText.includes('shirt');
+  const isSizedApparel = isVest || isPants || isUpperBody;
+  const selectedSizeName = selection.size || selection.waist || null;
+  const editorialCategory = isVest ? 'Vest' : isPants ? 'Trousers' : categoryText.includes('shirt') ? 'Leather Shirt' : isUpperBody ? 'Jacket' : 'Piece';
+  const editorialOwner = p.gender === 'Women' ? "Women's" : p.gender === 'Men' ? "Men's" : 'Unisex';
   const factual = value => value !== undefined && value !== null && value !== '';
   const displayValue = value => typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
   const metafieldLabels = {
@@ -6195,6 +6205,48 @@ function FactualPDP({ product: p, go, addToCart }) {
           ))}
         </div>
       </div>
+      {p.publicDescription && (
+        <section className="pdp-editorial-story" style={{ padding: '96px 48px', borderTop: '1px solid var(--line)', background: 'var(--bg-2)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>FROM THE BENCH · {(p.maker || 'MOTOGRIP WORKSHOP').toUpperCase()}</div>
+            <h2 className="display" style={{ fontSize: 'clamp(32px, 4vw, 56px)', margin: 0, lineHeight: 1.05, fontWeight: 400 }}>On the {editorialOwner} {editorialCategory}.</h2>
+            <div style={{ color: 'var(--fg-3)', fontSize: 16, lineHeight: 1.85, marginTop: 24 }}>{p.publicDescription}</div>
+            <button className="btn btn-ghost" style={{ marginTop: 28 }} onClick={() => go('journal')}>More from the journal</button>
+          </div>
+          <div className="ph grain" style={{ aspectRatio: '4/5', background: 'var(--bg-2)' }}>
+            <img src={p.alt || p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+          </div>
+        </section>
+      )}
+      {isSizedApparel && (
+        <section className="pdp-category-size-chart" style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
+            {isVest ? `${editorialOwner.toUpperCase()} MOTORCYCLE LEATHER VEST SIZE CHART` : isPants ? `${editorialOwner.toUpperCase()} LEATHER TROUSERS SIZE CHART` : `${editorialOwner.toUpperCase()} ${editorialCategory.toUpperCase()} SIZE CHART`}
+          </div>
+          <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>Fit at a glance.</h2>
+          {isVest && <>
+            <JacketSizeChart unit={fitChartUnit} onUnitChange={setFitChartUnit} selectedSize={selectedSizeName} chart={p.gender === 'Women' ? SSM_WOMENS_VEST_SIZE_CHART : SSM_MENS_VEST_SIZE_CHART} ariaLabel={`${editorialOwner} vest size chart units`} note="Measure around the fullest part of your chest—or your stomach if it is larger—and use the larger body measurement. Measure over your usual riding layer and size up for a more relaxed fit." footer="GARMENT MEASUREMENTS REFER TO THE FINISHED VEST. BODY MEASUREMENTS REFER TO THE WEARER." />
+            {p.gender === 'Women' ? <WomensVestMeasureGuide /> : <MensVestMeasureGuide />}
+          </>}
+          {isUpperBody && <>
+            <JacketSizeChart unit={fitChartUnit} onUnitChange={setFitChartUnit} selectedSize={selectedSizeName} chart={p.gender === 'Women' ? SSM_WOMENS_JACKET_SIZE_CHART : SSM_JACKET_SIZE_CHART} ariaLabel={`${editorialOwner} ${editorialCategory.toLowerCase()} size chart units`} />
+            {p.gender === 'Women' ? <WomensJacketMeasureGuide /> : <MensJacketMeasureGuide />}
+          </>}
+          {isPants && isChaps && <>
+            <JacketSizeChart unit={fitChartUnit} onUnitChange={setFitChartUnit} selectedSize={selectedSizeName} chart={SSM_UNISEX_CHAPS_SIZE_CHART} ariaLabel="Unisex leather chaps size chart units" />
+            <UnisexChapsMeasureGuide />
+          </>}
+          {isPants && !isChaps && (
+            <div style={{ overflowX: 'auto', borderTop: '1px solid var(--line-2)', borderBottom: '1px solid var(--line-2)' }}>
+              <table style={{ width: '100%', minWidth: 620, borderCollapse: 'collapse' }}>
+                <thead><tr>{(p.options || []).map(option => <th key={option.name} className="mono" style={{ textAlign: 'left', padding: '15px 12px', color: 'var(--accent-2)', fontSize: 9, borderBottom: '1px solid var(--line-2)' }}>{option.name.toUpperCase()}</th>)}</tr></thead>
+                <tbody><tr>{(p.options || []).map(option => <td key={option.name} className="mono" style={{ padding: '18px 12px', color: 'var(--fg-2)', borderRight: '1px solid var(--line)' }}>{(option.values || []).join(' · ')}</td>)}</tr></tbody>
+              </table>
+              <div className="mono" style={{ fontSize: 8, color: 'var(--fg-4)', padding: '12px' }}>SELECT WAIST AND INSEAM SEPARATELY WHERE OFFERED. USE THE PRODUCT PICKER ABOVE FOR CURRENT AVAILABILITY.</div>
+            </div>
+          )}
+        </section>
+      )}
       {Array.isArray(p.reviews) && p.reviews.length > 0 && (
         <section style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
           <h2 className="display" style={{ fontSize: 32, fontWeight: 400 }}>Verified product reviews</h2>

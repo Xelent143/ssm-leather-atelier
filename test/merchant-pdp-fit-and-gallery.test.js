@@ -15,6 +15,14 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
     assert.match(source, /Customize in Fit Lab/);
     assert.match(source, /SIZE GUIDE/);
     assert.match(source, /surcharge: isMadeToMeasure \? madeToMeasureSurcharge : 0/);
+    assert.match(source, /className="pdp-editorial-story"/);
+    assert.match(source, /className="pdp-category-size-chart"/);
+    assert.match(source, /SSM_MENS_VEST_SIZE_CHART/);
+    assert.match(source, /SSM_WOMENS_VEST_SIZE_CHART/);
+    assert.match(source, /SSM_JACKET_SIZE_CHART/);
+    assert.match(source, /SSM_WOMENS_JACKET_SIZE_CHART/);
+    assert.match(source, /SSM_UNISEX_CHAPS_SIZE_CHART/);
+    assert.match(source, /SELECT WAIST AND INSEAM SEPARATELY WHERE OFFERED/);
   });
 }
 
