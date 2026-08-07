@@ -193,6 +193,25 @@ const SSM_PRODUCTS = [
   },
 ];
 
+const productColorName = (product) => {
+  const namedColor = String(product.name || '').match(/\b(black|white|red|blue|green|brown|tan|grey|gray|yellow|orange|silver|gold|navy|mocha|oxblood|cognac)\b/i)?.[1];
+  return namedColor ? namedColor.replace(/^./, character => character.toUpperCase()) : 'As Shown';
+};
+
+SSM_PRODUCTS.forEach((product) => {
+  const genuineColorImage = product.img || product.gallery?.[0]?.src || product.alt || '';
+  if (!Array.isArray(product.colors) || product.colors.length === 0) {
+    const name = productColorName(product);
+    product.colors = [{ id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name, color: '#777777', image: genuineColorImage }];
+  } else {
+    product.colors = product.colors.map((color) => ({
+      ...color,
+      image: color.image || color.modelImage || genuineColorImage,
+    }));
+  }
+  product.defaultColor = product.defaultColor || product.colors[0]?.id || '';
+});
+
 // ── Imagery map ─────────────────────────────────────────────────────────────
 
 const SSM_IMAGES = {

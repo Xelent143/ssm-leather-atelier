@@ -209,7 +209,8 @@ function FactualPDP({ product: p, go, addToCart }) {
           {(p.options || []).map(option => (
             <div key={option.name} style={{ marginBottom: 24 }}>
               <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
-                <span>{option.name.toUpperCase()} · {String(selection[option.name.toLowerCase()] || '').toUpperCase()}</span>
+                <span>{option.name.toUpperCase()}{option.name.toLowerCase() === 'color' ? '' : ` · ${String(selection[option.name.toLowerCase()] || '').toUpperCase()}`}</span>
+                {option.name.toLowerCase() === 'color' && <span style={{ color: 'var(--fg-2)' }}>{String(selection.color || '').toUpperCase()}</span>}
                 {option.name.toLowerCase() === 'size' && <button onClick={() => go('size')} className="ulink" style={{ color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 10 }}>SIZE GUIDE ↗</button>}
               </div>
               <div className={option.name.toLowerCase() === 'size' ? 'pdp-size-option-grid' : undefined}
@@ -225,7 +226,7 @@ function FactualPDP({ product: p, go, addToCart }) {
                     disabled={!available} aria-pressed={active}
                     aria-label={`${option.name} ${value}${available ? '' : ', unavailable'}`}
                     style={colorSpec ? {
-                      padding: '4px',
+                      padding: 0,
                       border: 0,
                       background: 'transparent',
                       color: available ? (active ? 'var(--fg)' : 'var(--fg-4)') : 'var(--fg-4)',
@@ -235,7 +236,7 @@ function FactualPDP({ product: p, go, addToCart }) {
                       display: 'inline-flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: 9,
+                      gap: 8,
                     } : {
                       minHeight: 40,
                       padding: '0 14px',
@@ -249,9 +250,9 @@ function FactualPDP({ product: p, go, addToCart }) {
                       alignItems: 'center',
                     }}>
                     {colorSpec && <span aria-hidden="true" style={{
-                      width: 48,
-                      height: 48,
-                      flex: '0 0 48px',
+                      width: 34,
+                      height: 34,
+                      flex: '0 0 34px',
                       borderRadius: '50%',
                       border: '1px solid var(--line-2)',
                       outline: active ? '1px solid var(--fg)' : 'none',

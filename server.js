@@ -924,6 +924,15 @@ function publicProductForPdp(product) {
   const colorNames = optionMap.color?.length
     ? optionMap.color
     : (Array.isArray(product.colors) ? product.colors : [product.color]).filter(Boolean).map(String);
+  if (!colorNames.length) colorNames.push('As Shown');
+  if (!optionMap.color?.length) {
+    options.push({ name: 'Color', values: [...colorNames] });
+    optionMap.color = colorNames;
+  }
+  options.sort((left, right) => {
+    const rank = (name) => name.toLowerCase() === 'color' ? 0 : name.toLowerCase() === 'size' ? 1 : 2;
+    return rank(left.name) - rank(right.name);
+  });
   const variantSizes = sizes.length ? sizes : ['One Size'];
   const variantColors = colorNames.length ? colorNames : ['Default'];
   const variants = variantSizes.flatMap((size) => variantColors.map((color) => {

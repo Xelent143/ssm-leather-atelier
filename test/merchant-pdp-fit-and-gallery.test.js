@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
+const { publicProductForPdp } = require(path.join(root, 'server.js'));
 
 for (const file of ['ssm-pdp.jsx', 'index.html']) {
   test(`${file} keeps merchant PDP galleries contained and exposes fit controls`, () => {
@@ -75,3 +76,30 @@ test('shirts, jackets, coats, blazers and puffers route to the jacket chart whil
   assert.ok(vestChartProducts.length > 0);
   assert.ok(jacketChartProducts.every(product => !vestChartProducts.includes(product)));
 });
+
+test('every active merchant listing exposes an image-based color selector, including single-color products', () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));
+  const activeProducts = catalog.products.filter(product => product.status === 'active');
+  assert.ok(activeProducts.length > 0);
+  for (const product of activeProducts) {
+    const publicProduct = publicProductForPdp(product);
+    const colorOption = publicProduct.options.find(option => option.name.toLowerCase() === 'color');
+    assert.ok(colorOption, `${product.id} must expose a Color option`);
+    assert.ok(colorOption.values.length > 0, `${product.id} must expose at least one color`);
+    assert.equal(publicProduct.colors.length, colorOption.values.length, `${product.id} color sequence must stay synchronized`);
+    assert.ok(publicProduct.colors.every(color => color.image), `${product.id} must use image-based color swatches`);
+    const sizeIndex = publicProduct.options.findIndex(option => option.name.toLowerCase() === 'size');
+    const colorIndex = publicProduct.options.findIndex(option => option.name.toLowerCase() === 'color');
+    if (sizeIndex >= 0) assert.ok(colorIndex < sizeIndex, `${product.id} must show Color before Size`);
+  }
+});
+
+for (const file of ['ssm-data.jsx', 'index.html']) {
+  test(`${file} backfills image-based color selectors for every legacy product`, () => {
+    const source = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.match(source, /SSM_PRODUCTS\.forEach\(\(product\) =>/);
+    assert.match(source, /product\.colors = \[\{ id: name\.toLowerCase\(\)/);
+    assert.match(source, /image: color\.image \|\| color\.modelImage \|\| genuineColorImage/);
+    assert.match(source, /product\.defaultColor = product\.defaultColor \|\| product\.colors\[0\]\?\.id/);
+  });
+}
