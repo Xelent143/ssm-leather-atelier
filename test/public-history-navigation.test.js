@@ -23,3 +23,12 @@ for (const relativePath of publicAppCopies) {
       'go() must create the browser-history entry before updating the React view');
   });
 }
+
+for (const relativePath of ['ssm-home.jsx', 'index.html']) {
+  test(`${relativePath} preserves native new-tab behavior on product cards`, () => {
+    const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
+
+    assert.match(source, /<a href=\{`\/products\/\$\{product\.slug\}`\} className="card" style=\{\{ cursor: 'pointer', display: 'block' \}\}>/);
+    assert.match(source, /e\.preventDefault\(\); e\.stopPropagation\(\); onQuickView\(product\);/);
+  });
+}

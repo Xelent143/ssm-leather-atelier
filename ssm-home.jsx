@@ -126,8 +126,7 @@ function HeroCentered() {
 
 function ProductCard({ product, onQuickView, go }) {
   return (
-    <a href={`/products/${product.slug}`} className="card" style={{ cursor: 'pointer', display: 'block' }}
-      onClick={(e) => { e.preventDefault(); go('pdp', { product }); }}>
+    <a href={`/products/${product.slug}`} className="card" style={{ cursor: 'pointer', display: 'block' }}>
       <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '3/4' }}>
         <div className="ph card-img" data-img="1" data-label={product.name}
           style={{ position: 'absolute', inset: 0, '--img': `url(${product.img})` }} />
@@ -144,7 +143,7 @@ function ProductCard({ product, onQuickView, go }) {
           position: 'absolute', bottom: 16, left: 16, right: 16,
         }}>
           <button className="btn" style={{ width: '100%', justifyContent: 'center', fontSize: 10, padding: '12px' }}
-            onClick={(e) => { e.stopPropagation(); onQuickView(product); }}>
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product); }}>
             Quick View
           </button>
         </div>
