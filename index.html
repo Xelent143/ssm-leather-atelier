@@ -5908,6 +5908,11 @@ function FactualPDP({ product: p, go, addToCart }) {
   const [selection, setSelection] = React.useState(initialSelection);
   const [imgIdx, setImgIdx] = React.useState(0);
   const [openSection, setOpenSection] = React.useState('description');
+  const [fitMode, setFitMode] = React.useState('standard');
+  const [measurements, setMeasurements] = React.useState({
+    height: '', chest: '', naturalWaist: '', lowerWaist: '',
+    shoulder: '', hips: '', sleeves: '', weight: '',
+  });
   const images = (p.images || [p.img, p.alt]).filter(Boolean).map((src, index) => ({
     src,
     label: p.imageMetadata?.find(item => item.path === src)?.altText ||
@@ -5916,7 +5921,10 @@ function FactualPDP({ product: p, go, addToCart }) {
   const selectedVariant = sellableVariants.find(variant =>
     Object.entries(selection).every(([key, value]) =>
       !value || !variant.attributes?.[key] || variant.attributes[key] === value)) || null;
-  const selectedPrice = Number(selectedVariant?.price ?? p.price ?? 0);
+  const baseSelectedPrice = Number(selectedVariant?.price ?? p.price ?? 0);
+  const madeToMeasureSurcharge = Number(p.madeToMeasureSurcharge ?? 50);
+  const isMadeToMeasure = fitMode === 'made-to-measure';
+  const selectedPrice = baseSelectedPrice + (isMadeToMeasure ? madeToMeasureSurcharge : 0);
   const selectedCompareAt = Number(selectedVariant?.compareAtPrice ?? p.compareAtPrice ?? 0);
   const validCompareAt = selectedCompareAt > selectedPrice;
   const discount = validCompareAt && selectedCompareAt > 0
@@ -5953,6 +5961,13 @@ function FactualPDP({ product: p, go, addToCart }) {
       ...Object.fromEntries(Object.entries(compatible.attributes || {})),
     } : candidate);
   };
+  const updateMeasurement = (key, value) => setMeasurements(current => ({ ...current, [key]: value }));
+  const measurementFields = [
+    ['height', 'Height', 'in/cm'], ['chest', 'Chest', 'in/cm'],
+    ['naturalWaist', 'Natural waist', 'in/cm'], ['lowerWaist', 'Lower waist', 'in/cm'],
+    ['shoulder', 'Shoulder', 'in/cm'], ['hips', 'Hips', 'in/cm'],
+    ['sleeves', 'Sleeves', 'in/cm'], ['weight', 'Weight', 'lbs'],
+  ];
   const factual = value => value !== undefined && value !== null && value !== '';
   const displayValue = value => typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
   const metafieldLabels = {
@@ -6028,20 +6043,20 @@ function FactualPDP({ product: p, go, addToCart }) {
         <span>/</span>
         <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
       </nav>
-      <div className="factual-pdp-grid" style={{ display: 'grid', gridTemplateColumns: '80px minmax(0, 1fr) 480px', padding: '0 48px 80px' }}>
+      <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
           {images.map((image, index) => (
             <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
               className="ph tiny" data-label=""
-              style={{ width: 64, aspectRatio: '3/4', cursor: 'pointer', outline: imgIdx === index ? '1px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.65, background: p.cat === 'Bags' ? '#fff' : 'transparent', border: 0, padding: 0 }}>
-              <img src={image.src} alt="" style={{ width: '100%', height: '100%', objectFit: p.cat === 'Bags' ? 'contain' : 'cover', objectPosition: 'center' }} />
+              style={{ width: 76, aspectRatio: '1', cursor: 'pointer', outline: imgIdx === index ? '1px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.65, background: 'var(--bg-2)', border: 0, padding: 0 }}>
+              <img src={image.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
             </button>
           ))}
         </div>
-        <div style={{ paddingLeft: 24 }}>
-          {images.length > 0 && <div className="ph grain" data-label=""
-            role="img" aria-label={images[imgIdx]?.label} style={{ aspectRatio: '4/5', background: p.cat === 'Bags' ? '#fff' : 'transparent' }}>
-            <img src={images[imgIdx]?.src} alt="" style={{ width: '100%', height: '100%', objectFit: p.cat === 'Bags' ? 'contain' : 'cover', objectPosition: 'center' }} />
+        <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
+          {images.length > 0 && <div className="ph grain pdp-main-image" data-label=""
+            role="img" aria-label={images[imgIdx]?.label} style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', background: 'var(--bg-2)' }}>
+            <img src={images[imgIdx]?.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
           </div>}
         </div>
         <div style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
@@ -6063,8 +6078,9 @@ function FactualPDP({ product: p, go, addToCart }) {
 
           {(p.options || []).map(option => (
             <div key={option.name} style={{ marginBottom: 24 }}>
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12 }}>
-                {option.name.toUpperCase()} · {String(selection[option.name.toLowerCase()] || '').toUpperCase()}
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+                <span>{option.name.toUpperCase()} · {String(selection[option.name.toLowerCase()] || '').toUpperCase()}</span>
+                {option.name.toLowerCase() === 'size' && <button onClick={() => go('size')} className="ulink" style={{ color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 10 }}>SIZE GUIDE ↗</button>}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {(option.values || []).map(value => {
@@ -6123,20 +6139,49 @@ function FactualPDP({ product: p, go, addToCart }) {
             {selectedAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}
             {selectedVariant?.sku ? ` · SKU ${selectedVariant.sku}` : ''}
           </div>
+          {p.madeToMeasureEnabled && (
+            <div style={{ marginBottom: 16 }}>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                <span>FIT</span><span style={{ color: 'var(--fg-4)' }}>MADE TO MEASURE +${madeToMeasureSurcharge}</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: isMadeToMeasure ? 14 : 0 }}>
+                {[
+                  { id: 'standard', title: 'Standard size', detail: `Cut to size ${selection.size || selection.waist || ''}` },
+                  { id: 'made-to-measure', title: 'Made to measure', detail: `Pattern adjusted from your measurements · +$${madeToMeasureSurcharge}` },
+                ].map(option => {
+                  const active = fitMode === option.id;
+                  return <button key={option.id} onClick={() => setFitMode(option.id)} aria-pressed={active} style={{ textAlign: 'left', padding: 11, border: `1px solid ${active ? 'var(--accent-2)' : 'var(--line-2)'}`, background: active ? 'rgba(176,138,76,0.08)' : 'transparent', color: 'var(--fg)', minHeight: 72, cursor: 'pointer' }}>
+                    <div style={{ fontFamily: 'var(--display)', fontSize: 18, lineHeight: 1.1 }}>{option.title}</div>
+                    <div className="mono" style={{ fontSize: 8, color: active ? 'var(--accent-2)' : 'var(--fg-4)', marginTop: 8, lineHeight: 1.5 }}>{option.detail.toUpperCase()}</div>
+                  </button>;
+                })}
+              </div>
+              {isMadeToMeasure && <div className="page-fade" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, padding: 14, border: '1px solid var(--line)', background: 'var(--bg-2)' }}>
+                {measurementFields.map(([key, label, placeholder]) => <label key={key} className="mono" style={{ fontSize: 9, color: 'var(--fg-4)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {label.toUpperCase()}<input value={measurements[key]} onChange={event => updateMeasurement(key, event.target.value)} placeholder={placeholder} style={{ width: '100%', padding: '10px 0', background: 'transparent', border: 'none', borderBottom: '1px solid var(--line-2)', color: 'var(--fg)', fontFamily: 'var(--sans)', fontSize: 13, outline: 'none' }} />
+                </label>)}
+              </div>}
+            </div>
+          )}
           <button className="btn" disabled={!selectedAvailable}
-            style={{ width: '100%', justifyContent: 'center', marginBottom: 24, opacity: selectedAvailable ? 1 : 0.55 }}
+            style={{ width: '100%', justifyContent: 'center', marginBottom: 8, opacity: selectedAvailable ? 1 : 0.55 }}
             onClick={() => selectedAvailable && addToCart(p, {
               ...selection,
               size: selection.size || selection.waist,
               leather: p.material || p.metafields?.outerMaterial || 'Leather',
-              fitLabel: selection.inseam ? `Inseam ${selection.inseam} inches` : null,
-              measurements: selection.inseam ? { inseam: `${selection.inseam} inches` } : null,
+              fitMode,
+              fitLabel: isMadeToMeasure ? 'Made to measure' : 'Standard size',
+              measurements: isMadeToMeasure ? measurements : (selection.inseam ? { inseam: `${selection.inseam} inches` } : null),
+              surcharge: isMadeToMeasure ? madeToMeasureSurcharge : 0,
               variantId: selectedVariant?.id,
               sku: selectedVariant?.sku,
               price: selectedPrice,
             })}>
             {selectedAvailable ? `Add to Bag — ${selectedPrice.toLocaleString()}` : 'Currently unavailable'}
           </button>
+          {p.madeToMeasureEnabled && <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 24 }} onClick={() => go('mto', { startWith: p })}>
+            Customize in Fit Lab <Icon name="arrow" size={14} />
+          </button>}
 
           {sections.map(([id, title, content]) => (
             <div key={id} style={{ borderTop: '1px solid var(--line)' }}>
