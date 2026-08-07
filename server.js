@@ -175,6 +175,19 @@ const publicRoutes = {
       author: 'MOTOGRIP GEAR Editorial',
     },
   },
+  '/blog/smooth-wrinkles-leather-jacket-or-vest-safely': {
+    view: 'article',
+    params: { articleId: 'smooth-wrinkles-leather-jacket-or-vest-safely' },
+    title: 'How to Remove Wrinkles From Leather Safely | MOTOGRIP GEAR',
+    desc: 'Learn how to relax wrinkles in leather jackets and vests with proper hanging, gentle reshaping and safer humidity while avoiding damaging heat.',
+    image: '/assets/generated/blog/smooth-wrinkles-leather-card.jpg',
+    article: {
+      headline: 'How Can You Smooth Wrinkles from a Leather Jacket or Vest Safely?',
+      datePublished: '2026-08-07',
+      dateModified: '2026-08-07',
+      author: 'MOTOGRIP GEAR Editorial',
+    },
+  },
   '/blog/how-to-clean-leather-jacket': {
     view: 'article',
     params: { articleId: 'how-to-clean-leather-jacket' },
