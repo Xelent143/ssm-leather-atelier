@@ -2352,6 +2352,46 @@ const SSM_PRODUCTS = [
   },
 ];
 
+// Products whose complete PDP payload is served from merchant-catalog.json.
+// Keep lightweight card data here so they participate in storefront collections;
+// the card link performs a normal navigation to load the authoritative PDP data.
+const SSM_MERCHANT_COLLECTION_PRODUCTS = [
+  {
+    id: 'p35', slug: 'mens-blue-swat-cowhide-leather-motorcycle-vest',
+    name: "Men's Blue SWAT Cowhide Leather Motorcycle Vest", cat: 'Vests', gender: 'Men',
+    price: 250, tag: 'New', serverCatalog: true,
+    blurb: '1.1–1.2 mm cowhide · concealed-carry pockets · YKK zipper',
+    img: A('vests/mens-blue-swat-cowhide-leather-motorcycle-vest/01-blue-swat-leather-vest-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19, '6XL': 19 },
+  },
+  {
+    id: 'p36', slug: 'mens-black-swat-cowhide-leather-motorcycle-vest',
+    name: "Men's Black SWAT Cowhide Leather Motorcycle Vest", cat: 'Vests', gender: 'Men',
+    price: 250, tag: 'New', serverCatalog: true,
+    blurb: '1.1–1.2 mm cowhide · concealed-carry pockets · YKK zipper',
+    img: A('vests/mens-black-swat-cowhide-leather-motorcycle-vest/01-black-swat-leather-vest-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19, '6XL': 19 },
+  },
+  {
+    id: 'p37', slug: 'mens-red-swat-cowhide-leather-motorcycle-vest',
+    name: "Men's Red SWAT Cowhide Leather Motorcycle Vest", cat: 'Vests', gender: 'Men',
+    price: 250, tag: 'New', serverCatalog: true,
+    blurb: '1.1–1.2 mm cowhide · concealed-carry pockets · YKK zipper',
+    img: A('vests/mens-red-swat-cowhide-leather-motorcycle-vest/01-red-swat-leather-vest-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19, '6XL': 19 },
+  },
+  {
+    id: 'p38', slug: 'mens-white-swat-cowhide-leather-motorcycle-vest',
+    name: "Men's White SWAT Cowhide Leather Motorcycle Vest", cat: 'Vests', gender: 'Men',
+    price: 250, tag: 'New', serverCatalog: true,
+    blurb: '1.1–1.2 mm cowhide · concealed-carry pockets · YKK zipper',
+    img: A('vests/mens-white-swat-cowhide-leather-motorcycle-vest/01-white-swat-leather-vest-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19, '6XL': 19 },
+  },
+];
+
+const SSM_COLLECTION_PRODUCTS = [...SSM_PRODUCTS, ...SSM_MERCHANT_COLLECTION_PRODUCTS];
+
 // ── Imagery map ─────────────────────────────────────────────────────────────
 
 const SSM_IMAGES = {
@@ -5327,7 +5367,11 @@ function HeroCentered() {
 function ProductCard({ product, onQuickView, go }) {
   return (
     <a href={`/products/${product.slug}`} className="card" style={{ cursor: 'pointer', display: 'block' }}
-      onClick={(e) => { e.preventDefault(); go('pdp', { product }); }}>
+      onClick={(e) => {
+        if (product.serverCatalog) return;
+        e.preventDefault();
+        go('pdp', { product });
+      }}>
       <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '3/4' }}>
         <div className="ph card-img" data-img="1" data-label={product.name}
           style={{ position: 'absolute', inset: 0, '--img': `url(${product.img})` }} />
@@ -5340,14 +5384,16 @@ function ProductCard({ product, onQuickView, go }) {
             padding: '5px 9px', letterSpacing: '0.18em',
           }}>{product.tag}</div>
         )}
-        <div className="quickview" style={{
-          position: 'absolute', bottom: 16, left: 16, right: 16,
-        }}>
-          <button className="btn" style={{ width: '100%', justifyContent: 'center', fontSize: 10, padding: '12px' }}
-            onClick={(e) => { e.stopPropagation(); onQuickView(product); }}>
-            Quick View
-          </button>
-        </div>
+        {!product.serverCatalog && (
+          <div className="quickview" style={{
+            position: 'absolute', bottom: 16, left: 16, right: 16,
+          }}>
+            <button className="btn" style={{ width: '100%', justifyContent: 'center', fontSize: 10, padding: '12px' }}
+              onClick={(e) => { e.stopPropagation(); onQuickView(product); }}>
+              Quick View
+            </button>
+          </div>
+        )}
       </div>
       <div style={{ padding: '16px 2px 8px', display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <div>
@@ -5559,7 +5605,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
   };
 
   // Build filtered list
-  let products = SSM_PRODUCTS.filter(p => {
+  let products = SSM_COLLECTION_PRODUCTS.filter(p => {
     if (gender !== 'All' && p.gender !== gender) return false;
     if (cat !== 'All' && p.cat !== cat) return false;
     if (p.price > maxPrice) return false;
@@ -9397,7 +9443,7 @@ function NotFound({ go }) {
 function SearchResults({ go, query, onQuickView }) {
   const q = (query || '').toLowerCase().trim();
   const products = q
-    ? SSM_PRODUCTS.filter(p =>
+    ? SSM_COLLECTION_PRODUCTS.filter(p =>
         (p.name + ' ' + p.cat + ' ' + p.gender + ' ' + p.blurb).toLowerCase().includes(q))
     : [];
   const journal = q
