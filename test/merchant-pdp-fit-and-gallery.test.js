@@ -10,6 +10,8 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
   test(`${file} keeps merchant PDP galleries contained and exposes fit controls`, () => {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.match(source, /className="factual-pdp-grid pdp-commerce-layout"/);
+    assert.match(source, /className="pdp-thumb-rail"/);
+    assert.match(source, /className="pdp-details-panel"/);
     assert.match(source, /objectFit: 'contain'/);
     assert.match(source, /title: 'Standard size'/);
     assert.match(source, /title: 'Made to measure'/);

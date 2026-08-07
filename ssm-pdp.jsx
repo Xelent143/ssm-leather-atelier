@@ -174,7 +174,7 @@ function FactualPDP({ product: p, go, addToCart }) {
         <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
       </nav>
       <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
+        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
           {images.map((image, index) => (
             <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
               className="ph tiny" data-label=""
@@ -189,7 +189,7 @@ function FactualPDP({ product: p, go, addToCart }) {
             <img src={images[imgIdx]?.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
           </div>}
         </div>
-        <div style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
+        <div className="pdp-details-panel" style={{ paddingLeft: 48, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 10 }}>
             {[p.brand || p.vendor, p.productType || p.cat, p.category].filter(Boolean).join(' · ').toUpperCase()}
           </div>
