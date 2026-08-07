@@ -40,7 +40,7 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
 test('the storefront keeps every PDP size selector in the approved responsive grid', () => {
   const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.match(source, /\.pdp-size-option-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(6, minmax\(0, 1fr\)\)/);
-  assert.match(source, /\.pdp-size-option-button\s*\{[\s\S]*?min-height:\s*64px !important/);
+  assert.match(source, /\.pdp-size-option-button\s*\{[\s\S]*?min-height:\s*44px !important/);
   assert.match(source, /@media \(max-width: 720px\)[\s\S]*?\.pdp-size-option-grid \{ grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
 });
 
