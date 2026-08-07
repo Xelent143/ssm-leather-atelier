@@ -89,13 +89,14 @@ function FactualPDP({ product: p, go, addToCart }) {
     ['sleeves', 'Sleeves', 'in/cm'], ['weight', 'Weight', 'lbs'],
   ];
   const categoryText = `${p.cat || ''} ${p.category || ''} ${p.productType || ''}`.toLowerCase();
-  const isVest = categoryText.includes('vest');
+  const isPuffer = categoryText.includes('puffer');
+  const isVest = categoryText.includes('vest') && !isPuffer;
   const isPants = categoryText.includes('pant') || categoryText.includes('trouser') || categoryText.includes('chap');
   const isChaps = categoryText.includes('chap');
-  const isUpperBody = categoryText.includes('jacket') || categoryText.includes('shirt');
+  const isUpperBody = categoryText.includes('jacket') || categoryText.includes('shirt') || categoryText.includes('coat') || categoryText.includes('blazer') || isPuffer;
   const isSizedApparel = isVest || isPants || isUpperBody;
   const selectedSizeName = selection.size || selection.waist || null;
-  const editorialCategory = isVest ? 'Vest' : isPants ? 'Trousers' : categoryText.includes('shirt') ? 'Leather Shirt' : isUpperBody ? 'Jacket' : 'Piece';
+  const editorialCategory = isVest ? 'Vest' : isPants ? 'Trousers' : categoryText.includes('shirt') ? 'Leather Shirt' : isPuffer ? 'Puffer' : categoryText.includes('coat') ? 'Coat' : categoryText.includes('blazer') ? 'Blazer' : isUpperBody ? 'Jacket' : 'Piece';
   const editorialOwner = p.gender === 'Women' ? "Women's" : p.gender === 'Men' ? "Men's" : 'Unisex';
   const factual = value => value !== undefined && value !== null && value !== '';
   const displayValue = value => typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
@@ -340,7 +341,7 @@ function FactualPDP({ product: p, go, addToCart }) {
       {isSizedApparel && (
         <section className="pdp-category-size-chart" style={{ padding: '64px 48px', borderTop: '1px solid var(--line)' }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-            {isVest ? `${editorialOwner.toUpperCase()} MOTORCYCLE LEATHER VEST SIZE CHART` : isPants ? `${editorialOwner.toUpperCase()} LEATHER TROUSERS SIZE CHART` : `${editorialOwner.toUpperCase()} ${editorialCategory.toUpperCase()} SIZE CHART`}
+            {isVest ? `${editorialOwner.toUpperCase()} MOTORCYCLE LEATHER VEST SIZE CHART` : isPants ? `${editorialOwner.toUpperCase()} LEATHER TROUSERS SIZE CHART` : `${editorialOwner.toUpperCase()} JACKET SIZE CHART`}
           </div>
           <h2 className="display" style={{ fontSize: 32, margin: 0, fontWeight: 400, marginBottom: 24 }}>Fit at a glance.</h2>
           {isVest && <>
