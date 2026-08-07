@@ -14,6 +14,8 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
     assert.match(source, /title: 'Made to measure'/);
     assert.match(source, /Customize in Fit Lab/);
     assert.match(source, /SIZE GUIDE/);
+    assert.match(source, /className=\{option\.name\.toLowerCase\(\) === 'size' \? 'pdp-size-option-grid'/);
+    assert.match(source, /'pdp-size-option-button'/);
     assert.match(source, /surcharge: isMadeToMeasure \? madeToMeasureSurcharge : 0/);
     assert.match(source, /className="pdp-editorial-story"/);
     assert.match(source, /className="pdp-category-size-chart"/);
@@ -34,6 +36,13 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
     assert.doesNotMatch(source, /<img src=\{p\.alt \|\| p\.img\}/);
   });
 }
+
+test('the storefront keeps every PDP size selector in the approved responsive grid', () => {
+  const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(source, /\.pdp-size-option-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(6, minmax\(0, 1fr\)\)/);
+  assert.match(source, /\.pdp-size-option-button\s*\{[\s\S]*?min-height:\s*64px !important/);
+  assert.match(source, /@media \(max-width: 720px\)[\s\S]*?\.pdp-size-option-grid \{ grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+});
 
 test('all newly released SWAT vests retain made-to-measure support', () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));

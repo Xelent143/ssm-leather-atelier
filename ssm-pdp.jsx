@@ -212,7 +212,8 @@ function FactualPDP({ product: p, go, addToCart }) {
                 <span>{option.name.toUpperCase()} · {String(selection[option.name.toLowerCase()] || '').toUpperCase()}</span>
                 {option.name.toLowerCase() === 'size' && <button onClick={() => go('size')} className="ulink" style={{ color: 'var(--fg-2)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 10 }}>SIZE GUIDE ↗</button>}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div className={option.name.toLowerCase() === 'size' ? 'pdp-size-option-grid' : undefined}
+                style={option.name.toLowerCase() === 'size' ? undefined : { display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {(option.values || []).map(value => {
                   const active = selection[option.name.toLowerCase()] === value;
                   const available = optionAvailable(option.name, value);
@@ -220,6 +221,7 @@ function FactualPDP({ product: p, go, addToCart }) {
                     ? (p.colors || []).find(color => color.name === value)
                     : null;
                   return <button key={value} onClick={() => chooseOption(option.name, value)}
+                    className={!colorSpec && option.name.toLowerCase() === 'size' ? 'pdp-size-option-button' : undefined}
                     disabled={!available} aria-pressed={active}
                     aria-label={`${option.name} ${value}${available ? '' : ', unavailable'}`}
                     style={colorSpec ? {
@@ -537,13 +539,13 @@ function PDP({ product, go, addToCart, onQuickView }) {
               SIZE GUIDE ↗
             </button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 12 }}>
+          <div className="pdp-size-option-grid" style={{ marginBottom: 12 }}>
             {['XS','S','M','L','XL','XXL'].map(s => {
               const stock = sizeStock(s);
               const out = stock === 0;
               const low = stock > 0 && stock < 2;
               return (
-                <button key={s} onClick={() => setSize(s)} aria-label={`Size ${s}${out ? ', sold out' : ''}`}
+                <button key={s} className="pdp-size-option-button" onClick={() => setSize(s)} aria-label={`Size ${s}${out ? ', sold out' : ''}`}
                   style={{
                     height: 40, position: 'relative',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
