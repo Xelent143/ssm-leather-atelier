@@ -23,6 +23,10 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
     assert.match(source, /SSM_WOMENS_JACKET_SIZE_CHART/);
     assert.match(source, /SSM_UNISEX_CHAPS_SIZE_CHART/);
     assert.match(source, /SELECT WAIST AND INSEAM SEPARATELY WHERE OFFERED/);
+    assert.match(source, /function selectEditorialCloseUp\(images = \[\]\)/);
+    assert.match(source, /className="ph grain pdp-editorial-close-up"/);
+    assert.match(source, /Close-up detail of \$\{p\.name\}/);
+    assert.doesNotMatch(source, /<img src=\{p\.alt \|\| p\.img\}/);
   });
 }
 
@@ -34,5 +38,15 @@ test('all newly released SWAT vests retain made-to-measure support', () => {
   for (const vest of vests) {
     assert.equal(vest.madeToMeasureEnabled, true, `${vest.id} should support made to measure`);
     assert.equal(vest.madeToMeasureSurcharge, 50, `${vest.id} should use the approved surcharge`);
+  }
+});
+
+test('every active catalog product can supply the editorial close-up slot', () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));
+  const activeProducts = catalog.products.filter(product => product.status === 'active');
+  assert.ok(activeProducts.length > 0);
+  for (const product of activeProducts) {
+    const images = [product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean);
+    assert.ok(images.length > 0, `${product.id} must have a genuine image for the editorial detail slot`);
   }
 });
