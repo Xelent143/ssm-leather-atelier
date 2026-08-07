@@ -47,7 +47,7 @@ test('the storefront keeps every PDP size selector in the approved responsive gr
 
 test('all newly released SWAT vests retain made-to-measure support', () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));
-  const swatIds = new Set(['p35', 'p36', 'p37', 'p38', 'p39']);
+  const swatIds = new Set(['p35', 'p36', 'p37', 'p38', 'p39', 'p40', 'p41']);
   const vests = catalog.products.filter(product => swatIds.has(product.id));
   assert.equal(vests.length, swatIds.size);
   for (const vest of vests) {
