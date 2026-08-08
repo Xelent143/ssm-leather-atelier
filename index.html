@@ -359,6 +359,13 @@
     background-repeat: no-repeat;
     background-color: var(--bg-2);
   }
+  .factual-pdp .pdp-main-image {
+    width: min(100%, 760px);
+    aspect-ratio: 1;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto;
+  }
   .pdp-details-panel { min-width: 0; }
   .pdp-size-option-grid {
     display: grid;
@@ -518,6 +525,7 @@
     .pdp-main-media { order: 1; padding-left: 0 !important; }
     .pdp-details-panel { order: 3; padding-left: 0 !important; padding-top: 32px; position: static !important; }
     .pdp-main-image { height: min(128vw, 680px) !important; min-height: 420px !important; }
+    .factual-pdp .pdp-main-image { width: 100%; height: auto !important; min-height: 0 !important; }
     .pdp-size-option-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .pdp-size-option-button { min-height: 44px !important; font-size: 14px !important; }
     /* MTO + Checkout split */
@@ -2479,6 +2487,14 @@ const SSM_MERCHANT_COLLECTION_PRODUCTS = [
     blurb: 'Suede leather · Western fringe · five colors',
     img: A('jackets/mens-black-suede-fringe-biker-jacket/black/01-mens-black-suede-fringe-biker-jacket-model-front.png'),
     stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19 },
+  },
+  {
+    id: 'p48', slug: 'mens-crocodile-snake-embossed-leather-biker-vest-red-black',
+    name: "Men's Crocodile & Snake Embossed Leather Biker Vest – Red & Black Side-Lace Waistcoat", cat: 'Vests', gender: 'Men',
+    price: 250, tag: 'New', serverCatalog: true,
+    blurb: '1.1–1.2 mm cowhide · embossed texture · adjustable side laces',
+    img: A('vests/mens-crocodile-snake-embossed-leather-biker-vest-red-black/01-model-front.png'),
+    stock: { XS: 19, S: 19, M: 19, L: 19, XL: 19, XXL: 19, '3XL': 19, '4XL': 19, '5XL': 19, '6XL': 19 },
   },
 ];
 

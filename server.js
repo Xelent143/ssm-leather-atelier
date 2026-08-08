@@ -1034,7 +1034,8 @@ function publicProductForPdp(product) {
       path: image,
       altText: index === 0 && product.imageAltText
         ? product.imageAltText
-        : `${product.title} ${index === 0 ? 'featured image' : `image ${index + 1}`}`,
+        : product.galleryImageAltText?.[index - 1]
+          || `${product.title} ${index === 0 ? 'featured image' : `image ${index + 1}`}`,
     })),
     blurb: product.shortDescription || '',
     publicDescription: product.description || product.schemaDescription || '',
