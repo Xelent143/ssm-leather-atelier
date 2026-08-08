@@ -21,7 +21,7 @@ function FactualPDP({ product: p, go, addToCart }) {
     || sellableVariants[0] || null;
   const initialSelection = Object.fromEntries((p.options || []).map(option => {
     const key = option.name.toLowerCase();
-    return [key, initialVariant?.attributes?.[key] || option.values?.[0] || ''];
+    return [key, key === 'size' || key === 'waist' ? '' : (initialVariant?.attributes?.[key] || option.values?.[0] || '')];
   }));
   const [selection, setSelection] = React.useState(initialSelection);
   const [imgIdx, setImgIdx] = React.useState(0);
@@ -49,7 +49,11 @@ function FactualPDP({ product: p, go, addToCart }) {
   const validCompareAt = selectedCompareAt > selectedPrice;
   const discount = validCompareAt && selectedCompareAt > 0
     ? Math.round(((selectedCompareAt - selectedPrice) / selectedCompareAt) * 100) : 0;
-  const selectedAvailable = Boolean(selectedVariant &&
+  const requiredOptionsSelected = (p.options || []).every(option => {
+    const key = option.name.toLowerCase();
+    return !['size', 'waist', 'inseam'].includes(key) || Boolean(selection[key]);
+  });
+  const selectedAvailable = Boolean(requiredOptionsSelected && selectedVariant &&
     Number(selectedVariant.quantity || 0) > 0 &&
     selectedVariant.status !== 'disabled' && selectedVariant.availableForSale !== false);
   const selectedMedia = p.imageMetadata?.find(item => item.id === selectedVariant?.imageId);
@@ -317,7 +321,7 @@ function FactualPDP({ product: p, go, addToCart }) {
               sku: selectedVariant?.sku,
               price: selectedPrice,
             })}>
-            {selectedAvailable ? `Add to Bag — $${selectedPrice.toLocaleString()}` : 'Currently unavailable'}
+            {selectedAvailable ? `Add to Bag — $${selectedPrice.toLocaleString()}` : (!requiredOptionsSelected ? 'Select size to continue' : 'Currently unavailable')}
           </button>
           {p.madeToMeasureEnabled && <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 24 }} onClick={() => go('mto', { startWith: p })}>
             Customize in Fit Lab <Icon name="arrow" size={14} />

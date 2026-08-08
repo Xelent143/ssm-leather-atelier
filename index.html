@@ -30,11 +30,19 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/assets/motogrip-favicon-transparent.png" />
 <link rel="apple-touch-icon" href="/assets/motogrip-favicon-transparent.png" />
 
-<!-- JSON-LD: Organizations -->
+<!-- JSON-LD: Website and Organizations -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://motogripgear.com/#website",
+      "url": "https://motogripgear.com/",
+      "name": "MOTOGRIP GEAR",
+      "publisher": { "@id": "https://motogripgear.com/#motogrip-gear-llc" },
+      "inLanguage": "en-US"
+    },
     {
       "@type": "Organization",
       "@id": "https://motogripgear.com/#motogrip-gear-llc",
@@ -596,8 +604,8 @@
 <body>
 <div id="root"></div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 <script type="text/babel" data-presets="env,react" data-file="tweaks-panel.jsx">
 
@@ -1201,13 +1209,13 @@ Object.assign(PAGE_ONE_MENS_JACKETS[2], {
   material: 'Real sheepskin leather',
   materialNote: 'Black aniline finish with a quilted viscose lining',
   colors: [
-    { id: 'black', name: 'Black', color: '#414046', image: 'https://www.thejacketmaker.com/cdn/shop/files/black02-030_c645a7e6-db18-4d20-8ec1-2eb7e9757712_small.jpg?v=1693247825' },
-    { id: 'blue', name: 'Blue', color: '#5e7995', image: 'https://www.thejacketmaker.com/cdn/shop/files/blue01_small.jpg?v=1693328319' },
-    { id: 'brown', name: 'Brown', color: '#b16d4d', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown05-1555070845100_small.jpg?v=1693414657' },
-    { id: 'tan-brown', name: 'Tan Brown', color: '#b16d4d', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown05-1555070845100_small.jpg?v=1693414657' },
-    { id: 'distressed-brown', name: 'Distressed Brown', color: '#514a46', image: 'https://www.thejacketmaker.com/cdn/shop/files/brown06-025_small.jpg?v=1693415409' },
-    { id: 'green', name: 'Green', color: '#4f554e', image: 'https://www.thejacketmaker.com/cdn/shop/files/green_small.jpg?v=1693416042' },
-    { id: 'red', name: 'Red', color: '#b1403f', image: 'https://www.thejacketmaker.com/cdn/shop/files/red_small.jpg?v=1693418572' },
+    { id: 'black', name: 'Black', color: '#414046', image: 'assets/generated/mens-shirts/black-lambskin-leather-biker-shirt/06-motogrip-mens-black-lambskin-leather-shirt-close-up.png' },
+    { id: 'blue', name: 'Blue', color: '#5e7995', image: 'assets/generated/mens-shirts/blue-lambskin-leather-biker-shirt/06-motogrip-mens-blue-lambskin-leather-shirt-close-up.png' },
+    { id: 'brown', name: 'Brown', color: '#b16d4d', image: 'assets/generated/mens-shirts/brown-lambskin-leather-biker-shirt/06-motogrip-mens-brown-lambskin-leather-shirt-close-up.png' },
+    { id: 'tan-brown', name: 'Tan Brown', color: '#b16d4d', image: 'assets/generated/mens-shirts/tan-lambskin-leather-biker-shirt/06-motogrip-mens-tan-lambskin-leather-shirt-close-up.png' },
+    { id: 'distressed-brown', name: 'Distressed Brown', color: '#514a46', image: 'assets/generated/mens-shirts/distressed-lambskin-leather-shirt/05-motogrip-mens-distressed-brown-lambskin-leather-shirt-close-up-square-v2.png' },
+    { id: 'green', name: 'Green', color: '#4f554e', image: 'assets/generated/mens-shirts/green-lambskin-leather-biker-shirt/06-motogrip-mens-green-lambskin-leather-shirt-close-up.png' },
+    { id: 'red', name: 'Red', color: '#b1403f', image: 'assets/generated/mens-shirts/red-lambskin-leather-biker-shirt/06-motogrip-mens-red-lambskin-leather-shirt-close-up.png' },
   ],
   defaultColor: 'black',
   story: {
@@ -5548,9 +5556,9 @@ function ProductCard({ product, onQuickView, go }) {
 
 function CategoryStrip({ go }) {
   const cats = [
-    { name: 'Jackets', label: 'ROAD ARMOR · 24 PIECES', filter: 'Jackets', img: SSM_IMAGES.catJackets },
-    { name: 'Vests', label: 'LAYERING · 12 PIECES', filter: 'Vests', img: SSM_IMAGES.catVests },
-    { name: 'Trousers', label: 'RIDE-CUT · 16 PIECES', filter: 'Pants', img: SSM_IMAGES.catPants },
+    { name: 'Jackets', label: 'ROAD ARMOR', filter: 'Jackets', img: SSM_IMAGES.catJackets },
+    { name: 'Vests', label: 'LAYERING', filter: 'Vests', img: SSM_IMAGES.catVests },
+    { name: 'Trousers', label: 'RIDE-CUT', filter: 'Pants', img: SSM_IMAGES.catPants },
     { name: 'Fit Lab', label: 'MADE TO MEASURE · CUSTOM', filter: null, view: 'mto', img: SSM_IMAGES.catAtelier },
   ];
   return (
@@ -6044,7 +6052,7 @@ function FactualPDP({ product: p, go, addToCart }) {
     || sellableVariants[0] || null;
   const initialSelection = Object.fromEntries((p.options || []).map(option => {
     const key = option.name.toLowerCase();
-    return [key, initialVariant?.attributes?.[key] || option.values?.[0] || ''];
+    return [key, key === 'size' || key === 'waist' ? '' : (initialVariant?.attributes?.[key] || option.values?.[0] || '')];
   }));
   const [selection, setSelection] = React.useState(initialSelection);
   const [imgIdx, setImgIdx] = React.useState(0);
@@ -6072,7 +6080,11 @@ function FactualPDP({ product: p, go, addToCart }) {
   const validCompareAt = selectedCompareAt > selectedPrice;
   const discount = validCompareAt && selectedCompareAt > 0
     ? Math.round(((selectedCompareAt - selectedPrice) / selectedCompareAt) * 100) : 0;
-  const selectedAvailable = Boolean(selectedVariant &&
+  const requiredOptionsSelected = (p.options || []).every(option => {
+    const key = option.name.toLowerCase();
+    return !['size', 'waist', 'inseam'].includes(key) || Boolean(selection[key]);
+  });
+  const selectedAvailable = Boolean(requiredOptionsSelected && selectedVariant &&
     Number(selectedVariant.quantity || 0) > 0 &&
     selectedVariant.status !== 'disabled' && selectedVariant.availableForSale !== false);
   const selectedMedia = p.imageMetadata?.find(item => item.id === selectedVariant?.imageId);
@@ -6340,7 +6352,7 @@ function FactualPDP({ product: p, go, addToCart }) {
               sku: selectedVariant?.sku,
               price: selectedPrice,
             })}>
-            {selectedAvailable ? `Add to Bag — ${selectedPrice.toLocaleString()}` : 'Currently unavailable'}
+            {selectedAvailable ? `Add to Bag — $${selectedPrice.toLocaleString()}` : (!requiredOptionsSelected ? 'Select size to continue' : 'Currently unavailable')}
           </button>
           {p.madeToMeasureEnabled && <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 24 }} onClick={() => go('mto', { startWith: p })}>
             Customize in Fit Lab <Icon name="arrow" size={14} />

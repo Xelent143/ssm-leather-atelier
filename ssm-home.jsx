@@ -161,9 +161,9 @@ function ProductCard({ product, onQuickView, go }) {
 
 function CategoryStrip({ go }) {
   const cats = [
-    { name: 'Jackets', label: 'ROAD ARMOR · 24 PIECES', filter: 'Jackets', img: SSM_IMAGES.catJackets },
-    { name: 'Vests', label: 'LAYERING · 12 PIECES', filter: 'Vests', img: SSM_IMAGES.catVests },
-    { name: 'Trousers', label: 'RIDE-CUT · 16 PIECES', filter: 'Pants', img: SSM_IMAGES.catPants },
+    { name: 'Jackets', label: 'ROAD ARMOR', filter: 'Jackets', img: SSM_IMAGES.catJackets },
+    { name: 'Vests', label: 'LAYERING', filter: 'Vests', img: SSM_IMAGES.catVests },
+    { name: 'Trousers', label: 'RIDE-CUT', filter: 'Pants', img: SSM_IMAGES.catPants },
     { name: 'Fit Lab', label: 'MADE TO MEASURE · CUSTOM', filter: null, view: 'mto', img: SSM_IMAGES.catAtelier },
   ];
   return (

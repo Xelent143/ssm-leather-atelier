@@ -218,6 +218,7 @@ const publicRoutes = {
   '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
   '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
   '/custom-consultation': { view: 'consult', title: 'Custom Leather Consultation | MOTOGRIP GEAR', desc: 'Start a custom leather jacket, vest, or trouser consultation with MOTOGRIP GEAR fit and design guidance.' },
+  '/wholesale': { view: 'consult', title: 'Wholesale & Private-Label Leather Apparel | MOTOGRIP GEAR', desc: 'Discuss wholesale, private-label, OEM, and retailer leather-apparel requirements with MOTOGRIP GEAR.' },
   '/sustainability': { view: 'sustain', title: 'Durability & Sustainability | MOTOGRIP GEAR', desc: 'Learn how durable materials, repairable construction, and measured fit help MOTOGRIP gear stay in use longer.' },
   '/stockists': { view: 'stockists', title: 'MOTOGRIP GEAR Stockists & Fitting Locations', desc: 'Find MOTOGRIP GEAR fitting locations, showroom appointments, stockists, and upcoming trunk shows.' },
   '/press': { view: 'press', title: 'Press & Brand Resources | MOTOGRIP GEAR', desc: 'Access MOTOGRIP GEAR brand notes, product information, imagery guidance, and press contact details.' },
@@ -732,7 +733,7 @@ function checkoutLineItems(rawItems) {
     const rawId = String(rawItem.baseId || rawItem.id || '');
     const baseId = rawId.replace(/-\d+$/, '');
     const product = store.products.find((candidate) => candidate.id === baseId || candidate.slug === baseId);
-    if (!product || product.status === 'archived') throw new Error('A product in your bag is no longer available.');
+    if (!product || product.status !== 'active') throw new Error('A product in your bag is no longer available.');
 
     const quantity = Number(rawItem.qty);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
@@ -747,6 +748,13 @@ function checkoutLineItems(rawItems) {
     const selectedSize = String(rawItem.size || '').trim().slice(0, 40);
     const selectedInseam = String(rawItem.measurements?.inseam || '').trim().slice(0, 40);
     const selectedLeather = String(rawItem.leather || '').trim().slice(0, 80);
+    const stockSizes = Object.keys(product.stock || {});
+    if (fitMode === 'standard' && stockSizes.length && !selectedSize) {
+      throw new Error(`Select a size for ${product.title}.`);
+    }
+    if (fitMode === 'standard' && stockSizes.length && !stockSizes.includes(selectedSize)) {
+      throw new Error(`Select an available size for ${product.title}.`);
+    }
     const colorOptions = Array.isArray(product.availableColors) ? product.availableColors : [];
     const requestedColor = String(rawItem.productColor || product.color || '').trim().slice(0, 40);
     const selectedColor = colorOptions.length
@@ -911,8 +919,37 @@ function resolvePath(urlPath) {
 function publicCatalog(store) {
   return {
     settings: store.settings,
-    products: store.products.filter((product) => product.status !== 'archived'),
+    products: store.products.filter((product) => product.status === 'active'),
   };
+}
+
+function activePublicProducts(store) {
+  return (store.products || []).filter((product) => product.status === 'active');
+}
+
+function injectRootHtml(html, staticHtml) {
+  return html.replace(/<div\s+id=["']root["']\s*><\/div>/i, `<div id="root">${staticHtml}</div>`);
+}
+
+function homepageStaticHtml(store, req) {
+  const storeName = store.settings?.storeName || 'MOTOGRIP GEAR';
+  const currency = store.settings?.currency || 'USD';
+  const products = activePublicProducts(store).map((product) => {
+    const name = product.title || 'MOTOGRIP GEAR product';
+    const image = productImageUrl(req, product.primaryImage || product.image);
+    return `<li><article><a href="${escapeHtml(productPath(product))}"><h2>${escapeHtml(name)}</h2><img src="${escapeHtml(image)}" alt="${escapeHtml(product.imageAltText || name)}" loading="lazy"><p>${escapeHtml(currency)} ${Number(product.price || 0).toFixed(2)}</p></a></article></li>`;
+  }).join('');
+  return `<main data-server-rendered="homepage"><header><h1>${escapeHtml(storeName)}</h1><p>${escapeHtml(publicRoutes['/'].desc)}</p></header><section aria-labelledby="server-product-list"><h2 id="server-product-list">Products</h2><ul>${products}</ul></section></main>`;
+}
+
+function productStaticHtml(product, store, req) {
+  const name = product.title || 'MOTOGRIP GEAR product';
+  const currency = store.settings?.currency || 'USD';
+  const description = product.description || product.schemaDescription || `${name} from MOTOGRIP GEAR.`;
+  const images = [...new Set([product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean))]
+    .map((imagePath, index) => `<img src="${escapeHtml(productImageUrl(req, imagePath))}" alt="${escapeHtml(index === 0 ? (product.imageAltText || name) : `${name} image ${index + 1}`)}" loading="${index === 0 ? 'eager' : 'lazy'}">`)
+    .join('');
+  return `<main data-server-rendered="product"><nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/shop">${escapeHtml(product.category || 'Shop')}</a> / <span aria-current="page">${escapeHtml(name)}</span></nav><article><h1>${escapeHtml(name)}</h1><p>${escapeHtml(description)}</p><p>${escapeHtml(currency)} ${Number(product.price || 0).toFixed(2)}</p><div aria-label="${escapeHtml(`${name} images`)}">${images}</div></article></main>`;
 }
 
 function publicProductForPdp(product) {
@@ -935,6 +972,10 @@ function publicProductForPdp(product) {
   const optionMap = Object.fromEntries(options.map((option) => [option.name.toLowerCase(), option.values]));
   const stock = product.stock && typeof product.stock === 'object' ? product.stock : {};
   const sizes = optionMap.size?.length ? optionMap.size : Object.keys(stock);
+  if (sizes.length && !optionMap.size?.length) {
+    options.push({ name: 'Size', values: [...sizes] });
+    optionMap.size = sizes;
+  }
   const colorNames = optionMap.color?.length
     ? optionMap.color
     : (Array.isArray(product.colors) ? product.colors : [product.color]).filter(Boolean).map(String);
@@ -1140,7 +1181,7 @@ function injectProductHead(html, product, store, req) {
 <script type="application/ld+json">${escapeScriptJson(meta.jsonLd)}</script>
 <script>window.__SSM_INITIAL_PRODUCT__ = ${escapeScriptJson(publicProduct)};
 window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: product.slug })};</script>`;
-  return html
+  const withHead = html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(meta.desc)}" />`)
     .replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
@@ -1153,6 +1194,7 @@ window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson({ view: 'pdp', productSlug: pr
     .replace(/<meta name="twitter:description" content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(meta.desc)}" />`)
     .replace(/<meta name="twitter:image" content=".*?" \/>/s, `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`)
     .replace('</head>', `${extraHead}\n</head>`);
+  return injectRootHtml(withHead, productStaticHtml(product, store, req));
 }
 
 function injectRouteHead(html, route, req) {
@@ -1177,6 +1219,21 @@ function injectRouteHead(html, route, req) {
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
   })}</script>` : '';
+  const faqJsonLd = route.view === 'faq' ? `
+<script type="application/ld+json">${escapeScriptJson({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      ['Where do you ship?', 'Worldwide shipping is available. Shipping costs, delivery estimates, and applicable duties are shown at checkout.'],
+      ['What is your return policy?', 'Eligible standard-size, non-personalized pieces may be returned or exchanged within 30 days of signed delivery when they are unworn, unused and complete. Custom, made-to-measure, personalized and final-sale pieces are not eligible for a standard return.'],
+      ['What warranty do you offer?', 'Each product includes a one-year workmanship warranty. Eligibility is confirmed after reviewing the order and issue.'],
+      ['Do I need an account to order?', 'No. Guest checkout is available. An account lets you track orders, save addresses, and write to your maker on Made-to-Order commissions.'],
+    ].map(([name, text]) => ({
+      '@type': 'Question',
+      name,
+      acceptedAnswer: { '@type': 'Answer', text },
+    })),
+  })}</script>` : '';
   return html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(route.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(route.desc)}" />`)
@@ -1190,7 +1247,7 @@ function injectRouteHead(html, route, req) {
     .replace(/<meta name="twitter:title" content=".*?" \/>/s, `<meta name="twitter:title" content="${escapeHtml(route.title)}" />`)
     .replace(/<meta name="twitter:description" content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(route.desc)}" />`)
     .replace(/<meta name="twitter:image" content=".*?" \/>/s, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '$&')
-    .replace('</head>', `${articleJsonLd}\n<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson(initialRoute)};</script>\n</head>`);
+    .replace('</head>', `${articleJsonLd}${faqJsonLd}\n<script>window.__SSM_INITIAL_ROUTE__ = ${escapeScriptJson(initialRoute)};</script>\n</head>`);
 }
 
 function servePublicRoute(req, res, route) {
@@ -1199,7 +1256,9 @@ function servePublicRoute(req, res, route) {
       send(res, 500, 'Site unavailable');
       return;
     }
-    send(res, 200, injectRouteHead(html, route, req), 'text/html; charset=utf-8', {
+    let body = injectRouteHead(html, route, req);
+    if (route.view === 'home') body = injectRootHtml(body, homepageStaticHtml(readPublicStore(), req));
+    send(res, 200, body, 'text/html; charset=utf-8', {
       'Cache-Control': 'no-cache',
       'X-Robots-Tag': route.noindex ? 'noindex, follow' : 'index, follow',
     });
@@ -1208,7 +1267,7 @@ function servePublicRoute(req, res, route) {
 
 function serveProductPage(req, res, slug) {
   const store = readPublicStore();
-  const product = store.products.find((item) => item.slug === slug && item.status !== 'archived');
+  const product = store.products.find((item) => item.slug === slug && item.status === 'active');
   if (!product) {
     send(res, 404, 'Product not found');
     return;
@@ -1227,7 +1286,7 @@ function serveSitemap(req, res) {
   const store = readPublicStore();
   const urls = [
     ...indexablePublicPaths,
-    ...store.products.filter((product) => product.status !== 'archived').map(productPath),
+    ...store.products.filter((product) => product.status === 'active').map(productPath),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1885,5 +1944,10 @@ module.exports = {
   indexablePublicPaths,
   readPublicStore,
   publicProductForPdp,
+  checkoutLineItems,
+  activePublicProducts,
+  injectRootHtml,
+  homepageStaticHtml,
+  productStaticHtml,
   merchantSeedProducts,
 };
