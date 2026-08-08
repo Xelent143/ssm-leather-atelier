@@ -202,6 +202,7 @@ function productGridWorkspace(session) {
   return grid;
 }
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
+const canonicalSiteUrl = 'https://motogripgear.com';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
@@ -740,6 +741,11 @@ function absoluteUrl(req, urlPath = '/') {
   return `${hostName}${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}`;
 }
 
+function canonicalPublicUrl(urlPath = '/') {
+  if (/^https:\/\//i.test(urlPath)) return urlPath;
+  return `${canonicalSiteUrl}${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}`;
+}
+
 function productPath(product) {
   return `/products/${product.slug}`;
 }
@@ -749,6 +755,13 @@ function productImageUrl(req, imagePath) {
   if (/^https:\/\//i.test(cleanPath)) return cleanPath;
   if (assetCdnBase && cleanPath.startsWith('/assets/generated/')) return `${assetCdnBase}${cleanPath}`;
   return absoluteUrl(req, cleanPath);
+}
+
+function canonicalProductImageUrl(imagePath) {
+  const cleanPath = canonicalMediaUrl(imagePath, { fallback: '/assets/motogrip-logo-transparent.png' });
+  if (/^https:\/\//i.test(cleanPath)) return cleanPath;
+  if (assetCdnBase && cleanPath.startsWith('/assets/generated/')) return `${assetCdnBase}${cleanPath}`;
+  return canonicalPublicUrl(cleanPath);
 }
 
 function readBody(req, maxBytes = 1024 * 1024) {
@@ -1075,13 +1088,92 @@ function publicCatalog(store) {
   };
 }
 
+function publicProducts(store) {
+  return (store.products || []).filter((product) =>
+    !['archived', 'hidden', 'draft'].includes(product.status));
+}
+
+function productDisplayName(product) {
+  return product.title || product.name || 'MOTOGRIP GEAR product';
+}
+
+function productImagePaths(product) {
+  return [...new Set([
+    product.primaryImage,
+    product.image,
+    ...(Array.isArray(product.galleryImages) ? product.galleryImages : []),
+  ].filter(Boolean))];
+}
+
+function formattedPrice(product, currency) {
+  const amount = Number(product.price || 0);
+  return `${escapeHtml(currency)} ${escapeHtml(amount.toFixed(2))}`;
+}
+
+function injectRootHtml(html, staticHtml) {
+  return html.replace(
+    /<div\s+id=["']root["']\s*><\/div>/i,
+    `<div id="root">${staticHtml}</div>`,
+  );
+}
+
+function homepageStaticHtml(store) {
+  const storeName = store.settings?.storeName || 'MOTOGRIP GEAR';
+  const tagline = store.settings?.tagline || publicRoutes['/'].desc;
+  const currency = store.settings?.currency || 'USD';
+  const products = publicProducts(store).map((product) => {
+    const name = productDisplayName(product);
+    const image = canonicalProductImageUrl(product.primaryImage || product.image);
+    const alt = product.imageAltText || name;
+    const href = `/products/${encodeURIComponent(product.slug)}`;
+    return `<li><article><a href="${escapeHtml(href)}"><h2>${escapeHtml(name)}</h2><img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" loading="lazy"><p>${formattedPrice(product, currency)}</p></a></article></li>`;
+  }).join('');
+  return `<main data-server-rendered="homepage"><header><h1>${escapeHtml(storeName)}</h1><p>${escapeHtml(tagline)}</p></header><section aria-labelledby="server-product-list"><h2 id="server-product-list">Products</h2><ul>${products}</ul></section></main>`;
+}
+
+function productStaticHtml(product, store) {
+  const name = productDisplayName(product);
+  const currency = store.settings?.currency || 'USD';
+  const description = product.description || product.schemaDescription || `${name} from MOTOGRIP GEAR.`;
+  const images = productImagePaths(product).map((imagePath, index) => {
+    const alt = index === 0 ? (product.imageAltText || name) : `${name} image ${index + 1}`;
+    return `<img src="${escapeHtml(canonicalProductImageUrl(imagePath))}" alt="${escapeHtml(alt)}" loading="${index === 0 ? 'eager' : 'lazy'}">`;
+  }).join('');
+  const category = product.category || product.productType || 'Shop';
+  return `<main data-server-rendered="product"><nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/shop">${escapeHtml(category)}</a> / <span aria-current="page">${escapeHtml(name)}</span></nav><article><h1>${escapeHtml(name)}</h1><p>${escapeHtml(description)}</p><p>${formattedPrice(product, currency)}</p><div aria-label="${escapeHtml(`${name} images`)}">${images}</div></article></main>`;
+}
+
+function homepageJsonLd(store) {
+  const storeName = store.settings?.storeName || 'MOTOGRIP GEAR';
+  const homeUrl = canonicalPublicUrl('/');
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${homeUrl}#organization`,
+        name: storeName,
+        url: homeUrl,
+        logo: canonicalPublicUrl('/assets/motogrip-logo-transparent-v2.png'),
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${homeUrl}#website`,
+        name: storeName,
+        url: homeUrl,
+        publisher: { '@id': `${homeUrl}#organization` },
+      },
+    ],
+  };
+}
+
 function productMeta(product, store, req) {
   const currency = store.settings.currency || 'USD';
   const title = product.seoTitle || `${product.title} | ${product.category}, ${product.gender} | MOTOGRIP GEAR`;
   const desc = (product.seoDescription || product.schemaDescription || product.description || `${product.title} from MOTOGRIP GEAR.`).slice(0, 158);
-  const canonical = product.canonicalUrl || absoluteUrl(req, productPath(product));
-  const image = productImageUrl(req, product.primaryImage || product.image);
-  const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
+  const canonical = canonicalPublicUrl(product.canonicalUrl || productPath(product));
+  const image = canonicalProductImageUrl(product.primaryImage || product.image);
+  const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map(canonicalProductImageUrl) : [])];
   const sellableVariants = (Array.isArray(product.variants) ? product.variants : [])
     .filter((variant) => variant.status !== 'disabled' && variant.availableForSale !== false);
   const availability = (sellableVariants.length
@@ -1219,8 +1311,8 @@ function productMeta(product, store, req) {
         '@type': 'BreadcrumbList',
         '@id': `${canonical}#breadcrumb`,
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl(req, '/') },
-          { '@type': 'ListItem', position: 2, name: product.category || 'Shop', item: absoluteUrl(req, '/shop') },
+          { '@type': 'ListItem', position: 1, name: 'Home', item: canonicalPublicUrl('/') },
+          { '@type': 'ListItem', position: 2, name: product.category || 'Shop', item: canonicalPublicUrl('/shop') },
           { '@type': 'ListItem', position: 3, name: product.title, item: canonical },
         ],
       },
@@ -1290,7 +1382,7 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
       reviews: Array.isArray(product.reviews) ? product.reviews : [],
     },
   })};</script>`;
-  return html
+  const withHead = html
     .replace(/<title>.*?<\/title>/s, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description" content=".*?" \/>/s, `<meta name="description" content="${escapeHtml(meta.desc)}" />`)
     .replace(/<link rel="canonical" href=".*?" \/>/s, `<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
@@ -1303,13 +1395,15 @@ window.__SSM_PRODUCT_OVERRIDE__ = ${escapeScriptJson({
     .replace(/<meta name="twitter:description" content=".*?" \/>/s, `<meta name="twitter:description" content="${escapeHtml(meta.desc)}" />`)
     .replace(/<meta name="twitter:image" content=".*?" \/>/s, `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`)
     .replace('</head>', `${extraHead}\n</head>`);
+  return injectRootHtml(withHead, productStaticHtml(product, store));
 }
 
 function injectRouteHead(html, route, req) {
-  const canonical = absoluteUrl(req, new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname.replace(/\/$/, '') || '/');
+  const canonicalPath = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname.replace(/\/$/, '') || '/';
+  const canonical = canonicalPublicUrl(canonicalPath);
   const robots = route.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large';
   const initialRoute = { view: route.view, ...(route.params ? { params: route.params } : {}) };
-  const image = route.image ? absoluteUrl(req, route.image) : '';
+  const image = route.image ? canonicalPublicUrl(route.image) : '';
   const articleJsonLd = route.article ? `
 <script type="application/ld+json">${escapeScriptJson({
     '@context': 'https://schema.org',
@@ -1319,11 +1413,11 @@ function injectRouteHead(html, route, req) {
     image: [image],
     datePublished: route.article.datePublished,
     dateModified: route.article.dateModified,
-    author: { '@type': 'Organization', name: route.article.author, url: absoluteUrl(req, '/') },
+    author: { '@type': 'Organization', name: route.article.author, url: canonicalPublicUrl('/') },
     publisher: {
       '@type': 'Organization',
       name: 'MOTOGRIP GEAR',
-      logo: { '@type': 'ImageObject', url: absoluteUrl(req, '/assets/motogrip-logo-transparent-v2.png') },
+      logo: { '@type': 'ImageObject', url: canonicalPublicUrl('/assets/motogrip-logo-transparent-v2.png') },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
   })}</script>` : '';
@@ -1349,7 +1443,18 @@ function servePublicRoute(req, res, route) {
       send(res, 500, 'Site unavailable');
       return;
     }
-    send(res, 200, injectRouteHead(html, route, req), 'text/html; charset=utf-8', {
+    let body = injectRouteHead(html, route, req);
+    if (route.view === 'home') {
+      const store = readPublicStore();
+      const homeImage = canonicalPublicUrl('/assets/generated/hero-atelier-campaign.png');
+      const homeSchema = `<script type="application/ld+json">${escapeScriptJson(homepageJsonLd(store))}</script>`;
+      body = body
+        .replace(/<meta property="og:image" content=".*?" \/>/s, `<meta property="og:image" content="${escapeHtml(homeImage)}" />`)
+        .replace(/<meta name="twitter:image" content=".*?" \/>/s, `<meta name="twitter:image" content="${escapeHtml(homeImage)}" />`)
+        .replace('</head>', `${homeSchema}\n</head>`);
+      body = injectRootHtml(body, homepageStaticHtml(store));
+    }
+    send(res, 200, body, 'text/html; charset=utf-8', {
       'Cache-Control': 'no-cache',
       'X-Robots-Tag': route.noindex ? 'noindex, follow' : 'index, follow',
     });
@@ -1378,12 +1483,11 @@ function serveSitemap(req, res) {
   const store = readPublicStore();
   const urls = [
     ...indexablePublicPaths,
-    ...store.products.filter((product) =>
-      !['archived', 'hidden', 'draft'].includes(product.status)).map(productPath),
+    ...publicProducts(store).map(productPath),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((urlPath) => `  <url><loc>${escapeHtml(absoluteUrl(req, urlPath))}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}
+${urls.map((urlPath) => `  <url><loc>${escapeHtml(canonicalPublicUrl(urlPath))}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}
 </urlset>
 `;
   send(res, 200, xml, 'application/xml; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
@@ -3207,6 +3311,11 @@ function serveFile(req, res, filePath) {
 const server = http.createServer(async (req, res) => {
   try {
     if (indexingDisabled()) res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    const requestHost = String(req.headers.host || '').split(':')[0].toLowerCase();
+    if (requestHost === 'www.motogripgear.com') {
+      permanentRedirect(res, `${canonicalSiteUrl}${req.url || '/'}`);
+      return;
+    }
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     let requestPath;
     try {
@@ -3301,7 +3410,7 @@ const server = http.createServer(async (req, res) => {
     if (requestPath === '/robots.txt') {
       const robots = indexingDisabled()
         ? 'User-agent: *\nDisallow: /\n'
-        : `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl(req, '/sitemap.xml')}\n`;
+        : `User-agent: *\nAllow: /\nSitemap: ${canonicalPublicUrl('/sitemap.xml')}\n`;
       send(res, 200, robots, 'text/plain; charset=utf-8');
       return;
     }
@@ -3404,6 +3513,10 @@ module.exports = {
   productMeta,
   injectProductHead,
   injectRouteHead,
+  injectRootHtml,
+  homepageStaticHtml,
+  productStaticHtml,
+  homepageJsonLd,
   publicRoutes,
   indexablePublicPaths,
   readPublicStore,
