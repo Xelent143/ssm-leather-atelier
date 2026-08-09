@@ -9913,11 +9913,11 @@ function applySEO(view, params) {
   let desc  = seo?.desc  || '';
   if (view === 'pdp') {
     const p = params?.product || SSM_PRODUCTS[0];
-    title = SSM_SEO.pdp.title
+    title = p.seoTitle || SSM_SEO.pdp.title
       .replace('%name%', p.name)
       .replace('%cat%', p.cat)
       .replace('%gender%', p.gender);
-    desc = (p.story?.piece || p.blurb || '').slice(0, 158);
+    desc = (p.seoDescription || p.story?.piece || p.publicDescription || p.blurb || '').slice(0, 158);
   }
   if (view === 'article') {
     const article = articleFromParams(params);
@@ -9933,7 +9933,9 @@ function applySEO(view, params) {
     document.head.appendChild(m);
   }
   m.setAttribute('content', desc || 'Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options.');
-  const canonicalUrl = `${window.location.origin}${cleanPathForView(view, params)}`;
+  const canonicalUrl = view === 'pdp' && params?.product?.canonicalUrl
+    ? params.product.canonicalUrl
+    : `${window.location.origin}${cleanPathForView(view, params)}`;
   let canonical = document.querySelector('link[rel="canonical"]');
   if (!canonical) {
     canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical');
