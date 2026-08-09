@@ -124,11 +124,18 @@
     outline-offset: 2px;
   }
   a { color: inherit; text-decoration: none; }
-  img { display: block; max-width: 100%; }
+  img {
+    display: block;
+    max-width: 100%;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 
   /* image / placeholder */
   .ph {
     position: relative;
+    -webkit-user-drag: none;
+    user-select: none;
     background:
       repeating-linear-gradient(
         135deg,
@@ -9883,6 +9890,18 @@ const routeStateFromLocation = () => {
     ? { view: matchedView, params: {} }
     : { view: 'notfound', params: {} };
 };
+const initialRouteState = () => {
+  const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
+  const product = initialSlug ? productFromSlug(initialSlug) : null;
+  if (product) return { view: 'pdp', params: { product } };
+  if (SSM_INITIAL_ROUTE?.view) {
+    return {
+      view: SSM_INITIAL_ROUTE.view,
+      params: SSM_INITIAL_ROUTE.params || {},
+    };
+  }
+  return routeStateFromLocation();
+};
 
 function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
@@ -9976,24 +9995,9 @@ function metaCheckoutFromUrl() {
 
 function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [view, setView] = React.useState(() => {
-    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
-    if (initialSlug && productFromSlug(initialSlug)) return 'pdp';
-    if (SSM_INITIAL_ROUTE?.view) return SSM_INITIAL_ROUTE.view;
-    const supportPage = supportPageFromPath();
-    if (supportPage) return supportPage;
-    // Resume from hash on refresh.
-    const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
-    return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
-      'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','returns','file-return','track','privacy','terms','consult','contact','search','notfound'
-    ].includes(h) ? h : 'home';
-  });
-  const [params, setParams] = React.useState(() => {
-    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
-    const product = initialSlug ? productFromSlug(initialSlug) : null;
-    return product ? { product } : (SSM_INITIAL_ROUTE?.params || {});
-  });
+  const [route, setRoute] = React.useState(initialRouteState);
+  const view = route.view;
+  const params = route.params || {};
   const [cart, setCart] = React.useState(() => {
     const metaCheckout = metaCheckoutFromUrl();
     if (metaCheckout.requested) return metaCheckout.items;
@@ -10031,8 +10035,7 @@ function App() {
       const savedRoute = event.state?.__motogripRoute === SSM_HISTORY_MARKER
         ? event.state
         : routeStateFromLocation();
-      setView(savedRoute.view);
-      setParams(savedRoute.params || {});
+      setRoute({ view: savedRoute.view, params: savedRoute.params || {} });
       window.scrollTo({ top: 0, behavior: 'auto' });
     };
     window.addEventListener('popstate', onPopState);
@@ -10048,8 +10051,7 @@ function App() {
     } else {
       window.history.pushState(nextState, '', path);
     }
-    setView(v);
-    setParams(p);
+    setRoute({ view: v, params: p });
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
@@ -10171,6 +10173,27 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>
+  (() => {
+    const protectedMediaSelector = 'img, picture, video, canvas, svg, .ph, [data-img], [style*="background-image"]';
+
+    document.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    }, { capture: true });
+
+    document.addEventListener('dragstart', (event) => {
+      if (event.target?.closest?.(protectedMediaSelector)) {
+        event.preventDefault();
+      }
+    }, { capture: true });
+
+    document.addEventListener('copy', (event) => {
+      if (window.getSelection()?.anchorNode?.parentElement?.closest?.(protectedMediaSelector)) {
+        event.preventDefault();
+      }
+    }, { capture: true });
+  })();
 </script>
 </body>
 </html>
