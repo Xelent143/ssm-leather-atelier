@@ -10,6 +10,10 @@ const slugs = [
   'mens-dark-brown-removable-hood-lambskin-bomber-jacket',
   'mens-black-grey-removable-hood-lambskin-bomber-jacket',
   'mens-cognac-brown-removable-hood-lambskin-bomber-jacket',
+  'mens-blue-removable-hood-lambskin-bomber-jacket',
+  'mens-camel-wax-removable-hood-lambskin-bomber-jacket',
+  'mens-black-quilted-shoulder-removable-hood-lambskin-bomber-jacket',
+  'mens-cognac-wax-removable-hood-lambskin-bomber-jacket',
 ];
 
 test('approved hooded lambskin jackets retain their publication contract', () => {
@@ -22,6 +26,9 @@ test('approved hooded lambskin jackets retain their publication contract', () =>
     assert.equal(product.price, 220);
     assert.equal(product.madeToMeasureEnabled, true);
     assert.equal(product.madeToMeasureSurcharge, 50);
+    assert.equal(product.gender, 'Men');
+    assert.deepEqual(product.subcategories,
+      ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets']);
     assert.deepEqual(product.options.find((option) => option.name === 'Size').values,
       ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL']);
     assert.equal(Object.values(product.stock).every((quantity) => quantity === 19), true);
@@ -45,5 +52,16 @@ test('client hydration preserves product-specific SEO metadata', () => {
     assert.match(source, /title = p\.seoTitle \|\| SSM_SEO\.pdp\.title/);
     assert.match(source, /p\.seoDescription \|\| p\.story\?\.piece \|\| p\.publicDescription/);
     assert.match(source, /params\?\.product\?\.canonicalUrl/);
+  }
+});
+
+test('all eight hooded jackets appear in the men collection cards and required jacket categories', () => {
+  const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  for (const slug of slugs) {
+    assert.match(indexSource, new RegExp(`slug: '${slug}'`));
+  }
+  const requiredCategories = ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets'];
+  for (const product of slugs.map((slug) => catalog.products.find((item) => item.slug === slug))) {
+    assert.deepEqual(product.subcategories, requiredCategories);
   }
 });

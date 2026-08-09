@@ -1024,6 +1024,7 @@ function publicProductForPdp(product) {
     keywords: Array.isArray(product.keywords) ? product.keywords : [],
     cat: product.category || 'Shop',
     category: product.category || 'Shop',
+    subcategories: Array.isArray(product.subcategories) ? product.subcategories : [],
     gender: product.gender || 'Unisex',
     brand: product.brand || 'MOTOGRIP GEAR',
     vendor: product.brand || 'MOTOGRIP GEAR',
