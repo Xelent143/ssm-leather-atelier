@@ -1472,6 +1472,7 @@ function serveMerchantFeed(req, res) {
 
       variants.forEach(([size, quantity]) => {
         const variantId = `${sku}-${String(size).replace(/[^a-z0-9]+/gi, '-')}`;
+        const quantityValue = Math.max(0, Number(quantity || 0));
         const fields = [
           ['id', variantId],
           ['title', `${product.title} - Size ${size}`],
@@ -1479,13 +1480,13 @@ function serveMerchantFeed(req, res) {
           ['link', link],
           ['image_link', image],
           ...additionalImages.map((additionalImage) => ['additional_image_link', additionalImage]),
-          ['availability', Number(quantity) > 0 ? 'in_stock' : 'out_of_stock'],
-          ['quantity_to_sell_on_facebook', Math.max(0, Math.floor(Number(quantity) || 0))],
+          ['availability', quantityValue > 0 ? 'in stock' : 'out of stock'],
+          ['quantity_to_sell_on_facebook', Math.floor(quantityValue)],
           ['price', `${Number(product.price || 0).toFixed(2)} ${currency}`],
           ['condition', merchantCondition(product.condition)],
           ['brand', product.brand || store.settings.storeName || 'MOTOGRIP GEAR'],
           ['mpn', product.mpn || sku],
-          ['identifier_exists', 'true'],
+          ['identifier_exists', product.mpn || product.gtin ? 'true' : 'false'],
           ['google_product_category', product.googleProductCategory],
           ['product_type', product.productType || product.category],
           ['age_group', String(product.ageGroup || 'adult').toLowerCase()],
