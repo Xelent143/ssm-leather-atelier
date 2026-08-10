@@ -12,6 +12,7 @@ const {
   productStaticHtml,
   publicProductForPdp,
   publicRoutes,
+  serveMerchantFeed,
 } = require('../server');
 
 test('runtime stock creates a visible Size option when legacy options are absent', () => {
@@ -81,4 +82,20 @@ test('homepage and product routes expose useful server-rendered HTML before Java
   assert.match(product, /<h1>Active Jacket<\/h1>/);
   assert.match(product, /<img /);
   assert.match(injectRootHtml('<div id="root"></div>', product), /data-server-rendered="product"/);
+});
+
+test('the shared Google and Meta XML feed includes sellable quantity for every variant', () => {
+  let body = '';
+  const response = {
+    writeHead() {},
+    end(value) { body = String(value || ''); },
+  };
+  serveMerchantFeed({ headers: { host: 'motogripgear.com' } }, response);
+
+  const itemCount = (body.match(/<item>/g) || []).length;
+  const quantities = [...body.matchAll(/<g:quantity_to_sell_on_facebook>(\d+)<\/g:quantity_to_sell_on_facebook>/g)]
+    .map((match) => Number(match[1]));
+  assert.ok(itemCount > 0);
+  assert.equal(quantities.length, itemCount);
+  assert.ok(quantities.every((quantity) => quantity === 19));
 });

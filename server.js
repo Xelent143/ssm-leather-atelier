@@ -1440,6 +1440,7 @@ function serveMerchantFeed(req, res) {
           ['image_link', image],
           ...additionalImages.map((additionalImage) => ['additional_image_link', additionalImage]),
           ['availability', Number(quantity) > 0 ? 'in_stock' : 'out_of_stock'],
+          ['quantity_to_sell_on_facebook', Math.max(0, Math.floor(Number(quantity) || 0))],
           ['price', `${Number(product.price || 0).toFixed(2)} ${currency}`],
           ['condition', merchantCondition(product.condition)],
           ['brand', product.brand || store.settings.storeName || 'MOTOGRIP GEAR'],
@@ -1958,4 +1959,5 @@ module.exports = {
   homepageStaticHtml,
   productStaticHtml,
   merchantSeedProducts,
+  serveMerchantFeed,
 };
