@@ -1653,40 +1653,52 @@ function serveMetaCatalogFeed(req, res) {
     'google_product_category',
     'gender',
     'age_group',
+    'size',
+    'size_system',
+    'size_type',
+    'item_group_id',
     'color',
     'material',
   ];
 
   const rows = store.products
     .filter((product) => product.status === 'active')
-    .map((product) => {
+    .flatMap((product) => {
       const sku = product.sku || product.id;
+      const groupId = product.itemGroupId || product.slug || product.id;
       const link = product.canonicalUrl || absoluteUrl(req, productPath(product));
       const image = productImageUrl(req, product.primaryImage || product.image);
       const description = merchantDescription(product);
-      const inventory = Object.keys(product.stock || {}).length
-        ? Object.values(product.stock).reduce((total, quantity) => total + Number(quantity || 0), 0)
-        : Number(product.inventory || 0);
+      const variants = Object.keys(product.stock || {}).length
+        ? Object.entries(product.stock)
+        : [[product.size || 'One Size', Number(product.inventory || 0)]];
 
-      const item = {
-        id: sku,
-        title: product.title,
-        description,
-        availability: inventory > 0 ? 'in stock' : 'out of stock',
-        condition: merchantCondition(product.condition),
-        price: `${Number(product.price || 0).toFixed(2)} ${currency}`,
-        link,
-        image_link: image,
-        brand: product.brand || store.settings.storeName || 'MOTOGRIP GEAR',
-        product_type: product.productType || product.category,
-        google_product_category: product.googleProductCategory,
-        gender: merchantGender(product.gender),
-        age_group: String(product.ageGroup || 'adult').toLowerCase(),
-        color: product.color,
-        material: product.material || product.leatherType,
-      };
+      return variants.map(([size, quantity]) => {
+        const variantId = `${sku}-${String(size).replace(/[^a-z0-9]+/gi, '-')}`;
+        const item = {
+          id: variantId,
+          title: `${product.title} - Size ${size}`,
+          description,
+          availability: Number(quantity) > 0 ? 'in stock' : 'out of stock',
+          condition: merchantCondition(product.condition),
+          price: `${Number(product.price || 0).toFixed(2)} ${currency}`,
+          link,
+          image_link: image,
+          brand: product.brand || store.settings.storeName || 'MOTOGRIP GEAR',
+          product_type: product.productType || product.category,
+          google_product_category: product.googleProductCategory,
+          gender: merchantGender(product.gender),
+          age_group: String(product.ageGroup || 'adult').toLowerCase(),
+          size,
+          size_system: String(product.sizeSystem || 'US').toUpperCase(),
+          size_type: String(product.sizeType || 'regular').toLowerCase(),
+          item_group_id: groupId,
+          color: product.color,
+          material: product.material || product.leatherType,
+        };
 
-      return columns.map((column) => escapeCsv(item[column])).join(',');
+        return columns.map((column) => escapeCsv(item[column])).join(',');
+      });
     });
 
   const feed = `${columns.join(',')}\n${rows.join('\n')}\n`;
