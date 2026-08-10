@@ -6242,6 +6242,177 @@
       "reviews": []
     },
     {
+      "id": "p65",
+      "slug": "mens-brown-suede-leather-western-cowboy-waistcoat-vest",
+      "title": "Men's Brown Suede Leather Western Cowboy Waistcoat Vest",
+      "category": "Vests",
+      "gender": "Men",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 190,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "A classic MOTOGRIP GEAR men's western waistcoat vest crafted in genuine brown suede leather. The sleeveless tailored silhouette combines notch lapels, a double-breasted button front, a welt chest pocket, lower flap pockets and a clean plain back panel for a refined cowboy-inspired look. Built as a premium layering piece, it pairs easily with shirts, denim and motorcycle lifestyle wardrobes while keeping the focus on soft suede texture and clean waistcoat tailoring.",
+      "shortDescription": "Genuine suede leather · western lapel cut · double-breasted front",
+      "image": "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/01-model-front.png",
+      "primaryImage": "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/01-model-front.png",
+      "galleryImages": [
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/02-model-back.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/03-product-front.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/04-product-back.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/05-close-up.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/06-infographic.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/07-side-angle.png",
+        "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/08-extra-angle-1.png"
+      ],
+      "galleryImageAltText": [
+        "Man wearing a brown suede leather western waistcoat vest from the back.",
+        "Brown suede leather double-breasted western waistcoat vest, front product view.",
+        "Brown suede leather western waistcoat vest with plain tailored back panel.",
+        "Close-up of brown suede leather waistcoat lapels, buttons and pocket details.",
+        "Feature guide for the brown suede leather western waistcoat vest.",
+        "Brown suede leather western waistcoat vest shown from the side angle.",
+        "Brown suede leather waistcoat vest alternate side angle."
+      ],
+      "colors": [
+        "Brown"
+      ],
+      "colorImages": {
+        "Brown": "assets/generated/vests/mens-brown-suede-leather-western-cowboy-waistcoat-vest/01-model-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL",
+            "6XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Brown"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Brown Suede Leather Western Waistcoat Vest | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP men's brown suede leather western waistcoat vest with notch lapels, double-breasted buttons, flap pockets and sizes XS–6XL.",
+      "geoTitle": "Men's Brown Suede Western Waistcoat Vest: Design, Fit and Features",
+      "geoDescription": "The MOTOGRIP GEAR men's brown suede western waistcoat vest features genuine suede leather, notch lapels, a double-breasted button front, chest welt pocket, lower flap pockets, a plain tailored back, sizes XS–6XL and made-to-measure ordering.",
+      "aeoTitle": "What Features Does the Brown Suede Western Waistcoat Vest Have?",
+      "aeoDescription": "It combines genuine brown suede leather with notch lapels, a double-breasted button front, a welt chest pocket, lower flap pockets and a plain tailored back panel.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-brown-suede-leather-western-cowboy-waistcoat-vest",
+      "schemaDescription": "MOTOGRIP GEAR men's genuine brown suede leather western waistcoat vest with notch lapels, double-breasted buttons, pockets, sizes XS through 6XL and made-to-measure availability.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MG-P65-BRN-SUEDE-WEST-VEST",
+      "mpn": "MOTOGRIP-BROWN-SUEDE-WESTERN-WAISTCOAT-VEST",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Vests",
+      "productType": "Leather apparel > Men's leather vests > Western vests",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "Man wearing a brown suede leather western cowboy waistcoat vest from the front.",
+      "material": "Genuine suede leather",
+      "color": "Brown",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-brown-suede-leather-western-cowboy-waistcoat-vest",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Brush gently with a suede brush; avoid water saturation, direct heat and harsh cleaners; use suede-safe care products after testing on a concealed area.",
+      "fitNotes": "Standard men's waistcoat fit in sizes XS–6XL; made-to-measure ordering is available for a personalized fit.",
+      "leatherType": "Genuine suede leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Not specified",
+      "hardware": "Dark front buttons",
+      "closureType": "Double-breasted button front",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Motorcycle lifestyle layering, western styling and everyday wear",
+      "season": "All-season layering",
+      "craftMethod": "Tailored suede waistcoat construction with notch lapels, double-breasted front, welt chest pocket and lower flap pockets",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Genuine brown suede leather construction",
+        "Western-inspired waistcoat silhouette",
+        "Notch lapels",
+        "Double-breasted button front",
+        "Welt chest pocket",
+        "Lower flap pockets",
+        "Plain tailored back panel",
+        "Sleeveless cut for easy layering",
+        "Standard men's fit in sizes XS–6XL",
+        "Made-to-measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Genuine suede leather"
+        ],
+        [
+          "Color",
+          "Brown"
+        ],
+        [
+          "Style",
+          "Western cowboy waistcoat vest"
+        ],
+        [
+          "Closure",
+          "Double-breasted button front"
+        ],
+        [
+          "Pockets",
+          "Chest welt pocket and lower flap pockets"
+        ],
+        [
+          "Back",
+          "Plain tailored back panel"
+        ],
+        [
+          "Sizes",
+          "XS–6XL"
+        ]
+      ],
+      "perfectFor": "Western styling, motorcycle lifestyle layering, denim outfits, casual events and refined everyday waistcoat wear.",
+      "whyYouWillLoveIt": "The soft brown suede, tailored sleeveless cut and classic double-breasted western front create a distinctive waistcoat that feels polished without losing rugged character.",
+      "reviews": []
+    },
+    {
       "id": "p49",
       "slug": "mens-black-removable-hood-lambskin-jacket",
       "title": "Men's Black Removable-Hood Lambskin Leather Jacket",
