@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>MOTOGRIP GEAR — Road-Cut Leather Jackets & Moto Gear</title>
 <meta name="description" content="Premium motorcycle leather jackets, vests, and trousers with made-to-measure fit options. Built for grip, weather, and daily miles." />
 <meta name="theme-color" content="#F5F1E8" />
 <meta name="author" content="MOTOGRIP GEAR" />
 <meta name="robots" content="index,follow,max-image-preview:large" />
 <meta name="google-site-verification" content="yiuUZWklH3wTPiV70ppLC_o7fSIexSoU5_wqOZ0iDDY" />
+<meta name="p:domain_verify" content="1c8fd65d056539c41e828f0dbf5160a5" />
 <link rel="canonical" href="https://motogripgear.com/" />
 
 <!-- Open Graph -->
@@ -101,6 +102,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://unpkg.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
@@ -131,16 +133,24 @@
   body { overflow-x: hidden; }
   ::selection { background: var(--accent); color: var(--fg); }
   button { font-family: inherit; cursor: pointer; }
+  button, a, input, select, textarea, [role="button"] { touch-action: manipulation; }
   button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
     outline: 1px solid var(--accent-2);
     outline-offset: 2px;
   }
   a { color: inherit; text-decoration: none; }
-  img { display: block; max-width: 100%; }
+  img {
+    display: block;
+    max-width: 100%;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 
   /* image / placeholder */
   .ph {
     position: relative;
+    -webkit-user-drag: none;
+    user-select: none;
     background:
       repeating-linear-gradient(
         135deg,
@@ -543,8 +553,8 @@
 <body>
 <div id="root"></div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 <script type="text/babel" data-presets="env,react" data-file="tweaks-panel.jsx">
 
@@ -3074,6 +3084,280 @@ const SSM_JOURNAL = [
     nextPrimary: 'Shop motorcycle jackets',
     nextPrimaryCat: 'Jackets',
   },
+  {
+    id: 'break-in-a-leather-motorcycle-jacket-safely',
+    cat: 'Leather Care',
+    title: 'How to break in a leather motorcycle jacket without damaging it',
+    seoTitle: 'How to Break In a Leather Motorcycle Jacket Safely | MOTOGRIP GEAR',
+    metaDescription: 'Learn how to break in a leather motorcycle jacket safely without water, heat, or damage. MOTOGRIP GEAR explains fit, wear time, movement, and care.',
+    dek: 'A safe, patience-first guide to softening a leather motorcycle jacket through real wear while protecting shape, grain, seams, and hardware.',
+    duration: '8 min',
+    date: 'August 10, 2026',
+    isoDate: '2026-08-10',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/break-in-leather-motorcycle-jacket-hero.jpg',
+    heroAlt: 'Premium MOTOGRIP leather jacket care banner showing how to break in leather safely',
+    cardImage: '/assets/generated/blog/break-in-leather-motorcycle-jacket-card.jpg',
+    cardImageAlt: 'MOTOGRIP brown woven leather motorcycle jacket break-in guide visual with headline and logo',
+    quickAnswer: 'Wear the jacket regularly in short sessions, move naturally, and let body heat soften the leather. Avoid water, direct heat, forced stretching, and heavy oils.',
+    body: [
+      'A new leather motorcycle jacket should feel structured, not punishing. Good leather softens through body heat, movement and time, but rushing the process can distort the shape, dry the surface or stress the seams.',
+      'The safest break-in method is simple: confirm the fit is correct, wear the jacket in short sessions, move naturally and let the leather adapt gradually. If the jacket is painfully tight or the zipper is under strain, exchange or adjust the size before trying to force it.'
+    ],
+    sections: [
+      {
+        title: '1. Start with a fit that can actually break in',
+        paragraphs: [
+          'Leather can relax slightly at movement points, but it will not turn a wrong size into the right one. The shoulders should sit cleanly, the zipper should close without fighting, and the chest should allow normal breathing.',
+          'A firm new jacket is normal. Sharp pulling across the back, lifted shoulders or a front zipper that bows outward are warning signs that the fit needs review.'
+        ]
+      },
+      {
+        title: '2. Use short wear sessions first',
+        paragraphs: [
+          'Wear the jacket indoors or on short trips for thirty to sixty minutes at a time. Body heat and gentle movement soften the leather more safely than aggressive stretching.',
+          'After each wear, hang it on a wide hanger and let the leather rest. This keeps the shoulder line and front panels from collapsing while the jacket starts shaping to you.'
+        ]
+      },
+      {
+        title: '3. Move like you ride',
+        paragraphs: [
+          'Zip the jacket, reach forward, bend your elbows and sit in a riding posture if you use the jacket on a motorcycle. These movements ease the leather where it matters most: shoulders, sleeves, chest and waist.',
+          'Do not pull hard on cuffs, pockets or the zipper. Natural movement works; force damages.'
+        ],
+        bullets: [
+          'Reach forward gently to open the shoulder and upper back.',
+          'Bend and straighten the arms to soften sleeve creases.',
+          'Sit for a few minutes to check hem and waist comfort.',
+          'Keep pockets light during the early wears.'
+        ]
+      },
+      {
+        title: '4. Avoid shortcuts that damage leather',
+        paragraphs: [
+          'Do not soak the jacket, shower in it, use a hair dryer, place it near a heater, or heavily oil the leather. Water and direct heat can shrink, stain or harden the hide, while too much conditioner can darken the surface and weaken structure.',
+          'If the leather feels dry after regular wear, use a suitable conditioner sparingly and test it first on a hidden area.'
+        ]
+      },
+      {
+        title: '5. Know when the jacket is ready',
+        paragraphs: [
+          'A properly broken-in jacket closes easily, lets your arms move without harsh pulling and develops natural crease lines at the elbows, waist and shoulders. It should still hold its shape and feel secure.',
+          'The goal is not to make leather floppy. The goal is controlled comfort with the original silhouette intact.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'BREAK-IN CHECKLIST',
+    checklistTitle: 'Soften the leather without abusing it.',
+    checklist: [
+      'Confirm the jacket closes cleanly before breaking it in.',
+      'Wear it in short, repeated sessions.',
+      'Use natural arm, shoulder and seated movements.',
+      'Avoid water, steam, dryers, heaters and forced stretching.',
+      'Condition only when needed and only with a suitable product.'
+    ],
+    faqEyebrow: 'LEATHER BREAK-IN FAQ',
+    faq: [
+      {
+        q: 'How long does it take to break in a leather jacket?',
+        a: 'Most jackets feel easier after several wears and continue improving over two to four weeks of normal use.'
+      },
+      {
+        q: 'Can I use water to soften a leather jacket?',
+        a: 'No. Water can stain, shrink or distort leather. Natural wear is safer.'
+      },
+      {
+        q: 'Should a leather jacket feel tight at first?',
+        a: 'It can feel firm, but it should not restrict breathing, force the zipper or sharply pull across the shoulders.'
+      }
+    ],
+    pull: 'Break leather in with patience, not punishment.',
+    nextTitle: 'Start with the right fit.',
+    nextBody: 'Review MOTOGRIP size guidance before choosing your next leather jacket or made-to-measure build.',
+    nextPrimary: 'Size guide',
+    nextPrimaryCat: 'Size Guide',
+  },
+  {
+    id: 'layer-a-hooded-leather-moto-vest-without-bulk',
+    cat: 'Vest Guide',
+    title: 'How to layer a hooded leather moto vest without bulk',
+    seoTitle: 'How to Layer a Hooded Leather Moto Vest Without Bulk | MOTOGRIP GEAR',
+    metaDescription: 'Learn how to layer a hooded leather moto vest without bulk. MOTOGRIP GEAR covers base layers, fit, riding position, and clean exterior styling.',
+    dek: 'A practical MOTOGRIP guide to layering a hooded leather moto vest with clean proportions, useful warmth, and no bulky fit problems.',
+    duration: '7 min',
+    date: 'August 10, 2026',
+    isoDate: '2026-08-10',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/hooded-moto-vest-layering-hero.jpg',
+    heroAlt: 'Hooded leather moto vest layering guide banner showing exterior MOTOGRIP vest',
+    cardImage: '/assets/generated/blog/hooded-moto-vest-layering-card.jpg',
+    cardImageAlt: 'MOTOGRIP black and white hooded leather moto vest layering blog visual with logo',
+    quickAnswer: 'Use thin fitted base layers, avoid bulky hoods or heavy fleece, and check the vest while seated and reaching forward so the zipper and armholes stay clean.',
+    body: [
+      'A hooded leather moto vest works best when the layers underneath support the silhouette instead of fighting it. The vest already has structure, contrast panels and hardware, so the base layer should stay clean and low-bulk.',
+      'Layering is about proportion. If the armholes, zipper and waist stay smooth, the vest looks intentional. If the hoodie, shirt or thermal bunches, the whole outfit starts feeling heavy.'
+    ],
+    sections: [
+      {
+        title: '1. Start with a thin base layer',
+        paragraphs: [
+          'Choose a fitted tee, thermal or lightweight knit as the first layer. Smooth fabrics slide more easily under leather and reduce bunching around the armholes.',
+          'Avoid oversized sweatshirts under a fitted vest. They can push the front panels outward and make the zipper feel tighter than the actual vest size.'
+        ]
+      },
+      {
+        title: '2. Do not stack bulky hoods',
+        paragraphs: [
+          'If the vest already has a hood, keep any additional hood thin or skip it entirely. Two heavy hoods compete behind the neck and can make the collar area look crowded.',
+          'A crewneck, mock neck or slim zip layer usually keeps the line cleaner.'
+        ]
+      },
+      {
+        title: '3. Keep the colour story simple',
+        paragraphs: [
+          'Black, off-white, grey and cream base layers work naturally with a black-and-white leather vest. They let the quilting, pockets and contrast panels stay visible.',
+          'If you add colour, keep it controlled: one accent is enough.'
+        ]
+      },
+      {
+        title: '4. Check the seated position',
+        paragraphs: [
+          'Zip the vest and sit down before you decide the outfit works. The waist should not ride up aggressively, and the front should not create hard folds near the zipper.',
+          'For riding or long wear, reach forward and check the shoulders, armholes and chest. Comfort in motion matters more than a mirror-only fit.'
+        ],
+        bullets: [
+          'Base layer lies flat at the chest.',
+          'Armholes stay clean with no fabric rolls.',
+          'Hood sits naturally behind the neck.',
+          'Zipper closes without pulling.'
+        ]
+      },
+      {
+        title: '5. Finish with practical pockets and footwear',
+        paragraphs: [
+          'Use the vest pockets for light essentials only. Overloading the front pockets can change the silhouette and create pressure points.',
+          'Boots, clean sneakers or riding footwear all work, but the best choice is the one that matches the purpose of the outfit.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'VEST LAYERING CHECKLIST',
+    checklistTitle: 'Keep warmth, lose the bulk.',
+    checklist: [
+      'Use a slim base layer before heavier pieces.',
+      'Avoid stacking two thick hoods.',
+      'Keep black, cream, grey and off-white as the core palette.',
+      'Test the vest while seated and reaching forward.',
+      'Do not overload the front pockets.'
+    ],
+    faqEyebrow: 'HOODED VEST FAQ',
+    faq: [
+      {
+        q: 'Can I wear a hoodie under a leather vest?',
+        a: 'Yes, but a slim hoodie works best, especially when the vest already has a hood.'
+      },
+      {
+        q: 'Should a leather vest be tight when layered?',
+        a: 'It should feel secure, not tight, and should zip without pulling.'
+      },
+      {
+        q: 'What looks best under a black and white moto vest?',
+        a: 'Black, cream, grey and off-white base layers keep the look clean.'
+      }
+    ],
+    pull: 'A layered vest should look sharp in motion, not padded in place.',
+    nextTitle: 'Build the fit around the vest.',
+    nextBody: 'Explore MOTOGRIP leather vests and choose the layer that matches your ride, climate and style.',
+    nextPrimary: 'Shop vests',
+    nextPrimaryCat: 'Vests',
+  },
+  {
+    id: 'store-a-leather-long-coat-between-seasons',
+    cat: 'Leather Care',
+    title: 'How to store a leather long coat between seasons',
+    seoTitle: 'How to Store a Leather Long Coat Between Seasons | MOTOGRIP GEAR',
+    metaDescription: 'Learn how to store a leather long coat properly with MOTOGRIP GEAR: hanger choice, breathable covers, moisture control, conditioning, and seasonal checks.',
+    dek: 'A practical storage guide for keeping a leather long coat clean, shaped, breathable, and ready for the next season.',
+    duration: '7 min',
+    date: 'August 10, 2026',
+    isoDate: '2026-08-10',
+    byline: 'MOTOGRIP GEAR Editorial',
+    hero: '/assets/generated/blog/leather-long-coat-storage-hero.jpg',
+    heroAlt: 'Leather long coat seasonal storage banner in MOTOGRIP warm studio style',
+    cardImage: '/assets/generated/blog/leather-long-coat-storage-card.jpg',
+    cardImageAlt: 'MOTOGRIP black leather long coat storage guide visual with logo and care headline',
+    quickAnswer: 'Use a wide padded hanger, keep the coat in a cool dry closet, avoid plastic covers and direct sunlight, and never store leather while damp.',
+    body: [
+      'A leather long coat has more weight, length and surface area than a short jacket, so storage matters. Poor hanging, plastic covers, moisture and direct light can create shoulder dents, creases, odour or uneven colour change.',
+      'Good storage is not complicated. Clean the coat, dry it fully, hang it correctly and give the leather room to breathe.'
+    ],
+    sections: [
+      {
+        title: '1. Clean and dry the coat before storage',
+        paragraphs: [
+          'Wipe the coat with a soft dry cloth to remove dust and surface residue. If the coat has been exposed to rain or humidity, let it dry naturally at room temperature before it goes into the closet.',
+          'Never store leather while damp. Moisture trapped in folds, seams or lining can create odour and surface problems later.'
+        ]
+      },
+      {
+        title: '2. Use a wide hanger',
+        paragraphs: [
+          'A long coat needs support through the shoulders. A wide wooden or padded hanger helps maintain the shoulder line and prevents sharp pressure marks.',
+          'Wire hangers and narrow plastic hangers can deform the shoulder over time, especially with heavier leather.'
+        ]
+      },
+      {
+        title: '3. Choose breathable coverage',
+        paragraphs: [
+          'Use a breathable cotton garment cover when you need dust protection. Avoid sealed plastic bags for long-term storage because leather needs airflow.',
+          'Leave space around the coat so the leather is not compressed by other garments.'
+        ]
+      },
+      {
+        title: '4. Control light, heat and humidity',
+        paragraphs: [
+          'Store leather away from direct sunlight, radiators and damp walls. Heat can dry the hide, while sunlight may fade or age colour unevenly.',
+          'A cool, dry closet is ideal. In humid climates, check the coat during storage rather than forgetting it for months.'
+        ]
+      },
+      {
+        title: '5. Refresh before the season starts',
+        paragraphs: [
+          'When the weather changes, take the coat out early, inspect the surface and lining, and let it air naturally. If the leather feels dry, use a suitable conditioner sparingly after testing a hidden area.',
+          'Do not over-condition before storage. Too much product can darken the finish and attract dust.'
+        ]
+      }
+    ],
+    checklistEyebrow: 'LONG COAT STORAGE CHECKLIST',
+    checklistTitle: 'Store the shape, not just the garment.',
+    checklist: [
+      'Wipe dust and residue before storage.',
+      'Let the coat dry fully at room temperature.',
+      'Use a wide wooden or padded hanger.',
+      'Choose a breathable cover instead of plastic.',
+      'Keep away from sunlight, heat and damp areas.',
+      'Inspect during the off-season in humid climates.'
+    ],
+    faqEyebrow: 'LEATHER COAT STORAGE FAQ',
+    faq: [
+      {
+        q: 'Can I fold a leather long coat for storage?',
+        a: 'It is better to hang it on a wide padded hanger because folding can create deep creases.'
+      },
+      {
+        q: 'Should leather be stored in plastic?',
+        a: 'No. A breathable cotton garment cover is safer than plastic.'
+      },
+      {
+        q: 'Can sunlight damage a leather coat?',
+        a: 'Yes. Direct sunlight can dry, fade or unevenly age leather.'
+      }
+    ],
+    pull: 'A leather coat ages best when it can breathe, hang correctly and stay dry.',
+    nextTitle: 'Keep leather ready for next season.',
+    nextBody: 'Read MOTOGRIP leather care guidance for cleaning, conditioning and long-term ownership.',
+    nextPrimary: 'Leather care',
+    nextPrimaryCat: 'Leather Care',
+  },
 ];
 
 // ── FAQ data (used by /faq) ─────────────────────────────────────────────────
@@ -4034,7 +4318,7 @@ function ProductCard({ product, onQuickView, go }) {
           position: 'absolute', bottom: 16, left: 16, right: 16,
         }}>
           <button className="btn" style={{ width: '100%', justifyContent: 'center', fontSize: 10, padding: '12px' }}
-            onClick={(e) => { e.stopPropagation(); onQuickView(product); }}>
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product); }}>
             Quick View
           </button>
         </div>
@@ -8226,6 +8510,18 @@ const routeStateFromLocation = () => {
     ? { view: matchedView, params: {} }
     : { view: 'notfound', params: {} };
 };
+const initialRouteState = () => {
+  const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
+  const product = initialSlug ? productFromSlug(initialSlug) : null;
+  if (product) return { view: 'pdp', params: { product } };
+  if (SSM_INITIAL_ROUTE?.view) {
+    return {
+      view: SSM_INITIAL_ROUTE.view,
+      params: SSM_INITIAL_ROUTE.params || {},
+    };
+  }
+  return routeStateFromLocation();
+};
 
 function applySEO(view, params) {
   const seo = (view === 'shop' && params?.gender === 'Women') ? SSM_SEO.shopWomen
@@ -8324,24 +8620,9 @@ function metaCheckoutFromUrl() {
 
 function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [view, setView] = React.useState(() => {
-    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
-    if (initialSlug && productFromSlug(initialSlug)) return 'pdp';
-    if (SSM_INITIAL_ROUTE?.view) return SSM_INITIAL_ROUTE.view;
-    const supportPage = supportPageFromPath();
-    if (supportPage) return supportPage;
-    // Resume from hash on refresh.
-    const h = (window.location.hash || '').replace(/^#\/?/, '').split('/')[0];
-    return h && ['home','shop','pdp','mto','lookbook','about','account','checkout',
-      'journal','article','care','repairs','concierge','sustain','stockists',
-      'press','giftcard','faq','size','ship','returns','file-return','track','privacy','terms','consult','contact','search','notfound'
-    ].includes(h) ? h : 'home';
-  });
-  const [params, setParams] = React.useState(() => {
-    const initialSlug = SSM_INITIAL_ROUTE?.productSlug || pathProductSlug();
-    const product = initialSlug ? productFromSlug(initialSlug) : null;
-    return product ? { product } : (SSM_INITIAL_ROUTE?.params || {});
-  });
+  const [route, setRoute] = React.useState(initialRouteState);
+  const view = route.view;
+  const params = route.params || {};
   const [cart, setCart] = React.useState(() => {
     const metaCheckout = metaCheckoutFromUrl();
     if (metaCheckout.requested) return metaCheckout.items;
@@ -8379,8 +8660,7 @@ function App() {
       const savedRoute = event.state?.__motogripRoute === SSM_HISTORY_MARKER
         ? event.state
         : routeStateFromLocation();
-      setView(savedRoute.view);
-      setParams(savedRoute.params || {});
+      setRoute({ view: savedRoute.view, params: savedRoute.params || {} });
       window.scrollTo({ top: 0, behavior: 'auto' });
     };
     window.addEventListener('popstate', onPopState);
@@ -8396,8 +8676,7 @@ function App() {
     } else {
       window.history.pushState(nextState, '', path);
     }
-    setView(v);
-    setParams(p);
+    setRoute({ view: v, params: p });
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
@@ -8519,6 +8798,46 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>
+  (() => {
+    const protectedMediaSelector = 'img, picture, video, canvas, svg, .ph, [data-img], [style*="background-image"]';
+    const optimizeMedia = () => {
+      const images = Array.from(document.querySelectorAll('img'));
+      images.forEach((img, index) => {
+        if (!img.hasAttribute('loading')) {
+          img.setAttribute('loading', index === 0 ? 'eager' : 'lazy');
+        }
+        if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
+      });
+    };
+
+    const scheduleMediaOptimization = () => {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', optimizeMedia, { once: true });
+      } else {
+        optimizeMedia();
+      }
+    };
+
+    document.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    }, { capture: true });
+
+    document.addEventListener('dragstart', (event) => {
+      if (event.target?.closest?.(protectedMediaSelector)) {
+        event.preventDefault();
+      }
+    }, { capture: true });
+
+    document.addEventListener('copy', (event) => {
+      if (window.getSelection()?.anchorNode?.parentElement?.closest?.(protectedMediaSelector)) {
+        event.preventDefault();
+      }
+    }, { capture: true });
+
+    scheduleMediaOptimization();
+  })();
 </script>
 </body>
 </html>

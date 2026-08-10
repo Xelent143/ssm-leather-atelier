@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const zlib = require('zlib');
 const { canonicalMediaUrl } = require('./media-url');
 const { createAdminSecurity, parseCookies, safeEqual } = require('./admin-security');
 const { createAdminIdentity } = require('./admin-identity');
@@ -327,6 +328,45 @@ const publicRoutes = {
       author: 'MOTOGRIP GEAR Editorial',
     },
   },
+  '/blog/break-in-a-leather-motorcycle-jacket-safely': {
+    view: 'article',
+    params: { articleId: 'break-in-a-leather-motorcycle-jacket-safely' },
+    title: 'How to Break In a Leather Motorcycle Jacket Safely | MOTOGRIP GEAR',
+    desc: 'Learn how to break in a leather motorcycle jacket safely without water, heat, or damage. MOTOGRIP GEAR explains fit, wear time, movement, and care.',
+    image: '/assets/generated/blog/break-in-leather-motorcycle-jacket-hero.jpg',
+    article: {
+      headline: 'How to Break In a Leather Motorcycle Jacket Without Damaging It',
+      datePublished: '2026-08-10',
+      dateModified: '2026-08-10',
+      author: 'MOTOGRIP GEAR Editorial',
+    },
+  },
+  '/blog/layer-a-hooded-leather-moto-vest-without-bulk': {
+    view: 'article',
+    params: { articleId: 'layer-a-hooded-leather-moto-vest-without-bulk' },
+    title: 'How to Layer a Hooded Leather Moto Vest Without Bulk | MOTOGRIP GEAR',
+    desc: 'Learn how to layer a hooded leather moto vest without bulk. MOTOGRIP GEAR covers base layers, fit, riding position, and clean exterior styling.',
+    image: '/assets/generated/blog/hooded-moto-vest-layering-hero.jpg',
+    article: {
+      headline: 'How to Layer a Hooded Leather Moto Vest Without Bulk',
+      datePublished: '2026-08-10',
+      dateModified: '2026-08-10',
+      author: 'MOTOGRIP GEAR Editorial',
+    },
+  },
+  '/blog/store-a-leather-long-coat-between-seasons': {
+    view: 'article',
+    params: { articleId: 'store-a-leather-long-coat-between-seasons' },
+    title: 'How to Store a Leather Long Coat Between Seasons | MOTOGRIP GEAR',
+    desc: 'Learn how to store a leather long coat properly with MOTOGRIP GEAR: hanger choice, breathable covers, moisture control, conditioning, and seasonal checks.',
+    image: '/assets/generated/blog/leather-long-coat-storage-hero.jpg',
+    article: {
+      headline: 'How to Store a Leather Long Coat Between Seasons',
+      datePublished: '2026-08-10',
+      dateModified: '2026-08-10',
+      author: 'MOTOGRIP GEAR Editorial',
+    },
+  },
   '/brand': { view: 'about', title: 'About MOTOGRIP GEAR | Motorcycle Leather Craftsmanship', desc: 'Discover MOTOGRIP GEAR, a premium leather brand focused on authentic craftsmanship, functional design, precise fit, and lasting value.' },
   '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
   '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
@@ -495,14 +535,63 @@ function writeStore(store) {
 }
 
 function send(res, status, body, contentType = 'text/plain; charset=utf-8', headers = {}) {
+  const req = res._motogripRequest || {};
+  const method = String(req.method || '').toUpperCase();
+  const isGetOrHead = method === 'GET' || method === 'HEAD';
+  const bodyBuffer = Buffer.isBuffer(body) ? body : Buffer.from(body == null ? '' : body, 'utf8');
+  const isCompressible = status === 200
+    && bodyBuffer.length >= 512
+    && /^text\/|^application\/(?:javascript|json|xml|ld\+json|x-www-form-urlencoded|javascript;|ecmascript|x-ecmascript)|^image\/svg\+xml/i.test(contentType);
   const responseHeaders = {
     'Content-Type': contentType,
     'Cache-Control': status === 200 ? 'public, max-age=300' : 'no-store',
     ...headers,
   };
+  responseHeaders.Vary = responseHeaders.Vary
+    ? `${responseHeaders.Vary}, Accept-Encoding`
+    : 'Accept-Encoding';
+  const etag = `"${crypto.createHash('sha1').update(bodyBuffer).digest('hex')}"`;
+  responseHeaders.ETag = responseHeaders.ETag || etag;
+
+  if (status === 200 && isGetOrHead && req.headers && req.headers['if-none-match']) {
+    const token = req.headers['if-none-match'].split(',').map((value) => value.trim());
+    if (token.includes('*') || token.includes(etag)) {
+      responseHeaders['Content-Length'] = '0';
+      if (indexingDisabled()) responseHeaders['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
+      res.writeHead(304, responseHeaders);
+      res.end();
+      return;
+    }
+  }
+
+  let responseBody = bodyBuffer;
+  if (isCompressible && typeof req.headers?.['accept-encoding'] === 'string') {
+    const acceptEncoding = req.headers['accept-encoding'];
+    if (/\bbr\b/.test(acceptEncoding)) {
+      try {
+        responseBody = zlib.brotliCompressSync(bodyBuffer);
+        responseHeaders['Content-Encoding'] = 'br';
+      } catch {
+        responseBody = bodyBuffer;
+      }
+    } else if (/\bgzip\b/.test(acceptEncoding)) {
+      try {
+        responseBody = zlib.gzipSync(bodyBuffer);
+        responseHeaders['Content-Encoding'] = 'gzip';
+      } catch {
+        responseBody = bodyBuffer;
+      }
+    }
+  }
+
   if (indexingDisabled()) responseHeaders['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
+  responseHeaders['Content-Length'] = String(responseBody.length);
   res.writeHead(status, responseHeaders);
-  res.end(body);
+  if (method === 'HEAD') {
+    res.end();
+  } else {
+    res.end(responseBody);
+  }
 }
 
 function serveCategoryPage(req, res, handle) {
@@ -576,7 +665,8 @@ function hasLegacyWooQuery(url) {
     return legacyWooQueryNames.has(normalized)
       || normalized.startsWith('filter_')
       || normalized.startsWith('query_type_')
-      || normalized.startsWith('woocommerce_');
+      || normalized.startsWith('woocommerce_')
+      || normalized.startsWith('attribute_pa_');
   });
 }
 
@@ -601,12 +691,18 @@ function handleLegacyWooRequest(url, requestPath, res) {
   }
 
   if (lowerPath.startsWith('/product-tag/')
+    || lowerPath === '/product-tag'
     || lowerPath === '/woocommerce'
     || lowerPath.startsWith('/woocommerce/')
     || lowerPath.startsWith('/woocommerce-api/')
     || lowerPath.startsWith('/wc-api/')
     || lowerPath.startsWith('/wp-json/wc/')
     || lowerPath.startsWith('/wp-content/plugins/woocommerce/')) {
+    sendGone(res);
+    return true;
+  }
+
+  if (lowerPath === '/product' || lowerPath === '/product/') {
     sendGone(res);
     return true;
   }
@@ -624,6 +720,10 @@ function handleLegacyWooRequest(url, requestPath, res) {
   if (hasLegacyWooQuery(url)) {
     if (normalizedPath === '/' && url.searchParams.get('post_type') === 'product') {
       permanentRedirect(res, '/shop');
+      return true;
+    }
+    if (normalizedPath === '/product') {
+      sendGone(res);
       return true;
     }
     if (publicRoutes[normalizedPath]
@@ -3297,19 +3397,19 @@ function serveFile(req, res, filePath) {
       const ext = path.extname(finalPath).toLowerCase();
       const relativePath = path.relative(root, finalPath);
       const isAdminAsset = relativePath === 'admin.js' || relativePath === 'admin.css';
-      res.writeHead(200, {
+      send(res, 200, data, types[ext] || 'application/octet-stream', {
         'Content-Type': types[ext] || 'application/octet-stream',
         'Cache-Control': ext === '.html' || isAdminAsset ? 'no-cache' : 'public, max-age=31536000, immutable',
         'X-Content-Type-Options': 'nosniff',
+        'Last-Modified': new Date(stat.mtime).toUTCString(),
       });
-      if (req.method === 'HEAD') res.end();
-      else res.end(data);
     });
   });
 }
 
 const server = http.createServer(async (req, res) => {
   try {
+    res._motogripRequest = req;
     if (indexingDisabled()) res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
     const requestHost = String(req.headers.host || '').split(':')[0].toLowerCase();
     if (requestHost === 'www.motogripgear.com') {
@@ -3420,6 +3520,11 @@ const server = http.createServer(async (req, res) => {
       const assetPath = hasExtension ? requestPath.replace(/^\/admin/, '/admin') : '/admin.html';
       const adminFile = path.join(root, assetPath.replace(/^\/+/, ''));
       serveFile(req, res, adminFile);
+      return;
+    }
+
+    if (requestPath === '/cart' || requestPath === '/bag' || requestPath === '/basket') {
+      permanentRedirect(res, '/checkout');
       return;
     }
 
