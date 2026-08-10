@@ -43,6 +43,7 @@ const cleanPathForView = (view, params = {}) => {
     const article = articleFromParams(params);
     if (article?.id) return `/blog/${article.id}`;
   }
+  if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Hooded Leather Jackets') return '/men/hooded-leather-jackets';
   if (view === 'shop' && params?.gender === 'Women') return '/women';
   if (view === 'shop' && params?.gender === 'Men') return '/men';
   if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
@@ -76,6 +77,7 @@ const routeStateFromLocation = () => {
     '/shop': { view: 'shop', params: {} },
     '/women': { view: 'shop', params: { gender: 'Women' } },
     '/men': { view: 'shop', params: { gender: 'Men' } },
+    '/men/hooded-leather-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Hooded Leather Jackets' } },
     '/jackets': { view: 'shop', params: { cat: 'Jackets' } },
     '/vests': { view: 'shop', params: { cat: 'Vests' } },
     '/pants': { view: 'shop', params: { cat: 'Pants' } },
@@ -305,7 +307,7 @@ function App() {
         cartCount={cart.reduce((n, it) => n + it.qty, 0)} />
 
       {view === 'home' && <Home go={go} onQuickView={setQuickView} heroVariant={t.hero} />}
-      {view === 'shop' && <Shop go={go} onQuickView={setQuickView} initialGender={params.gender} initialCat={params.cat} />}
+      {view === 'shop' && <Shop go={go} onQuickView={setQuickView} initialGender={params.gender} initialCat={params.cat} initialSubcategory={params.subcategory} />}
       {view === 'pdp' && <PDP product={params.product} go={go} addToCart={addToCart} onQuickView={setQuickView} />}
       {view === 'mto' && <MTO go={go} startWith={params.startWith} addToCart={addToCart} />}
       {view === 'lookbook' && <Lookbook go={go} />}

@@ -3,9 +3,10 @@
 // price slider trims the result set, and an empty state replaces the grid
 // when no piece matches.
 
-function Shop({ go, onQuickView, initialGender, initialCat }) {
+function Shop({ go, onQuickView, initialGender, initialCat, initialSubcategory }) {
   const [gender, setGender] = React.useState(initialGender || 'All');
   const [cat, setCat] = React.useState(initialCat || 'All');
+  const [subcategory, setSubcategory] = React.useState(initialSubcategory || 'All');
   const [sort, setSort] = React.useState('Featured');
   const [filterOpen, setFilterOpen] = React.useState(false);
 
@@ -17,6 +18,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
 
   React.useEffect(() => { if (initialGender) setGender(initialGender); }, [initialGender]);
   React.useEffect(() => { if (initialCat) setCat(initialCat); }, [initialCat]);
+  React.useEffect(() => { setSubcategory(initialSubcategory || 'All'); }, [initialSubcategory]);
 
   // Reset filters when category-level changes (so a filter pill doesn't strand on an empty shop).
   const resetFilters = () => {
@@ -31,6 +33,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
   let products = SSM_PRODUCTS.filter(p => {
     if (gender !== 'All' && p.gender !== gender) return false;
     if (cat !== 'All' && p.cat !== cat) return false;
+    if (subcategory !== 'All' && !(p.subcategories || []).includes(subcategory)) return false;
     if (p.price > maxPrice) return false;
     // sizes: a product passes if any selected size has stock > 0 (or unknown)
     if (sizes.length) {
@@ -70,6 +73,7 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
   const lede = (() => {
     if (gender === 'Women' && cat === 'All') return "Cut to a woman's frame, not a smaller man's.";
     if (gender === 'Men'   && cat === 'All') return "Built for shoulder, not for show.";
+    if (subcategory === 'Hooded Leather Jackets') return "Hooded leather jackets with removable or built-in hood styling, filtered away from non-hooded silhouettes.";
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Puffer Vests') return "Quilted leather layers designed for warmth, movement, and clean everyday versatility.";
@@ -84,11 +88,11 @@ function Shop({ go, onQuickView, initialGender, initialCat }) {
     <div className="page-fade">
       <section style={{ padding: '64px 48px 32px' }}>
         <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 16 }}>
-          GEAR {gender !== 'All' ? `· ${gender.toUpperCase()}` : ''} {cat !== 'All' ? `· ${cat.toUpperCase()}` : ''}
+          GEAR {gender !== 'All' ? `· ${gender.toUpperCase()}` : ''} {cat !== 'All' ? `· ${cat.toUpperCase()}` : ''} {subcategory !== 'All' ? `· ${subcategory.toUpperCase()}` : ''}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 24 }}>
           <h1 className="display" style={{ fontSize: 'clamp(48px, 7vw, 104px)', margin: 0, lineHeight: 0.95, fontWeight: 400 }}>
-            {cat === 'All' ? (gender === 'All' ? 'The Collection' : `For ${gender === 'Men' ? 'him' : 'her'}.`) : cat}
+            {subcategory !== 'All' ? subcategory : (cat === 'All' ? (gender === 'All' ? 'The Collection' : `For ${gender === 'Men' ? 'him' : 'her'}.`) : cat)}
           </h1>
           <div style={{ color: 'var(--fg-3)', fontSize: 13, paddingBottom: 8, maxWidth: 520, lineHeight: 1.6 }}>
             {lede}
