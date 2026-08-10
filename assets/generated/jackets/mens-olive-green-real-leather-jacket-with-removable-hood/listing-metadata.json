@@ -1,0 +1,51 @@
+{
+  "brand": "MOTOGRIP GEAR",
+  "title": "MOTOGRIP GEAR Men's Olive Green Real Leather Jacket with Removable Hood",
+  "price_usd": 250,
+  "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
+    "3XL",
+    "4XL",
+    "5XL"
+  ],
+  "inventory_by_size": {
+    "XS": 19,
+    "S": 19,
+    "M": 19,
+    "L": 19,
+    "XL": 19,
+    "XXL": 19,
+    "3XL": 19,
+    "4XL": 19,
+    "5XL": 19
+  },
+  "made_to_measure": {
+    "enabled": true,
+    "surcharge_usd": 50
+  },
+  "color": "Olive Green with Heather Grey Hood",
+  "material": "Real lambskin leather",
+  "categories": [
+    "Men",
+    "All Leather Jackets",
+    "Biker Jackets",
+    "Hooded Leather Jackets"
+  ],
+  "features": [
+    "Real lambskin leather outer shell",
+    "Removable heather grey hood with drawstrings",
+    "Center zip front closure",
+    "Four outside zipper pockets",
+    "Two inside pockets plus mobile pocket",
+    "Soft polyester inner lining"
+  ],
+  "description": "Built for everyday edge and practical comfort, this MOTOGRIP GEAR olive green real leather jacket with removable hood is crafted from real lambskin leather with a hooded profile, functional pocket layout, and soft polyester lining. The design gives riders and streetwear customers a clean leather layer that works with denim, boots, and casual riding-inspired looks.",
+  "meta_title": "MOTOGRIP GEAR Men's Olive Green Real Leather Jacket with Removable Hood",
+  "meta_description": "Shop the MOTOGRIP GEAR Men's Olive Green Real Leather Jacket with Removable Hood in Olive Green with Heather Grey Hood. Real lambskin leather, hooded style, functional pockets, XS-5XL, and made-to-measure option.",
+  "sku_base": "MG-OLIVE-GREEN-REAL-LEATHER-JACKET-WITH-REMOVABLE-HOOD"
+}

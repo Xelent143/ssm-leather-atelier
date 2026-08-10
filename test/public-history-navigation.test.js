@@ -19,7 +19,9 @@ for (const relativePath of publicAppCopies) {
     const goStart = source.indexOf('const go = (v, p = {}) => {');
     const pushIndex = source.indexOf("window.history.pushState(nextState, '', path);", goStart);
     const setViewIndex = source.indexOf('setView(v);', goStart);
-    assert.ok(goStart >= 0 && pushIndex > goStart && setViewIndex > pushIndex,
+    const setRouteIndex = source.indexOf('setRoute({ view: v, params: p });', goStart);
+    const viewUpdateIndex = [setViewIndex, setRouteIndex].filter((index) => index > pushIndex).sort((a, b) => a - b)[0];
+    assert.ok(goStart >= 0 && pushIndex > goStart && viewUpdateIndex > pushIndex,
       'go() must create the browser-history entry before updating the React view');
   });
 }

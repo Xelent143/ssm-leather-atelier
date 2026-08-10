@@ -8382,6 +8382,724 @@
       "perfectFor": "Everyday layering, travel and motorcycle-inspired casual styling.",
       "whyYouWillLoveIt": "The supple lambskin shell and removable hood provide versatile styling, while the practical pocket layout supports everyday use.",
       "reviews": []
+    },
+    {
+      "id": "p61",
+      "slug": "mens-black-leather-varsity-jacket-with-hood",
+      "title": "Men's Black Leather Varsity Jacket With Hood",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Biker Jackets",
+        "Hooded Leather Jackets"
+      ],
+      "gender": "Men",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "Built for everyday edge and practical comfort, this MOTOGRIP GEAR black leather varsity jacket with hood is crafted from real lambskin leather with a hooded profile, snap-button front and soft polyester lining. Rib-knit cuffs and hem keep the fit clean, while two slanted waist pockets support daily wear.",
+      "shortDescription": "Real lambskin leather · attached hood · snap-button front",
+      "image": "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/01-model-front.jpg",
+      "primaryImage": "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/01-model-front.jpg",
+      "galleryImages": [
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/02-model-back.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/03-product-front.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/04-product-back.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/05-close-up.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/06-inner.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/07-infographic.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/08-extra-angle-1.jpg",
+        "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/09-extra-angle-2.jpg"
+      ],
+      "galleryImageAltText": [
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood worn by model, back view on warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood product front on clean warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood product back on clean warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood close up on clean warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood inner on clean warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood infographic with verified material, hood and pocket details.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood extra angle 1 on clean warm beige background.",
+        "MOTOGRIP GEAR men's black leather varsity jacket with hood extra angle 2 on clean warm beige background."
+      ],
+      "colors": [
+        "Black"
+      ],
+      "colorImages": {
+        "Black": "assets/generated/jackets/mens-black-leather-varsity-jacket-with-hood/03-product-front.jpg"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Black"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Black Leather Varsity Jacket With Hood | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR men's black leather varsity jacket with hood in Black. Real lambskin leather, hooded style, functional pockets, XS–5XL and made-to-measure option.",
+      "keywords": [
+        "MOTOGRIP GEAR black leather varsity jacket",
+        "men's hooded leather varsity jacket",
+        "black lambskin leather jacket",
+        "hooded leather jacket"
+      ],
+      "geoTitle": "Men's Black Leather Varsity Jacket With Hood: Features and Fit",
+      "geoDescription": "Men's Black Leather Varsity Jacket With Hood uses Real lambskin leather, hooded styling, soft polyester lining, practical pockets and sizes XS–5XL.",
+      "aeoTitle": "What features does the Men's Black Leather Varsity Jacket With Hood have?",
+      "aeoDescription": "It combines a Real lambskin leather shell with hooded styling, soft polyester lining, functional pockets and sizes XS–5XL.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-black-leather-varsity-jacket-with-hood",
+      "schemaDescription": "Men's Black Leather Varsity Jacket With Hood by MOTOGRIP GEAR in Real lambskin leather with made-to-measure sizing available.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-HLJ-BLV-001",
+      "mpn": "MGG-HLJ-BLV-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Hooded leather jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's black leather varsity jacket with hood worn by model, front view on warm beige background.",
+      "material": "Real lambskin leather",
+      "color": "Black",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-black-leather-varsity-jacket-with-hood",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store on a broad hanger away from direct heat and sunlight.",
+      "fitNotes": "Regular men's fit in sizes XS–5XL; consult the MOTOGRIP men's jacket size guide before ordering.",
+      "leatherType": "Real lambskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Soft polyester lining",
+      "hardware": "Durable snap-button hardware",
+      "closureType": "Snap-button front closure",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Everyday casual wear and motorcycle-inspired styling",
+      "season": "Layering jacket",
+      "craftMethod": "Lambskin leather varsity jacket construction with attached hood and rib-knit trim",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Real lambskin leather outer shell",
+        "Attached leather hood with drawstrings",
+        "Snap-button front closure",
+        "Two slanted waist pockets",
+        "Rib-knit cuffs and hem",
+        "Soft polyester inner lining",
+        "Men's sizes XS–5XL"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Real lambskin leather"
+        ],
+        [
+          "Color",
+          "Black"
+        ],
+        [
+          "Hood",
+          "Attached leather hood with drawstrings"
+        ],
+        [
+          "Lining",
+          "Soft polyester"
+        ],
+        [
+          "Closure",
+          "Snap-button front"
+        ],
+        [
+          "Pockets",
+          "Two slanted waist pockets plus one inside mobile pocket"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Everyday layering, travel and motorcycle-inspired casual styling.",
+      "whyYouWillLoveIt": "The real lambskin shell, attached hood and rib-knit trim create a versatile varsity profile with practical daily pockets.",
+      "reviews": []
+    },
+    {
+      "id": "p62",
+      "slug": "mens-camel-brown-leather-jacket-with-removable-hood",
+      "title": "Men's Camel Brown Leather Jacket With Removable Hood",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Biker Jackets",
+        "Hooded Leather Jackets"
+      ],
+      "gender": "Men",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "This MOTOGRIP GEAR camel brown leather jacket is crafted from 100% real lambskin leather with a removable hood for flexible styling. A smooth YKK front zipper, chest pocket layout, rib-knit cuffs and hem, and soft polyester lining make it a practical hooded leather layer for everyday wear.",
+      "shortDescription": "100% lambskin leather · removable hood · YKK zip front",
+      "image": "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/01-model-front.jpg",
+      "primaryImage": "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/01-model-front.jpg",
+      "galleryImages": [
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/02-model-back.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/03-product-front.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/04-product-back.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/05-close-up.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/06-inner.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/07-infographic.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/08-extra-angle-1.jpg",
+        "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/09-extra-angle-2.jpg"
+      ],
+      "galleryImageAltText": [
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood worn by model, back view on warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood product front on clean warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood product back on clean warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood close up on clean warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood inner on clean warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood infographic with verified material, hood and pocket details.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood extra angle 1 on clean warm beige background.",
+        "MOTOGRIP GEAR men's camel brown leather jacket with removable hood extra angle 2 on clean warm beige background."
+      ],
+      "colors": [
+        "Camel Brown"
+      ],
+      "colorImages": {
+        "Camel Brown": "assets/generated/jackets/mens-camel-brown-leather-jacket-with-removable-hood/03-product-front.jpg"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Camel Brown"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Camel Brown Leather Jacket With Removable Hood | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR men's camel brown leather jacket with removable hood in Camel Brown. 100% real lambskin leather, hooded style, functional pockets, XS–5XL and made-to-measure option.",
+      "keywords": [
+        "MOTOGRIP GEAR camel brown leather jacket",
+        "men's removable hood leather jacket",
+        "camel lambskin leather jacket",
+        "hooded leather jacket"
+      ],
+      "geoTitle": "Men's Camel Brown Leather Jacket With Removable Hood: Features and Fit",
+      "geoDescription": "Men's Camel Brown Leather Jacket With Removable Hood uses 100% real lambskin leather, hooded styling, soft polyester lining, practical pockets and sizes XS–5XL.",
+      "aeoTitle": "What features does the Men's Camel Brown Leather Jacket With Removable Hood have?",
+      "aeoDescription": "It combines a 100% real lambskin leather shell with hooded styling, soft polyester lining, functional pockets and sizes XS–5XL.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-camel-brown-leather-jacket-with-removable-hood",
+      "schemaDescription": "Men's Camel Brown Leather Jacket With Removable Hood by MOTOGRIP GEAR in 100% real lambskin leather with made-to-measure sizing available.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-HLJ-CBR-001",
+      "mpn": "MGG-HLJ-CBR-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Hooded leather jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's camel brown leather jacket with removable hood worn by model, front view on warm beige background.",
+      "material": "100% real lambskin leather",
+      "color": "Camel Brown",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-camel-brown-leather-jacket-with-removable-hood",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store on a broad hanger away from direct heat and sunlight.",
+      "fitNotes": "Regular men's fit in sizes XS–5XL; consult the MOTOGRIP men's jacket size guide before ordering.",
+      "leatherType": "100% real lambskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Soft polyester lining",
+      "hardware": "YKK zipper hardware",
+      "closureType": "YKK front zipper with removable hood",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Everyday casual wear and motorcycle-inspired styling",
+      "season": "Layering jacket",
+      "craftMethod": "Lambskin leather jacket construction with removable hood and rib-knit trim",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "100% real lambskin leather outer shell",
+        "Removable hood with drawstrings",
+        "YKK zip front closure",
+        "Chest zipper and flap pockets",
+        "Rib-knit cuffs and hem",
+        "Soft polyester inner lining",
+        "Men's sizes XS–5XL"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "100% real lambskin leather"
+        ],
+        [
+          "Color",
+          "Camel Brown"
+        ],
+        [
+          "Hood",
+          "Removable hood with drawstrings"
+        ],
+        [
+          "Lining",
+          "Soft polyester"
+        ],
+        [
+          "Closure",
+          "YKK zip front"
+        ],
+        [
+          "Pockets",
+          "Chest zipper and flap pockets plus side storage"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Everyday layering, travel and motorcycle-inspired casual styling.",
+      "whyYouWillLoveIt": "The camel brown lambskin shell and removable hood give two styling options, while the pocket layout and rib-knit trim add daily practicality.",
+      "reviews": []
+    },
+    {
+      "id": "p63",
+      "slug": "mens-black-real-leather-bomber-jacket-with-detachable-hood",
+      "title": "Men's Black Real Leather Bomber Jacket With Detachable Hood",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Biker Jackets",
+        "Hooded Leather Jackets"
+      ],
+      "gender": "Men",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "This MOTOGRIP GEAR black real leather bomber jacket pairs a detachable hood with a functional multi-pocket front and rib-knit trim. Crafted from real lambskin leather with a soft polyester lining, it gives riders and streetwear customers a clean hooded bomber profile for everyday layering.",
+      "shortDescription": "Real lambskin leather · detachable hood · bomber pocket layout",
+      "image": "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/01-model-front.jpg",
+      "primaryImage": "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/01-model-front.jpg",
+      "galleryImages": [
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/02-model-back.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/03-product-front.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/04-product-back.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/05-close-up.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/06-inner.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/07-infographic.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/08-extra-angle-1.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/09-extra-angle-2.jpg",
+        "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/10-extra-angle-3.jpg"
+      ],
+      "galleryImageAltText": [
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood worn by model, back view on warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood product front on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood product back on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood close up on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood inner on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood infographic with verified material, hood and pocket details.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood extra angle 1 on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood extra angle 2 on clean warm beige background.",
+        "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood extra angle 3 on clean warm beige background."
+      ],
+      "colors": [
+        "Black"
+      ],
+      "colorImages": {
+        "Black": "assets/generated/jackets/mens-black-real-leather-bomber-jacket-with-detachable-hood/03-product-front.jpg"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Black"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Black Real Leather Bomber Jacket With Detachable Hood | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood in Black. Real lambskin leather, hooded style, functional pockets, XS–5XL and made-to-measure option.",
+      "keywords": [
+        "MOTOGRIP GEAR black leather bomber jacket",
+        "men's detachable hood leather jacket",
+        "black lambskin bomber jacket",
+        "hooded leather bomber"
+      ],
+      "geoTitle": "Men's Black Real Leather Bomber Jacket With Detachable Hood: Features and Fit",
+      "geoDescription": "Men's Black Real Leather Bomber Jacket With Detachable Hood uses Real lambskin leather, hooded styling, soft polyester lining, practical pockets and sizes XS–5XL.",
+      "aeoTitle": "What features does the Men's Black Real Leather Bomber Jacket With Detachable Hood have?",
+      "aeoDescription": "It combines a Real lambskin leather shell with hooded styling, soft polyester lining, functional pockets and sizes XS–5XL.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-black-real-leather-bomber-jacket-with-detachable-hood",
+      "schemaDescription": "Men's Black Real Leather Bomber Jacket With Detachable Hood by MOTOGRIP GEAR in Real lambskin leather with made-to-measure sizing available.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-HBJ-BRD-001",
+      "mpn": "MGG-HBJ-BRD-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Hooded leather jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's black real leather bomber jacket with detachable hood worn by model, front view on warm beige background.",
+      "material": "Real lambskin leather",
+      "color": "Black",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-black-real-leather-bomber-jacket-with-detachable-hood",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store on a broad hanger away from direct heat and sunlight.",
+      "fitNotes": "Regular men's fit in sizes XS–5XL; consult the MOTOGRIP men's jacket size guide before ordering.",
+      "leatherType": "Real lambskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Soft polyester lining",
+      "hardware": "Durable metal zipper hardware",
+      "closureType": "Center zip front closure",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Everyday casual wear and motorcycle-inspired styling",
+      "season": "Layering jacket",
+      "craftMethod": "Lambskin leather bomber construction with detachable hood and rib-knit trim",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Real lambskin leather outer shell",
+        "Detachable hood with drawstrings",
+        "Center zip front closure",
+        "Two chest flap pockets",
+        "Two side pockets and two internal pockets",
+        "Rib-knit cuffs and hem",
+        "Men's sizes XS–5XL"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Real lambskin leather"
+        ],
+        [
+          "Color",
+          "Black"
+        ],
+        [
+          "Hood",
+          "Detachable hood with drawstrings"
+        ],
+        [
+          "Lining",
+          "Soft polyester"
+        ],
+        [
+          "Closure",
+          "Center zip front"
+        ],
+        [
+          "Pockets",
+          "Two chest flap pockets, two side pockets and two internal pockets"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Everyday layering, travel and motorcycle-inspired casual styling.",
+      "whyYouWillLoveIt": "The detachable hood and multi-pocket bomber layout create a practical leather layer that works hooded or streamlined.",
+      "reviews": []
+    },
+    {
+      "id": "p64",
+      "slug": "mens-olive-green-real-leather-jacket-with-removable-hood",
+      "title": "Men's Olive Green Real Leather Jacket With Removable Hood",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Biker Jackets",
+        "Hooded Leather Jackets"
+      ],
+      "gender": "Men",
+      "price": 250,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "This MOTOGRIP GEAR olive green real leather jacket is crafted from real lambskin leather with a removable heather grey hood and soft polyester lining. Four outside zipper pockets, two inside pockets and a center zip front give it a practical everyday profile with a clean hooded leather look.",
+      "shortDescription": "Real lambskin leather · removable grey hood · zip pockets",
+      "image": "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/01-model-front.jpg",
+      "primaryImage": "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/01-model-front.jpg",
+      "galleryImages": [
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/02-model-back.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/03-product-front.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/04-product-back.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/05-close-up.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/06-inner.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/07-infographic.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/08-extra-angle-1.jpg",
+        "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/09-extra-angle-2.jpg"
+      ],
+      "galleryImageAltText": [
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood worn by model, back view on warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood product front on clean warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood product back on clean warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood close up on clean warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood inner on clean warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood infographic with verified material, hood and pocket details.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood extra angle 1 on clean warm beige background.",
+        "MOTOGRIP GEAR men's olive green real leather jacket with removable hood extra angle 2 on clean warm beige background."
+      ],
+      "colors": [
+        "Olive Green with Heather Grey Hood"
+      ],
+      "colorImages": {
+        "Olive Green with Heather Grey Hood": "assets/generated/jackets/mens-olive-green-real-leather-jacket-with-removable-hood/03-product-front.jpg"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Olive Green with Heather Grey Hood"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Olive Green Real Leather Jacket With Removable Hood | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR men's olive green real leather jacket with removable hood in Olive Green with Heather Grey Hood. Real lambskin leather, hooded style, functional pockets, XS–5XL and made-to-measure option.",
+      "keywords": [
+        "MOTOGRIP GEAR olive green leather jacket",
+        "men's removable hood leather jacket",
+        "olive lambskin leather jacket",
+        "hooded leather jacket"
+      ],
+      "geoTitle": "Men's Olive Green Real Leather Jacket With Removable Hood: Features and Fit",
+      "geoDescription": "Men's Olive Green Real Leather Jacket With Removable Hood uses Real lambskin leather, hooded styling, soft polyester lining, practical pockets and sizes XS–5XL.",
+      "aeoTitle": "What features does the Men's Olive Green Real Leather Jacket With Removable Hood have?",
+      "aeoDescription": "It combines a Real lambskin leather shell with hooded styling, soft polyester lining, functional pockets and sizes XS–5XL.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-olive-green-real-leather-jacket-with-removable-hood",
+      "schemaDescription": "Men's Olive Green Real Leather Jacket With Removable Hood by MOTOGRIP GEAR in Real lambskin leather with made-to-measure sizing available.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-HLJ-OLV-001",
+      "mpn": "MGG-HLJ-OLV-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Hooded leather jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's olive green real leather jacket with removable hood worn by model, front view on warm beige background.",
+      "material": "Real lambskin leather",
+      "color": "Olive Green with Heather Grey Hood",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-olive-green-real-leather-jacket-with-removable-hood",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Wipe gently with a soft dry cloth; use lambskin-safe leather care after testing on a concealed area; store on a broad hanger away from direct heat and sunlight.",
+      "fitNotes": "Regular men's fit in sizes XS–5XL; consult the MOTOGRIP men's jacket size guide before ordering.",
+      "leatherType": "Real lambskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Soft polyester lining",
+      "hardware": "Durable metal zipper hardware",
+      "closureType": "Center zip front closure",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Everyday casual wear and motorcycle-inspired styling",
+      "season": "Layering jacket",
+      "craftMethod": "Lambskin leather jacket construction with removable heather grey hood",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Real lambskin leather outer shell",
+        "Removable heather grey hood with drawstrings",
+        "Center zip front closure",
+        "Four outside zipper pockets",
+        "Two inside pockets plus mobile pocket",
+        "Soft polyester inner lining",
+        "Men's sizes XS–5XL"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Real lambskin leather"
+        ],
+        [
+          "Color",
+          "Olive Green with Heather Grey Hood"
+        ],
+        [
+          "Hood",
+          "Removable heather grey hood with drawstrings"
+        ],
+        [
+          "Lining",
+          "Soft polyester"
+        ],
+        [
+          "Closure",
+          "Center zip front"
+        ],
+        [
+          "Pockets",
+          "Four outside zipper pockets and two inside pockets"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Everyday layering, travel and motorcycle-inspired casual styling.",
+      "whyYouWillLoveIt": "The olive lambskin shell, removable grey hood and practical zipper-pocket layout give the jacket a useful everyday riding-inspired profile.",
+      "reviews": []
     }
   ]
 }
