@@ -25,6 +25,7 @@ function FactualPDP({ product: p, go, addToCart }) {
   }));
   const [selection, setSelection] = React.useState(initialSelection);
   const [imgIdx, setImgIdx] = React.useState(0);
+  const thumbRailRef = React.useRef(null);
   const [openSection, setOpenSection] = React.useState('description');
   const [fitChartUnit, setFitChartUnit] = React.useState('inch');
   const [fitMode, setFitMode] = React.useState('standard');
@@ -70,6 +71,24 @@ function FactualPDP({ product: p, go, addToCart }) {
     const nextIndex = images.findIndex(image => image.src === selectedColorImage);
     if (nextIndex >= 0) setImgIdx(nextIndex);
   }, [selection.color]);
+
+  React.useEffect(() => {
+    const rail = thumbRailRef.current;
+    const activeThumb = rail?.querySelector(`[data-thumb-index="${imgIdx}"]`);
+    activeThumb?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }, [imgIdx]);
+
+  const scrollThumbRail = (direction) => {
+    const rail = thumbRailRef.current;
+    if (!rail) return;
+    const isMobile = typeof window !== 'undefined'
+      && window.matchMedia
+      && window.matchMedia('(max-width: 720px)').matches;
+    const amount = isMobile ? Math.max(rail.clientWidth * 0.75, 120) : 408;
+    rail.scrollBy(isMobile
+      ? { left: direction * amount, behavior: 'smooth' }
+      : { top: direction * amount, behavior: 'smooth' });
+  };
 
   const optionAvailable = (optionName, value) => {
     const key = optionName.toLowerCase();
@@ -184,15 +203,19 @@ function FactualPDP({ product: p, go, addToCart }) {
         <span>/</span>
         <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
       </nav>
-      <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%' }}>
-        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
-          {images.map((image, index) => (
-            <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
-              className="ph tiny" data-label=""
-              style={{ width: 76, aspectRatio: '1', cursor: 'pointer', outline: imgIdx === index ? '1px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.65, background: 'var(--bg-2)', border: 0, padding: 0 }}>
-              <img src={image.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
-            </button>
-          ))}
+      <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '148px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%' }}>
+        <div className="pdp-thumb-column">
+          <button type="button" className="pdp-thumb-arrow" aria-label="Show previous product images" onClick={() => scrollThumbRail(-1)}>↑</button>
+          <div ref={thumbRailRef} className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
+            {images.map((image, index) => (
+              <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
+                className="ph tiny pdp-thumb-button" data-label="" data-thumb-index={index}
+                style={{ cursor: 'pointer', outline: imgIdx === index ? '2px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.78 }}>
+                <img src={image.src} alt="" />
+              </button>
+            ))}
+          </div>
+          <button type="button" className="pdp-thumb-arrow" aria-label="Show more product images" onClick={() => scrollThumbRail(1)}>↓</button>
         </div>
         <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
           {images.length > 0 && <div className="ph grain pdp-main-image" data-label=""
@@ -401,6 +424,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
   const [leather, setLeather] = React.useState(SSM_LEATHERS[0].id);
   const [size, setSize] = React.useState('M');
   const [imgIdx, setImgIdx] = React.useState(0);
+  const thumbRailRef = React.useRef(null);
   const [openSection, setOpenSection] = React.useState('details');
   const [notifyOpen, setNotifyOpen] = React.useState(false);
   const [notifyEmail, setNotifyEmail] = React.useState('');
@@ -451,6 +475,22 @@ function PDP({ product, go, addToCart, onQuickView }) {
     ['Fit service', `Standard sizing or made to measure (+$${madeToMeasureSurcharge})`],
     ['Customization', 'Available by leather, size, measurements, and custom fit request'],
   ];
+  React.useEffect(() => {
+    const rail = thumbRailRef.current;
+    const activeThumb = rail?.querySelector(`[data-thumb-index="${imgIdx}"]`);
+    activeThumb?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }, [imgIdx]);
+  const scrollThumbRail = (direction) => {
+    const rail = thumbRailRef.current;
+    if (!rail) return;
+    const isMobile = typeof window !== 'undefined'
+      && window.matchMedia
+      && window.matchMedia('(max-width: 720px)').matches;
+    const amount = isMobile ? Math.max(rail.clientWidth * 0.75, 120) : 408;
+    rail.scrollBy(isMobile
+      ? { left: direction * amount, behavior: 'smooth' }
+      : { top: direction * amount, behavior: 'smooth' });
+  };
 
   return (
     <div className="page-fade">
@@ -466,23 +506,27 @@ function PDP({ product, go, addToCart, onQuickView }) {
       </nav>
 
       <div className="pdp-commerce-layout" style={{
-        display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
+        display: 'grid', gridTemplateColumns: '148px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
         padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%',
       }}>
         {/* Thumbnails */}
-        <div className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
-          {images.map((img, i) => (
-            <button key={i} onClick={() => setImgIdx(i)}
-              aria-label={img.label}
-              className="ph tiny" data-img="1" data-label=""
-              style={{
-                width: 76, height: 76, aspectRatio: '1', cursor: 'pointer',
-                '--img': `url(${img.src})`,
-                outline: imgIdx === i ? '1px solid var(--fg)' : 'none',
-                outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.6,
-                background: 'transparent', border: 0, padding: 0,
-              }} />
-          ))}
+        <div className="pdp-thumb-column">
+          <button type="button" className="pdp-thumb-arrow" aria-label="Show previous product images" onClick={() => scrollThumbRail(-1)}>↑</button>
+          <div ref={thumbRailRef} className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
+            {images.map((img, i) => (
+              <button key={i} onClick={() => setImgIdx(i)}
+                aria-label={img.label}
+                className="ph tiny pdp-thumb-button" data-img="1" data-label="" data-thumb-index={i}
+                style={{
+                  cursor: 'pointer',
+                  '--img': `url(${img.src})`,
+                  outline: imgIdx === i ? '2px solid var(--fg)' : 'none',
+                  outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.78,
+                  background: 'transparent',
+                }} />
+            ))}
+          </div>
+          <button type="button" className="pdp-thumb-arrow" aria-label="Show more product images" onClick={() => scrollThumbRail(1)}>↓</button>
         </div>
         {/* Main image */}
         <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
