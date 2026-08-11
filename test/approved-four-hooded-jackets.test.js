@@ -22,7 +22,7 @@ test('four owner-approved hooded jackets meet their publication contract', () =>
     assert.equal(product.madeToMeasureEnabled, true);
     assert.equal(product.madeToMeasureSurcharge, 50);
     assert.equal(product.gender, 'Men');
-    assert.deepEqual(product.subcategories, ['All Leather Jackets', 'Biker Jackets', 'Hooded Leather Jackets']);
+    assert.deepEqual(product.subcategories, ['All Leather Jackets', 'Biker Jackets', 'Hooded Leather Jackets', 'Winter Jackets']);
     assert.deepEqual(product.options.find((option) => option.name === 'Size').values, ['XS','S','M','L','XL','XXL','3XL','4XL','5XL']);
     assert.equal(Object.values(product.stock).every((quantity) => quantity === 19), true);
     assert.equal(product.inventory, 171);

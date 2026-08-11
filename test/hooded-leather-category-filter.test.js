@@ -18,6 +18,7 @@ test('men hooded leather jackets category contains only hooded leather jacket pr
     assert.equal(product.category, 'Jackets');
     assert.equal(product.gender, 'Men');
     assert.ok((product.subcategories || []).includes('Hooded Leather Jackets'));
+    assert.ok((product.subcategories || []).includes('Winter Jackets'));
   }
 
   const nonHooded = activeMenProducts.filter((product) => !(product.subcategories || []).includes('Hooded Leather Jackets'));

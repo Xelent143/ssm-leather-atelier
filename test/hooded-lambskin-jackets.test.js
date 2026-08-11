@@ -28,7 +28,7 @@ test('approved hooded lambskin jackets retain their publication contract', () =>
     assert.equal(product.madeToMeasureSurcharge, 50);
     assert.equal(product.gender, 'Men');
     assert.deepEqual(product.subcategories,
-      ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets']);
+      ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets', 'Winter Jackets']);
     assert.deepEqual(product.options.find((option) => option.name === 'Size').values,
       ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL']);
     assert.equal(Object.values(product.stock).every((quantity) => quantity === 19), true);
@@ -60,7 +60,7 @@ test('all eight hooded jackets appear in the men collection cards and required j
   for (const slug of slugs) {
     assert.match(indexSource, new RegExp(`slug: '${slug}'`));
   }
-  const requiredCategories = ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets'];
+  const requiredCategories = ['All Leather Jackets', 'Bomber Jackets', 'Biker Jackets', 'Hooded Leather Jackets', 'Winter Jackets'];
   for (const product of slugs.map((slug) => catalog.products.find((item) => item.slug === slug))) {
     assert.deepEqual(product.subcategories, requiredCategories);
   }
