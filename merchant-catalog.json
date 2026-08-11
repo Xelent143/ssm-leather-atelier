@@ -6593,6 +6593,205 @@
       "reviews": []
     },
     {
+      "id": "p67",
+      "slug": "mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket",
+      "title": "Men's Semi-Aniline Sheepskin Leather Hooded Puffer Jacket",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Puffer Jackets",
+        "Hooded Leather Jackets",
+        "Winter Jackets"
+      ],
+      "gender": "Men",
+      "price": 357,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "Built for cold days without sacrificing a refined leather look, this MOTOGRIP GEAR men's hooded puffer jacket combines real sheepskin leather with a semi-aniline finish and a structured padded silhouette. A full front zipper and high-neck collar provide practical coverage, while the removable hood shifts easily between casual and streamlined styling. The polyester lining supports comfortable layering, and hidden rib cuffs finish the sleeves without changing the jacket's clean outer shape. Two exterior welt waist pockets and two interior open pockets provide useful storage. Choose from Tan Brown, Deep Green, Waxed Brown or Black.",
+      "shortDescription": "Real sheepskin · semi-aniline finish · removable hood",
+      "image": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/01-tan-model-front.png",
+      "primaryImage": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/01-tan-model-front.png",
+      "galleryImages": [
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/02-tan-model-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/03-tan-product-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/04-tan-product-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/05-tan-close-up.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/06-tan-side-angle.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/07-tan-infographic.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/08-color-green.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/09-color-waxed-brown.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/10-color-black.png"
+      ],
+      "galleryImageAltText": [
+        "MOTOGRIP GEAR men's tan leather puffer jacket with removable hood, back model view.",
+        "MOTOGRIP GEAR tan semi-aniline sheepskin leather hooded puffer jacket, front product view.",
+        "MOTOGRIP GEAR tan sheepskin leather puffer jacket with removable hood, back product view.",
+        "Close-up of the MOTOGRIP GEAR tan leather puffer jacket welt pocket, hidden rib cuff and stitching.",
+        "MOTOGRIP GEAR men's tan hooded leather puffer jacket, three-quarter side view.",
+        "Feature guide for the MOTOGRIP GEAR sheepskin leather hooded puffer jacket.",
+        "MOTOGRIP GEAR men's deep green sheepskin leather hooded puffer jacket color option.",
+        "MOTOGRIP GEAR men's waxed brown sheepskin leather hooded puffer jacket color option.",
+        "MOTOGRIP GEAR men's black sheepskin leather hooded puffer jacket color option."
+      ],
+      "colors": [
+        "Tan Brown",
+        "Deep Green",
+        "Waxed Brown",
+        "Black"
+      ],
+      "colorImages": {
+        "Tan Brown": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/03-tan-product-front.png",
+        "Deep Green": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/08-color-green.png",
+        "Waxed Brown": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/09-color-waxed-brown.png",
+        "Black": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket/10-color-black.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Tan Brown",
+            "Deep Green",
+            "Waxed Brown",
+            "Black"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Sheepskin Leather Hooded Puffer Jacket | MOTOGRIP GEAR",
+      "seoDescription": "Shop a real semi-aniline sheepskin leather puffer jacket with removable hood, high-neck collar, hidden rib cuffs and four colors. Sizes XS–5XL and Made to Measure available.",
+      "geoTitle": "Men's Semi-Aniline Sheepskin Leather Hooded Puffer Jacket: Materials, Colors and Fit",
+      "geoDescription": "This MOTOGRIP GEAR men's leather puffer jacket uses real sheepskin with a semi-aniline finish, polyester lining, removable hood, hidden rib cuffs, four pockets, four colors, sizes XS–5XL and Made to Measure ordering.",
+      "aeoTitle": "What Features Does the MOTOGRIP Sheepskin Leather Hooded Puffer Jacket Have?",
+      "aeoDescription": "It features real semi-aniline sheepskin leather, padded horizontal panels, a removable hood, high-neck collar, full zipper, hidden rib cuffs, two exterior pockets and two interior pockets.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket",
+      "schemaDescription": "MOTOGRIP GEAR men's real sheepskin leather hooded puffer jacket with semi-aniline finish, removable hood, hidden rib cuffs, four colors and sizes XS through 5XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MG-P67-SH-PUFFER-HOOD",
+      "mpn": "MOTOGRIP-SHEEPSKIN-HOODED-PUFFER",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Hooded leather puffer jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's tan sheepskin leather hooded puffer jacket, front model view.",
+      "material": "Sheepskin leather",
+      "color": "Tan Brown / Deep Green / Waxed Brown / Black",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Professional leather clean only; store on a padded hanger away from direct heat, moisture and prolonged sunlight.",
+      "fitNotes": "Standard men's jacket fit in sizes XS–5XL; Made to Measure ordering is available for a personalized fit.",
+      "leatherType": "Sheepskin leather with a semi-aniline finish",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Polyester lining",
+      "hardware": "Metal front zipper and hood drawcord hardware",
+      "closureType": "Full front zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Cold-weather casual wear, commuting and everyday leather outerwear",
+      "season": "Cold-weather outerwear",
+      "craftMethod": "Padded horizontal-panel sheepskin construction with a removable hood and hidden rib cuffs",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Real sheepskin leather outer shell",
+        "Semi-aniline leather finish",
+        "Polyester lining",
+        "Horizontal padded puffer-panel construction",
+        "Removable hood with adjustable drawcords",
+        "High-neck collar",
+        "Full front zipper closure",
+        "Hidden rib cuffs beneath open leather hems",
+        "Two exterior welt waist pockets",
+        "Two interior open pockets",
+        "Tan Brown, Deep Green, Waxed Brown and Black color options",
+        "Standard men's fit in sizes XS–5XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Outer material",
+          "Real sheepskin leather"
+        ],
+        [
+          "Leather finish",
+          "Semi-aniline"
+        ],
+        [
+          "Lining",
+          "Polyester"
+        ],
+        [
+          "Closure",
+          "Full front zipper"
+        ],
+        [
+          "Hood",
+          "Removable with adjustable drawcords"
+        ],
+        [
+          "Cuffs",
+          "Hidden rib cuffs beneath open leather hems"
+        ],
+        [
+          "Pockets",
+          "Two exterior welt waist pockets and two interior open pockets"
+        ],
+        [
+          "Colors",
+          "Tan Brown, Deep Green, Waxed Brown and Black"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Cold-weather city wear, commuting, travel and modern everyday leather styling.",
+      "whyYouWillLoveIt": "The natural sheepskin grain, clean padded profile, removable hood and four versatile colors combine the character of leather outerwear with practical everyday layering.",
+      "reviews": []
+    },
+    {
       "id": "p49",
       "slug": "mens-black-removable-hood-lambskin-jacket",
       "title": "Men's Black Removable-Hood Lambskin Leather Jacket",

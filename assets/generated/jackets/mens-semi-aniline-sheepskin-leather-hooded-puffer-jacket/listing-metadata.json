@@ -1,0 +1,51 @@
+{
+  "status": "approved_for_publication",
+  "publish_allowed": true,
+  "brand": "MOTOGRIP GEAR",
+  "title": "Men's Semi-Aniline Sheepskin Leather Hooded Puffer Jacket",
+  "slug": "mens-semi-aniline-sheepskin-leather-hooded-puffer-jacket",
+  "base_sku": "MG-PUF-SH-HOOD",
+  "price_usd": 357,
+  "currency": "USD",
+  "material": {
+    "outer_shell": "Real sheepskin leather",
+    "finish": "Semi-aniline",
+    "inner_shell": "Polyester lining"
+  },
+  "colors": [
+    {"name": "Tan Brown", "code": "TN"},
+    {"name": "Deep Green", "code": "GR"},
+    {"name": "Waxed Brown", "code": "WB"},
+    {"name": "Black", "code": "BK"}
+  ],
+  "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+  "inventory": {
+    "quantity_per_color_and_size": 19,
+    "track_inventory": true
+  },
+  "made_to_measure": {
+    "enabled": true,
+    "surcharge_usd": 50,
+    "measurement_form_required": true,
+    "fit_lab_required": true
+  },
+  "categories": [
+    "Men",
+    "All Leather Jackets",
+    "Puffer Jackets",
+    "Hooded Leather Jackets",
+    "Winter Jackets"
+  ],
+  "gallery": [
+    "01-tan-model-front.png",
+    "02-tan-model-back.png",
+    "03-tan-product-front.png",
+    "04-tan-product-back.png",
+    "05-tan-close-up.png",
+    "06-tan-side-angle.png",
+    "07-tan-infographic.png",
+    "08-color-green.png",
+    "09-color-waxed-brown.png",
+    "10-color-black.png"
+  ]
+}
