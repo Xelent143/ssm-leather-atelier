@@ -1,0 +1,13 @@
+{
+  "title": "Men's Genuine Lambskin Leather T-Shirt — Orange",
+  "slug": "mens-orange-lambskin-leather-t-shirt",
+  "category": "Leather Shirts",
+  "gender": "Men",
+  "price": 220,
+  "sizes": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"],
+  "inventoryPerSize": 19,
+  "madeToMeasureEnabled": true,
+  "madeToMeasureSurcharge": 50,
+  "color": "Orange",
+  "material": "Genuine lambskin leather"
+}

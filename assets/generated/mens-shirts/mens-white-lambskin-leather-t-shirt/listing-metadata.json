@@ -1,0 +1,14 @@
+{
+  "title": "Men's Genuine Lambskin Leather T-Shirt — White",
+  "slug": "mens-white-lambskin-leather-t-shirt",
+  "category": "Leather Shirts",
+  "gender": "Men",
+  "price": 220,
+  "sizes": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"],
+  "inventoryPerSize": 19,
+  "madeToMeasureEnabled": true,
+  "madeToMeasureSurcharge": 50,
+  "color": "White",
+  "material": "Genuine lambskin leather",
+  "closeUpSource": "Controlled crop of genuine product-front pixels"
+}
