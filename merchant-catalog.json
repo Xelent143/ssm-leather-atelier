@@ -6792,6 +6792,232 @@
       "reviews": []
     },
     {
+      "id": "p74",
+      "slug": "mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+      "title": "Men's Semi-Aniline Sheepskin Leather Puffer Bomber Jacket",
+      "category": "Jackets",
+      "subcategories": [
+        "Puffer Jackets",
+        "Winter Jackets"
+      ],
+      "gender": "Men",
+      "price": 332,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "Crafted from real sheepskin leather with a smooth semi-aniline finish, this MOTOGRIP GEAR puffer bomber jacket combines refined leather character with insulated everyday comfort. Horizontal padded panels create a clean winter silhouette, while the high-neck collar, rib-knit cuffs and segmented rib-knit hem provide a secure finish. The streamlined front features a full-length metal zipper and two zippered hand pockets. Two additional inside pockets keep daily essentials close without interrupting the minimal exterior. Choose from Brown, Navy Blue, Black or Forest Green.",
+      "shortDescription": "Real sheepskin · semi-aniline finish · puffer bomber profile",
+      "image": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/01-brown-model-open-front.png",
+      "primaryImage": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/01-brown-model-open-front.png",
+      "galleryImages": [
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/05-brown-model-tilted-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/03-brown-model-full-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/02-brown-model-side.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/04-brown-model-close-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/06-brown-pocket-cuff-close-up.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/25-motogrip-leather-puffer-jacket-infographic.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/01-navy-blue-model-open-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/02-navy-blue-model-side.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/03-navy-blue-model-full-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/04-navy-blue-model-close-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/05-navy-blue-model-tilted-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/06-navy-blue-pocket-cuff-close-up.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/01-black-model-open-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/02-black-model-side.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/03-black-model-full-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/04-black-model-close-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/05-black-model-tilted-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/06-black-pocket-cuff-close-up.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/01-forest-green-model-open-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/02-forest-green-model-side.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/03-forest-green-model-full-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/04-forest-green-model-close-front.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/05-forest-green-model-tilted-back.png",
+        "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/06-forest-green-collar-zip-close-up.png"
+      ],
+      "galleryImageAltText": [
+        "Three-quarter back view of the MOTOGRIP GEAR brown leather puffer bomber jacket.",
+        "Full-length front view of a model wearing the MOTOGRIP GEAR brown leather puffer jacket.",
+        "MOTOGRIP GEAR men's brown leather puffer bomber jacket shown from a three-quarter side angle.",
+        "Close front view of the MOTOGRIP GEAR brown sheepskin leather puffer bomber jacket.",
+        "Close-up of the MOTOGRIP GEAR brown leather puffer jacket zip pocket and rib-knit cuff.",
+        "MOTOGRIP GEAR sheepskin leather puffer bomber jacket features and four color options.",
+        "MOTOGRIP GEAR men's navy blue sheepskin leather puffer bomber jacket worn open from the front.",
+        "MOTOGRIP GEAR men's navy blue leather puffer bomber jacket shown from a side angle.",
+        "Full-length front view of a model wearing the MOTOGRIP GEAR navy blue leather puffer jacket.",
+        "Close front view of the MOTOGRIP GEAR navy blue sheepskin leather puffer bomber jacket.",
+        "Three-quarter back view of the MOTOGRIP GEAR navy blue leather puffer bomber jacket.",
+        "Close-up of the MOTOGRIP GEAR navy blue leather puffer jacket zip pocket and rib-knit cuff.",
+        "MOTOGRIP GEAR men's black sheepskin leather puffer bomber jacket worn open from the front.",
+        "MOTOGRIP GEAR men's black leather puffer bomber jacket shown from a three-quarter side angle.",
+        "Full-length front view of a model wearing the MOTOGRIP GEAR black leather puffer jacket.",
+        "Close front view of the MOTOGRIP GEAR black sheepskin leather puffer bomber jacket.",
+        "Three-quarter back view of the MOTOGRIP GEAR black leather puffer bomber jacket.",
+        "Close-up of the MOTOGRIP GEAR black leather puffer jacket zip pocket and rib-knit hem.",
+        "MOTOGRIP GEAR men's forest green sheepskin leather puffer bomber jacket worn open from the front.",
+        "MOTOGRIP GEAR men's forest green leather puffer bomber jacket shown from a side angle.",
+        "Full-length front view of a model wearing the MOTOGRIP GEAR forest green leather puffer jacket.",
+        "Close front view of the MOTOGRIP GEAR forest green sheepskin leather puffer bomber jacket.",
+        "Three-quarter back view of the MOTOGRIP GEAR forest green leather puffer bomber jacket.",
+        "Close-up of the MOTOGRIP GEAR forest green leather puffer jacket high-neck collar and center zipper."
+      ],
+      "colors": [
+        "Brown",
+        "Navy Blue",
+        "Black",
+        "Forest Green"
+      ],
+      "colorImages": {
+        "Brown": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/brown/04-brown-model-close-front.png",
+        "Navy Blue": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/navy-blue/04-navy-blue-model-close-front.png",
+        "Black": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/black/04-black-model-close-front.png",
+        "Forest Green": "assets/generated/jackets/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket/forest-green/04-forest-green-model-close-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Brown",
+            "Navy Blue",
+            "Black",
+            "Forest Green"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Sheepskin Leather Puffer Bomber Jacket | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP men's sheepskin leather puffer bomber jacket with a semi-aniline finish, high-neck collar, four pockets and four colors. Sizes XS–5XL.",
+      "geoTitle": "Men's Semi-Aniline Sheepskin Leather Puffer Bomber Jacket: Materials, Colors and Fit",
+      "geoDescription": "This MOTOGRIP GEAR men's puffer bomber jacket uses real sheepskin with a semi-aniline finish, polyester lining, rib-knit trim, four pockets, four colors, sizes XS–5XL and Made to Measure ordering.",
+      "aeoTitle": "What Features Does the MOTOGRIP Sheepskin Leather Puffer Bomber Jacket Have?",
+      "aeoDescription": "It features real semi-aniline sheepskin leather, padded horizontal panels, a high-neck collar, full metal zipper, rib-knit cuffs and hem, two exterior zip pockets and two interior pockets.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+      "schemaDescription": "MOTOGRIP GEAR men's real sheepskin leather puffer bomber jacket with semi-aniline finish, high-neck collar, rib-knit trim, four colors and sizes XS through 5XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MG-P71-SH-PUFFER-BOMBER",
+      "mpn": "MOTOGRIP-SHEEPSKIN-PUFFER-BOMBER",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Puffer bomber jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "MOTOGRIP GEAR men's brown sheepskin leather puffer bomber jacket worn open from the front.",
+      "material": "Sheepskin leather",
+      "color": "Brown / Navy Blue / Black / Forest Green",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Professional leather clean only; store on a padded hanger away from direct heat, moisture and prolonged sunlight.",
+      "fitNotes": "Standard men's jacket fit in sizes XS–5XL; Made to Measure ordering is available for a personalized fit.",
+      "leatherType": "Sheepskin leather with a semi-aniline finish",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Polyester lining",
+      "hardware": "Metal front zipper and zip pocket hardware",
+      "closureType": "Full front zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Cold-weather casual wear, commuting and everyday leather outerwear",
+      "season": "Cold-weather outerwear",
+      "craftMethod": "Padded horizontal-panel sheepskin construction with rib-knit cuffs and hem",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Real sheepskin leather outer shell",
+        "Semi-aniline leather finish",
+        "Polyester lining",
+        "Horizontal padded puffer-panel construction",
+        "High-neck stand collar",
+        "Full metal front zipper closure",
+        "Rib-knit cuffs and segmented rib-knit hem",
+        "Two exterior zip hand pockets",
+        "Two interior pockets",
+        "Brown, Navy Blue, Black and Forest Green color options",
+        "Standard men's fit in sizes XS–5XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Outer material",
+          "Real sheepskin leather"
+        ],
+        [
+          "Leather finish",
+          "Semi-aniline"
+        ],
+        [
+          "Lining",
+          "Polyester"
+        ],
+        [
+          "Closure",
+          "Full metal front zipper"
+        ],
+        [
+          "Collar",
+          "High-neck stand collar"
+        ],
+        [
+          "Cuffs and hem",
+          "Rib-knit"
+        ],
+        [
+          "Pockets",
+          "Two exterior zip hand pockets and two interior pockets"
+        ],
+        [
+          "Colors",
+          "Brown, Navy Blue, Black and Forest Green"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Cold-weather city wear, commuting, travel and refined everyday layering.",
+      "whyYouWillLoveIt": "Soft sheepskin, clean horizontal padding, practical zip pockets and rib-knit bomber trim create a refined winter jacket without unnecessary bulk.",
+      "reviews": []
+    },
+    {
       "id": "p49",
       "slug": "mens-black-removable-hood-lambskin-jacket",
       "title": "Men's Black Removable-Hood Lambskin Leather Jacket",
