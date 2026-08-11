@@ -9700,19 +9700,55 @@
         "Black lambskin leather T-shirt feature infographic.",
         "Side-angle product view of the black lambskin leather T-shirt."
       ],
-      "colors": ["Black"],
+      "colors": [
+        "Black"
+      ],
       "colorImages": {
         "Black": "assets/generated/mens-shirts/mens-black-lambskin-leather-t-shirt/03-product-front.png"
       },
       "maker": "MOTOGRIP Workshop",
-      "stock": {"XS": 19, "S": 19, "M": 19, "L": 19, "XL": 19, "XXL": 19, "3XL": 19, "4XL": 19, "5XL": 19, "6XL": 19},
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19
+      },
       "options": [
-        {"name": "Size", "values": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"]},
-        {"name": "Color", "values": ["Black"]}
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL",
+            "6XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Black"
+          ]
+        }
       ],
       "seoTitle": "Men's Black Lambskin Leather T-Shirt | MOTOGRIP GEAR",
       "seoDescription": "Shop a men's genuine black lambskin leather T-shirt with crew neck, short sleeves and stitched yoke seam. Sizes XS–6XL and Made to Measure available.",
-      "keywords": ["men's black leather T-shirt", "lambskin leather tee", "black leather biker shirt"],
+      "keywords": [
+        "men's black leather T-shirt",
+        "lambskin leather tee",
+        "black leather biker shirt"
+      ],
       "geoTitle": "Men's Black Lambskin Leather T-Shirt: Material, Construction and Fit",
       "geoDescription": "This MOTOGRIP GEAR men's leather T-shirt uses genuine black lambskin with a crew neck, short sleeves, stitched yoke seam, sizes XS–6XL and Made to Measure ordering.",
       "aeoTitle": "What are the features of the black lambskin leather T-shirt?",
@@ -9735,7 +9771,11 @@
       "sizeType": "Regular",
       "ageGroup": "Adult",
       "itemGroupId": "mens-black-lambskin-leather-t-shirt",
-      "variantOptions": ["Size", "Color", "Fit"],
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
       "shippingWeight": "",
       "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
       "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
@@ -9755,8 +9795,41 @@
       "season": "Lightweight leather layer",
       "craftMethod": "Short-sleeve lambskin construction with a double-stitched horizontal yoke seam",
       "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
-      "features": ["Genuine black lambskin leather", "Pullover crew neckline", "Short sleeves with stitched cuffs", "Double-stitched horizontal chest and back yoke seam", "Straight stitched hem", "Sizes XS–6XL", "Made to Measure ordering available"],
-      "specifications": [["Material", "Genuine lambskin leather"], ["Color", "Black"], ["Neckline", "Crew neck"], ["Sleeves", "Short sleeves"], ["Closure", "Pullover"], ["Sizes", "XS–6XL"]],
+      "features": [
+        "Genuine black lambskin leather",
+        "Pullover crew neckline",
+        "Short sleeves with stitched cuffs",
+        "Double-stitched horizontal chest and back yoke seam",
+        "Straight stitched hem",
+        "Sizes XS–6XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Genuine lambskin leather"
+        ],
+        [
+          "Color",
+          "Black"
+        ],
+        [
+          "Neckline",
+          "Crew neck"
+        ],
+        [
+          "Sleeves",
+          "Short sleeves"
+        ],
+        [
+          "Closure",
+          "Pullover"
+        ],
+        [
+          "Sizes",
+          "XS–6XL"
+        ]
+      ],
       "perfectFor": "Everyday streetwear, events and motorcycle-inspired casual styling.",
       "whyYouWillLoveIt": "The smooth black lambskin and clean crew-neck silhouette bring leather character to a simple short-sleeve shape.",
       "reviews": []
@@ -9794,19 +9867,55 @@
         "Orange lambskin leather T-shirt feature infographic.",
         "Side-angle product view of the orange lambskin leather T-shirt."
       ],
-      "colors": ["Orange"],
+      "colors": [
+        "Orange"
+      ],
       "colorImages": {
         "Orange": "assets/generated/mens-shirts/mens-orange-lambskin-leather-t-shirt/03-product-front.png"
       },
       "maker": "MOTOGRIP Workshop",
-      "stock": {"XS": 19, "S": 19, "M": 19, "L": 19, "XL": 19, "XXL": 19, "3XL": 19, "4XL": 19, "5XL": 19, "6XL": 19},
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19
+      },
       "options": [
-        {"name": "Size", "values": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"]},
-        {"name": "Color", "values": ["Orange"]}
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL",
+            "6XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Orange"
+          ]
+        }
       ],
       "seoTitle": "Men's Orange Lambskin Leather T-Shirt | MOTOGRIP GEAR",
       "seoDescription": "Shop a men's genuine orange lambskin leather T-shirt with crew neck, short sleeves and stitched yoke seam. Sizes XS–6XL and Made to Measure available.",
-      "keywords": ["men's orange leather T-shirt", "orange lambskin leather tee", "orange leather biker shirt"],
+      "keywords": [
+        "men's orange leather T-shirt",
+        "orange lambskin leather tee",
+        "orange leather biker shirt"
+      ],
       "geoTitle": "Men's Orange Lambskin Leather T-Shirt: Material, Construction and Fit",
       "geoDescription": "This MOTOGRIP GEAR men's leather T-shirt uses genuine orange lambskin with a crew neck, short sleeves, stitched yoke seam, sizes XS–6XL and Made to Measure ordering.",
       "aeoTitle": "What are the features of the orange lambskin leather T-shirt?",
@@ -9829,7 +9938,11 @@
       "sizeType": "Regular",
       "ageGroup": "Adult",
       "itemGroupId": "mens-orange-lambskin-leather-t-shirt",
-      "variantOptions": ["Size", "Color", "Fit"],
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
       "shippingWeight": "",
       "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
       "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
@@ -9849,8 +9962,41 @@
       "season": "Lightweight leather layer",
       "craftMethod": "Short-sleeve lambskin construction with a double-stitched horizontal yoke seam",
       "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
-      "features": ["Genuine orange lambskin leather", "Pullover crew neckline", "Short sleeves with stitched cuffs", "Double-stitched horizontal chest and back yoke seam", "Straight stitched hem", "Sizes XS–6XL", "Made to Measure ordering available"],
-      "specifications": [["Material", "Genuine lambskin leather"], ["Color", "Orange"], ["Neckline", "Crew neck"], ["Sleeves", "Short sleeves"], ["Closure", "Pullover"], ["Sizes", "XS–6XL"]],
+      "features": [
+        "Genuine orange lambskin leather",
+        "Pullover crew neckline",
+        "Short sleeves with stitched cuffs",
+        "Double-stitched horizontal chest and back yoke seam",
+        "Straight stitched hem",
+        "Sizes XS–6XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Genuine lambskin leather"
+        ],
+        [
+          "Color",
+          "Orange"
+        ],
+        [
+          "Neckline",
+          "Crew neck"
+        ],
+        [
+          "Sleeves",
+          "Short sleeves"
+        ],
+        [
+          "Closure",
+          "Pullover"
+        ],
+        [
+          "Sizes",
+          "XS–6XL"
+        ]
+      ],
       "perfectFor": "Everyday streetwear, events and motorcycle-inspired casual styling.",
       "whyYouWillLoveIt": "The warm orange lambskin and clean crew-neck silhouette create a distinctive short-sleeve leather statement.",
       "reviews": []
@@ -9888,19 +10034,55 @@
         "White lambskin leather T-shirt feature infographic.",
         "Side-angle product view of the white lambskin leather T-shirt."
       ],
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "colorImages": {
         "White": "assets/generated/mens-shirts/mens-white-lambskin-leather-t-shirt/03-product-front.png"
       },
       "maker": "MOTOGRIP Workshop",
-      "stock": {"XS": 19, "S": 19, "M": 19, "L": 19, "XL": 19, "XXL": 19, "3XL": 19, "4XL": 19, "5XL": 19, "6XL": 19},
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19
+      },
       "options": [
-        {"name": "Size", "values": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"]},
-        {"name": "Color", "values": ["White"]}
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL",
+            "6XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "White"
+          ]
+        }
       ],
       "seoTitle": "Men's White Lambskin Leather T-Shirt | MOTOGRIP GEAR",
       "seoDescription": "Shop a men's genuine white lambskin leather T-shirt with crew neck, short sleeves and stitched yoke seam. Sizes XS–6XL and Made to Measure available.",
-      "keywords": ["men's white leather T-shirt", "white lambskin leather tee", "white leather biker shirt"],
+      "keywords": [
+        "men's white leather T-shirt",
+        "white lambskin leather tee",
+        "white leather biker shirt"
+      ],
       "geoTitle": "Men's White Lambskin Leather T-Shirt: Material, Construction and Fit",
       "geoDescription": "This MOTOGRIP GEAR men's leather T-shirt uses genuine white lambskin with a crew neck, short sleeves, stitched yoke seam, sizes XS–6XL and Made to Measure ordering.",
       "aeoTitle": "What are the features of the white lambskin leather T-shirt?",
@@ -9923,7 +10105,11 @@
       "sizeType": "Regular",
       "ageGroup": "Adult",
       "itemGroupId": "mens-white-lambskin-leather-t-shirt",
-      "variantOptions": ["Size", "Color", "Fit"],
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
       "shippingWeight": "",
       "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
       "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
@@ -9943,10 +10129,586 @@
       "season": "Lightweight leather layer",
       "craftMethod": "Short-sleeve lambskin construction with a double-stitched horizontal yoke seam",
       "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
-      "features": ["Genuine white lambskin leather", "Pullover crew neckline", "Short sleeves with stitched cuffs", "Double-stitched horizontal chest and back yoke seam", "Straight stitched hem", "Sizes XS–6XL", "Made to Measure ordering available"],
-      "specifications": [["Material", "Genuine lambskin leather"], ["Color", "White"], ["Neckline", "Crew neck"], ["Sleeves", "Short sleeves"], ["Closure", "Pullover"], ["Sizes", "XS–6XL"]],
+      "features": [
+        "Genuine white lambskin leather",
+        "Pullover crew neckline",
+        "Short sleeves with stitched cuffs",
+        "Double-stitched horizontal chest and back yoke seam",
+        "Straight stitched hem",
+        "Sizes XS–6XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Material",
+          "Genuine lambskin leather"
+        ],
+        [
+          "Color",
+          "White"
+        ],
+        [
+          "Neckline",
+          "Crew neck"
+        ],
+        [
+          "Sleeves",
+          "Short sleeves"
+        ],
+        [
+          "Closure",
+          "Pullover"
+        ],
+        [
+          "Sizes",
+          "XS–6XL"
+        ]
+      ],
       "perfectFor": "Everyday streetwear, events and motorcycle-inspired casual styling.",
       "whyYouWillLoveIt": "The crisp white lambskin and clean crew-neck silhouette give the short-sleeve leather shape a refined, minimal finish.",
+      "reviews": []
+    },
+    {
+      "id": "p71",
+      "slug": "mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "title": "Men's Tan Brown Chevron Quilted Sheepskin Leather Puffer Jacket",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Puffer Jackets",
+        "Winter Jackets"
+      ],
+      "gender": "Men",
+      "price": 335,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "A clean MOTOGRIP GEAR men's tan brown leather puffer jacket made with a smooth sheepskin-style leather finish and bold chevron quilted panels across the front, back and sleeves. The stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem give it a structured cold-weather profile without a removable hood. It is built for everyday winter layering, travel and motorcycle-inspired street style, with standard sizes XS–5XL plus Made to Measure ordering.",
+      "shortDescription": "Sheepskin leather · chevron quilting · stand collar",
+      "image": "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "primaryImage": "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "galleryImages": [
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/02-model-back.png",
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png",
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/04-product-back.png",
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/05-close-up.png",
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/06-infographic.png",
+        "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/07-quilting-detail.png"
+      ],
+      "galleryImageAltText": [
+        "Back view of a man wearing the MOTOGRIP GEAR tan brown chevron quilted leather puffer jacket.",
+        "Front product view of the MOTOGRIP GEAR tan brown chevron quilted sheepskin leather puffer jacket.",
+        "Back product view of the MOTOGRIP GEAR tan brown chevron quilted leather puffer jacket showing V-shaped padded panels.",
+        "Close-up of the MOTOGRIP GEAR tan brown leather puffer jacket zipper, pocket, quilting and leather grain.",
+        "Feature infographic for the MOTOGRIP GEAR tan brown chevron quilted leather puffer jacket.",
+        "Detail view of the MOTOGRIP GEAR tan brown leather puffer jacket chevron quilting and smooth leather finish."
+      ],
+      "colors": [
+        "Tan Brown"
+      ],
+      "colorImages": {
+        "Tan Brown": "assets/generated/jackets/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Tan Brown"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Tan Brown Chevron Quilted Sheepskin Leather Puffer Jacket | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR tan brown chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS–5XL.",
+      "keywords": [
+        "men's tan brown leather puffer jacket",
+        "chevron quilted leather jacket",
+        "men’s sheepskin leather winter jacket",
+        "MOTOGRIP GEAR leather puffer jacket"
+      ],
+      "geoTitle": "Men's Tan Brown Chevron Quilted Sheepskin Leather Puffer Jacket: Material, Quilting and Fit",
+      "geoDescription": "This MOTOGRIP GEAR men's tan brown puffer jacket features sheepskin-style leather, chevron quilting, stand collar, zipper closure, angled welt pockets, elasticated cuffs, sizes XS–5XL and Made to Measure ordering.",
+      "aeoTitle": "What features does the MOTOGRIP tan brown chevron leather puffer jacket have?",
+      "aeoDescription": "It features a sheepskin-style leather shell, chevron quilted padded panels, stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "schemaDescription": "MOTOGRIP GEAR men's tan brown chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS through 5XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-PUF-TBN-001",
+      "mpn": "MOTOGRIP-PUF-TBN-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Puffer jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "Front view of a man wearing a MOTOGRIP GEAR tan brown chevron quilted sheepskin leather puffer jacket.",
+      "material": "Sheepskin leather",
+      "color": "Tan Brown",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-tan-brown-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Professional leather clean only; store on a broad hanger away from direct heat, moisture and prolonged sunlight.",
+      "fitNotes": "Regular men’s jacket fit in sizes XS–5XL; consult the MOTOGRIP men’s jacket size guide or choose Made to Measure.",
+      "leatherType": "Sheepskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Not specified",
+      "hardware": "Silver-tone front zipper hardware",
+      "closureType": "Full front zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Cold-weather casual wear, commuting and motorcycle-inspired street style",
+      "season": "Cold-weather outerwear",
+      "craftMethod": "Chevron quilted padded sheepskin leather construction with stand collar, angled pockets and elasticated cuffs and hem",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Tan Brown sheepskin leather shell",
+        "Chevron quilted padded panels across the front, back and sleeves",
+        "Stand collar",
+        "Full front zipper closure",
+        "Two angled outside welt pockets",
+        "Elasticated cuffs and gathered hem",
+        "Smooth leather grain with natural sheen",
+        "Standard men’s sizes XS–5XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Outer material",
+          "Sheepskin leather"
+        ],
+        [
+          "Color",
+          "Tan Brown"
+        ],
+        [
+          "Quilting",
+          "Chevron padded panel layout"
+        ],
+        [
+          "Collar",
+          "Stand collar"
+        ],
+        [
+          "Closure",
+          "Full front zipper"
+        ],
+        [
+          "Pockets",
+          "Two angled outside welt pockets"
+        ],
+        [
+          "Cuffs and hem",
+          "Elasticated gathered leather finish"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Cold-weather everyday wear, travel, commuting, biker-inspired outfits and refined street style.",
+      "whyYouWillLoveIt": "The tan brown leather finish, V-shaped quilting and clean stand-collar profile give this puffer jacket warmth, texture and a sharper leather outerwear look.",
+      "reviews": []
+    },
+    {
+      "id": "p72",
+      "slug": "mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "title": "Men's Deep Green Chevron Quilted Sheepskin Leather Puffer Jacket",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Puffer Jackets",
+        "Winter Jackets"
+      ],
+      "gender": "Men",
+      "price": 335,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "A clean MOTOGRIP GEAR men's deep green leather puffer jacket made with a smooth sheepskin-style leather finish and bold chevron quilted panels across the front, back and sleeves. The stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem give it a structured cold-weather profile without a removable hood. It is built for everyday winter layering, travel and motorcycle-inspired street style, with standard sizes XS–5XL plus Made to Measure ordering.",
+      "shortDescription": "Sheepskin leather · chevron quilting · deep green",
+      "image": "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "primaryImage": "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "galleryImages": [
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/02-model-back.png",
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png",
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/04-product-back.png",
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/05-close-up.png",
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/06-infographic.png",
+        "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/07-quilting-detail.png"
+      ],
+      "galleryImageAltText": [
+        "Back view of a man wearing the MOTOGRIP GEAR deep green chevron quilted leather puffer jacket.",
+        "Front product view of the MOTOGRIP GEAR deep green chevron quilted sheepskin leather puffer jacket.",
+        "Back product view of the MOTOGRIP GEAR deep green chevron quilted leather puffer jacket showing V-shaped padded panels.",
+        "Close-up of the MOTOGRIP GEAR deep green leather puffer jacket zipper, pocket, quilting and leather grain.",
+        "Feature infographic for the MOTOGRIP GEAR deep green chevron quilted leather puffer jacket.",
+        "Detail view of the MOTOGRIP GEAR deep green leather puffer jacket chevron quilting and smooth leather finish."
+      ],
+      "colors": [
+        "Deep Green"
+      ],
+      "colorImages": {
+        "Deep Green": "assets/generated/jackets/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Deep Green"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Deep Green Chevron Quilted Sheepskin Leather Puffer Jacket | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR deep green chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS–5XL.",
+      "keywords": [
+        "men's deep green leather puffer jacket",
+        "chevron quilted leather jacket",
+        "men’s sheepskin leather winter jacket",
+        "MOTOGRIP GEAR leather puffer jacket"
+      ],
+      "geoTitle": "Men's Deep Green Chevron Quilted Sheepskin Leather Puffer Jacket: Material, Quilting and Fit",
+      "geoDescription": "This MOTOGRIP GEAR men's deep green puffer jacket features sheepskin-style leather, chevron quilting, stand collar, zipper closure, angled welt pockets, elasticated cuffs, sizes XS–5XL and Made to Measure ordering.",
+      "aeoTitle": "What features does the MOTOGRIP deep green chevron leather puffer jacket have?",
+      "aeoDescription": "It features a sheepskin-style leather shell, chevron quilted padded panels, stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "schemaDescription": "MOTOGRIP GEAR men's deep green chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS through 5XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-PUF-DGN-001",
+      "mpn": "MOTOGRIP-PUF-DGN-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Puffer jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "Front view of a man wearing a MOTOGRIP GEAR deep green chevron quilted sheepskin leather puffer jacket.",
+      "material": "Sheepskin leather",
+      "color": "Deep Green",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-deep-green-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Professional leather clean only; store on a broad hanger away from direct heat, moisture and prolonged sunlight.",
+      "fitNotes": "Regular men’s jacket fit in sizes XS–5XL; consult the MOTOGRIP men’s jacket size guide or choose Made to Measure.",
+      "leatherType": "Sheepskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Not specified",
+      "hardware": "Silver-tone front zipper hardware",
+      "closureType": "Full front zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Cold-weather casual wear, commuting and motorcycle-inspired street style",
+      "season": "Cold-weather outerwear",
+      "craftMethod": "Chevron quilted padded sheepskin leather construction with stand collar, angled pockets and elasticated cuffs and hem",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Deep Green sheepskin leather shell",
+        "Chevron quilted padded panels across the front, back and sleeves",
+        "Stand collar",
+        "Full front zipper closure",
+        "Two angled outside welt pockets",
+        "Elasticated cuffs and gathered hem",
+        "Smooth leather grain with natural sheen",
+        "Standard men’s sizes XS–5XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Outer material",
+          "Sheepskin leather"
+        ],
+        [
+          "Color",
+          "Deep Green"
+        ],
+        [
+          "Quilting",
+          "Chevron padded panel layout"
+        ],
+        [
+          "Collar",
+          "Stand collar"
+        ],
+        [
+          "Closure",
+          "Full front zipper"
+        ],
+        [
+          "Pockets",
+          "Two angled outside welt pockets"
+        ],
+        [
+          "Cuffs and hem",
+          "Elasticated gathered leather finish"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Cold-weather everyday wear, travel, commuting, biker-inspired outfits and refined street style.",
+      "whyYouWillLoveIt": "The deep green leather finish, V-shaped quilting and clean stand-collar profile give this puffer jacket warmth, texture and a sharper leather outerwear look.",
+      "reviews": []
+    },
+    {
+      "id": "p73",
+      "slug": "mens-black-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "title": "Men's Black Chevron Quilted Sheepskin Leather Puffer Jacket",
+      "category": "Jackets",
+      "subcategories": [
+        "All Leather Jackets",
+        "Puffer Jackets",
+        "Winter Jackets"
+      ],
+      "gender": "Men",
+      "price": 335,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 171,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "A clean MOTOGRIP GEAR men's black leather puffer jacket made with a smooth sheepskin-style leather finish and bold chevron quilted panels across the front, back and sleeves. The stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem give it a structured cold-weather profile without a removable hood. It is built for everyday winter layering, travel and motorcycle-inspired street style, with standard sizes XS–5XL plus Made to Measure ordering.",
+      "shortDescription": "Sheepskin leather · chevron quilting · black",
+      "image": "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "primaryImage": "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/01-model-front.png",
+      "galleryImages": [
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/02-model-back.png",
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png",
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/04-product-back.png",
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/05-close-up.png",
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/06-infographic.png",
+        "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/07-quilting-detail.png"
+      ],
+      "galleryImageAltText": [
+        "Back view of a man wearing the MOTOGRIP GEAR black chevron quilted leather puffer jacket.",
+        "Front product view of the MOTOGRIP GEAR black chevron quilted sheepskin leather puffer jacket.",
+        "Back product view of the MOTOGRIP GEAR black chevron quilted leather puffer jacket showing V-shaped padded panels.",
+        "Close-up of the MOTOGRIP GEAR black leather puffer jacket zipper, pocket, quilting and leather grain.",
+        "Feature infographic for the MOTOGRIP GEAR black chevron quilted leather puffer jacket.",
+        "Detail view of the MOTOGRIP GEAR black leather puffer jacket chevron quilting and smooth leather finish."
+      ],
+      "colors": [
+        "Black"
+      ],
+      "colorImages": {
+        "Black": "assets/generated/jackets/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket/03-product-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Black"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Black Chevron Quilted Sheepskin Leather Puffer Jacket | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP GEAR black chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS–5XL.",
+      "keywords": [
+        "men's black leather puffer jacket",
+        "chevron quilted leather jacket",
+        "men’s sheepskin leather winter jacket",
+        "MOTOGRIP GEAR leather puffer jacket"
+      ],
+      "geoTitle": "Men's Black Chevron Quilted Sheepskin Leather Puffer Jacket: Material, Quilting and Fit",
+      "geoDescription": "This MOTOGRIP GEAR men's black puffer jacket features sheepskin-style leather, chevron quilting, stand collar, zipper closure, angled welt pockets, elasticated cuffs, sizes XS–5XL and Made to Measure ordering.",
+      "aeoTitle": "What features does the MOTOGRIP black chevron leather puffer jacket have?",
+      "aeoDescription": "It features a sheepskin-style leather shell, chevron quilted padded panels, stand collar, full front zipper, angled welt pockets, elasticated cuffs and gathered hem.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-black-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "schemaDescription": "MOTOGRIP GEAR men's black chevron quilted sheepskin leather puffer jacket with stand collar, zip front, angled pockets and sizes XS through 5XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MGG-PUF-BLK-001",
+      "mpn": "MOTOGRIP-PUF-BLK-001",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+      "productType": "Leather apparel > Men's leather jackets > Puffer jackets",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "Front view of a man wearing a MOTOGRIP GEAR black chevron quilted sheepskin leather puffer jacket.",
+      "material": "Sheepskin leather",
+      "color": "Black",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-black-chevron-quilted-sheepskin-leather-puffer-jacket",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Professional leather clean only; store on a broad hanger away from direct heat, moisture and prolonged sunlight.",
+      "fitNotes": "Regular men’s jacket fit in sizes XS–5XL; consult the MOTOGRIP men’s jacket size guide or choose Made to Measure.",
+      "leatherType": "Sheepskin leather",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Not specified",
+      "lining": "Not specified",
+      "hardware": "Silver-tone front zipper hardware",
+      "closureType": "Full front zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Cold-weather casual wear, commuting and motorcycle-inspired street style",
+      "season": "Cold-weather outerwear",
+      "craftMethod": "Chevron quilted padded sheepskin leather construction with stand collar, angled pockets and elasticated cuffs and hem",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Black sheepskin leather shell",
+        "Chevron quilted padded panels across the front, back and sleeves",
+        "Stand collar",
+        "Full front zipper closure",
+        "Two angled outside welt pockets",
+        "Elasticated cuffs and gathered hem",
+        "Smooth leather grain with natural sheen",
+        "Standard men’s sizes XS–5XL",
+        "Made to Measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Outer material",
+          "Sheepskin leather"
+        ],
+        [
+          "Color",
+          "Black"
+        ],
+        [
+          "Quilting",
+          "Chevron padded panel layout"
+        ],
+        [
+          "Collar",
+          "Stand collar"
+        ],
+        [
+          "Closure",
+          "Full front zipper"
+        ],
+        [
+          "Pockets",
+          "Two angled outside welt pockets"
+        ],
+        [
+          "Cuffs and hem",
+          "Elasticated gathered leather finish"
+        ],
+        [
+          "Sizes",
+          "XS–5XL"
+        ]
+      ],
+      "perfectFor": "Cold-weather everyday wear, travel, commuting, biker-inspired outfits and refined street style.",
+      "whyYouWillLoveIt": "The black leather finish, V-shaped quilting and clean stand-collar profile give this puffer jacket warmth, texture and a sharper leather outerwear look.",
       "reviews": []
     }
   ]
