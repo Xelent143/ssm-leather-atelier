@@ -1385,7 +1385,7 @@ function escapeCsv(value) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
-function serveMetaCatalogFeed(req, res) {
+function serveMetaCatalogFeed(req, res, options = {}) {
   const store = readPublicStore();
   const currency = store.settings.currency || 'USD';
   const columns = [
@@ -1441,9 +1441,10 @@ function serveMetaCatalogFeed(req, res) {
     });
 
   const feed = `${columns.join(',')}\n${rows.join('\n')}\n`;
+  const filename = options.filename || 'motogrip-meta-catalog.csv';
   send(res, 200, feed, 'text/csv; charset=utf-8', {
     'Cache-Control': 'no-cache, max-age=0',
-    'Content-Disposition': 'inline; filename="motogrip-meta-catalog.csv"',
+    'Content-Disposition': `inline; filename="${filename}"`,
   });
 }
 
@@ -1931,6 +1932,13 @@ const server = http.createServer(async (req, res) => {
 
     if (requestPath === '/meta-catalog-feed.csv') {
       serveMetaCatalogFeed(req, res);
+      return;
+    }
+
+    if (requestPath === '/facebook-catalog-feed.csv' || requestPath === '/facebook-catalog-feed') {
+      serveMetaCatalogFeed(req, res, {
+        filename: 'motogrip-facebook-catalog.csv',
+      });
       return;
     }
 
