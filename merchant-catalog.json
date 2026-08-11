@@ -6413,6 +6413,186 @@
       "reviews": []
     },
     {
+      "id": "p66",
+      "slug": "mens-crocodile-embossed-leather-denim-motorcycle-vest",
+      "title": "Men's Crocodile-Embossed Leather & Denim Motorcycle Vest",
+      "category": "Vests",
+      "gender": "Men",
+      "price": 220,
+      "compareAtPrice": null,
+      "status": "active",
+      "inventory": 209,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
+      "tag": "New",
+      "description": "Built for distinctive motorcycle style, this MOTOGRIP GEAR men's vest combines red crocodile-embossed leather on the shoulders, collar and accents with a jet-black denim torso. Red contrast stitching reinforces the two-tone look, while the club-style one-inch collar, covered snaps and cropped center zipper create a clean rider-focused front. Two snap-down chest pockets and two snap-down slash pockets with leather lining provide practical storage. Inside, a three-panel oxblood lining includes a left-side cellphone pocket, a quick-access concealed-carry pocket on the left and an additional concealed-carry pocket on the right. Easy-access panels support patches and embroidery, and YKK zippers complete the construction. The crocodile appearance is embossed leather; this vest does not contain genuine crocodile skin.",
+      "shortDescription": "1.0–1.1 mm embossed leather · jet-black denim · concealed-carry pockets",
+      "image": "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/01-model-front.png",
+      "primaryImage": "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/01-model-front.png",
+      "galleryImages": [
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/02-model-back.png",
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/03-product-front.png",
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/04-product-back.png",
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/05-close-up.png",
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/06-inner-lining.png",
+        "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/07-infographic.png"
+      ],
+      "galleryImageAltText": [
+        "Man wearing the red crocodile-embossed leather and black denim motorcycle vest from the back.",
+        "Red crocodile-embossed leather and jet-black denim motorcycle vest, front product view.",
+        "Red crocodile-embossed leather and black denim motorcycle vest with a patch-ready back.",
+        "Close-up of red crocodile-embossed leather, black denim, red stitching and pocket details.",
+        "Open leather and denim motorcycle vest showing its oxblood lining and inner pocket construction.",
+        "Feature guide for the red crocodile-embossed leather and black denim motorcycle vest."
+      ],
+      "colors": [
+        "Red / Black"
+      ],
+      "colorImages": {
+        "Red / Black": "assets/generated/vests/mens-crocodile-embossed-leather-denim-motorcycle-vest/01-model-front.png"
+      },
+      "maker": "MOTOGRIP Workshop",
+      "stock": {
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19,
+        "7XL": 19
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "3XL",
+            "4XL",
+            "5XL",
+            "6XL",
+            "7XL"
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            "Red / Black"
+          ]
+        }
+      ],
+      "seoTitle": "Men's Crocodile-Embossed Leather & Denim Vest | MOTOGRIP GEAR",
+      "seoDescription": "Shop the MOTOGRIP men's red crocodile-embossed leather and black denim motorcycle vest with concealed-carry pockets, YKK zippers and sizes XS–7XL.",
+      "geoTitle": "Men's Crocodile-Embossed Leather and Denim Motorcycle Vest: Features and Fit",
+      "geoDescription": "The MOTOGRIP GEAR men's motorcycle vest combines 1.0–1.1 mm red crocodile-embossed leather with jet-black denim, an oxblood lining, four exterior pockets, concealed-carry storage, sizes XS–7XL and made-to-measure ordering.",
+      "aeoTitle": "What Features Does the Crocodile-Embossed Leather and Denim Vest Have?",
+      "aeoDescription": "It combines red crocodile-embossed leather with jet-black denim, red stitching, a covered snap and zipper front, four exterior pockets, oxblood lining, concealed-carry storage and patch-ready panels.",
+      "canonicalUrl": "https://motogripgear.com/products/mens-crocodile-embossed-leather-denim-motorcycle-vest",
+      "schemaDescription": "MOTOGRIP GEAR men's red crocodile-embossed leather and black denim motorcycle vest with oxblood lining, concealed-carry pockets, YKK zippers and sizes XS through 7XL.",
+      "brand": "MOTOGRIP GEAR",
+      "sku": "MG-P66-RDBK-CROC-DENIM-VEST",
+      "mpn": "MOTOGRIP-RED-BLACK-CROC-EMBOSSED-DENIM-VEST",
+      "gtin": "",
+      "googleProductCategory": "Apparel & Accessories > Clothing > Outerwear > Vests",
+      "productType": "Motorcycle riding gear > Men's leather vests > Leather and denim motorcycle vests",
+      "condition": "NewCondition",
+      "availability": "InStock",
+      "priceValidUntil": "2027-12-31",
+      "imageAltText": "Man wearing a red crocodile-embossed leather and black denim motorcycle vest from the front.",
+      "material": "Crocodile-embossed leather and denim",
+      "color": "Red / Black",
+      "sizeSystem": "US",
+      "sizeType": "Regular",
+      "ageGroup": "Adult",
+      "itemGroupId": "mens-crocodile-embossed-leather-denim-motorcycle-vest",
+      "variantOptions": [
+        "Size",
+        "Color",
+        "Fit"
+      ],
+      "shippingWeight": "",
+      "shippingPolicy": "Shipping options and delivery estimates are shown at checkout",
+      "returnPolicy": "Returns are subject to the current MOTOGRIP GEAR return policy",
+      "ratingValue": 0,
+      "reviewCount": 0,
+      "careInstructions": "Wipe leather accents gently with a soft dry cloth; spot-clean denim carefully; use leather-safe care only after testing on a concealed area; store away from direct heat and sunlight.",
+      "fitNotes": "Standard men's vest fit in sizes XS–7XL; made-to-measure ordering is available for a personalized fit.",
+      "leatherType": "Crocodile-embossed leather accents",
+      "leatherOrigin": "Not specified",
+      "leatherThickness": "Approximately 1.0–1.1 mm",
+      "lining": "Three-panel oxblood lining",
+      "hardware": "YKK zippers and covered metal snaps",
+      "closureType": "Covered snap front with cropped center zipper",
+      "armorCompatibility": "Not designed as protective motorcycle armor",
+      "weatherResistance": "No weather-resistance claim",
+      "ridingUseCase": "Motorcycle riding, club wear, patch customization and everyday biker styling",
+      "season": "Layering vest",
+      "craftMethod": "Two-tone leather and denim construction with crocodile embossing, red contrast stitching and patch-access panels",
+      "warranty": "Covered by the current MOTOGRIP GEAR workmanship policy",
+      "features": [
+        "Red crocodile-embossed leather on the shoulders and accents",
+        "Approximately 1.0–1.1 mm leather thickness",
+        "Jet-black denim torso with red contrast stitching",
+        "Club-style one-inch collar",
+        "Covered snaps and cropped center zipper",
+        "Two snap-down chest pockets",
+        "Two snap-down slash pockets with leather lining",
+        "Three-panel oxblood liner",
+        "Left-side interior cellphone pocket",
+        "Quick-access concealed-carry pocket on the left",
+        "Interior concealed-carry pocket on the right",
+        "Easy-access panels for patches and embroidery",
+        "YKK zippers",
+        "Standard men's fit in sizes XS–7XL",
+        "Made-to-measure ordering available"
+      ],
+      "specifications": [
+        [
+          "Materials",
+          "Crocodile-embossed leather and jet-black denim"
+        ],
+        [
+          "Color",
+          "Red / Black"
+        ],
+        [
+          "Leather thickness",
+          "Approximately 1.0–1.1 mm"
+        ],
+        [
+          "Closure",
+          "Covered snaps and cropped center zipper"
+        ],
+        [
+          "Exterior pockets",
+          "Two snap-down chest pockets and two snap-down slash pockets"
+        ],
+        [
+          "Interior",
+          "Oxblood lining, cellphone pocket and two concealed-carry pockets"
+        ],
+        [
+          "Customization",
+          "Easy-access panels for patches and embroidery"
+        ],
+        [
+          "Sizes",
+          "XS–7XL"
+        ]
+      ],
+      "perfectFor": "Motorcycle riding, biker events, club patch customization and everyday layered wear.",
+      "whyYouWillLoveIt": "The red crocodile-embossed leather accents, black denim body, practical pocket layout and oxblood interior combine distinctive club style with useful everyday storage.",
+      "reviews": []
+    },
+    {
       "id": "p49",
       "slug": "mens-black-removable-hood-lambskin-jacket",
       "title": "Men's Black Removable-Hood Lambskin Leather Jacket",

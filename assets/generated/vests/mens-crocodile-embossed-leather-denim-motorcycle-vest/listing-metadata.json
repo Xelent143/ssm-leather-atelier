@@ -1,0 +1,49 @@
+{
+  "title": "Men's Crocodile Embossed Leather Denim Motorcycle Vest",
+  "slug": "mens-crocodile-embossed-leather-denim-motorcycle-vest",
+  "price": 220,
+  "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
+    "3XL",
+    "4XL",
+    "5XL",
+    "6XL",
+    "7XL"
+  ],
+  "quantityPerSize": 19,
+  "madeToMeasure": {
+    "enabled": true,
+    "surcharge": 50
+  },
+  "categoryPlacement": [
+    "Men",
+    "Riding Gear",
+    "Leather Vests"
+  ],
+  "features": [
+    "Red crocodile embossed 1.0-1.1 mm leather on shoulders and accents",
+    "Jet black denim torso with red stitching",
+    "Club style with one-inch collar, covered snaps and cropped center zipper",
+    "Two snap-down chest pockets",
+    "Two snap-down slash pockets with leather lining",
+    "Oxblood three-panel liner",
+    "Interior cellphone pocket on left side",
+    "Quick access conceal carry pocket on left side and interior conceal carry pocket on right side",
+    "Easy access panels for patches and embroideries",
+    "YKK zippers"
+  ],
+  "images": [
+    "01-model-front.png",
+    "02-model-back.png",
+    "03-product-front.png",
+    "04-product-back.png",
+    "05-close-up.png",
+    "06-inner-lining.png",
+    "07-infographic.png"
+  ]
+}
