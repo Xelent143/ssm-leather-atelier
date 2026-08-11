@@ -44,6 +44,29 @@ test('product pages inject the requested public product before the route boots',
   }
 });
 
+test('product JSON-LD includes complete Google merchant listing recommendations', () => {
+  const store = readPublicStore();
+  const source = store.products.find((product) => product.slug === vestSlugs[0]);
+  const html = '<html><head><title>Old</title><meta name="description" content="" /><link rel="canonical" href="" /><meta property="og:url" content="" /><meta property="og:type" content="website" /><meta property="og:title" content="" /><meta property="og:description" content="" /><meta property="og:image" content="" /><meta name="twitter:title" content="" /><meta name="twitter:description" content="" /><meta name="twitter:image" content="" /></head></html>';
+  const body = injectProductHead(html, source, store, {
+    headers: { host: 'motogripgear.com' },
+    url: `/products/${source.slug}`,
+  });
+  const json = body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+  const graph = JSON.parse(json)['@graph'];
+  const productNode = graph.find((node) => node['@type'] === 'Product');
+  const offer = productNode.offers;
+
+  assert.equal(productNode.audience.suggestedGender, 'https://schema.org/Male');
+  assert.match(offer.validFrom, /^\d{4}-\d{2}-\d{2}/);
+  assert.equal(offer.shippingDetails.shippingRate.currency, 'USD');
+  assert.equal(offer.shippingDetails.shippingRate.value, '0');
+  assert.equal(offer.shippingDetails.deliveryTime.handlingTime.unitCode, 'DAY');
+  assert.equal(offer.shippingDetails.deliveryTime.handlingTime.minValue, 1);
+  assert.equal(offer.hasMerchantReturnPolicy.returnFees, 'https://schema.org/ReturnFeesCustomerResponsibility');
+  assert.equal(offer.hasMerchantReturnPolicy.returnShippingFeesAmount, undefined);
+});
+
 for (const relativePath of ['ssm-app.jsx', 'index.html']) {
   test(`${relativePath} resolves an injected merchant product before static products`, () => {
     const source = fs.readFileSync(path.join(root, relativePath), 'utf8');

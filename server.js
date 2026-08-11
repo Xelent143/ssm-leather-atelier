@@ -1127,6 +1127,9 @@ function productMeta(product, store, req) {
   const image = productImageUrl(req, product.primaryImage || product.image);
   const images = [image, ...(Array.isArray(product.galleryImages) ? product.galleryImages.map((src) => productImageUrl(req, src)) : [])];
   const availability = Number(product.inventory || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+  const suggestedGender = schemaSuggestedGender(product.gender);
+  const shippingDetails = product.shippingPolicy ? schemaShippingDetails(currency) : undefined;
+  const merchantReturnPolicy = product.returnPolicy ? schemaMerchantReturnPolicy() : undefined;
   const productNode = {
     '@type': 'Product',
     '@id': `${canonical}#product`,
@@ -1145,7 +1148,7 @@ function productMeta(product, store, req) {
     material: product.material || product.leatherType || undefined,
     color: product.color || undefined,
     size: product.size || undefined,
-    audience: product.gender ? { '@type': 'PeopleAudience', suggestedGender: product.gender } : undefined,
+    audience: suggestedGender ? { '@type': 'PeopleAudience', suggestedGender } : undefined,
     additionalProperty: [
       ['Made to measure', product.madeToMeasureEnabled ? `Available +${currency} ${product.madeToMeasureSurcharge}` : 'Not available'],
       ['Leather type', product.leatherType],
@@ -1161,36 +1164,15 @@ function productMeta(product, store, req) {
       priceCurrency: currency,
       price: Number(product.price || 0).toFixed(2),
       priceValidUntil: product.priceValidUntil || undefined,
+      validFrom: product.priceValidFrom || product.createdAt || '2026-01-01T00:00:00+00:00',
       availability,
       itemCondition: `https://schema.org/${product.condition || 'NewCondition'}`,
       seller: {
         '@type': 'Organization',
         name: store.settings.storeName || 'MOTOGRIP GEAR',
       },
-      shippingDetails: product.shippingPolicy ? {
-        '@type': 'OfferShippingDetails',
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'US',
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          transitTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 5,
-            maxValue: 7,
-            unitCode: 'DAY',
-          },
-        },
-      } : undefined,
-      hasMerchantReturnPolicy: product.returnPolicy ? {
-        '@type': 'MerchantReturnPolicy',
-        applicableCountry: 'US',
-        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-        merchantReturnDays: 30,
-        returnMethod: 'https://schema.org/ReturnByMail',
-        returnFees: 'https://schema.org/ReturnShippingFees',
-      } : undefined,
+      shippingDetails,
+      hasMerchantReturnPolicy: merchantReturnPolicy,
     },
   };
   if (Number(product.ratingValue || 0) > 0 && Number(product.reviewCount || 0) > 0) {
@@ -1216,6 +1198,55 @@ function productMeta(product, store, req) {
     ],
   };
   return { title, desc, canonical, image, jsonLd };
+}
+
+function schemaSuggestedGender(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (['men', 'mens', "men's", 'male'].includes(normalized)) return 'https://schema.org/Male';
+  if (['women', 'womens', "women's", 'female'].includes(normalized)) return 'https://schema.org/Female';
+  if (normalized === 'unisex') return 'Unisex';
+  return undefined;
+}
+
+function schemaShippingDetails(currency) {
+  return {
+    '@type': 'OfferShippingDetails',
+    shippingRate: {
+      '@type': 'MonetaryAmount',
+      value: '0',
+      currency,
+    },
+    shippingDestination: {
+      '@type': 'DefinedRegion',
+      addressCountry: 'US',
+    },
+    deliveryTime: {
+      '@type': 'ShippingDeliveryTime',
+      handlingTime: {
+        '@type': 'QuantitativeValue',
+        minValue: 1,
+        maxValue: 3,
+        unitCode: 'DAY',
+      },
+      transitTime: {
+        '@type': 'QuantitativeValue',
+        minValue: 3,
+        maxValue: 7,
+        unitCode: 'DAY',
+      },
+    },
+  };
+}
+
+function schemaMerchantReturnPolicy() {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: 'US',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: 30,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+  };
 }
 
 function injectProductHead(html, product, store, req) {
