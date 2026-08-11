@@ -1947,6 +1947,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (requestPath === '/cart' || requestPath === '/cart/' || requestPath === '/products' || requestPath === '/products/') {
+      permanentRedirect(res, '/shop');
+      return;
+    }
+
     const productMatch = requestPath.match(/^\/products\/([a-z0-9-]+)\/?$/);
     if (productMatch) {
       serveProductPage(req, res, productMatch[1]);
