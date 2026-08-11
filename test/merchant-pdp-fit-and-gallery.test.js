@@ -10,7 +10,7 @@ for (const file of ['ssm-pdp.jsx', 'index.html']) {
   test(`${file} keeps merchant PDP galleries contained and exposes fit controls`, () => {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.match(source, /className="factual-pdp-grid pdp-commerce-layout"/);
-    assert.match(source, /gridTemplateColumns: '148px minmax\(0, 1fr\) minmax\(390px, 0\.62fr\)'/);
+    assert.match(source, /gridTemplateColumns: '120px minmax\(0, 1fr\) minmax\(390px, 0\.62fr\)'/);
     assert.match(source, /className="pdp-thumb-column"/);
     assert.match(source, /className="pdp-thumb-rail"/);
     assert.match(source, /className="pdp-thumb-arrow"/);
@@ -57,11 +57,11 @@ test('the storefront keeps every PDP size selector in the approved responsive gr
 
 test('the storefront keeps PDP thumbnail rails large and arrow-controlled', () => {
   const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  assert.match(source, /\.pdp-thumb-column\s*\{[\s\S]*?width:\s*136px/);
-  assert.match(source, /\.pdp-thumb-button\s*\{[\s\S]*?width:\s*128px !important/);
-  assert.match(source, /\.pdp-thumb-button\s*\{[\s\S]*?height:\s*128px !important/);
-  assert.match(source, /\.pdp-thumb-arrow\s*\{[\s\S]*?height:\s*34px/);
-  assert.match(source, /\.factual-pdp \.pdp-main-image\s*\{[\s\S]*?max-width:\s*1180px/);
+  assert.match(source, /\.pdp-thumb-column\s*\{[\s\S]*?width:\s*112px/);
+  assert.match(source, /\.pdp-thumb-button\s*\{[\s\S]*?width:\s*104px !important/);
+  assert.match(source, /\.pdp-thumb-button\s*\{[\s\S]*?height:\s*104px !important/);
+  assert.match(source, /\.pdp-thumb-arrow\s*\{[\s\S]*?height:\s*30px/);
+  assert.match(source, /\.factual-pdp \.pdp-main-image\s*\{[\s\S]*?max-width:\s*980px/);
   assert.match(source, /@media \(max-width: 720px\)[\s\S]*?\.pdp-thumb-column\s*\{[\s\S]*?flex-direction:\s*row !important/);
 });
 
