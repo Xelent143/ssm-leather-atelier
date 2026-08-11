@@ -44,6 +44,8 @@ const cleanPathForView = (view, params = {}) => {
     if (article?.id) return `/blog/${article.id}`;
   }
   if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Hooded Leather Jackets') return '/men/hooded-leather-jackets';
+  if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Puffer Jackets') return '/men/puffer-jackets';
+  if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Winter Jackets') return '/men/winter-jackets';
   if (view === 'shop' && params?.gender === 'Women') return '/women';
   if (view === 'shop' && params?.gender === 'Men') return '/men';
   if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
@@ -78,6 +80,8 @@ const routeStateFromLocation = () => {
     '/women': { view: 'shop', params: { gender: 'Women' } },
     '/men': { view: 'shop', params: { gender: 'Men' } },
     '/men/hooded-leather-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Hooded Leather Jackets' } },
+    '/men/puffer-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Puffer Jackets' } },
+    '/men/winter-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Winter Jackets' } },
     '/jackets': { view: 'shop', params: { cat: 'Jackets' } },
     '/vests': { view: 'shop', params: { cat: 'Vests' } },
     '/pants': { view: 'shop', params: { cat: 'Pants' } },

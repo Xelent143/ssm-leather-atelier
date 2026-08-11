@@ -1149,6 +1149,7 @@ const PAGE_ONE_MENS_JACKETS = PAGE_ONE_MENS_JACKET_SPECS.map((spec, index) => {
   return {
     id: `mj${String(index + 1).padStart(2, '0')}`, slug,
     name, cat: 'Jackets', gender: 'Men', collection: style,
+    subcategories: style.toLowerCase().includes('puffer') ? ['Puffer Jackets', 'Winter Jackets'] : [],
     price, compareAt, hue: color === 'Brown' || color === 'Mocha' ? 24 : color === 'Green' ? 90 : color === 'Blue' ? 210 : 0,
     tag: compareAt ? 'Sale' : (index >= 34 && index <= 37 ? 'New' : null),
     blurb: `${style} silhouette · ${color.toLowerCase()} ${name.includes('Suede') ? 'suede' : 'leather'} · made to measure available`,
@@ -5341,7 +5342,7 @@ function Header({ go, view, onCartClick, onSearchClick, cartCount }) {
                   {section.links.map((label) => (
                     <button key={label} onClick={() => navigate(
                       SSM_NAV.find(item => item.mega === openMega),
-                      label === 'Hooded Leather Jackets'
+                      ['Hooded Leather Jackets', 'Puffer Jackets', 'Winter Jackets'].includes(label)
                         ? { ...section, subcategory: label }
                         : (['Puffer Vests', 'Leather Shirts'].includes(label) ? { ...section, cat: label } : section)
                     )} className="ulink" style={{
@@ -6282,6 +6283,8 @@ function Shop({ go, onQuickView, initialGender, initialCat, initialSubcategory }
     if (gender === 'Women' && cat === 'All') return "Cut to a woman's frame, not a smaller man's.";
     if (gender === 'Men'   && cat === 'All') return "Built for shoulder, not for show.";
     if (subcategory === 'Hooded Leather Jackets') return "Hooded leather jackets with removable or built-in hood styling, filtered away from non-hooded silhouettes.";
+    if (subcategory === 'Puffer Jackets') return "Quilted leather puffer jackets selected for warmth, clean volume, and everyday layering.";
+    if (subcategory === 'Winter Jackets') return "Cold-weather leather jackets and puffer layers selected for warmth, coverage, and everyday wear.";
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Puffer Vests') return "Quilted leather layers designed for warmth, movement, and clean everyday versatility.";
@@ -10323,6 +10326,8 @@ const cleanPathForView = (view, params = {}) => {
     if (article?.id) return `/blog/${article.id}`;
   }
   if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Hooded Leather Jackets') return '/men/hooded-leather-jackets';
+  if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Puffer Jackets') return '/men/puffer-jackets';
+  if (view === 'shop' && params?.gender === 'Men' && params?.subcategory === 'Winter Jackets') return '/men/winter-jackets';
   if (view === 'shop' && params?.gender === 'Women') return '/women';
   if (view === 'shop' && params?.gender === 'Men') return '/men';
   if (view === 'shop' && params?.cat === 'Jackets') return '/jackets';
@@ -10357,6 +10362,8 @@ const routeStateFromLocation = () => {
     '/women': { view: 'shop', params: { gender: 'Women' } },
     '/men': { view: 'shop', params: { gender: 'Men' } },
     '/men/hooded-leather-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Hooded Leather Jackets' } },
+    '/men/puffer-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Puffer Jackets' } },
+    '/men/winter-jackets': { view: 'shop', params: { gender: 'Men', cat: 'Jackets', subcategory: 'Winter Jackets' } },
     '/jackets': { view: 'shop', params: { cat: 'Jackets' } },
     '/vests': { view: 'shop', params: { cat: 'Vests' } },
     '/pants': { view: 'shop', params: { cat: 'Pants' } },

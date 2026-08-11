@@ -74,6 +74,8 @@ function Shop({ go, onQuickView, initialGender, initialCat, initialSubcategory }
     if (gender === 'Women' && cat === 'All') return "Cut to a woman's frame, not a smaller man's.";
     if (gender === 'Men'   && cat === 'All') return "Built for shoulder, not for show.";
     if (subcategory === 'Hooded Leather Jackets') return "Hooded leather jackets with removable or built-in hood styling, filtered away from non-hooded silhouettes.";
+    if (subcategory === 'Puffer Jackets') return "Quilted leather puffer jackets selected for warmth, clean volume, and everyday layering.";
+    if (subcategory === 'Winter Jackets') return "Cold-weather leather jackets and puffer layers selected for warmth, coverage, and everyday wear.";
     if (cat === 'Jackets') return "Asymmetric, classic, cropped, long. Twelve silhouettes; one hide doctrine.";
     if (cat === 'Vests')   return "Layering, made obvious. Quilted yokes, raw selvedge, four-pocket utility.";
     if (cat === 'Puffer Vests') return "Quilted leather layers designed for warmth, movement, and clean everyday versatility.";
