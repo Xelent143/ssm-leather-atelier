@@ -27,6 +27,16 @@ function categoryId(name) {
   return `cat-${slugify(name)}`;
 }
 
+function missingSeedProducts(seedProducts, existingRows) {
+  const existingIds = new Set((existingRows || []).map((row) => String(row.id || '')));
+  const existingSlugs = new Set((existingRows || []).map((row) => String(row.slug || '')));
+  return (seedProducts || []).filter((product) => {
+    const id = String(product.id || '');
+    const slug = slugify(product.slug || product.title || id);
+    return !existingIds.has(id) && !existingSlugs.has(slug);
+  });
+}
+
 function productPayload(product, categoryName) {
   return {
     ...product,
@@ -241,12 +251,16 @@ async function init(seedStore) {
     await client.query('BEGIN');
     const count = await client.query('SELECT COUNT(*)::int AS count FROM admin_products');
     const state = await client.query('SELECT id FROM admin_store_state WHERE id = TRUE');
-    if (count.rows[0].count === 0 && (seedStore.products || []).length) {
-      const names = defaultCategoryNames(seedStore);
+    const seedProducts = Array.isArray(seedStore.products) ? seedStore.products : [];
+    const productsToSeed = count.rows[0].count === 0
+      ? seedProducts
+      : missingSeedProducts(seedProducts, (await client.query('SELECT id, slug FROM admin_products')).rows);
+    if (productsToSeed.length) {
+      const names = defaultCategoryNames({ ...seedStore, products: productsToSeed });
       await ensureCategories(client, names);
       const categoryRows = await client.query('SELECT id, name FROM admin_categories');
       const categoryMap = new Map(categoryRows.rows.map((row) => [row.name.toLowerCase(), row]));
-      for (const product of seedStore.products) await upsertProduct(client, product, categoryMap);
+      for (const product of productsToSeed) await upsertProduct(client, product, categoryMap);
     }
     if (!state.rows.length) {
       await client.query(`
@@ -423,4 +437,5 @@ module.exports = {
   saveProductImage,
   saveProductImages,
   saveStore,
+  missingSeedProducts,
 };

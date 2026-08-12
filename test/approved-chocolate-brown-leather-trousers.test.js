@@ -6,6 +6,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const catalog = JSON.parse(fs.readFileSync(path.join(root, 'merchant-catalog.json'), 'utf8'));
 const { publicProductForPdp } = require(path.join(root, 'server.js'));
+const { missingSeedProducts } = require(path.join(root, 'db.js'));
 
 const slug = 'chocolate-brown-leather-trousers';
 
@@ -47,6 +48,12 @@ test('chocolate brown leather trousers meet the publication contract', () => {
   const publicText = JSON.stringify(product);
   assert.doesNotMatch(publicText, /angel|angeljackets|fjackets|blingsoul|decrum/i);
   assert.doesNotMatch(publicText, /side-laced|laced-side|chatgpt image/i);
+
+  assert.deepEqual(
+    missingSeedProducts([product], [{ id: 'p75', slug: 'mens-waxed-brown-hooded-leather-puffer-jacket' }]).map((item) => item.slug),
+    [slug],
+  );
+  assert.deepEqual(missingSeedProducts([product], [{ id: 'p76', slug }]), []);
 });
 
 test('chocolate brown leather trousers appear in the Pants collection cards', () => {
