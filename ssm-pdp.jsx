@@ -203,14 +203,14 @@ function FactualPDP({ product: p, go, addToCart }) {
         <span>/</span>
         <span style={{ fontSize: 10, color: 'var(--fg-2)' }}>{p.name.toUpperCase()}</span>
       </nav>
-      <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '120px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1680, margin: '0 auto', width: '100%' }}>
+      <div className="factual-pdp-grid pdp-commerce-layout" style={{ display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%' }}>
         <div className="pdp-thumb-column">
           <button type="button" className="pdp-thumb-arrow" aria-label="Show previous product images" onClick={() => scrollThumbRail(-1)}>↑</button>
-          <div ref={thumbRailRef} className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 0 }}>
+          <div ref={thumbRailRef} className="pdp-thumb-rail" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
             {images.map((image, index) => (
               <button key={image.src} onClick={() => setImgIdx(index)} aria-label={image.label}
                 className="ph tiny pdp-thumb-button" data-label="" data-thumb-index={index}
-                style={{ cursor: 'pointer', outline: imgIdx === index ? '2px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.78 }}>
+                style={{ cursor: 'pointer', outline: imgIdx === index ? '1px solid var(--fg)' : 'none', outlineOffset: 2, opacity: imgIdx === index ? 1 : 0.65 }}>
                 <img src={image.src} alt="" />
               </button>
             ))}
@@ -219,7 +219,7 @@ function FactualPDP({ product: p, go, addToCart }) {
         </div>
         <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
           {images.length > 0 && <div className="ph grain pdp-main-image" data-label=""
-            role="img" aria-label={images[imgIdx]?.label} style={{ height: 'min(760px, calc(100vh - 190px))', minHeight: 540, position: 'relative', background: 'var(--bg-2)' }}>
+            role="img" aria-label={images[imgIdx]?.label} style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', background: 'var(--bg-2)' }}>
             <img src={images[imgIdx]?.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
           </div>}
         </div>
@@ -506,8 +506,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
       </nav>
 
       <div className="pdp-commerce-layout" style={{
-        display: 'grid', gridTemplateColumns: '120px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
-        padding: '0 36px 80px', maxWidth: 1680, margin: '0 auto', width: '100%',
+        display: 'grid', gridTemplateColumns: '82px minmax(0, 1fr) minmax(390px, 0.62fr)', gap: 0,
+        padding: '0 36px 80px', maxWidth: 1780, margin: '0 auto', width: '100%',
       }}>
         {/* Thumbnails */}
         <div className="pdp-thumb-column">
@@ -520,8 +520,8 @@ function PDP({ product, go, addToCart, onQuickView }) {
                 style={{
                   cursor: 'pointer',
                   '--img': `url(${img.src})`,
-                  outline: imgIdx === i ? '2px solid var(--fg)' : 'none',
-                  outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.78,
+                  outline: imgIdx === i ? '1px solid var(--fg)' : 'none',
+                  outlineOffset: 2, opacity: imgIdx === i ? 1 : 0.6,
                   background: 'transparent',
                 }} />
             ))}
@@ -531,7 +531,7 @@ function PDP({ product, go, addToCart, onQuickView }) {
         {/* Main image */}
         <div className="pdp-main-media" style={{ paddingLeft: 18 }}>
           <div className="ph grain pdp-main-image" data-img="1" data-label="" role="img" aria-label={images[imgIdx].alt || images[imgIdx].label}
-            style={{ height: 'min(760px, calc(100vh - 190px))', minHeight: 540, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
+            style={{ height: 'min(860px, calc(100vh - 190px))', minHeight: 620, position: 'relative', '--img': `url(${images[imgIdx].src})` }}>
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8 }}>
               <button aria-label="Save to wishlist"
                 style={{ width: 36, height: 36, background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(10px)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 0, color: 'var(--fg)' }}>
