@@ -1612,8 +1612,9 @@ function normalizeStore(input) {
     products: products.map((product) => ({
       id: String(product.id || crypto.randomUUID()),
       slug: String(product.slug || product.title || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      title: String(product.title || 'Untitled product'),
+      title: String(product.title || ''),
       category: String(product.category || 'Jackets'),
+      subcategory: String(product.subcategory || ''),
       gender: String(product.gender || 'Unisex'),
       price: Number(product.price || 0),
       compareAtPrice: product.compareAtPrice === null || product.compareAtPrice === '' ? null : Number(product.compareAtPrice || 0),
@@ -1623,6 +1624,10 @@ function normalizeStore(input) {
       madeToMeasureSurcharge: Number(product.madeToMeasureSurcharge || 0),
       tag: String(product.tag || ''),
       description: String(product.description || ''),
+      features: String(product.features || ''),
+      specifications: String(product.specifications || ''),
+      perfectFor: String(product.perfectFor || ''),
+      whyYouWillLoveIt: String(product.whyYouWillLoveIt || ''),
       image: String(product.image || ''),
       maker: String(product.maker || ''),
       stock: product.stock && typeof product.stock === 'object' ? product.stock : {},
@@ -1672,12 +1677,22 @@ function normalizeStore(input) {
       craftMethod: String(product.craftMethod || ''),
       warranty: String(product.warranty || ''),
     })),
-    categories: categoryNames.map((name, index) => ({
-      id: `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-      name,
-      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      sortOrder: index,
-    })),
+    categories: categoryNames.map((name, index) => {
+      const source = categoryInput.find((category) => String(category.name || category).trim().toLowerCase() === name.toLowerCase());
+      return {
+        id: String(source?.id || `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`),
+        name,
+        slug: String(source?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')),
+        sortOrder: Number(source?.sortOrder ?? source?.sort_order ?? index),
+        subcategories: Array.isArray(source?.subcategories) ? source.subcategories.map((subcategory, subcategoryIndex) => ({
+          id: String(subcategory.id || `sub-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${String(subcategory.name || subcategory).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`),
+          categoryId: String(source?.id || `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`),
+          name: String(subcategory.name || subcategory),
+          slug: String(subcategory.slug || String(subcategory.name || subcategory).toLowerCase().replace(/[^a-z0-9]+/g, '-')),
+          sortOrder: Number(subcategory.sortOrder ?? subcategory.sort_order ?? subcategoryIndex),
+        })) : [],
+      };
+    }),
     orders: orders.map((order) => ({
       ...order,
       id: String(order.id || crypto.randomUUID()),
@@ -1700,13 +1715,16 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  const publicImageMatch = apiPath.match(/^\/api\/catalog\/images\/([^/]+)$/);
+  const publicImageMatch = apiPath.match(/^\/api\/catalog\/images\/([^/]+)(?:\/([^/]+))?$/);
   if (publicImageMatch && (req.method === 'GET' || req.method === 'HEAD')) {
     if (!database.isEnabled()) {
       sendJson(res, 404, { error: 'Product image storage is not configured.' });
       return true;
     }
-    const image = await database.getImage(decodeURIComponent(publicImageMatch[1]));
+    const image = await database.getImage(
+      decodeURIComponent(publicImageMatch[1]),
+      publicImageMatch[2] ? decodeURIComponent(publicImageMatch[2]) : '',
+    );
     if (!image || !image.image_bytes || (image.status !== 'active' && !getSession(req))) {
       sendJson(res, 404, { error: 'Product image not found.' });
       return true;
@@ -2011,6 +2029,57 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  const subcategoryCreateMatch = apiPath.match(/^\/api\/admin\/categories\/([^/]+)\/subcategories$/);
+  if (subcategoryCreateMatch && req.method === 'POST') {
+    try {
+      const categoryId = decodeURIComponent(subcategoryCreateMatch[1]);
+      const name = String((await readBody(req)).name || '').trim().slice(0, 80);
+      if (!name) throw new Error('Subcategory name is required.');
+      if (database.isEnabled()) {
+        databaseStoreCache = await database.addSubcategory(categoryId, name);
+      } else {
+        const store = readStore();
+        const category = (store.categories || []).find((item) => item.id === categoryId);
+        if (!category) throw new Error('Choose a valid category first.');
+        category.subcategories = category.subcategories || [];
+        if (!category.subcategories.some((item) => item.name.toLowerCase() === name.toLowerCase())) {
+          category.subcategories.push({
+            id: `sub-${categoryId}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+            categoryId,
+            name,
+            slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            sortOrder: category.subcategories.length,
+          });
+        }
+        await persistStore(store);
+      }
+      sendJson(res, 201, readStore());
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const subcategoryDeleteMatch = apiPath.match(/^\/api\/admin\/subcategories\/([^/]+)$/);
+  if (subcategoryDeleteMatch && req.method === 'DELETE') {
+    try {
+      const id = decodeURIComponent(subcategoryDeleteMatch[1]);
+      if (database.isEnabled()) {
+        databaseStoreCache = await database.removeSubcategory(id);
+      } else {
+        const store = readStore();
+        for (const category of store.categories || []) {
+          category.subcategories = (category.subcategories || []).filter((item) => item.id !== id);
+        }
+        await persistStore(store);
+      }
+      sendJson(res, 200, readStore());
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
   const publishMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/publish$/);
   if (publishMatch && req.method === 'POST') {
     const id = decodeURIComponent(publishMatch[1]);
@@ -2022,7 +2091,7 @@ async function handleApi(req, res, pathname) {
     }
     const image = String(product.primaryImage || product.image || '').trim();
     const missing = [
-      !String(product.title || '').trim() || product.title === 'New product' ? 'title' : '',
+      !String(product.title || '').trim() || ['New product', 'Untitled product'].includes(product.title) ? 'title' : '',
       !String(product.description || '').trim() ? 'description' : '',
       !String(product.category || '').trim() ? 'category' : '',
       !(Number(product.price) > 0) ? 'price' : '',
@@ -2041,6 +2110,68 @@ async function handleApi(req, res, pathname) {
     }, ...(store.activity || []).slice(0, 24)];
     const saved = await persistStore(store);
     sendJson(res, 200, saved);
+    return true;
+  }
+
+  const imagesUploadMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/images$/);
+  if (imagesUploadMatch && req.method === 'POST') {
+    if (!database.isEnabled()) {
+      sendJson(res, 503, { error: 'Railway PostgreSQL is required for image uploads.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req, 60 * 1024 * 1024);
+      if (!Array.isArray(body.images) || !body.images.length) throw new Error('Choose at least one image to upload.');
+      if (body.images.length > 10) throw new Error('Upload up to 10 images at a time.');
+      let totalBytes = 0;
+      const images = body.images.map((item) => {
+        const match = String(item.data || '').match(/^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/i);
+        if (!match) throw new Error('Upload PNG, JPG, WEBP, or GIF images only.');
+        const buffer = Buffer.from(match[2], 'base64');
+        if (!buffer.length || buffer.length > 8 * 1024 * 1024) throw new Error('Each image must be smaller than 8 MB.');
+        totalBytes += buffer.length;
+        return {
+          buffer,
+          mime: match[1].toLowerCase(),
+          name: String(item.name || 'product-image').slice(0, 160),
+          altText: String(item.altText || '').trim().slice(0, 240),
+        };
+      });
+      if (totalBytes > 40 * 1024 * 1024) throw new Error('The combined image upload must be smaller than 40 MB.');
+      databaseStoreCache = await database.saveProductImages(decodeURIComponent(imagesUploadMatch[1]), images);
+      sendJson(res, 200, databaseStoreCache);
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const imagesOrderMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/images\/order$/);
+  if (imagesOrderMatch && req.method === 'PUT') {
+    try {
+      if (!database.isEnabled()) throw new Error('Railway PostgreSQL is required for image ordering.');
+      const imageIds = (await readBody(req)).imageIds;
+      if (!Array.isArray(imageIds) || new Set(imageIds).size !== imageIds.length) throw new Error('Provide a valid image order.');
+      databaseStoreCache = await database.reorderProductImages(decodeURIComponent(imagesOrderMatch[1]), imageIds.map(String));
+      sendJson(res, 200, databaseStoreCache);
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const imageDeleteMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/images\/([^/]+)$/);
+  if (imageDeleteMatch && req.method === 'DELETE') {
+    try {
+      if (!database.isEnabled()) throw new Error('Railway PostgreSQL is required for image removal.');
+      databaseStoreCache = await database.deleteProductImage(
+        decodeURIComponent(imageDeleteMatch[1]),
+        decodeURIComponent(imageDeleteMatch[2]),
+      );
+      sendJson(res, 200, databaseStoreCache);
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

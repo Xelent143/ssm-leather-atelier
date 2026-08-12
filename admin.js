@@ -10,6 +10,9 @@ const state = {
   store: null,
   selectedProductId: null,
   dirty: false,
+  pendingImages: [],
+  mediaOrder: [],
+  editorSaving: false,
 };
 
 const nav = [
@@ -38,6 +41,31 @@ function escapeHtml(value = '') {
 
 function slugify(value = '') {
   return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function adminPathForView(view) {
+  return view === 'dashboard' ? '/admin' : `/admin/${view}`;
+}
+
+function applyRoute() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/admin';
+  const editorMatch = path.match(/^\/admin\/products\/([^/]+)$/);
+  if (editorMatch) {
+    state.view = 'product-editor';
+    state.selectedProductId = editorMatch[1] === 'new' ? null : decodeURIComponent(editorMatch[1]);
+    return;
+  }
+  const view = path.match(/^\/admin\/([^/]+)$/)?.[1] || 'dashboard';
+  state.view = nav.some(([id]) => id === view) ? view : 'dashboard';
+}
+
+function navigateAdmin(path) {
+  window.history.pushState({}, '', path);
+  state.pendingImages = [];
+  state.mediaOrder = [];
+  applyRoute();
+  if (state.view === 'product-editor' && !state.selectedProductId) createProductDraft();
+  render();
 }
 
 function assetUrl(value = '') {
@@ -73,7 +101,45 @@ function toast(message) {
 }
 
 function productById(id = state.selectedProductId) {
-  return state.store.products.find((product) => product.id === id) || state.store.products[0];
+  return state.store.products.find((product) => product.id === id) || null;
+}
+
+function createProductDraft() {
+  const id = `p-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const category = categories()[0]?.name || '';
+  const product = {
+    id,
+    slug: '',
+    title: '',
+    description: '',
+    category,
+    subcategory: '',
+    gender: 'Unisex',
+    price: '',
+    compareAtPrice: '',
+    inventory: 0,
+    status: 'draft',
+    uploadedImages: [],
+    image: '',
+    primaryImage: '',
+    galleryImages: [],
+    madeToMeasureEnabled: true,
+    madeToMeasureSurcharge: Number(state.store.settings.madeToMeasureSurcharge || 50),
+    stock: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0, '4XL': 0, '5XL': 0, '6XL': 0 },
+    brand: 'MOTOGRIP GEAR',
+    sku: id,
+    condition: 'NewCondition',
+    material: 'Leather',
+    sizeSystem: 'US',
+    sizeType: 'Regular',
+    ageGroup: 'Adult',
+    itemGroupId: id,
+    variantOptions: ['Size', 'Leather', 'Fit'],
+  };
+  state.store.products.unshift(product);
+  state.selectedProductId = id;
+  state.dirty = true;
+  return product;
 }
 
 function categories() {
@@ -174,10 +240,17 @@ function shell(content) {
         <div class="nav-group">
           <div class="nav-label">Store</div>
           ${nav.map(([id, icon, label]) => `
-            <button class="nav-item ${state.view === id ? 'active' : ''}" data-view="${id}">
-              <span class="nav-icon">${icon}</span>
-              <span>${label}</span>
-            </button>
+            <div class="nav-entry">
+              <button class="nav-item ${(state.view === id || (id === 'products' && state.view === 'product-editor')) ? 'active' : ''}" data-view="${id}">
+                <span class="nav-icon">${icon}</span>
+                <span>${label}</span>
+              </button>
+              ${id === 'products' ? `
+                <button class="nav-subitem ${state.view === 'product-editor' && window.location.pathname.endsWith('/new') ? 'active' : ''}" id="sidebar-add-product">
+                  <span>＋</span><span>Add Product</span>
+                </button>
+              ` : ''}
+            </div>
           `).join('')}
         </div>
         <div class="sidebar-footer">
@@ -290,13 +363,11 @@ function productTable(products) {
 
 function renderProducts() {
   const products = filteredProducts();
-  if (!state.selectedProductId && products[0]) state.selectedProductId = products[0].id;
-  const product = productById();
   return `
-    ${pageHead('Products', 'Create, edit, publish, archive, and tune product-level made-to-measure pricing.', '<button class="btn primary" id="new-product">Add product</button>')}
+    ${pageHead('Products', 'Create, edit, publish, and organize your complete product catalog.', '<button class="btn primary" id="new-product">Add product</button>')}
     <div class="card category-manager">
       <div class="card-head">
-        <div><h2>Categories</h2><span class="muted">Create or remove product categories stored in PostgreSQL.</span></div>
+        <div><h2>Categories</h2><span class="muted">Categories and their subcategories are stored in PostgreSQL.</span></div>
         <button class="btn" id="add-category">Add category</button>
       </div>
       <div class="card-pad category-list">
@@ -306,119 +377,205 @@ function renderProducts() {
       </div>
     </div>
     <div style="height:16px"></div>
-    <div class="grid two-col">
-      <div class="card">
-        <div class="card-head"><h2>Catalog</h2><span class="pill">${products.length} shown</span></div>
-        <div class="table-wrap">${productTable(products)}</div>
-      </div>
-      ${product ? productEditor(product) : '<div class="card empty">Select a product to edit.</div>'}
+    <div class="card">
+      <div class="card-head"><h2>Catalog</h2><span class="pill">${products.length} shown</span></div>
+      <div class="table-wrap">${productTable(products)}</div>
     </div>
   `;
 }
 
 function productEditor(product) {
   const stock = product.stock || {};
+  const selectedCategory = categories().find((category) => category.name === product.category);
   const categoryNames = categories().map((category) => category.name);
   if (product.category && !categoryNames.includes(product.category)) categoryNames.push(product.category);
+  const subcategories = [...(selectedCategory?.subcategories || [])];
+  if (product.subcategory && !subcategories.some((item) => item.name === product.subcategory)) {
+    subcategories.push({ id: '', name: product.subcategory });
+  }
+  const uploaded = product.uploadedImages || [];
+  const catalogImages = uploaded.length ? [] : [...new Set([product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean))];
+  const unorderedMedia = [
+    ...uploaded.map((image, index) => ({ kind: 'uploaded', id: image.id, name: image.name, src: image.url, index })),
+    ...catalogImages.map((src, index) => ({ kind: 'catalog', id: `catalog-${index}`, name: src.split('/').pop() || `Catalog image ${index + 1}`, src, index })),
+    ...state.pendingImages.map((image, index) => ({ kind: 'pending', id: image.id, name: image.name, src: image.data, index })),
+  ];
+  const mediaByKey = new Map(unorderedMedia.map((image) => [`${image.kind}:${image.id}`, image]));
+  const orderedKeys = [...state.mediaOrder.filter((key) => mediaByKey.has(key))];
+  for (const key of mediaByKey.keys()) if (!orderedKeys.includes(key)) orderedKeys.push(key);
+  state.mediaOrder = orderedKeys;
+  const media = orderedKeys.map((key) => mediaByKey.get(key));
+  const livePath = `/products/${encodeURIComponent(product.slug || slugify(product.title))}`;
   return `
-    <div class="card">
-      <div class="card-head">
-        <h2>${escapeHtml(product.title)}</h2>
-        <div class="button-row">
-          <span class="pill ${product.status}">${escapeHtml(product.status)}</span>
-          ${product.status === 'active' ? '<a class="btn" href="/products/' + encodeURIComponent(product.slug) + '" target="_blank" rel="noreferrer">View live</a>' : '<button class="btn primary" id="publish-product">Publish now</button>'}
+    <div class="product-editor-page" id="product-form" data-id="${escapeHtml(product.id)}">
+      ${pageHead(
+        product.title ? escapeHtml(product.title) : 'Add product',
+        'Essential product details stay visible. Advanced fields remain tucked away until you need them.',
+        `<button class="btn" id="back-products">Back to products</button>
+         <button class="btn" id="save-draft">Save draft</button>
+         <button class="btn" id="save-product">Save</button>
+         <button class="btn primary" id="save-publish">Save &amp; publish</button>`,
+      )}
+      ${product.status === 'active' ? `
+        <div class="live-product-banner">
+          <div><strong>Published</strong><span>Your product is live on the storefront.</span></div>
+          <a class="btn" href="${livePath}" target="_blank" rel="noreferrer">View live product ↗</a>
         </div>
-      </div>
-      <div class="card-pad">
-        <div class="form-grid" id="product-form" data-id="${product.id}">
-          ${field('Title', 'title', product.title)}
-          ${field('Slug', 'slug', product.slug)}
-          ${selectField('Status', 'status', product.status, ['active', 'draft', 'archived'])}
-          ${selectField('Category', 'category', product.category, categoryNames)}
-          ${selectField('Gender', 'gender', product.gender, ['Men', 'Women', 'Unisex'])}
-          ${field('Tag', 'tag', product.tag)}
-          ${field('Price', 'price', product.price, 'number')}
-          ${field('Compare-at price', 'compareAtPrice', product.compareAtPrice || '', 'number')}
-          ${field('Inventory', 'inventory', product.inventory, 'number')}
-          ${field('Maker', 'maker', product.maker)}
-          ${field('Image path', 'image', product.image, 'text', true)}
-          <div class="field full upload-field">
-            <label for="product-image-file">Product image</label>
-            <div class="upload-row">
-              <input id="product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-              <span class="muted">PNG, JPG, WEBP, or GIF · max 8 MB</span>
+      ` : ''}
+      <div class="editor-layout">
+        <div class="editor-main">
+          <section class="card editor-section">
+            <div class="card-head"><div><h2>Product details</h2><span class="muted">The information customers see first.</span></div></div>
+            <div class="card-pad form-grid">
+              ${field('Title', 'title', product.title, 'text', true)}
+              ${textareaField('Description', 'description', product.description)}
             </div>
-            ${product.primaryImage ? `<img class="editor-image-preview" src="${escapeHtml(product.primaryImage)}" alt="${escapeHtml(product.imageAltText || product.title)}">` : '<span class="muted">No image uploaded.</span>'}
-          </div>
-          ${textareaField('Description', 'description', product.description)}
-          <div class="field full"><h3>SEO and AI discovery</h3></div>
-          ${field('SEO title', 'seoTitle', product.seoTitle, 'text', true)}
-          ${textareaField('SEO description', 'seoDescription', product.seoDescription)}
-          ${textareaField('Schema description', 'schemaDescription', product.schemaDescription)}
-          ${field('Canonical URL', 'canonicalUrl', product.canonicalUrl, 'url', true)}
-          ${field('Brand', 'brand', product.brand)}
-          ${field('SKU', 'sku', product.sku)}
-          ${field('MPN', 'mpn', product.mpn)}
-          ${field('GTIN / UPC / EAN', 'gtin', product.gtin)}
-          ${field('Google product category', 'googleProductCategory', product.googleProductCategory, 'text', true)}
-          ${field('Product type', 'productType', product.productType)}
-          ${selectField('Condition', 'condition', product.condition || 'NewCondition', ['NewCondition', 'UsedCondition', 'RefurbishedCondition'])}
-          ${field('Price valid until', 'priceValidUntil', product.priceValidUntil, 'date')}
-          ${field('Primary image', 'primaryImage', product.primaryImage || product.image, 'text', true)}
-          ${textareaField('Gallery images', 'galleryImagesText', (product.galleryImages || []).join('\\n'))}
-          ${field('Image alt text', 'imageAltText', product.imageAltText, 'text', true)}
-          <div class="field full"><h3>Variants, apparel attributes, and merchant fields</h3></div>
-          ${field('Material', 'material', product.material)}
-          ${field('Color', 'color', product.color)}
-          ${field('Size system', 'sizeSystem', product.sizeSystem)}
-          ${field('Size type', 'sizeType', product.sizeType)}
-          ${field('Age group', 'ageGroup', product.ageGroup)}
-          ${field('Item group ID', 'itemGroupId', product.itemGroupId)}
-          ${field('Variant options', 'variantOptionsText', (product.variantOptions || []).join(', '), 'text', true)}
-          ${field('Shipping weight', 'shippingWeight', product.shippingWeight)}
-          ${textareaField('Shipping policy', 'shippingPolicy', product.shippingPolicy)}
-          ${textareaField('Return policy', 'returnPolicy', product.returnPolicy)}
-          ${field('Rating value', 'ratingValue', product.ratingValue || '', 'number')}
-          ${field('Review count', 'reviewCount', product.reviewCount || '', 'number')}
-          <div class="field full"><h3>MOTOGRIP product authority</h3></div>
-          ${field('Leather type', 'leatherType', product.leatherType)}
-          ${field('Leather origin', 'leatherOrigin', product.leatherOrigin)}
-          ${field('Leather thickness', 'leatherThickness', product.leatherThickness)}
-          ${field('Lining', 'lining', product.lining)}
-          ${field('Hardware', 'hardware', product.hardware)}
-          ${field('Closure type', 'closureType', product.closureType)}
-          ${field('Armor compatibility', 'armorCompatibility', product.armorCompatibility)}
-          ${field('Weather resistance', 'weatherResistance', product.weatherResistance)}
-          ${field('Riding use case', 'ridingUseCase', product.ridingUseCase)}
-          ${field('Season', 'season', product.season)}
-          ${textareaField('Care instructions', 'careInstructions', product.careInstructions)}
-          ${textareaField('Fit notes', 'fitNotes', product.fitNotes)}
-          ${field('Craft method', 'craftMethod', product.craftMethod, 'text', true)}
-          ${field('Warranty', 'warranty', product.warranty, 'text', true)}
-          <div class="field full">
-            <div class="toggle-line">
-              <div>
-                <strong>Made to measure</strong><br>
-                <span class="muted">Show this fit option on the product and add its surcharge.</span>
+          </section>
+
+          <section class="card editor-section">
+            <div class="card-head"><div><h2>Media</h2><span class="muted">Upload up to 10 images. Drag image cards to set their order; the first is the cover.</span></div></div>
+            <div class="card-pad">
+              <label class="media-dropzone" id="media-dropzone" for="product-images">
+                <input id="product-images" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+                <span class="dropzone-icon">＋</span>
+                <strong>Drop product images here</strong>
+                <span>or click to select multiple files at once · PNG, JPG, WEBP or GIF · 8 MB each</span>
+              </label>
+              <div class="media-grid" id="media-grid">
+                ${media.length ? media.map((image, index) => `
+                  <article class="media-card" draggable="true" data-image-kind="${image.kind}" data-image-id="${escapeHtml(image.id)}" data-image-index="${image.index}">
+                    <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.name || product.title)}">
+                    <div class="media-card-meta">
+                      <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                      <span class="media-name">${index === 0 ? '<strong>Cover</strong> · ' : ''}${escapeHtml(image.name || `Image ${index + 1}`)}</span>
+                      <button type="button" class="media-remove" data-remove-image="${escapeHtml(image.id)}" data-image-kind="${image.kind}" aria-label="Remove image">×</button>
+                    </div>
+                  </article>
+                `).join('') : '<div class="media-empty">No product images yet.</div>'}
               </div>
-              <input type="checkbox" data-product-field="madeToMeasureEnabled" ${product.madeToMeasureEnabled ? 'checked' : ''}>
             </div>
-          </div>
-          ${field('Made-to-measure surcharge', 'madeToMeasureSurcharge', product.madeToMeasureSurcharge, 'number')}
-          <div class="field full">
-            <label>Size stock</label>
-            <div class="form-grid">
-              ${['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'].map((size) => `
-                <div class="field">
-                  <label>${size}</label>
-                  <input data-stock-size="${size}" value="${Number(stock[size] || 0)}" type="number" min="0">
-                </div>
-              `).join('')}
+          </section>
+
+          <section class="card editor-section">
+            <div class="card-head"><h2>Pricing and inventory</h2></div>
+            <div class="card-pad form-grid">
+              ${field('Price', 'price', product.price, 'number')}
+              ${field('Compare-at price', 'compareAtPrice', product.compareAtPrice || '', 'number')}
+              ${field('Quantity', 'inventory', product.inventory, 'number')}
             </div>
-          </div>
+          </section>
+
+          <section class="optional-fields">
+            ${optionalSection('Search engine listing', 'SEO title, description, URL, schema, and product identifiers.', `
+              ${field('SEO title', 'seoTitle', product.seoTitle, 'text', true)}
+              ${textareaField('SEO description', 'seoDescription', product.seoDescription)}
+              ${textareaField('Schema description', 'schemaDescription', product.schemaDescription)}
+              ${field('URL handle', 'slug', product.slug, 'text', true)}
+              ${field('Canonical URL', 'canonicalUrl', product.canonicalUrl, 'url', true)}
+              ${field('SKU', 'sku', product.sku)}
+              ${field('MPN', 'mpn', product.mpn)}
+              ${field('GTIN / UPC / EAN', 'gtin', product.gtin)}
+              ${field('Google product category', 'googleProductCategory', product.googleProductCategory, 'text', true)}
+            `)}
+            ${optionalSection('Product content', 'Add structured details when they are available.', `
+              ${textareaField('Features', 'features', product.features)}
+              ${textareaField('Specifications', 'specifications', product.specifications)}
+              ${textareaField('Perfect for', 'perfectFor', product.perfectFor)}
+              ${textareaField('Why you’ll love it', 'whyYouWillLoveIt', product.whyYouWillLoveIt)}
+            `)}
+            ${optionalSection('Apparel and merchant details', 'Material, color, sizing, condition, variants, and ratings.', `
+              ${field('Brand', 'brand', product.brand)}
+              ${field('Product type', 'productType', product.productType)}
+              ${selectField('Condition', 'condition', product.condition || 'NewCondition', ['NewCondition', 'UsedCondition', 'RefurbishedCondition'])}
+              ${field('Material', 'material', product.material)}
+              ${field('Color', 'color', product.color)}
+              ${field('Size system', 'sizeSystem', product.sizeSystem)}
+              ${field('Size type', 'sizeType', product.sizeType)}
+              ${field('Age group', 'ageGroup', product.ageGroup)}
+              ${field('Item group ID', 'itemGroupId', product.itemGroupId)}
+              ${field('Variant options', 'variantOptionsText', (product.variantOptions || []).join(', '), 'text', true)}
+              ${field('Shipping weight', 'shippingWeight', product.shippingWeight)}
+              ${field('Rating value', 'ratingValue', product.ratingValue || '', 'number')}
+              ${field('Review count', 'reviewCount', product.reviewCount || '', 'number')}
+            `)}
+            ${optionalSection('Shipping and returns', 'Customer-facing delivery and return information.', `
+              ${textareaField('Shipping policy', 'shippingPolicy', product.shippingPolicy)}
+              ${textareaField('Return policy', 'returnPolicy', product.returnPolicy)}
+              ${textareaField('Care instructions', 'careInstructions', product.careInstructions)}
+              ${textareaField('Fit notes', 'fitNotes', product.fitNotes)}
+              ${field('Warranty', 'warranty', product.warranty, 'text', true)}
+            `)}
+            ${optionalSection('Leather product authority', 'Construction and riding-specific attributes.', `
+              ${field('Leather type', 'leatherType', product.leatherType)}
+              ${field('Leather origin', 'leatherOrigin', product.leatherOrigin)}
+              ${field('Leather thickness', 'leatherThickness', product.leatherThickness)}
+              ${field('Lining', 'lining', product.lining)}
+              ${field('Hardware', 'hardware', product.hardware)}
+              ${field('Closure type', 'closureType', product.closureType)}
+              ${field('Armor compatibility', 'armorCompatibility', product.armorCompatibility)}
+              ${field('Weather resistance', 'weatherResistance', product.weatherResistance)}
+              ${field('Riding use case', 'ridingUseCase', product.ridingUseCase)}
+              ${field('Season', 'season', product.season)}
+              ${field('Craft method', 'craftMethod', product.craftMethod, 'text', true)}
+            `)}
+            ${optionalSection('Made to measure and size stock', 'Configure fit service and optional per-size quantities.', `
+              <div class="field full">
+                <div class="toggle-line"><div><strong>Made to measure</strong><br><span class="muted">Offer custom measurements with a surcharge.</span></div><input type="checkbox" data-product-field="madeToMeasureEnabled" ${product.madeToMeasureEnabled ? 'checked' : ''}></div>
+              </div>
+              ${field('Made-to-measure surcharge', 'madeToMeasureSurcharge', product.madeToMeasureSurcharge, 'number')}
+              <div class="field full"><label>Size stock</label><div class="size-stock-grid">
+                ${['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'].map((size) => `<div class="field"><label>${size}</label><input data-stock-size="${size}" value="${Number(stock[size] || 0)}" type="number" min="0"></div>`).join('')}
+              </div></div>
+            `)}
+          </section>
         </div>
+
+        <aside class="editor-sidebar">
+          <section class="card editor-section sticky-editor-card">
+            <div class="card-head"><h2>Organization</h2></div>
+            <div class="card-pad form-grid one-column">
+              ${selectField('Status', 'status', product.status || 'draft', product.status === 'active' ? ['active', 'draft', 'archived'] : ['draft', 'archived'])}
+              ${selectField('Gender', 'gender', product.gender || 'Unisex', ['Men', 'Women', 'Unisex'])}
+              ${selectField('Category', 'category', product.category, categoryNames)}
+              <div class="field">
+                <label>Subcategory</label>
+                <select data-product-field="subcategory">
+                  <option value="">No subcategory</option>
+                  ${subcategories.map((item) => `<option value="${escapeHtml(item.name)}" ${item.name === product.subcategory ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="button-row organization-actions">
+                <button class="btn" type="button" id="add-category">Add category</button>
+                <button class="btn" type="button" id="add-subcategory">Add subcategory</button>
+                ${product.subcategory && subcategories.find((item) => item.name === product.subcategory)?.id ? `<button class="btn danger" type="button" data-delete-subcategory="${escapeHtml(subcategories.find((item) => item.name === product.subcategory).id)}">Remove selected</button>` : ''}
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <div class="editor-footer-actions">
+        <span class="muted">${state.pendingImages.length ? `${state.pendingImages.length} image${state.pendingImages.length === 1 ? '' : 's'} ready to upload` : 'All product data is saved together.'}</span>
+        <div class="button-row"><button class="btn" id="footer-save">Save</button><button class="btn primary" id="footer-publish">Save &amp; publish</button></div>
       </div>
     </div>
+  `;
+}
+
+function renderProductEditor() {
+  let product = productById();
+  if (!product && window.location.pathname.replace(/\/$/, '').endsWith('/products/new')) product = createProductDraft();
+  if (!product) {
+    return `${pageHead('Product not found', 'This product may have been removed.', '<button class="btn" id="back-products">Back to products</button>')}<div class="card empty">Choose a product from the catalog.</div>`;
+  }
+  return productEditor(product);
+}
+
+function optionalSection(title, subtitle, fields) {
+  return `
+    <details class="card optional-section">
+      <summary><span><strong>${title}</strong><small>${subtitle}</small></span><span class="optional-chevron">⌄</span></summary>
+      <div class="card-pad form-grid">${fields}</div>
+    </details>
   `;
 }
 
@@ -613,6 +770,7 @@ function render() {
   const views = {
     dashboard: renderDashboard,
     products: renderProducts,
+    'product-editor': renderProductEditor,
     orders: renderOrders,
     returns: renderReturns,
     mto: renderMto,
@@ -621,14 +779,13 @@ function render() {
   };
   root.innerHTML = shell((views[state.view] || renderDashboard)());
   bindShell();
-  if (state.dirty) document.querySelector('.savebar')?.classList.add('visible');
+  if (state.dirty && state.view !== 'product-editor') document.querySelector('.savebar')?.classList.add('visible');
 }
 
 function bindShell() {
   document.querySelectorAll('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
-      state.view = button.dataset.view;
-      render();
+      navigateAdmin(adminPathForView(button.dataset.view));
     });
   });
 
@@ -644,20 +801,74 @@ function bindShell() {
     renderLogin();
   });
 
-  document.getElementById('save')?.addEventListener('click', saveStore);
+  document.getElementById('save')?.addEventListener('click', () => state.view === 'product-editor' ? saveProductWorkflow() : saveStore());
   document.getElementById('discard')?.addEventListener('click', loadStore);
+  document.getElementById('back-products')?.addEventListener('click', () => navigateAdmin('/admin/products'));
+  document.getElementById('sidebar-add-product')?.addEventListener('click', () => navigateAdmin('/admin/products/new'));
 
   document.getElementById('add-category')?.addEventListener('click', async () => {
     const name = window.prompt('New category name');
     if (!name?.trim()) return;
     try {
+      const selectedId = state.selectedProductId;
+      if (state.view === 'product-editor' && state.dirty) {
+        state.store = await api('/api/admin/store', { method: 'PUT', body: JSON.stringify(state.store) });
+        state.selectedProductId = selectedId;
+      }
       state.store = await api('/api/admin/categories', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
+      state.selectedProductId = selectedId;
       state.dirty = false;
       render();
       toast('Category added');
     } catch (error) {
       toast(error.message);
     }
+  });
+
+  document.getElementById('add-subcategory')?.addEventListener('click', async () => {
+    const product = productById();
+    const category = categories().find((item) => item.name === product?.category);
+    if (!category) {
+      toast('Choose a category first');
+      return;
+    }
+    const name = window.prompt(`New subcategory under ${category.name}`);
+    if (!name?.trim()) return;
+    try {
+      const selectedId = state.selectedProductId;
+      if (state.dirty) state.store = await api('/api/admin/store', { method: 'PUT', body: JSON.stringify(state.store) });
+      state.store = await api(`/api/admin/categories/${encodeURIComponent(category.id)}/subcategories`, {
+        method: 'POST',
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      state.selectedProductId = selectedId;
+      const savedProduct = productById();
+      if (savedProduct) savedProduct.subcategory = name.trim();
+      state.dirty = true;
+      render();
+      toast('Subcategory added');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+
+  document.querySelectorAll('[data-delete-subcategory]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!window.confirm('Remove this subcategory? Existing products keep their saved text until reassigned.')) return;
+      try {
+        const productId = state.selectedProductId;
+        if (state.dirty) state.store = await api('/api/admin/store', { method: 'PUT', body: JSON.stringify(state.store) });
+        state.store = await api(`/api/admin/subcategories/${encodeURIComponent(button.dataset.deleteSubcategory)}`, { method: 'DELETE' });
+        state.selectedProductId = productId;
+        const product = productById();
+        if (product) product.subcategory = '';
+        state.dirty = true;
+        render();
+        toast('Subcategory removed');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
   });
 
   document.querySelectorAll('[data-delete-category]').forEach((button) => {
@@ -676,8 +887,7 @@ function bindShell() {
 
   document.querySelectorAll('[data-product]').forEach((row) => {
     row.addEventListener('click', () => {
-      state.selectedProductId = row.dataset.product;
-      render();
+      navigateAdmin(`/admin/products/${encodeURIComponent(row.dataset.product)}`);
     });
   });
 
@@ -705,6 +915,11 @@ function bindShell() {
     input.addEventListener('change', () => {
       assignProductField();
       markDirty();
+      if (input.dataset.productField === 'category') {
+        const product = productById();
+        if (product) product.subcategory = '';
+        render();
+      }
     });
   });
 
@@ -718,44 +933,136 @@ function bindShell() {
     });
   });
 
-  document.getElementById('publish-product')?.addEventListener('click', async () => {
+  const saveButtonBindings = [
+    ['save-draft', { forceDraft: true }],
+    ['save-product', {}],
+    ['footer-save', {}],
+    ['save-publish', { publish: true }],
+    ['footer-publish', { publish: true }],
+  ];
+  for (const [id, options] of saveButtonBindings) {
+    document.getElementById(id)?.addEventListener('click', () => saveProductWorkflow(options));
+  }
+
+  const addFiles = async (files) => {
     const product = productById();
-    if (!product) return;
+    if (!product || !files.length) return;
+    const available = 10 - (product.uploadedImages || []).length - state.pendingImages.length;
+    if (available <= 0) {
+      toast('This product already has 10 images');
+      return;
+    }
+    const accepted = [...files].slice(0, available);
     try {
-      if (state.dirty) await saveStore();
-      state.store = await api(`/api/admin/products/${encodeURIComponent(product.id)}/publish`, { method: 'POST' });
-      state.selectedProductId = product.id;
-      state.dirty = false;
+      const pending = await Promise.all(accepted.map(async (file) => {
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) throw new Error(`${file.name} is not a supported image.`);
+        if (file.size > 8 * 1024 * 1024) throw new Error(`${file.name} is larger than 8 MB.`);
+        return {
+          id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: file.name,
+          type: file.type,
+          data: await readFileAsDataUrl(file),
+        };
+      }));
+      state.pendingImages.push(...pending);
+      state.mediaOrder.push(...pending.map((image) => `pending:${image.id}`));
+      markDirty();
       render();
-      toast('Product published');
+      toast(`${pending.length} image${pending.length === 1 ? '' : 's'} ready to upload`);
     } catch (error) {
       toast(error.message);
     }
+  };
+
+  document.getElementById('product-images')?.addEventListener('change', (event) => addFiles(event.target.files || []));
+  const dropzone = document.getElementById('media-dropzone');
+  for (const eventName of ['dragenter', 'dragover']) {
+    dropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add('dragging');
+    });
+  }
+  for (const eventName of ['dragleave', 'drop']) {
+    dropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove('dragging');
+    });
+  }
+  dropzone?.addEventListener('drop', (event) => addFiles(event.dataTransfer?.files || []));
+
+  document.querySelectorAll('.media-card').forEach((card) => {
+    const key = `${card.dataset.imageKind}:${card.dataset.imageId}`;
+    card.addEventListener('dragstart', (event) => {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', key);
+      card.classList.add('dragging-card');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging-card'));
+    card.addEventListener('dragover', (event) => event.preventDefault());
+    card.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const sourceKey = event.dataTransfer.getData('text/plain');
+      const sourceIndex = state.mediaOrder.indexOf(sourceKey);
+      const targetIndex = state.mediaOrder.indexOf(key);
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+      state.mediaOrder.splice(sourceIndex, 1);
+      state.mediaOrder.splice(targetIndex, 0, sourceKey);
+      const product = productById();
+      if (product && state.mediaOrder.every((item) => item.startsWith('catalog:'))) {
+        const catalogById = new Map([...new Set([product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean))]
+          .map((src, index) => [`catalog-${index}`, src]));
+        const orderedUrls = state.mediaOrder.map((item) => catalogById.get(item.slice('catalog:'.length))).filter(Boolean);
+        product.primaryImage = orderedUrls[0] || '';
+        product.image = orderedUrls[0] || '';
+        product.galleryImages = orderedUrls.slice(1);
+        state.mediaOrder = orderedUrls.map((_, index) => `catalog:catalog-${index}`);
+      }
+      markDirty();
+      render();
+    });
   });
 
-  document.getElementById('product-image-file')?.addEventListener('change', async (event) => {
-    const file = event.target.files?.[0];
-    const product = productById();
-    if (!file || !product) return;
-    try {
-      if (state.dirty) await saveStore();
-      const data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('Could not read that image.'));
-        reader.readAsDataURL(file);
-      });
-      state.store = await api(`/api/admin/products/${encodeURIComponent(product.id)}/image`, {
-        method: 'POST',
-        body: JSON.stringify({ data, name: file.name }),
-      });
-      state.selectedProductId = product.id;
-      state.dirty = false;
-      render();
-      toast('Product image uploaded');
-    } catch (error) {
-      toast(error.message);
-    }
+  document.querySelectorAll('[data-remove-image]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const key = `${button.dataset.imageKind}:${button.dataset.removeImage}`;
+      if (button.dataset.imageKind === 'pending') {
+        state.pendingImages = state.pendingImages.filter((image) => image.id !== button.dataset.removeImage);
+        state.mediaOrder = state.mediaOrder.filter((item) => item !== key);
+        markDirty();
+        render();
+        return;
+      }
+      if (button.dataset.imageKind === 'catalog') {
+        const product = productById();
+        if (!product) return;
+        const currentUrls = [...new Set([product.primaryImage || product.image, ...(product.galleryImages || [])].filter(Boolean))];
+        const removeIndex = Number(button.dataset.removeImage.replace('catalog-', ''));
+        const nextUrls = currentUrls.filter((_, index) => index !== removeIndex);
+        product.primaryImage = nextUrls[0] || '';
+        product.image = nextUrls[0] || '';
+        product.galleryImages = nextUrls.slice(1);
+        state.mediaOrder = nextUrls.map((_, index) => `catalog:catalog-${index}`);
+        markDirty();
+        render();
+        return;
+      }
+      const product = productById();
+      if (!product || !window.confirm('Remove this uploaded image?')) return;
+      try {
+        if (state.dirty) {
+          state.store = await api('/api/admin/store', { method: 'PUT', body: JSON.stringify(state.store) });
+          state.selectedProductId = product.id;
+        }
+        state.store = await api(`/api/admin/products/${encodeURIComponent(product.id)}/images/${encodeURIComponent(button.dataset.removeImage)}`, { method: 'DELETE' });
+        state.selectedProductId = product.id;
+        state.mediaOrder = state.mediaOrder.filter((item) => item !== key);
+        state.dirty = state.pendingImages.length > 0;
+        render();
+        toast('Image removed');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
   });
 
   document.querySelectorAll('[data-setting-field]').forEach((input) => {
@@ -767,69 +1074,7 @@ function bindShell() {
   });
 
   document.getElementById('new-product')?.addEventListener('click', () => {
-    const id = `p-${Date.now()}`;
-    state.store.products.unshift({
-      id,
-      slug: 'new-product',
-      title: 'New product',
-      category: 'Jackets',
-      gender: 'Unisex',
-      price: 0,
-      compareAtPrice: null,
-      status: 'draft',
-      inventory: 0,
-      madeToMeasureEnabled: true,
-      madeToMeasureSurcharge: state.store.settings.madeToMeasureSurcharge,
-      tag: '',
-      description: '',
-      image: 'assets/generated/leather-detail.png',
-      stock: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0, '4XL': 0, '5XL': 0, '6XL': 0 },
-      maker: '',
-      seoTitle: '',
-      seoDescription: '',
-      canonicalUrl: '',
-      schemaDescription: '',
-      brand: 'MOTOGRIP GEAR',
-      sku: id,
-      mpn: '',
-      gtin: '',
-      googleProductCategory: 'Apparel & Accessories > Clothing > Outerwear > Coats & Jackets',
-      productType: 'Motorcycle leather gear',
-      condition: 'NewCondition',
-      priceValidUntil: '',
-      primaryImage: 'assets/generated/leather-detail.png',
-      galleryImages: [],
-      imageAltText: 'MOTOGRIP GEAR leather product',
-      material: 'Leather',
-      color: '',
-      sizeSystem: 'US',
-      sizeType: 'Regular',
-      ageGroup: 'Adult',
-      itemGroupId: id,
-      variantOptions: ['Size', 'Leather', 'Fit'],
-      shippingWeight: '',
-      shippingPolicy: 'Complimentary express shipping on stock pieces',
-      returnPolicy: '30-day returns on stock pieces; made-to-measure pieces are final sale with alteration support',
-      ratingValue: '',
-      reviewCount: '',
-      careInstructions: '',
-      fitNotes: '',
-      leatherType: '',
-      leatherOrigin: '',
-      leatherThickness: '',
-      lining: '',
-      hardware: '',
-      closureType: '',
-      armorCompatibility: '',
-      weatherResistance: '',
-      ridingUseCase: '',
-      season: '',
-      craftMethod: '',
-      warranty: '',
-    });
-    state.selectedProductId = id;
-    markDirty();
-    render();
+    navigateAdmin('/admin/products/new');
   });
 
   document.getElementById('add-demo-order')?.addEventListener('click', () => {
@@ -859,10 +1104,93 @@ function bindShell() {
   });
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveProductWorkflow({ publish = false, forceDraft = false } = {}) {
+  if (state.editorSaving) return;
+  const product = productById();
+  if (!product) return;
+  state.editorSaving = true;
+  const productId = product.id;
+  const wasNewRoute = window.location.pathname.replace(/\/$/, '').endsWith('/products/new');
+  try {
+    product.slug = slugify(product.slug || product.title || product.id);
+    if (forceDraft || (!publish && product.status === 'active' && !product.publishedAt)) product.status = 'draft';
+
+    const requestedOrder = [...state.mediaOrder];
+    const existingIds = new Set((product.uploadedImages || []).map((image) => image.id));
+    const pendingById = new Map(state.pendingImages.map((image) => [image.id, image]));
+    const pendingInOrder = requestedOrder
+      .filter((key) => key.startsWith('pending:'))
+      .map((key) => pendingById.get(key.slice('pending:'.length)))
+      .filter(Boolean);
+    for (const image of state.pendingImages) if (!pendingInOrder.includes(image)) pendingInOrder.push(image);
+
+    state.store = await api('/api/admin/store', { method: 'PUT', body: JSON.stringify(state.store) });
+    state.selectedProductId = productId;
+
+    const pendingToUploaded = new Map();
+    if (pendingInOrder.length) {
+      state.store = await api(`/api/admin/products/${encodeURIComponent(productId)}/images`, {
+        method: 'POST',
+        body: JSON.stringify({
+          images: pendingInOrder.map((image) => ({ data: image.data, name: image.name, altText: product.imageAltText || product.title })),
+        }),
+      });
+      state.selectedProductId = productId;
+      const uploadedAfter = productById()?.uploadedImages || [];
+      const newImages = uploadedAfter.filter((image) => !existingIds.has(image.id));
+      pendingInOrder.forEach((image, index) => {
+        if (newImages[index]) pendingToUploaded.set(image.id, newImages[index].id);
+      });
+    }
+
+    const uploadedNow = productById()?.uploadedImages || [];
+    const desiredIds = requestedOrder.map((key) => {
+      if (key.startsWith('uploaded:')) return key.slice('uploaded:'.length);
+      if (key.startsWith('pending:')) return pendingToUploaded.get(key.slice('pending:'.length));
+      return '';
+    }).filter(Boolean);
+    for (const image of uploadedNow) if (!desiredIds.includes(image.id)) desiredIds.push(image.id);
+    if (state.databaseConfigured && desiredIds.length > 1 && desiredIds.length === uploadedNow.length) {
+      state.store = await api(`/api/admin/products/${encodeURIComponent(productId)}/images/order`, {
+        method: 'PUT',
+        body: JSON.stringify({ imageIds: desiredIds }),
+      });
+      state.selectedProductId = productId;
+    }
+
+    state.pendingImages = [];
+    state.mediaOrder = [];
+    if (publish) {
+      state.store = await api(`/api/admin/products/${encodeURIComponent(productId)}/publish`, { method: 'POST' });
+      state.selectedProductId = productId;
+    }
+    state.dirty = false;
+    if (wasNewRoute) window.history.replaceState({}, '', `/admin/products/${encodeURIComponent(productId)}`);
+    render();
+    toast(publish ? 'Product published — live link ready' : forceDraft ? 'Draft saved' : 'Product saved');
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    state.editorSaving = false;
+  }
+}
+
 async function loadStore() {
   state.store = await api('/api/admin/store');
-  state.selectedProductId = state.store.products[0]?.id || null;
+  state.pendingImages = [];
+  state.mediaOrder = [];
   state.dirty = false;
+  applyRoute();
+  if (state.view === 'product-editor' && !state.selectedProductId) createProductDraft();
   render();
 }
 
@@ -888,5 +1216,13 @@ async function init() {
     root.innerHTML = `<main class="login-shell"><div class="login-card">Admin failed to load: ${escapeHtml(err.message)}</div></main>`;
   }
 }
+
+window.addEventListener('popstate', () => {
+  state.pendingImages = [];
+  state.mediaOrder = [];
+  applyRoute();
+  if (state.view === 'product-editor' && !state.selectedProductId && state.store) createProductDraft();
+  render();
+});
 
 init();
