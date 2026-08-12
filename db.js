@@ -238,6 +238,47 @@ async function readStoreFromDatabase() {
   return cache;
 }
 
+async function removeRequestedTestListings(client) {
+  const migrationId = 'act-remove-requested-test-listings-20260813';
+  const targets = [
+    'tst product bbrown',
+    'Leather Suit Case test',
+    'New product test',
+    'new test product',
+    "Men's White & Red Diamond-Quilted Cowhide Leather Motorcycle Vest",
+  ];
+  const activityResult = await client.query('SELECT activity FROM admin_store_state WHERE id = TRUE');
+  const activity = Array.isArray(activityResult.rows[0]?.activity) ? activityResult.rows[0].activity : [];
+  if (activity.some((event) => event?.id === migrationId)) return { removedCount: 0, titles: [] };
+
+  const productResult = await client.query(`
+    SELECT id, title
+    FROM admin_products
+    WHERE lower(title) = ANY($1::text[])
+  `, [targets.map((title) => title.toLowerCase())]);
+  const ids = productResult.rows.map((row) => row.id);
+  const titles = productResult.rows.map((row) => row.title);
+  if (ids.length) {
+    await client.query('DELETE FROM admin_product_images WHERE product_id = ANY($1::text[])', [ids]);
+    await client.query('DELETE FROM admin_products WHERE id = ANY($1::text[])', [ids]);
+  }
+  await client.query(`
+    INSERT INTO admin_store_state (id, activity, updated_at)
+    VALUES (TRUE, $1::jsonb, NOW())
+    ON CONFLICT (id) DO UPDATE SET activity = EXCLUDED.activity, updated_at = NOW()
+  `, [JSON.stringify([
+    {
+      id: migrationId,
+      at: new Date().toISOString(),
+      type: 'system',
+      message: `Removed ${ids.length} owner-requested test or draft product listing${ids.length === 1 ? '' : 's'} from the live admin catalog`,
+      titles,
+    },
+    ...activity,
+  ])]);
+  return { removedCount: ids.length, titles };
+}
+
 async function init(seedStore) {
   if (!enabled) return null;
   pool = new Pool({
@@ -268,6 +309,7 @@ async function init(seedStore) {
         VALUES (TRUE, $1::jsonb, $2::jsonb, $3::jsonb, $4::jsonb, $5::jsonb)
       `, [JSON.stringify(seedStore.settings || {}), JSON.stringify(seedStore.orders || []), JSON.stringify(seedStore.returnRequests || []), JSON.stringify(seedStore.customConsultations || []), JSON.stringify(seedStore.activity || [])]);
     }
+    await removeRequestedTestListings(client);
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
