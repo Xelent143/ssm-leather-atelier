@@ -1089,7 +1089,10 @@ function publicProductForPdp(product) {
       attributes: { size, color },
     };
   }));
-  const swatches = { black: '#111111', blue: '#2554b8', red: '#c9252d', white: '#f4f1e8' };
+  const swatches = {
+    black: '#111111', blue: '#2554b8', red: '#c9252d', white: '#f4f1e8',
+    brown: '#6b4226', 'chocolate brown': '#4a2a21',
+  };
   const colors = colorNames.map((name) => ({
     id: slugPart(name),
     name,
