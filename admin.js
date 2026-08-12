@@ -3,6 +3,7 @@ const root = document.getElementById('admin-root');
 const state = {
   authed: false,
   defaultPasswordInUse: false,
+  databaseConfigured: false,
   loading: true,
   view: 'dashboard',
   query: '',
@@ -39,6 +40,13 @@ function slugify(value = '') {
   return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function assetUrl(value = '') {
+  const source = String(value || '').trim();
+  if (!source) return '/assets/motogrip-logo-transparent.png';
+  if (/^(?:https?:|data:|\/)/i.test(source)) return source;
+  return `/${source}`;
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
@@ -66,6 +74,10 @@ function toast(message) {
 
 function productById(id = state.selectedProductId) {
   return state.store.products.find((product) => product.id === id) || state.store.products[0];
+}
+
+function categories() {
+  return state.store.categories || [];
 }
 
 function filteredProducts() {
@@ -170,7 +182,8 @@ function shell(content) {
         </div>
         <div class="sidebar-footer">
           <strong>${escapeHtml(state.store.settings.storeName)}</strong><br>
-          ${state.store.products.length} products · ${state.store.orders.length} orders
+          ${state.store.products.length} products · ${state.store.orders.length} orders<br>
+          <span class="database-state ${state.databaseConfigured ? 'connected' : ''}">${state.databaseConfigured ? '● PostgreSQL connected' : '○ Local data mode'}</span>
         </div>
       </aside>
       <main class="main">
@@ -257,7 +270,7 @@ function productTable(products) {
           <tr class="clickable" data-product="${product.id}">
             <td>
               <div class="resource">
-                <div class="thumb"><img src="/${escapeHtml(product.image)}" alt=""></div>
+                <div class="thumb"><img src="${escapeHtml(assetUrl(product.image || product.primaryImage))}" alt=""></div>
                 <div>
                   <strong>${escapeHtml(product.title)}</strong><br>
                   <span class="muted">${escapeHtml(product.category)} · ${escapeHtml(product.gender)}</span>
@@ -281,6 +294,18 @@ function renderProducts() {
   const product = productById();
   return `
     ${pageHead('Products', 'Create, edit, publish, archive, and tune product-level made-to-measure pricing.', '<button class="btn primary" id="new-product">Add product</button>')}
+    <div class="card category-manager">
+      <div class="card-head">
+        <div><h2>Categories</h2><span class="muted">Create or remove product categories stored in PostgreSQL.</span></div>
+        <button class="btn" id="add-category">Add category</button>
+      </div>
+      <div class="card-pad category-list">
+        ${categories().length ? categories().map((category) => `
+          <span class="category-chip"><span>${escapeHtml(category.name)}</span><button type="button" data-delete-category="${escapeHtml(category.id)}" aria-label="Remove ${escapeHtml(category.name)}">×</button></span>
+        `).join('') : '<span class="muted">No categories yet. Add your first category above.</span>'}
+      </div>
+    </div>
+    <div style="height:16px"></div>
     <div class="grid two-col">
       <div class="card">
         <div class="card-head"><h2>Catalog</h2><span class="pill">${products.length} shown</span></div>
@@ -293,18 +318,23 @@ function renderProducts() {
 
 function productEditor(product) {
   const stock = product.stock || {};
+  const categoryNames = categories().map((category) => category.name);
+  if (product.category && !categoryNames.includes(product.category)) categoryNames.push(product.category);
   return `
     <div class="card">
       <div class="card-head">
         <h2>${escapeHtml(product.title)}</h2>
-        <span class="pill ${product.status}">${escapeHtml(product.status)}</span>
+        <div class="button-row">
+          <span class="pill ${product.status}">${escapeHtml(product.status)}</span>
+          ${product.status === 'active' ? '<a class="btn" href="/products/' + encodeURIComponent(product.slug) + '" target="_blank" rel="noreferrer">View live</a>' : '<button class="btn primary" id="publish-product">Publish now</button>'}
+        </div>
       </div>
       <div class="card-pad">
         <div class="form-grid" id="product-form" data-id="${product.id}">
           ${field('Title', 'title', product.title)}
           ${field('Slug', 'slug', product.slug)}
           ${selectField('Status', 'status', product.status, ['active', 'draft', 'archived'])}
-          ${selectField('Category', 'category', product.category, ['Jackets', 'Vests', 'Pants', 'Accessories'])}
+          ${selectField('Category', 'category', product.category, categoryNames)}
           ${selectField('Gender', 'gender', product.gender, ['Men', 'Women', 'Unisex'])}
           ${field('Tag', 'tag', product.tag)}
           ${field('Price', 'price', product.price, 'number')}
@@ -312,6 +342,14 @@ function productEditor(product) {
           ${field('Inventory', 'inventory', product.inventory, 'number')}
           ${field('Maker', 'maker', product.maker)}
           ${field('Image path', 'image', product.image, 'text', true)}
+          <div class="field full upload-field">
+            <label for="product-image-file">Product image</label>
+            <div class="upload-row">
+              <input id="product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+              <span class="muted">PNG, JPG, WEBP, or GIF · max 8 MB</span>
+            </div>
+            ${product.primaryImage ? `<img class="editor-image-preview" src="${escapeHtml(product.primaryImage)}" alt="${escapeHtml(product.imageAltText || product.title)}">` : '<span class="muted">No image uploaded.</span>'}
+          </div>
           ${textareaField('Description', 'description', product.description)}
           <div class="field full"><h3>SEO and AI discovery</h3></div>
           ${field('SEO title', 'seoTitle', product.seoTitle, 'text', true)}
@@ -609,6 +647,33 @@ function bindShell() {
   document.getElementById('save')?.addEventListener('click', saveStore);
   document.getElementById('discard')?.addEventListener('click', loadStore);
 
+  document.getElementById('add-category')?.addEventListener('click', async () => {
+    const name = window.prompt('New category name');
+    if (!name?.trim()) return;
+    try {
+      state.store = await api('/api/admin/categories', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
+      state.dirty = false;
+      render();
+      toast('Category added');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+
+  document.querySelectorAll('[data-delete-category]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!window.confirm('Remove this category? Products assigned to it must be moved first.')) return;
+      try {
+        state.store = await api(`/api/admin/categories/${encodeURIComponent(button.dataset.deleteCategory)}`, { method: 'DELETE' });
+        state.dirty = false;
+        render();
+        toast('Category removed');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+  });
+
   document.querySelectorAll('[data-product]').forEach((row) => {
     row.addEventListener('click', () => {
       state.selectedProductId = row.dataset.product;
@@ -651,6 +716,46 @@ function bindShell() {
       product.inventory = Object.values(product.stock).reduce((sum, value) => sum + Number(value || 0), 0);
       markDirty();
     });
+  });
+
+  document.getElementById('publish-product')?.addEventListener('click', async () => {
+    const product = productById();
+    if (!product) return;
+    try {
+      if (state.dirty) await saveStore();
+      state.store = await api(`/api/admin/products/${encodeURIComponent(product.id)}/publish`, { method: 'POST' });
+      state.selectedProductId = product.id;
+      state.dirty = false;
+      render();
+      toast('Product published');
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+
+  document.getElementById('product-image-file')?.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    const product = productById();
+    if (!file || !product) return;
+    try {
+      if (state.dirty) await saveStore();
+      const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Could not read that image.'));
+        reader.readAsDataURL(file);
+      });
+      state.store = await api(`/api/admin/products/${encodeURIComponent(product.id)}/image`, {
+        method: 'POST',
+        body: JSON.stringify({ data, name: file.name }),
+      });
+      state.selectedProductId = product.id;
+      state.dirty = false;
+      render();
+      toast('Product image uploaded');
+    } catch (error) {
+      toast(error.message);
+    }
   });
 
   document.querySelectorAll('[data-setting-field]').forEach((input) => {
@@ -776,6 +881,7 @@ async function init() {
     const session = await api('/api/admin/session');
     state.authed = session.authenticated;
     state.defaultPasswordInUse = session.defaultPasswordInUse;
+    state.databaseConfigured = session.databaseConfigured;
     if (state.authed) await loadStore();
     else renderLogin();
   } catch (err) {

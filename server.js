@@ -3,12 +3,14 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const database = require('./db');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || '0.0.0.0';
 const assetCdnBase = (process.env.ASSET_CDN_BASE || '').replace(/\/+$/, '');
-const adminPassword = process.env.ADMIN_PASSWORD || 'motogrip-admin';
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT_NAME);
+const adminPassword = process.env.ADMIN_PASSWORD || (isProduction ? '' : 'motogrip-admin');
 const sessionTtlMs = 1000 * 60 * 60 * 12;
 const dataDir = process.env.ADMIN_DATA_DIR || path.join(root, 'data');
 const storePath = path.join(dataDir, 'admin-store.json');
@@ -20,6 +22,8 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
 const paypalApiBase = (process.env.PAYPAL_API_BASE || 'https://api-m.paypal.com').replace(/\/+$/, '');
+let databaseStoreCache = null;
+let databaseError = null;
 
 const publicRoutes = {
   '/': { view: 'home', title: 'MOTOGRIP GEAR — Premium Motorcycle Leather Gear', desc: 'Premium motorcycle leather jackets, vests, trousers, and made-to-measure gear built for fit, movement, and lasting road use.' },
@@ -313,6 +317,10 @@ function merchantSeedProducts() {
 }
 
 function defaultStore(products = []) {
+  const categoryNames = [...new Map(products.map((product) => {
+    const name = String(product.category || 'Uncategorized').trim();
+    return [name.toLowerCase(), name];
+  })).values()];
   return {
     settings: {
       storeName: 'MOTOGRIP GEAR',
@@ -324,6 +332,12 @@ function defaultStore(products = []) {
       imageryPrompt: 'Premium light-theme studio product photography for MOTOGRIP GEAR: warm ivory backdrop, road-ready leather jackets, crisp grain detail, natural daylight, soft shadow, editorial ecommerce crop, no dark background.',
     },
     products,
+    categories: categoryNames.map((name, index) => ({
+      id: `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      sortOrder: index,
+    })),
     orders: [],
     returnRequests: [],
     activity: [
@@ -420,10 +434,23 @@ function ensureStore() {
 
 function readStore() {
   ensureStore();
-  return JSON.parse(fs.readFileSync(storePath, 'utf8'));
+  if (databaseStoreCache) return databaseStoreCache;
+  const store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+  const names = [...new Map([
+    ...(store.categories || []).map((category) => [String(category.name || category).trim().toLowerCase(), String(category.name || category).trim()]),
+    ...(store.products || []).map((product) => [String(product.category || 'Uncategorized').trim().toLowerCase(), String(product.category || 'Uncategorized').trim()]),
+  ].filter(([, name]) => name)).values()];
+  store.categories = names.map((name, index) => ({
+    id: `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    sortOrder: index,
+  }));
+  return store;
 }
 
 function readPublicStore() {
+  if (databaseStoreCache) return databaseStoreCache;
   const runtimeStore = readStore();
   let seedStore = { settings: {}, products: [] };
   try {
@@ -453,6 +480,15 @@ function writeStore(store) {
   const tmp = `${storePath}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`);
   fs.renameSync(tmp, storePath);
+}
+
+async function persistStore(store) {
+  if (database.isEnabled()) {
+    databaseStoreCache = await database.saveStore(store);
+    return databaseStoreCache;
+  }
+  writeStore(store);
+  return readStore();
 }
 
 function send(res, status, body, contentType = 'text/plain; charset=utf-8', headers = {}) {
@@ -633,15 +669,22 @@ function getSession(req) {
 function setSession(res) {
   const token = crypto.randomBytes(32).toString('hex');
   sessions.set(token, { createdAt: Date.now(), expiresAt: Date.now() + sessionTtlMs });
-  return `mg_admin=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(sessionTtlMs / 1000)}`;
+  return `mg_admin=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(sessionTtlMs / 1000)}${isProduction ? '; Secure' : ''}`;
 }
 
-function readBody(req) {
+function adminPasswordMatches(candidate) {
+  if (!adminPassword) return false;
+  const expected = Buffer.from(adminPassword);
+  const supplied = Buffer.from(String(candidate || ''));
+  return expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
+}
+
+function readBody(req, maxBytes = 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 1024 * 1024) {
+      if (body.length > maxBytes) {
         reject(new Error('Request body too large'));
         req.destroy();
       }
@@ -1559,6 +1602,11 @@ function normalizeStore(input) {
   const orders = Array.isArray(input.orders) ? input.orders : current.orders;
   const returnRequests = Array.isArray(input.returnRequests) ? input.returnRequests : (current.returnRequests || []);
   const activity = Array.isArray(input.activity) ? input.activity : current.activity;
+  const categoryInput = Array.isArray(input.categories) ? input.categories : (current.categories || []);
+  const categoryNames = [...new Map([
+    ...categoryInput.map((category) => [String(category.name || category).trim().toLowerCase(), String(category.name || category).trim()]),
+    ...products.map((product) => [String(product.category || 'Uncategorized').trim().toLowerCase(), String(product.category || 'Uncategorized').trim()]),
+  ].filter(([, name]) => name)).values()];
   return {
     settings: { ...current.settings, ...(input.settings || {}) },
     products: products.map((product) => ({
@@ -1624,6 +1672,12 @@ function normalizeStore(input) {
       craftMethod: String(product.craftMethod || ''),
       warranty: String(product.warranty || ''),
     })),
+    categories: categoryNames.map((name, index) => ({
+      id: `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      sortOrder: index,
+    })),
     orders: orders.map((order) => ({
       ...order,
       id: String(order.id || crypto.randomUUID()),
@@ -1640,8 +1694,29 @@ function normalizeStore(input) {
 }
 
 async function handleApi(req, res, pathname) {
+  const apiPath = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
   if (pathname === '/api/catalog' && req.method === 'GET') {
     sendJson(res, 200, publicCatalog(readPublicStore()));
+    return true;
+  }
+
+  const publicImageMatch = apiPath.match(/^\/api\/catalog\/images\/([^/]+)$/);
+  if (publicImageMatch && (req.method === 'GET' || req.method === 'HEAD')) {
+    if (!database.isEnabled()) {
+      sendJson(res, 404, { error: 'Product image storage is not configured.' });
+      return true;
+    }
+    const image = await database.getImage(decodeURIComponent(publicImageMatch[1]));
+    if (!image || !image.image_bytes || (image.status !== 'active' && !getSession(req))) {
+      sendJson(res, 404, { error: 'Product image not found.' });
+      return true;
+    }
+    res.writeHead(200, {
+      'Content-Type': image.image_mime || 'application/octet-stream',
+      'Cache-Control': 'public, max-age=300',
+    });
+    if (req.method === 'HEAD') res.end();
+    else res.end(image.image_bytes);
     return true;
   }
 
@@ -1798,7 +1873,7 @@ async function handleApi(req, res, pathname) {
       },
       ...(store.activity || []),
     ].slice(0, 50);
-    writeStore(store);
+    await persistStore(store);
     returnRequestAttempts.set(clientIp, [...recentAttempts, now]);
     sendJson(res, 201, { ok: true, requestId });
     return true;
@@ -1827,7 +1902,7 @@ async function handleApi(req, res, pathname) {
     const store = readStore();
     store.customConsultations = [request, ...(store.customConsultations || [])].slice(0, 250);
     store.activity = [{ id: `act-${Date.now()}`, at: request.createdAt, type: 'consultation', message: `Custom consultation received from ${request.name}` }, ...(store.activity || []).slice(0, 24)];
-    writeStore(store);
+    await persistStore(store);
     sendJson(res, 201, { ok: true, id: request.id });
     return true;
   }
@@ -1835,14 +1910,19 @@ async function handleApi(req, res, pathname) {
   if (pathname === '/api/admin/session' && req.method === 'GET') {
     sendJson(res, 200, {
       authenticated: Boolean(getSession(req)),
-      defaultPasswordInUse: !process.env.ADMIN_PASSWORD,
+      defaultPasswordInUse: !isProduction && !process.env.ADMIN_PASSWORD,
+      databaseConfigured: database.isEnabled(),
     });
     return true;
   }
 
   if (pathname === '/api/admin/login' && req.method === 'POST') {
+    if (!adminPassword) {
+      sendJson(res, 503, { error: 'Admin access is not configured.' });
+      return true;
+    }
     const body = await readBody(req);
-    if (body.password !== adminPassword) {
+    if (!adminPasswordMatches(body.password)) {
       sendJson(res, 401, { error: 'Invalid password' });
       return true;
     }
@@ -1853,7 +1933,7 @@ async function handleApi(req, res, pathname) {
   if (pathname === '/api/admin/logout' && req.method === 'POST') {
     const token = parseCookies(req).mg_admin;
     if (token) sessions.delete(token);
-    sendJson(res, 200, { ok: true }, { 'Set-Cookie': 'mg_admin=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0' });
+    sendJson(res, 200, { ok: true }, { 'Set-Cookie': `mg_admin=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${isProduction ? '; Secure' : ''}` });
     return true;
   }
 
@@ -1880,8 +1960,112 @@ async function handleApi(req, res, pathname) {
       },
       ...next.activity.slice(0, 24),
     ];
-    writeStore(next);
-    sendJson(res, 200, readStore());
+    const saved = await persistStore(next);
+    sendJson(res, 200, saved);
+    return true;
+  }
+
+  if (apiPath === '/api/admin/categories' && req.method === 'POST') {
+    try {
+      const name = String((await readBody(req)).name || '').trim().slice(0, 80);
+      if (!name) throw new Error('Category name is required.');
+      if (database.isEnabled()) {
+        databaseStoreCache = await database.addCategory(name);
+      } else {
+        const store = readStore();
+        const exists = (store.categories || []).some((category) => category.name.toLowerCase() === name.toLowerCase());
+        if (exists) throw new Error('That category already exists.');
+        store.categories = [...(store.categories || []), {
+          id: `cat-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+          name,
+          slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          sortOrder: (store.categories || []).length,
+        }];
+        await persistStore(store);
+      }
+      sendJson(res, 201, readStore());
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const categoryMatch = apiPath.match(/^\/api\/admin\/categories\/([^/]+)$/);
+  if (categoryMatch && req.method === 'DELETE') {
+    try {
+      const id = decodeURIComponent(categoryMatch[1]);
+      if (database.isEnabled()) {
+        databaseStoreCache = await database.removeCategory(id);
+      } else {
+        const store = readStore();
+        if ((store.products || []).some((product) => product.category && `cat-${product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` === id)) {
+          throw new Error('Move or archive products in this category before removing it.');
+        }
+        store.categories = (store.categories || []).filter((category) => category.id !== id);
+        await persistStore(store);
+      }
+      sendJson(res, 200, readStore());
+    } catch (error) {
+      sendJson(res, 409, { error: error.message });
+    }
+    return true;
+  }
+
+  const publishMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/publish$/);
+  if (publishMatch && req.method === 'POST') {
+    const id = decodeURIComponent(publishMatch[1]);
+    const store = readStore();
+    const product = (store.products || []).find((item) => item.id === id);
+    if (!product) {
+      sendJson(res, 404, { error: 'Product not found.' });
+      return true;
+    }
+    const image = String(product.primaryImage || product.image || '').trim();
+    const missing = [
+      !String(product.title || '').trim() || product.title === 'New product' ? 'title' : '',
+      !String(product.description || '').trim() ? 'description' : '',
+      !String(product.category || '').trim() ? 'category' : '',
+      !(Number(product.price) > 0) ? 'price' : '',
+      !image || image.includes('leather-detail.png') ? 'product image' : '',
+    ].filter(Boolean);
+    if (missing.length) {
+      sendJson(res, 400, { error: `Complete the ${missing.join(', ')} before publishing.` });
+      return true;
+    }
+    product.status = 'active';
+    store.activity = [{
+      id: `act-${Date.now()}`,
+      at: new Date().toISOString(),
+      type: 'admin',
+      message: `${product.title} published from the admin panel`,
+    }, ...(store.activity || []).slice(0, 24)];
+    const saved = await persistStore(store);
+    sendJson(res, 200, saved);
+    return true;
+  }
+
+  const imageUploadMatch = apiPath.match(/^\/api\/admin\/products\/([^/]+)\/image$/);
+  if (imageUploadMatch && req.method === 'POST') {
+    if (!database.isEnabled()) {
+      sendJson(res, 503, { error: 'Railway PostgreSQL is required for image uploads.' });
+      return true;
+    }
+    try {
+      const body = await readBody(req, 12 * 1024 * 1024);
+      const match = String(body.data || '').match(/^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/i);
+      if (!match) throw new Error('Upload a PNG, JPG, WEBP, or GIF image.');
+      const buffer = Buffer.from(match[2], 'base64');
+      if (!buffer.length || buffer.length > 8 * 1024 * 1024) throw new Error('Images must be smaller than 8 MB.');
+      databaseStoreCache = await database.saveProductImage(
+        decodeURIComponent(imageUploadMatch[1]),
+        buffer,
+        match[1].toLowerCase(),
+        String(body.name || 'product-image').slice(0, 160),
+      );
+      sendJson(res, 200, databaseStoreCache);
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 
@@ -1916,6 +2100,11 @@ function serveFile(req, res, filePath) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    await databaseReady;
+    if (databaseError) {
+      sendJson(res, 503, { error: 'The product database is temporarily unavailable.' });
+      return;
+    }
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     let requestPath;
     try {
@@ -2024,10 +2213,18 @@ const server = http.createServer(async (req, res) => {
 });
 
 ensureStore();
+const databaseReady = database.init(readPublicStore()).then((store) => {
+  databaseStoreCache = store;
+}).catch((error) => {
+  databaseError = error;
+  console.error('PostgreSQL initialization failed:', error.message);
+});
 
 if (require.main === module) {
-  server.listen(port, host, () => {
-    console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
+  databaseReady.finally(() => {
+    server.listen(port, host, () => {
+      console.log(`MOTOGRIP GEAR site listening on http://${host}:${port}`);
+    });
   });
 }
 

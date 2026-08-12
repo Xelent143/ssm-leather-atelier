@@ -51,6 +51,23 @@ npx @railway/cli up
 If the project is already created in Railway, use `npx @railway/cli link`
 instead of `init`, then run `npx @railway/cli up`.
 
+### Add the product database
+
+1. In Railway, add a PostgreSQL service to the same project.
+2. Link the web service to PostgreSQL and provide the linked connection string
+   as `DATABASE_URL`.
+3. Set a strong `ADMIN_PASSWORD`; do not keep the local fallback password in
+   production.
+4. Keep `ADMIN_DATA_DIR=/app/data` if the existing JSON volume is still used
+   for non-product records.
+
+The first web boot creates `admin_categories`, `admin_products`, and
+`admin_store_state`, then imports the current admin catalog if the product table
+is empty. Open `/admin`, create a draft, upload an image, choose a category,
+save, and use **Publish now** when the listing is ready. PostgreSQL is the
+source of truth for products, categories, publication status, and uploaded
+product images.
+
 ## 3. Deploy to Vercel
 
 ### One-shot deploy (no GitHub needed)

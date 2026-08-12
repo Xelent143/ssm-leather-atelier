@@ -63,6 +63,20 @@ selections and are never trusted as payment amounts.
 npm start
 ```
 
+### Admin product database
+
+The admin panel is available at `/admin`. When Railway PostgreSQL is linked to
+the web service, expose its connection string as `DATABASE_URL` and set a
+strong `ADMIN_PASSWORD`. On the first boot, the server creates the database
+tables and imports the current verified catalog from `admin-store.json`.
+
+The Products panel then supports manual product drafts, image uploads (stored
+as PostgreSQL binary data), category creation/removal, and direct publishing.
+Published products are read from PostgreSQL by the storefront catalog, product
+pages, sitemap, and merchant feeds. Keep `ADMIN_DATA_DIR=/app/data` if you
+want the existing JSON fallback and non-product admin records to remain
+durable on a Railway volume.
+
 Railway CLI deployment:
 
 ```bash
