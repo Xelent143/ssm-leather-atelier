@@ -19,6 +19,7 @@ const sessions = new Map();
 const returnRequestAttempts = new Map();
 const publicBaseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 const paypalClientId = process.env.PAYPAL_CLIENT_ID || '';
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
 const paypalApiBase = (process.env.PAYPAL_API_BASE || 'https://api-m.paypal.com').replace(/\/+$/, '');
@@ -704,6 +705,24 @@ function readBody(req, maxBytes = 1024 * 1024) {
   });
 }
 
+function readRawBody(req, maxBytes = 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        reject(new Error('Request body too large'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
 function stripeRequest(method, requestPath, form) {
   return new Promise((resolve, reject) => {
     const body = form ? form.toString() : '';
@@ -745,6 +764,21 @@ function stripeRequest(method, requestPath, form) {
     if (body) request.write(body);
     request.end();
   });
+}
+
+function verifyStripeWebhookSignature(payload, signature, secret, toleranceSeconds = 300) {
+  if (!signature || !secret) return false;
+  const parts = Object.fromEntries(String(signature).split(',').map((part) => {
+    const separator = part.indexOf('=');
+    return separator === -1 ? [part, ''] : [part.slice(0, separator), part.slice(separator + 1)];
+  }));
+  const timestamp = Number(parts.t);
+  const received = String(parts.v1 || '');
+  if (!Number.isFinite(timestamp) || !received || Math.abs(Date.now() / 1000 - timestamp) > toleranceSeconds) return false;
+  const expected = crypto.createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex');
+  const receivedBuffer = Buffer.from(received, 'utf8');
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  return receivedBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
 }
 
 function paypalRequest(method, requestPath, { accessToken = '', body = null, basicAuth = '' } = {}) {
@@ -880,11 +914,159 @@ function checkoutLineItems(rawItems) {
     ].filter(Boolean).join(' · ');
 
     return {
+      baseId,
+      slug: product.slug || '',
+      sku: product.sku || product.id || baseId,
       quantity,
       name: String(product.title || product.name || 'MOTOGRIP GEAR product').slice(0, 120),
       description: details.slice(0, 200),
       unitAmount: Math.round((basePrice + surcharge) * 100),
+      size: selectedSize,
+      inseam: selectedInseam,
+      leather: selectedLeather,
+      color: selectedColor,
+      collarColor: selectedCollar,
+      fitMode,
     };
+  });
+}
+
+function newOrderId() {
+  return `MG-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+}
+
+function orderDraftFromItems(items, provider, providerOrderId = '') {
+  const now = new Date();
+  const lines = items.map((item) => ({
+    productId: item.baseId,
+    slug: item.slug,
+    sku: item.sku,
+    name: item.name,
+    description: item.description,
+    quantity: item.quantity,
+    unitPrice: item.unitAmount / 100,
+    total: (item.unitAmount * item.quantity) / 100,
+    size: item.size,
+    inseam: item.inseam,
+    leather: item.leather,
+    color: item.color,
+    collarColor: item.collarColor,
+    fitMode: item.fitMode,
+  }));
+  const total = lines.reduce((sum, line) => sum + line.total, 0);
+  return {
+    id: newOrderId(),
+    date: now.toISOString().slice(0, 10),
+    createdAt: now.toISOString(),
+    customer: '',
+    email: '',
+    phone: '',
+    shippingAddress: null,
+    status: 'pending',
+    payment: 'pending',
+    paymentStatus: 'pending',
+    provider,
+    providerOrderId,
+    fulfillment: 'unfulfilled',
+    total: Number(total.toFixed(2)),
+    currency: 'USD',
+    items: lines.reduce((sum, line) => sum + line.quantity, 0),
+    lines,
+    channel: 'Online Store',
+    fit: lines.some((line) => line.fitMode === 'made-to-measure') ? 'Made to measure' : 'Standard',
+  };
+}
+
+async function saveOrder(order) {
+  const store = readStore();
+  const duplicate = (store.orders || []).find((item) => item.id === order.id
+    || (order.providerOrderId && item.provider === order.provider && item.providerOrderId === order.providerOrderId));
+  if (duplicate) return duplicate;
+  store.orders = [order, ...(store.orders || [])];
+  store.activity = [
+    {
+      id: `act-${Date.now()}`,
+      at: new Date().toISOString(),
+      type: 'order',
+      message: `Order ${order.id} created from ${order.provider}`,
+    },
+    ...(store.activity || []),
+  ].slice(0, 100);
+  await persistStore(store);
+  return order;
+}
+
+async function updateOrder(orderId, patch) {
+  const store = readStore();
+  const index = (store.orders || []).findIndex((item) => item.id === orderId);
+  if (index === -1) return null;
+  const nextOrder = { ...store.orders[index], ...patch, updatedAt: new Date().toISOString() };
+  store.orders[index] = nextOrder;
+  store.activity = [
+    {
+      id: `act-${Date.now()}`,
+      at: new Date().toISOString(),
+      type: 'order',
+      message: `Order ${orderId} updated: ${patch.status || patch.paymentStatus || patch.fulfillment || 'details saved'}`,
+    },
+    ...(store.activity || []),
+  ].slice(0, 100);
+  await persistStore(store);
+  return nextOrder;
+}
+
+function paymentDetailsFromStripeSession(session) {
+  const customer = session.customer_details || {};
+  const shipping = session.shipping_details || {};
+  const address = shipping.address || customer.address || null;
+  return {
+    customer: shipping.name || customer.name || '',
+    email: customer.email || '',
+    phone: customer.phone || '',
+    shippingAddress: address ? {
+      line1: address.line1 || '',
+      line2: address.line2 || '',
+      city: address.city || '',
+      state: address.state || '',
+      postalCode: address.postal_code || '',
+      country: address.country || '',
+    } : null,
+  };
+}
+
+function paymentDetailsFromPayPalCapture(capture) {
+  const payer = capture.payer || {};
+  const purchaseUnit = capture.purchase_units?.[0] || {};
+  const shipping = purchaseUnit.shipping || {};
+  const address = shipping.address || null;
+  return {
+    customer: shipping.name?.full_name || [payer.name?.given_name, payer.name?.surname].filter(Boolean).join(' '),
+    email: payer.email_address || '',
+    phone: '',
+    shippingAddress: address ? {
+      line1: address.address_line_1 || '',
+      line2: address.address_line_2 || '',
+      city: address.admin_area_2 || '',
+      state: address.admin_area_1 || '',
+      postalCode: address.postal_code || '',
+      country: address.country_code || '',
+    } : null,
+  };
+}
+
+async function markOrderPaid(orderId, provider, providerReference, customerDetails = {}) {
+  const store = readStore();
+  const existing = (store.orders || []).find((item) => item.id === orderId
+    || (providerReference && item.provider === provider && item.providerOrderId === providerReference));
+  if (!existing) return null;
+  return updateOrder(existing.id, {
+    ...customerDetails,
+    status: 'paid',
+    payment: 'paid',
+    paymentStatus: 'paid',
+    provider,
+    providerOrderId: providerReference || existing.providerOrderId,
+    paidAt: existing.paidAt || new Date().toISOString(),
   });
 }
 
@@ -896,10 +1078,13 @@ async function createStripeCheckout(req, rawItems) {
     error.checkoutValidation = true;
     throw error;
   }
+  const order = orderDraftFromItems(items, 'stripe');
   const form = new URLSearchParams();
   form.set('mode', 'payment');
-  form.set('success_url', absoluteUrl(req, '/?payment=success&session_id={CHECKOUT_SESSION_ID}#/checkout'));
+  form.set('success_url', absoluteUrl(req, `/?payment=success&order_id=${encodeURIComponent(order.id)}&session_id={CHECKOUT_SESSION_ID}#/checkout`));
   form.set('cancel_url', absoluteUrl(req, '/?payment=cancelled#/checkout'));
+  form.set('client_reference_id', order.id);
+  form.set('metadata[order_id]', order.id);
   form.set('customer_creation', 'always');
   form.set('billing_address_collection', 'required');
   form.set('phone_number_collection[enabled]', 'true');
@@ -918,7 +1103,10 @@ async function createStripeCheckout(req, rawItems) {
     form.set(`line_items[${index}][quantity]`, String(item.quantity));
   });
 
-  return stripeRequest('POST', '/v1/checkout/sessions', form);
+  const session = await stripeRequest('POST', '/v1/checkout/sessions', form);
+  order.providerOrderId = session.id || '';
+  await saveOrder(order);
+  return session;
 }
 
 function paypalMoney(cents) {
@@ -935,13 +1123,14 @@ async function createPayPalOrder(req, rawItems) {
   }
 
   const totalCents = items.reduce((sum, item) => sum + item.unitAmount * item.quantity, 0);
+  const draft = orderDraftFromItems(items, 'paypal');
   const accessToken = await getPayPalAccessToken();
   const order = await paypalRequest('POST', '/v2/checkout/orders', {
     accessToken,
     body: {
       intent: 'CAPTURE',
       purchase_units: [{
-        reference_id: crypto.randomUUID(),
+        reference_id: draft.id,
         description: 'MOTOGRIP GEAR order',
         items: items.map((item) => ({
           name: item.name,
@@ -981,6 +1170,7 @@ async function createPayPalOrder(req, rawItems) {
 
   const approvalUrl = order.links?.find((link) => link.rel === 'payer-action' || link.rel === 'approve')?.href;
   if (!order.id || !approvalUrl) throw new Error('PayPal did not return an approval URL');
+  await saveOrder({ ...draft, providerOrderId: order.id });
   return { id: order.id, url: approvalUrl };
 }
 
@@ -1762,6 +1952,60 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (apiPath === '/api/stripe/webhook' && req.method === 'POST') {
+    if (!stripeWebhookSecret) {
+      sendJson(res, 503, { error: 'Stripe webhook signing secret is not configured.' });
+      return true;
+    }
+    try {
+      const rawBody = await readRawBody(req);
+      if (!verifyStripeWebhookSignature(rawBody, req.headers['stripe-signature'], stripeWebhookSecret)) {
+        sendJson(res, 400, { error: 'Invalid Stripe webhook signature.' });
+        return true;
+      }
+      const event = JSON.parse(rawBody.toString('utf8'));
+      const session = event.data?.object;
+      if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)
+        && session?.payment_status === 'paid') {
+        const orderId = session.metadata?.order_id || session.client_reference_id || '';
+        if (orderId) await markOrderPaid(orderId, 'stripe', session.id, paymentDetailsFromStripeSession(session));
+      }
+      sendJson(res, 200, { received: true });
+    } catch (error) {
+      console.error('Stripe webhook error:', error.message);
+      sendJson(res, 400, { error: 'Invalid Stripe webhook payload.' });
+    }
+    return true;
+  }
+
+  if (apiPath === '/api/stripe/confirm' && req.method === 'GET') {
+    if (!stripeSecretKey) {
+      sendJson(res, 503, { error: 'Stripe checkout is not configured.' });
+      return true;
+    }
+    const query = new URL(req.url, 'http://localhost').searchParams;
+    const sessionId = query.get('session_id') || '';
+    const orderId = query.get('order_id') || '';
+    if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId) || !/^MG-[A-Z0-9-]+$/i.test(orderId)) {
+      sendJson(res, 400, { error: 'Invalid Stripe confirmation details.' });
+      return true;
+    }
+    try {
+      const session = await stripeRequest('GET', `/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
+      const sessionOrderId = session.metadata?.order_id || session.client_reference_id || '';
+      if (sessionOrderId !== orderId || session.payment_status !== 'paid') {
+        sendJson(res, 409, { error: 'Stripe has not confirmed this payment yet.' });
+        return true;
+      }
+      const order = await markOrderPaid(orderId, 'stripe', session.id, paymentDetailsFromStripeSession(session));
+      sendJson(res, order ? 200 : 404, order ? { ok: true, orderId: order.id } : { error: 'Order record not found.' });
+    } catch (error) {
+      console.error('Stripe confirmation error:', error.message);
+      sendJson(res, 502, { error: 'Stripe confirmation is temporarily unavailable.' });
+    }
+    return true;
+  }
+
   if (pathname === '/api/paypal/checkout' && req.method === 'POST') {
     if (!paypalClientId || !paypalClientSecret) {
       sendJson(res, 503, { error: 'PayPal checkout is being configured. Please try again shortly.' });
@@ -1787,7 +2031,10 @@ async function handleApi(req, res, pathname) {
     try {
       const capture = await capturePayPalOrder(orderId);
       if (capture.status !== 'COMPLETED') throw new Error('PayPal payment was not completed');
-      redirect(res, absoluteUrl(req, `/?payment=success&provider=paypal&order_id=${encodeURIComponent(orderId)}#/checkout`));
+      const purchaseUnit = capture.purchase_units?.[0] || {};
+      const orderReference = purchaseUnit.reference_id || '';
+      const paidOrder = await markOrderPaid(orderReference, 'paypal', orderId, paymentDetailsFromPayPalCapture(capture));
+      redirect(res, absoluteUrl(req, `/?payment=${paidOrder ? 'success' : 'error'}&provider=paypal&order_id=${encodeURIComponent(paidOrder?.id || orderId)}#/checkout`));
     } catch (error) {
       console.error('PayPal capture error:', error.message);
       redirect(res, absoluteUrl(req, '/?payment=error&provider=paypal#/checkout'));
@@ -2377,5 +2624,8 @@ module.exports = {
   homepageStaticHtml,
   productStaticHtml,
   merchantSeedProducts,
+  markOrderPaid,
+  orderDraftFromItems,
   serveMerchantFeed,
+  verifyStripeWebhookSignature,
 };

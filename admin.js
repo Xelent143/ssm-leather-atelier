@@ -618,6 +618,7 @@ function ordersTable(orders) {
           <th>Date</th>
           <th>Customer</th>
           <th>Status</th>
+          <th>Payment</th>
           <th>Fulfillment</th>
           <th>Total</th>
         </tr>
@@ -629,8 +630,9 @@ function ordersTable(orders) {
             <td>${escapeHtml(order.date || '')}</td>
             <td>${escapeHtml(order.customer || '')}<br><span class="muted">${escapeHtml(order.email || '')}</span></td>
             <td><span class="pill ${escapeHtml(order.status)}">${escapeHtml(order.status)}</span></td>
+            <td>${escapeHtml(order.paymentStatus || order.payment || 'pending')}<br><span class="muted">${escapeHtml(order.provider || '')}</span></td>
             <td>${escapeHtml(order.fulfillment || '')}</td>
-            <td>${money(order.total)}</td>
+            <td>${money(order.total)}<br><span class="muted">${escapeHtml(String(order.items || 0))} item(s)</span></td>
           </tr>
         `).join('')}
       </tbody>
@@ -641,7 +643,7 @@ function ordersTable(orders) {
 function renderOrders() {
   const orders = filteredOrders();
   return `
-    ${pageHead('Orders', 'Review payment, fulfillment, and made-to-measure production status.', '<button class="btn" id="add-demo-order">Create test order</button>')}
+    ${pageHead('Orders', 'Review payment, fulfillment, and made-to-measure production status.')}
     <div class="card">
       <div class="card-head"><h2>All orders</h2><span class="pill">${orders.length} shown</span></div>
       <div class="table-wrap">${ordersTable(orders)}</div>
@@ -1075,24 +1077,6 @@ function bindShell() {
 
   document.getElementById('new-product')?.addEventListener('click', () => {
     navigateAdmin('/admin/products/new');
-  });
-
-  document.getElementById('add-demo-order')?.addEventListener('click', () => {
-    state.store.orders.unshift({
-      id: `MG-${Math.floor(1000 + Math.random() * 8999)}`,
-      date: new Date().toISOString().slice(0, 10),
-      customer: 'New customer',
-      email: 'customer@example.com',
-      status: 'open',
-      payment: 'paid',
-      fulfillment: 'unfulfilled',
-      total: 1280,
-      items: 1,
-      channel: 'Online Store',
-      fit: 'Made to measure',
-    });
-    markDirty();
-    render();
   });
 
   document.getElementById('apply-default-mto')?.addEventListener('click', () => {

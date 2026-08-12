@@ -275,7 +275,27 @@ async function init(seedStore) {
   } finally {
     client.release();
   }
-  return readStoreFromDatabase();
+  const loaded = await readStoreFromDatabase();
+  const migrationId = 'act-remove-seeded-dummy-orders-20260812';
+  const seededDummyIds = new Set(['MG-1001', 'MG-1002', 'MG-1003']);
+  const retainedOrders = (loaded.orders || []).filter((order) => !seededDummyIds.has(String(order.id || '')));
+  if (retainedOrders.length !== (loaded.orders || []).length
+    && !(loaded.activity || []).some((event) => event.id === migrationId)) {
+    return saveStore({
+      ...loaded,
+      orders: retainedOrders,
+      activity: [
+        {
+          id: migrationId,
+          at: new Date().toISOString(),
+          type: 'system',
+          message: 'Removed seeded dummy orders MG-1001, MG-1002, and MG-1003 before production order tracking went live',
+        },
+        ...(loaded.activity || []),
+      ],
+    });
+  }
+  return loaded;
 }
 
 async function saveStore(store) {

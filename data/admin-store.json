@@ -18,7 +18,7 @@
       "price": 250,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 30,
+      "inventory": 190,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "New",
@@ -26,16 +26,16 @@
       "image": "assets/generated/hooded-contrast-moto-vest-front.png",
       "maker": "MOTOGRIP Workshop",
       "stock": {
-        "XS": 3,
-        "S": 3,
-        "M": 3,
-        "L": 3,
-        "XL": 3,
-        "XXL": 3,
-        "3XL": 3,
-        "4XL": 3,
-        "5XL": 3,
-        "6XL": 3
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19,
+        "3XL": 19,
+        "4XL": 19,
+        "5XL": 19,
+        "6XL": 19
       },
       "seoTitle": "Black & White Hooded Leather Moto Vest | MOTOGRIP GEAR",
       "seoDescription": "Men's black and white hooded motorcycle vest in perforated cowhide leather, available in XS-6XL and made-to-measure sizing.",
@@ -99,7 +99,7 @@
       "price": 640,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 10,
+      "inventory": 114,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "",
@@ -107,12 +107,12 @@
       "image": "assets/generated/moto-vest.png",
       "maker": "Theo M.",
       "stock": {
-        "XS": 1,
-        "S": 2,
-        "M": 3,
-        "L": 2,
-        "XL": 1,
-        "XXL": 1
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19
       },
       "seoTitle": "Marlowe Moto Vest | Men Vests | MOTOGRIP GEAR",
       "seoDescription": "Quilted yoke · raw selvedge edge. Made-to-measure available, road-ready construction, premium leather, and detailed fit notes from MOTOGRIP GEAR.",
@@ -170,7 +170,7 @@
       "price": 920,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 9,
+      "inventory": 114,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "New",
@@ -178,12 +178,12 @@
       "image": "assets/generated/leather-trouser.png",
       "maker": "Helena A.",
       "stock": {
-        "XS": 1,
-        "S": 2,
-        "M": 2,
-        "L": 3,
-        "XL": 1,
-        "XXL": 0
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19
       },
       "seoTitle": "Saoirse Trouser | Women Pants | MOTOGRIP GEAR",
       "seoDescription": "High-rise · stretch napa. Made-to-measure available, road-ready construction, premium leather, and detailed fit notes from MOTOGRIP GEAR.",
@@ -241,7 +241,7 @@
       "price": 1450,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 4,
+      "inventory": 114,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "Fit Lab",
@@ -249,12 +249,12 @@
       "image": "assets/generated/mens-cafe-racer.png",
       "maker": "Bayard T.",
       "stock": {
-        "XS": 0,
-        "S": 1,
-        "M": 2,
-        "L": 1,
-        "XL": 0,
-        "XXL": 0
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19
       },
       "seoTitle": "Ridgemont Double Rider | Men Jackets | MOTOGRIP GEAR",
       "seoDescription": "Heritage cut · cordovan trim. Made-to-measure available, road-ready construction, premium leather, and detailed fit notes from MOTOGRIP GEAR.",
@@ -312,7 +312,7 @@
       "price": 1490,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 7,
+      "inventory": 114,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "New",
@@ -320,12 +320,12 @@
       "image": "assets/generated/long-coat.png",
       "maker": "Bayard T.",
       "stock": {
-        "XS": 0,
-        "S": 1,
-        "M": 2,
-        "L": 2,
-        "XL": 1,
-        "XXL": 1
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19
       },
       "seoTitle": "Idris Long Coat | Men Jackets | MOTOGRIP GEAR",
       "seoDescription": "Three-quarter · merino lined. Made-to-measure available, road-ready construction, premium leather, and detailed fit notes from MOTOGRIP GEAR.",
@@ -383,7 +383,7 @@
       "price": 1350,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 5,
+      "inventory": 114,
       "madeToMeasureEnabled": true,
       "madeToMeasureSurcharge": 50,
       "tag": "Fit Lab",
@@ -391,12 +391,12 @@
       "image": "assets/generated/womens-biker-jacket.png",
       "maker": "Iola V.",
       "stock": {
-        "XS": 1,
-        "S": 1,
-        "M": 2,
-        "L": 1,
-        "XL": 0,
-        "XXL": 0
+        "XS": 19,
+        "S": 19,
+        "M": 19,
+        "L": 19,
+        "XL": 19,
+        "XXL": 19
       },
       "seoTitle": "Maren Statement Jacket | Women Jackets | MOTOGRIP GEAR",
       "seoDescription": "Sculpted shoulder · waxed lamb. Made-to-measure available, road-ready construction, premium leather, and detailed fit notes from MOTOGRIP GEAR.",
@@ -454,9 +454,9 @@
       "price": 249,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 500,
-      "madeToMeasureEnabled": false,
-      "madeToMeasureSurcharge": 0,
+      "inventory": 190,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
       "tag": "New",
       "description": "Premium lambskin leather trousers with a structured waist, angular utility pockets and a clean bootcut flare. Choose a waist from 26 to 44 inches and an inseam from 26 to 36 inches.",
       "descriptionHtml": "<p>Cut from premium lambskin leather, these unisex black trousers combine a structured waist, angular utility pockets and a clean bootcut flare.</p><p>Choose a waist from 26 to 44 inches and an inseam from 26 to 36 inches for a considered fit.</p>",
@@ -474,38 +474,161 @@
       ],
       "maker": "MOTOGRIP Workshop",
       "stock": {
-        "26": 50,
-        "28": 50,
-        "30": 50,
-        "32": 50,
-        "34": 50,
-        "36": 50,
-        "38": 50,
-        "40": 50,
-        "42": 50,
-        "44": 50
+        "26": 19,
+        "28": 19,
+        "30": 19,
+        "32": 19,
+        "34": 19,
+        "36": 19,
+        "38": 19,
+        "40": 19,
+        "42": 19,
+        "44": 19
       },
       "options": [
         {
           "name": "Waist",
-          "values": ["26", "28", "30", "32", "34", "36", "38", "40", "42", "44"]
+          "values": [
+            "26",
+            "28",
+            "30",
+            "32",
+            "34",
+            "36",
+            "38",
+            "40",
+            "42",
+            "44"
+          ]
         },
         {
           "name": "Inseam",
-          "values": ["26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"]
+          "values": [
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31",
+            "32",
+            "33",
+            "34",
+            "35",
+            "36"
+          ]
         }
       ],
       "variants": [
-        { "id": "p16-waist-26", "sku": "MG-P16-W26", "attributes": { "waist": "26" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-28", "sku": "MG-P16-W28", "attributes": { "waist": "28" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-30", "sku": "MG-P16-W30", "attributes": { "waist": "30" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-32", "sku": "MG-P16-W32", "attributes": { "waist": "32" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-34", "sku": "MG-P16-W34", "attributes": { "waist": "34" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-36", "sku": "MG-P16-W36", "attributes": { "waist": "36" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-38", "sku": "MG-P16-W38", "attributes": { "waist": "38" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-40", "sku": "MG-P16-W40", "attributes": { "waist": "40" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-42", "sku": "MG-P16-W42", "attributes": { "waist": "42" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true },
-        { "id": "p16-waist-44", "sku": "MG-P16-W44", "attributes": { "waist": "44" }, "quantity": 50, "price": 249, "status": "active", "availableForSale": true }
+        {
+          "id": "p16-waist-26",
+          "sku": "MG-P16-W26",
+          "attributes": {
+            "waist": "26"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-28",
+          "sku": "MG-P16-W28",
+          "attributes": {
+            "waist": "28"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-30",
+          "sku": "MG-P16-W30",
+          "attributes": {
+            "waist": "30"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-32",
+          "sku": "MG-P16-W32",
+          "attributes": {
+            "waist": "32"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-34",
+          "sku": "MG-P16-W34",
+          "attributes": {
+            "waist": "34"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-36",
+          "sku": "MG-P16-W36",
+          "attributes": {
+            "waist": "36"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-38",
+          "sku": "MG-P16-W38",
+          "attributes": {
+            "waist": "38"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-40",
+          "sku": "MG-P16-W40",
+          "attributes": {
+            "waist": "40"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-42",
+          "sku": "MG-P16-W42",
+          "attributes": {
+            "waist": "42"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        },
+        {
+          "id": "p16-waist-44",
+          "sku": "MG-P16-W44",
+          "attributes": {
+            "waist": "44"
+          },
+          "quantity": 50,
+          "price": 249,
+          "status": "active",
+          "availableForSale": true
+        }
       ],
       "seoTitle": "Unisex Black Lambskin Flared Leather Trousers | MOTOGRIP",
       "seoDescription": "Shop MOTOGRIP unisex black lambskin flared leather trousers with utility pockets, waist sizes 26–44 inches and inseams 26–36 inches.",
@@ -527,7 +650,10 @@
       "sizeType": "Regular",
       "ageGroup": "Adult",
       "itemGroupId": "unisex-black-lambskin-flared-leather-trousers",
-      "variantOptions": ["Waist", "Inseam"],
+      "variantOptions": [
+        "Waist",
+        "Inseam"
+      ],
       "shippingWeight": "",
       "shippingPolicy": "Worldwide express delivery available at checkout",
       "returnPolicy": "Returns and refunds are subject to the published MOTOGRIP GEAR policy",
@@ -548,11 +674,26 @@
         "Waist and inseam selected separately"
       ],
       "specifications": [
-        ["Color", "Black"],
-        ["Fit", "Unisex bootcut"],
-        ["Waist", "26–44 inches in 2-inch increments"],
-        ["Inseam", "26–36 inches in 1-inch increments"],
-        ["Inventory", "50 pieces per waist, shared across inseam selections"]
+        [
+          "Color",
+          "Black"
+        ],
+        [
+          "Fit",
+          "Unisex bootcut"
+        ],
+        [
+          "Waist",
+          "26–44 inches in 2-inch increments"
+        ],
+        [
+          "Inseam",
+          "26–36 inches in 1-inch increments"
+        ],
+        [
+          "Inventory",
+          "50 pieces per waist, shared across inseam selections"
+        ]
       ],
       "perfectFor": "Premium everyday styling, travel and motorcycle-lifestyle wardrobes.",
       "whyYouWillLoveIt": "A precise waist-and-inseam selection pairs with soft lambskin and a confident flared profile.",
@@ -567,9 +708,9 @@
       "price": 250,
       "compareAtPrice": null,
       "status": "active",
-      "inventory": 100,
-      "madeToMeasureEnabled": false,
-      "madeToMeasureSurcharge": 0,
+      "inventory": 19,
+      "madeToMeasureEnabled": true,
+      "madeToMeasureSurcharge": 50,
       "tag": "New",
       "description": "A structured Crazy Horse cowhide leather backpack available in black or distressed brown, with organized storage, padded carrying support and antiqued brass-tone hardware. Its 37 × 28 × 16 cm profile includes a compartment sized for laptops up to 15.6 inches.",
       "descriptionHtml": "<p>A structured Crazy Horse cowhide leather backpack available in black or distressed brown, with organized storage, padded carrying support and antiqued brass-tone hardware.</p><p>Its 37 × 28 × 16 cm profile includes a compartment sized for laptops up to 15.6 inches.</p>",
@@ -592,16 +733,21 @@
       ],
       "maker": "MOTOGRIP Workshop",
       "stock": {
-        "One Size": 100
+        "One Size": 19
       },
       "options": [
         {
           "name": "Size",
-          "values": ["One Size"]
+          "values": [
+            "One Size"
+          ]
         },
         {
           "name": "Color",
-          "values": ["Black", "Brown"]
+          "values": [
+            "Black",
+            "Brown"
+          ]
         }
       ],
       "variants": [
@@ -637,7 +783,10 @@
       "sizeType": "",
       "ageGroup": "Adult",
       "itemGroupId": "heritage-crazy-horse-leather-laptop-backpack",
-      "variantOptions": ["Size", "Color"],
+      "variantOptions": [
+        "Size",
+        "Color"
+      ],
       "shippingWeight": "",
       "shippingPolicy": "Worldwide express delivery available at checkout",
       "returnPolicy": "Returns and refunds are subject to the published MOTOGRIP GEAR policy",
@@ -659,59 +808,37 @@
         "Antiqued brass-tone buckles and zipper hardware"
       ],
       "specifications": [
-        ["Material", "Crazy Horse cowhide leather"],
-        ["Color", "Black or distressed brown"],
-        ["Dimensions", "37 cm high × 28 cm wide × 16 cm deep"],
-        ["Laptop compatibility", "Up to 15.6 inches"],
-        ["Carry system", "Adjustable padded shoulder straps and top handle"],
-        ["Availability", "100 pieces total, shared across both color selections"]
+        [
+          "Material",
+          "Crazy Horse cowhide leather"
+        ],
+        [
+          "Color",
+          "Black or distressed brown"
+        ],
+        [
+          "Dimensions",
+          "37 cm high × 28 cm wide × 16 cm deep"
+        ],
+        [
+          "Laptop compatibility",
+          "Up to 15.6 inches"
+        ],
+        [
+          "Carry system",
+          "Adjustable padded shoulder straps and top handle"
+        ],
+        [
+          "Availability",
+          "100 pieces total, shared across both color selections"
+        ]
       ],
       "perfectFor": "Daily commuting, work, study and organized travel.",
       "whyYouWillLoveIt": "A practical multi-pocket layout meets the character of distressed Crazy Horse cowhide in a balanced everyday backpack.",
       "reviews": []
     }
   ],
-  "orders": [
-    {
-      "id": "MG-1001",
-      "date": "2026-05-12",
-      "customer": "Avery Stone",
-      "email": "avery@example.com",
-      "status": "open",
-      "payment": "paid",
-      "fulfillment": "unfulfilled",
-      "total": 1330,
-      "items": 1,
-      "channel": "Online Store",
-      "fit": "Made to measure"
-    },
-    {
-      "id": "MG-1002",
-      "date": "2026-05-11",
-      "customer": "Noah Carter",
-      "email": "noah@example.com",
-      "status": "in_progress",
-      "payment": "paid",
-      "fulfillment": "in production",
-      "total": 1180,
-      "items": 1,
-      "channel": "Online Store",
-      "fit": "Standard size"
-    },
-    {
-      "id": "MG-1003",
-      "date": "2026-05-10",
-      "customer": "Mira Lane",
-      "email": "mira@example.com",
-      "status": "fulfilled",
-      "payment": "paid",
-      "fulfillment": "shipped",
-      "total": 970,
-      "items": 1,
-      "channel": "Online Store",
-      "fit": "Made to measure"
-    }
-  ],
+  "orders": [],
   "activity": [
     {
       "id": "act-1778697745747",
@@ -724,7 +851,13 @@
       "at": "2026-05-13T18:36:43.435Z",
       "type": "system",
       "message": "Seeded MOTOGRIP GEAR admin data from storefront catalog"
+    },
+    {
+      "id": "act-approved-stock-mto-normalization-20260806",
+      "at": "2026-08-12T13:58:59.787Z",
+      "type": "system",
+      "message": "Applied approved ready-stock quantity 19 per listed size and enabled +$50 made-to-measure for 8 products"
     }
   ],
-  "updatedAt": "2026-05-13T19:29:55.306Z"
+  "updatedAt": "2026-08-12T13:58:59.792Z"
 }

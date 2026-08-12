@@ -48,6 +48,9 @@ variables in Railway, never in GitHub:
 
 - `STRIPE_SECRET_KEY` — start with a Stripe test-mode secret key, then replace
   it with the live-mode secret key after a successful test order.
+- `STRIPE_WEBHOOK_SECRET` — the signing secret for `POST /api/stripe/webhook`.
+  Subscribe to `checkout.session.completed` and
+  `checkout.session.async_payment_succeeded` in Stripe.
 - `PUBLIC_BASE_URL` — set to `https://motogripgear.com` so Stripe returns the
   customer to the production storefront.
 - `PAYPAL_CLIENT_ID` — the live REST app client ID from PayPal Developer.
@@ -57,7 +60,10 @@ variables in Railway, never in GitHub:
 
 Checkout prices are rebuilt from `merchant-catalog.json` on the server for both
 providers. Values submitted by the browser are treated only as product
-selections and are never trusted as payment amounts.
+selections and are never trusted as payment amounts. Confirmed Stripe and
+PayPal payments are saved as orders and appear in the protected `/admin`
+Orders panel. Stripe webhooks are the primary confirmation path; the Stripe
+success return also performs a server-side confirmation fallback.
 
 ```bash
 npm start

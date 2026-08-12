@@ -60,6 +60,12 @@ instead of `init`, then run `npx @railway/cli up`.
    production.
 4. Keep `ADMIN_DATA_DIR=/app/data` if the existing JSON volume is still used
    for non-product records.
+5. Configure the payment variables from `README.md`, including
+   `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PAYPAL_CLIENT_ID`, and
+   `PAYPAL_CLIENT_SECRET`. In Stripe, point a webhook at
+   `https://motogripgear.com/api/stripe/webhook` and subscribe to
+   `checkout.session.completed` and
+   `checkout.session.async_payment_succeeded`.
 
 The first web boot creates `admin_categories`, `admin_products`, and
 `admin_store_state`, then imports the current admin catalog if the product table

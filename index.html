@@ -7992,11 +7992,7 @@ function About({ go }) {
 
 function Account({ go }) {
   const [tab, setTab] = React.useState('orders');
-  const orders = [
-    { n: 'SSM-2026-0418', d: 'Apr 12, 2026', s: 'In transit', items: 'Voltaire Biker · Obsidian Noir · M', total: 1280, status: 'transit' },
-    { n: 'SSM-2026-0312', d: 'Mar 04, 2026', s: 'Delivered', items: 'Bishop Field Pant · Tobacco · 32', total: 880, status: 'delivered' },
-    { n: 'SSM-MTO-0089',  d: 'Feb 18, 2026', s: 'In atelier · Wk 4 of 8', items: 'Ridgemont Double Rider (MTO) · Cognac · L', total: 1790, status: 'atelier' },
-  ];
+  const orders = [];
   return (
     <div className="page-fade">
       <section style={{ padding: '64px 48px 32px' }}>
@@ -8033,7 +8029,7 @@ function Account({ go }) {
         <div style={{ padding: '0 0 0 48px' }}>
           {tab === 'orders' && (
             <div className="step-fade">
-              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 24 }}>3 ORDERS · 1 IN ATELIER</div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 24 }}>0 ORDERS</div>
               {orders.map(o => (
                 <div key={o.n} style={{ padding: '24px 0', borderBottom: '1px solid var(--line)', display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 24, alignItems: 'center' }}>
                   <div className="ph tiny" data-img="1" data-label=""
@@ -8056,25 +8052,8 @@ function Account({ go }) {
                 </div>
               ))}
 
-              {/* MTO progress */}
-              <div style={{ marginTop: 48, padding: 32, background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
-                <div className="mono" style={{ fontSize: 10, color: 'var(--accent-2)', marginBottom: 12 }}>YOUR COMMISSION · SSM-MTO-0089</div>
-                <div style={{ fontFamily: 'var(--display)', fontSize: 28, marginBottom: 24 }}>The Ridgemont, with Sigrid K.</div>
-                <div style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
-                  {['Cut', 'Stitch', 'Finish', 'QC', 'Ship'].map((s, i) => (
-                    <div key={s} style={{ flex: 1 }}>
-                      <div style={{ height: 2, background: i <= 1 ? 'var(--accent-2)' : 'var(--line-2)', marginBottom: 10 }} />
-                      <div className="mono" style={{ fontSize: 9, color: i <= 1 ? 'var(--accent-2)' : 'var(--fg-4)' }}>0{i+1} · {s.toUpperCase()}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ color: 'var(--fg-3)', fontSize: 13, lineHeight: 1.7 }}>
-                  Sigrid finished cutting the central panels last week. Stitching begins Monday. Estimated ship: Jun 14.
-                </div>
-                <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
-                  <button className="btn btn-ghost" style={{ fontSize: 10 }}>Write to Sigrid</button>
-                  <button className="btn btn-ghost" style={{ fontSize: 10 }}>View Commission</button>
-                </div>
+              <div style={{ marginTop: 24, border: '1px solid var(--line)', padding: 32, color: 'var(--fg-3)', fontSize: 14, lineHeight: 1.7 }}>
+                No orders are linked to this account yet. After checkout, use Track Your Order to view fulfillment updates.
               </div>
             </div>
           )}
@@ -8096,6 +8075,7 @@ function Checkout({ go, items, setItems }) {
   const [paymentProvider, setPaymentProvider] = React.useState('stripe');
   const [loading, setLoading] = React.useState('');
   const [error, setError] = React.useState('');
+  const [confirmedOrderId, setConfirmedOrderId] = React.useState(new URLSearchParams(window.location.search).get('order_id') || '');
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const ship = 0;
   const tax = 'Confirmed during payment';
@@ -8103,6 +8083,21 @@ function Checkout({ go, items, setItems }) {
   const cs = ['Contact', 'Delivery', 'Payment'];
   const paymentStatus = new URLSearchParams(window.location.search).get('payment');
   const metaCoupon = (new URLSearchParams(window.location.search).get('coupon') || '').trim().slice(0, 80);
+
+  React.useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const sessionId = query.get('session_id');
+    const orderId = query.get('order_id');
+    if (query.get('payment') !== 'success' || !sessionId || !orderId) return;
+    fetch(`/api/stripe/confirm?session_id=${encodeURIComponent(sessionId)}&order_id=${encodeURIComponent(orderId)}`)
+      .then((response) => response.json().then((body) => ({ response, body })))
+      .then(({ response, body }) => {
+        if (!response.ok) throw new Error(body.error || 'Payment confirmation is still processing.');
+        setConfirmedOrderId(body.orderId || orderId);
+        setItems([]);
+      })
+      .catch((confirmationError) => setError(confirmationError.message));
+  }, [setItems]);
 
   const beginSecureCheckout = async () => {
     if (!items.length || loading) return;
@@ -8123,6 +8118,7 @@ function Checkout({ go, items, setItems }) {
             productColor: item.productColor,
             collarColor: item.collarColor,
             fitMode: item.fitMode,
+            measurements: item.measurements,
           })),
         }),
       });
@@ -8152,7 +8148,7 @@ function Checkout({ go, items, setItems }) {
 
         {paymentStatus === 'success' && (
           <div style={{ border: '1px solid var(--accent-2)', padding: 16, marginBottom: 24, color: 'var(--fg-2)' }}>
-            Payment completed. Your payment provider will email your receipt and MOTOGRIP GEAR will confirm your order.
+            Payment completed. Your order number is <strong>{confirmedOrderId || 'being confirmed'}</strong>. Your payment provider will email your receipt and MOTOGRIP GEAR will begin fulfilment review.
           </div>
         )}
         {paymentStatus === 'cancelled' && (
