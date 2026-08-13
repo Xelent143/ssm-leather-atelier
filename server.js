@@ -613,6 +613,10 @@ function handleLegacyWooRequest(url, requestPath, res) {
       permanentRedirect(res, '/shop');
       return true;
     }
+    if (normalizedPath === '/product-category' || normalizedPath === '/product-tag') {
+      sendGone(res);
+      return true;
+    }
     if (normalizedPath === '/' && url.searchParams.get('post_type') === 'product') {
       permanentRedirect(res, '/shop');
       return true;
