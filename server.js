@@ -1903,7 +1903,7 @@ function normalizeStore(input) {
 
 async function handleApi(req, res, pathname) {
   const apiPath = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-  if (pathname === '/api/catalog' && req.method === 'GET') {
+  if ((pathname === '/api/catalog' || pathname === '/api/catalog/') && (req.method === 'GET' || req.method === 'HEAD')) {
     sendJson(res, 200, publicCatalog(readPublicStore()));
     return true;
   }
@@ -2175,7 +2175,8 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  if (pathname === '/api/admin/session' && req.method === 'GET') {
+  if ((pathname === '/api/admin/session' || pathname === '/api/admin/auth/session') &&
+      (req.method === 'GET' || req.method === 'HEAD')) {
     sendJson(res, 200, {
       authenticated: Boolean(getSession(req)),
       defaultPasswordInUse: !isProduction && !process.env.ADMIN_PASSWORD,
@@ -2211,7 +2212,7 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  if (pathname === '/api/admin/store' && req.method === 'GET') {
+  if ((pathname === '/api/admin/store' || pathname === '/api/admin/store/') && (req.method === 'GET' || req.method === 'HEAD')) {
     sendJson(res, 200, readStore());
     return true;
   }
