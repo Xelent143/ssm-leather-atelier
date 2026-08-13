@@ -264,9 +264,11 @@ const publicRoutes = {
   '/brand': { view: 'about', title: 'About MOTOGRIP GEAR | Motorcycle Leather Craftsmanship', desc: 'Discover MOTOGRIP GEAR, a premium leather brand focused on authentic craftsmanship, functional design, precise fit, and lasting value.' },
   '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
   '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
+  '/search': { view: 'search', noindex: true, title: 'Search MOTOGRIP GEAR', desc: 'Search through MOTOGRIP GEAR leather motorcycle apparel and product pages.' },
   '/custom-consultation': { view: 'consult', title: 'Custom Leather Consultation | MOTOGRIP GEAR', desc: 'Start a custom leather jacket, vest, or trouser consultation with MOTOGRIP GEAR fit and design guidance.' },
   '/wholesale': { view: 'consult', title: 'Wholesale & Private-Label Leather Apparel | MOTOGRIP GEAR', desc: 'Discuss wholesale, private-label, OEM, and retailer leather-apparel requirements with MOTOGRIP GEAR.' },
   '/sustainability': { view: 'sustain', title: 'Durability & Sustainability | MOTOGRIP GEAR', desc: 'Learn how durable materials, repairable construction, and measured fit help MOTOGRIP gear stay in use longer.' },
+  '/notfound': { view: 'notfound', noindex: true, title: 'Page not found | MOTOGRIP GEAR', desc: 'The requested page could not be found. Use our shop, product, blog and brand pages to continue browsing.' },
   '/stockists': { view: 'stockists', title: 'MOTOGRIP GEAR Stockists & Fitting Locations', desc: 'Find MOTOGRIP GEAR fitting locations, showroom appointments, stockists, and upcoming trunk shows.' },
   '/press': { view: 'press', title: 'Press & Brand Resources | MOTOGRIP GEAR', desc: 'Access MOTOGRIP GEAR brand notes, product information, imagery guidance, and press contact details.' },
   '/gift-cards': { view: 'giftcard', title: 'MOTOGRIP GEAR Gift Cards', desc: 'Give premium motorcycle leather gear while letting the recipient choose the style, fit, and details.' },
@@ -1741,11 +1743,15 @@ function serveMerchantFeed(req, res) {
       const description = merchantDescription(product);
 
       variants.forEach(([size, quantity]) => {
-        const variantId = `${sku}-${String(size).replace(/[^a-z0-9]+/gi, '-')}`;
+        const normalizedSize = String(size).replace(/[^a-z0-9]+/gi, '-');
+        const colorSlug = product.color
+          ? String(product.color).replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+          : '';
+        const variantId = [sku, normalizedSize, colorSlug].filter(Boolean).join('-');
         const quantityValue = Math.max(0, Number(quantity || 0));
         const fields = [
           ['id', variantId],
-          ['title', `${product.title} - Size ${size}`],
+          ['title', `${product.title} - Size ${size}${colorSlug ? ` (${product.color})` : ''}`],
           ['description', description],
           ['link', link],
           ['image_link', image],
