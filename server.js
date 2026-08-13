@@ -2553,7 +2553,20 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (requestPath === '/robots.txt') {
-      send(res, 200, `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl(req, '/sitemap.xml')}\n`, 'text/plain; charset=utf-8');
+      send(
+        res,
+        200,
+        `User-agent: *\n`
+        + `Disallow: /index.php\n`
+        + `Disallow: /product/\n`
+        + `Disallow: /product-category/\n`
+        + `Disallow: /product-tag/\n`
+        + `Disallow: /wp-content/\n`
+        + `Disallow: /wp-json/\n`
+        + `Allow: /\n`
+        + `Sitemap: ${absoluteUrl(req, '/sitemap.xml')}\n`,
+        'text/plain; charset=utf-8',
+      );
       return;
     }
 
