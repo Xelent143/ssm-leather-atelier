@@ -559,7 +559,10 @@ function hasLegacyWooQuery(url) {
     return legacyWooQueryNames.has(normalized)
       || normalized.startsWith('filter_')
       || normalized.startsWith('query_type_')
-      || normalized.startsWith('woocommerce_');
+      || normalized.startsWith('woocommerce_')
+      || normalized.startsWith('attribute_pa_')
+      || normalized === 'route'
+      || normalized === 'product_id';
   });
 }
 
@@ -585,6 +588,7 @@ function handleLegacyWooRequest(url, requestPath, res) {
 
   if (lowerPath.startsWith('/product-tag/')
     || lowerPath === '/woocommerce'
+    || lowerPath === '/index.php'
     || lowerPath.startsWith('/woocommerce/')
     || lowerPath.startsWith('/woocommerce-api/')
     || lowerPath.startsWith('/wc-api/')
@@ -605,6 +609,10 @@ function handleLegacyWooRequest(url, requestPath, res) {
   }
 
   if (hasLegacyWooQuery(url)) {
+    if (normalizedPath.startsWith('/product/')) {
+      permanentRedirect(res, '/shop');
+      return true;
+    }
     if (normalizedPath === '/' && url.searchParams.get('post_type') === 'product') {
       permanentRedirect(res, '/shop');
       return true;

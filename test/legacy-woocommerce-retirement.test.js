@@ -56,6 +56,16 @@ test('legacy WooCommerce category archives map to the closest live collection', 
   }
 });
 
+test('legacy attribute and index.php routes are retired or redirected cleanly', async () => {
+  const response = await request('/product/?attribute_pa_color=Black&attribute_pa_size=XL');
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get('location'), '/shop');
+
+  const legacyIndex = await request('/index.php?route=product/product&product_id=323');
+  assert.equal(legacyIndex.status, 410);
+  assert.match(legacyIndex.headers.get('x-robots-tag') || '', /noindex/);
+});
+
 test('known legacy product URLs redirect to the current PDP and retired products return 410', async () => {
   const live = await request('/product/black-white-hooded-leather-moto-vest/');
   assert.equal(live.status, 301);
