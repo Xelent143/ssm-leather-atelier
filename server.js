@@ -1948,7 +1948,7 @@ function safePlmError(error) {
 }
 
 async function handleApi(req, res, pathname) {
-  if (pathname === '/api/catalog' && req.method === 'GET') {
+  if ((pathname === '/api/catalog' || pathname === '/api/catalog/') && (req.method === 'GET' || req.method === 'HEAD')) {
     sendJson(res, 200, publicCatalog(readPublicStore()));
     return true;
   }
@@ -2406,7 +2406,8 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  if ((pathname === '/api/admin/session' || pathname === '/api/admin/auth/session') && req.method === 'GET') {
+  if ((pathname === '/api/admin/session' || pathname === '/api/admin/auth/session') &&
+      (req.method === 'GET' || req.method === 'HEAD')) {
     const session = adminSecurity.getSession(req);
     sendJson(res, 200, {
       authenticated: Boolean(session),
@@ -3331,7 +3332,7 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
-  if (pathname === '/api/admin/store' && req.method === 'GET') {
+  if ((pathname === '/api/admin/store' || pathname === '/api/admin/store/') && (req.method === 'GET' || req.method === 'HEAD')) {
     sendJson(res, 200, readStore());
     return true;
   }
