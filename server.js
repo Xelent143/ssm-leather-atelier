@@ -609,7 +609,7 @@ function handleLegacyWooRequest(url, requestPath, res) {
   }
 
   if (hasLegacyWooQuery(url)) {
-    if (normalizedPath.startsWith('/product/')) {
+    if (normalizedPath.startsWith('/product/') || normalizedPath === '/product') {
       permanentRedirect(res, '/shop');
       return true;
     }
