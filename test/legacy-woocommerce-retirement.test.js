@@ -64,6 +64,10 @@ test('legacy attribute and index.php routes are retired or redirected cleanly', 
   const legacyIndex = await request('/index.php?route=product/product&product_id=323');
   assert.equal(legacyIndex.status, 410);
   assert.match(legacyIndex.headers.get('x-robots-tag') || '', /noindex/);
+
+  const legacyHomeQuery = await request('/?route=product/product&product_id=323');
+  assert.equal(legacyHomeQuery.status, 410);
+  assert.match(legacyHomeQuery.headers.get('x-robots-tag') || '', /noindex/);
 });
 
 test('known legacy product URLs redirect to the current PDP and retired products return 410', async () => {
