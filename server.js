@@ -1291,7 +1291,8 @@ function publicProductForPdp(product) {
     color: swatches[String(name).toLowerCase()] || '#777777',
     image: assetPath(product.colorImages?.[name] || images[0]),
   }));
-  const concealedCarry = (product.features || []).some((feature) => /concealed[- ]carry/i.test(String(feature)));
+  const featureList = Array.isArray(product.features) ? product.features : [];
+  const concealedCarry = featureList.some((feature) => /concealed[- ]carry/i.test(String(feature)));
 
   return {
     id: product.id,
