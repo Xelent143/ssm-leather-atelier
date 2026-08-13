@@ -625,8 +625,13 @@ function handleLegacyWooRequest(url, requestPath, res) {
       sendGone(res);
       return true;
     }
-    if (publicRoutes[normalizedPath]
-      || /^\/products\/[a-z0-9-]+$/.test(normalizedPath)
+
+    if (publicRoutes[normalizedPath]) {
+      permanentRedirect(res, normalizedPath);
+      return true;
+    }
+
+    if (/^\/products\/[a-z0-9-]+$/.test(normalizedPath)
       || /^\/collections\/[a-z0-9-]+$/.test(normalizedPath)) {
       permanentRedirect(res, normalizedPath);
       return true;
