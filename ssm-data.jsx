@@ -918,9 +918,9 @@ const SSM_JOURNAL = [
     "isoDate": "2026-08-14",
     "byline": "MOTOGRIP GEAR Editorial",
     "hero": "/assets/generated/blog/suede-vs-smooth-leather-jackets-hero.jpg",
-    "heroAlt": "MOTOGRIP suede versus smooth leather guide with two verified jackets hanging in a warm studio",
+    "heroAlt": "Tan-brown suede and black smooth leather MOTOGRIP jackets hanging side by side in a warm studio",
     "cardImage": "/assets/generated/blog/suede-vs-smooth-leather-jackets-card.jpg",
-    "cardImageAlt": "Black MOTOGRIP suede fringe jacket beside a brown smooth leather cafe-racer for a texture comparison",
+    "cardImageAlt": "Tan-brown MOTOGRIP suede fringe biker jacket beside a black smooth cowhide biker jacket for a texture comparison",
     "quickAnswer": "Suede offers a soft, matte nap and expressive texture but needs careful brushing, stain caution and limited wet-weather exposure. Smooth leather has a cleaner, more reflective surface and is generally easier to maintain. The better choice depends on climate, style, care habits and the complete jacket construction.",
     "body": [
       "Suede and smooth leather can begin with the same broad raw material yet create completely different jackets. Suede has a soft nap that absorbs light and gives a relaxed, tactile appearance. Smooth leather presents the grain or a finished surface with clearer reflection and typically easier day-to-day wiping. The right choice depends on weather exposure, care habits, silhouette and the texture you want to live with."
@@ -938,17 +938,25 @@ const SSM_JOURNAL = [
         "title": "Suede: expressive texture with a specialist-care profile",
         "paragraphs": [
           "Suede works especially well when texture is central to the design. Western fringe, asymmetric biker details and tonal black hardware can become richer because the matte nap absorbs light rather than reflecting it.",
-          "The MOTOGRIP black suede fringe biker jacket shows this relationship clearly. The suede surface, long fringe, asymmetric zip and belt work as one design system. Converting the same silhouette to a glossy smooth finish would change its character significantly.",
+          "The MOTOGRIP tan-brown suede fringe biker jacket shows this relationship clearly. The suede surface, long fringe, asymmetric zip and belt work as one design system. Converting the same silhouette to a glossy smooth finish would change its character significantly.",
           "Suede also records contact quickly. Water, oil, pressure and dust can flatten or darken the nap. That does not make suede impractical, but it does mean the owner should use a suede brush, follow product-specific care instructions and seek professional help for large oil stains or widespread discoloration."
-        ]
+        ],
+        "image": "/assets/generated/blog/suede-vs-smooth-leather-suede-swatch.jpg",
+        "imageAlt": "Close view of the matte tan-brown suede nap, fringe and silver zipper on a MOTOGRIP biker jacket",
+        "imageCaption": "Verified MOTOGRIP tan-brown suede fringe biker jacket close-up. The raised matte nap scatters light and softens the color.",
+        "imageRatio": "3 / 2"
       },
       {
         "title": "Smooth leather: defined lines and a more direct care routine",
         "paragraphs": [
-          "Smooth leather emphasizes panel lines, collars, zips and pockets. A brown cafe-racer, for example, gains much of its character from the way light moves across the surface and highlights natural creasing.",
+          "Smooth leather emphasizes panel lines, collars, zips and pockets. The MOTOGRIP Aegis black cowhide biker jacket gains much of its character from the way light moves across the surface and highlights its grain and structured details.",
           "Smooth leather is generally easier to dust or wipe carefully than suede, but the exact finish still matters. Aniline smooth leather can be highly absorbent and mark-sensitive, while a pigmented surface may be more protected. “Smooth” describes texture, not a universal care method.",
           "The first step is always to identify the finish and read the care label. Avoid household detergent, alcohol, baby wipes, direct heat and heavy oiling. Use minimal moisture and test approved products on a hidden area."
-        ]
+        ],
+        "image": "/assets/generated/blog/suede-vs-smooth-leather-smooth-swatch.jpg",
+        "imageAlt": "Close view of the black smooth cowhide grain, lapel and silver zippers on a MOTOGRIP biker jacket",
+        "imageCaption": "Verified MOTOGRIP Aegis black cowhide biker jacket close-up. The smooth surface reflects light and makes the grain and hardware more defined.",
+        "imageRatio": "3 / 2"
       },
       {
         "title": "Weather and moisture",
@@ -1059,7 +1067,7 @@ const SSM_JOURNAL = [
     "relatedLinks": [
       {
         "url": "https://www.motogripgear.com/products/mens-black-suede-fringe-biker-jacket",
-        "anchor": "MOTOGRIP black suede fringe biker jacket"
+        "anchor": "MOTOGRIP suede fringe biker jacket"
       },
       {
         "url": "https://www.motogripgear.com/blog/how-to-clean-suede-leather-jacket",
