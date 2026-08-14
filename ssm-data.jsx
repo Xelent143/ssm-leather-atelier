@@ -290,6 +290,792 @@ const SSM_NAV = [
 
 const SSM_JOURNAL = [
   {
+    "id": "types-of-leather-for-jackets-guide",
+    "cat": "Leather Education",
+    "title": "Types of Leather for Jackets: A Practical Buyer’s Guide",
+    "seoTitle": "Types of Leather for Jackets: Buyer’s Guide | MOTOGRIP",
+    "metaDescription": "Compare cowhide, lambskin, sheepskin, goatskin, grain layers and finishes to choose a leather jacket by feel, use, construction and care with confidence.",
+    "dek": "Understand cowhide, lambskin, sheepskin, goatskin, grain layers and finishes so you can choose a leather jacket by real use rather than labels.",
+    "duration": "8 min",
+    "date": "August 14, 2026",
+    "isoDate": "2026-08-14",
+    "byline": "MOTOGRIP GEAR Editorial",
+    "hero": "/assets/generated/blog/types-of-leather-for-jackets-guide-hero.jpg",
+    "heroAlt": "MOTOGRIP leather types guide featuring a brown semi-aniline sheepskin puffer bomber jacket in a warm studio",
+    "cardImage": "/assets/generated/blog/types-of-leather-for-jackets-guide-card.jpg",
+    "cardImageAlt": "Man wearing a brown MOTOGRIP semi-aniline sheepskin leather puffer jacket beside a leather types guide headline",
+    "quickAnswer": "Choose jacket leather by intended use, feel, structure and care. Cowhide often supports a substantial silhouette, while lambskin and sheepskin are commonly selected for softness and flexibility. Full grain, corrected grain, suede, aniline and pigmented describe the layer or finish—not a universal quality ranking.",
+    "body": [
+      "Choosing a leather jacket becomes easier when you separate three questions: which animal the leather comes from, which layer of the hide is used, and how the surface is finished. Terms such as cowhide, lambskin, full grain, suede and semi-aniline describe different parts of that story. They are not interchangeable quality rankings, and no single label makes a jacket right for every wearer."
+    ],
+    "sections": [
+      {
+        "title": "Start with use, not terminology",
+        "paragraphs": [
+          "Before comparing leather names, decide what you need the jacket to do. An everyday jacket worn over knitwear may benefit from softness and easy movement. A structured biker or Western silhouette may look better in a leather that holds its shape. A suede statement jacket has a different care profile from a smooth finished jacket. A garment intended for motorcycle use also needs purpose-built patterning, seams, closures and verified protective specifications; leather type alone does not establish protection.",
+          "A practical shortlist starts with four questions:"
+        ],
+        "bullets": [
+          "Will the jacket be worn mainly for everyday style, cold-weather layering or motorcycle use?",
+          "Do you prefer a soft drape or a firm, structured silhouette?",
+          "How much surface variation and patina do you want?",
+          "Are you prepared for specialist care, or do you need a more forgiving finish?"
+        ]
+      },
+      {
+        "title": "Cowhide: substantial and naturally structured",
+        "paragraphs": [
+          "Cowhide is associated with a firm hand and visible body, although tanning, thickness and finish can change the result considerably. It is a natural fit for silhouettes that depend on structure: classic motorcycle-inspired jackets, Western jackets and pieces with pronounced seams or panels.",
+          "Do not assume that every cowhide jacket is heavy or that every cowhide has the same surface. A heavily corrected, thin cowhide can feel very different from a minimally finished, thicker hide. Judge the finished garment: bend the sleeve, inspect the grain under natural light and check whether the jacket returns to shape without feeling board-like.",
+          "The MOTOGRIP distressed cowhide Western fringe jacket shows how material, finish and silhouette work together. Its distressed surface and structured Western pattern are part of one design decision rather than proof that all cowhide behaves the same way."
+        ]
+      },
+      {
+        "title": "Lambskin: soft, fluid and comfortable from the first wear",
+        "paragraphs": [
+          "Lambskin is commonly chosen for its supple hand and clean drape. It works well in refined bombers, minimalist jackets and leather shirts where comfort and close movement matter. The surface can feel smooth and luxurious, but a softer leather may also show pressure marks or scratches more readily than a heavily protected finish.",
+          "That trade-off is not automatically a weakness. It simply means the jacket should match the owner’s expectations. If you want a soft everyday layer that follows the body, lambskin can be a strong choice. If you expect rough handling, frequent wet-weather exposure or a very rigid profile, examine the finish and construction carefully rather than relying on the species name alone."
+        ]
+      },
+      {
+        "title": "Sheepskin: versatile softness with many possible finishes",
+        "paragraphs": [
+          "Sheepskin is used across lightweight fashion jackets, padded winter silhouettes and shearling products. When the wool remains attached and is cut to a controlled length, the finished material may be described as shearling. When the wool is removed, sheepskin can be finished into smooth garment leather with a flexible hand.",
+          "The MOTOGRIP semi-aniline sheepskin leather puffer bomber demonstrates why the full specification matters: the species, semi-aniline surface and padded construction each influence the final feel. “Sheepskin” alone does not explain the whole jacket."
+        ]
+      },
+      {
+        "title": "Goatskin: distinctive grain and balanced flexibility",
+        "paragraphs": [
+          "Goatskin often has a clearly pebbled natural grain. Depending on tannage and thickness, it can offer useful flexibility without losing all structure. It is found in gloves, bags and jackets, but the finished performance still depends on the individual leather and garment construction.",
+          "When comparing goatskin with cowhide or lambskin, avoid broad claims such as “always stronger” or “always lighter.” Ask for the actual product specification and assess the leather in the finished piece."
+        ]
+      },
+      {
+        "title": "Full grain, corrected grain and split leather are layer terms",
+        "paragraphs": [
+          "Species tells you the animal source. Grain terminology tells you what happened to the hide surface.",
+          "Full grain leather retains the complete grain surface without corrective mechanical removal. Natural variation remains visible, and different areas of a hide will not look perfectly identical.",
+          "Corrected grain leather has part of the grain mechanically buffed and then finished to create a more uniform surface. Correction is not automatically a sign of a poor product; it can support consistent color and a more protected exterior. The quality of the base leather, finish and manufacturing still matters.",
+          "Split leather comes from a lower layer after the hide is divided horizontally. It may be finished in several ways. Suede is often made using the flesh side or split layer to create its characteristic nap.",
+          "“Genuine leather” should not be treated as a precise grade by itself. It generally tells you that the material is real leather rather than a synthetic substitute, but it does not disclose the species, layer, finish, thickness or construction quality."
+        ]
+      },
+      {
+        "title": "Aniline, semi-aniline and pigmented describe surface finish",
+        "paragraphs": [
+          "Aniline leather keeps the natural grain highly visible with minimal surface finishing. It can feel rich and natural but is less protected from soiling. Semi-aniline leather uses a light pigmented finish while allowing the grain to remain visible, balancing natural character with somewhat easier care. Pigmented leather uses a more covering finish that creates greater color uniformity and surface protection, while concealing more of the natural grain.",
+          "None is universally “best.” The correct choice depends on whether you prioritize natural variation, easy care, uniform color or a particular aesthetic."
+        ]
+      },
+      {
+        "title": "Suede and nubuck are not the same surface",
+        "paragraphs": [
+          "Suede generally presents the flesh side or a split surface with a longer, more noticeable nap. Nubuck is buffed on the grain side and usually has a finer, velvet-like surface. Both can look premium, but both need a care routine designed for napped leather. Products intended for smooth leather can darken, flatten or stain them."
+        ]
+      },
+      {
+        "title": "A five-point jacket inspection",
+        "paragraphs": [
+          "Explore the current MOTOGRIP leather jacket collection to compare verified product descriptions, silhouettes and fit options."
+        ],
+        "bullets": [
+          "Confirm the complete material description. Look for species, surface type and finish rather than one broad label.",
+          "Check the intended use. A fashion jacket and certified protective riding garment should not be evaluated by the same standard.",
+          "Inspect the whole construction. Seams, panels, lining, hardware and patterning matter alongside the leather.",
+          "Test fit in motion. Reach forward, bend the elbows and zip the jacket over the layers you will actually wear.",
+          "Understand care before buying. Ask whether the surface needs smooth-leather care, suede care or professional treatment."
+        ]
+      },
+      {
+        "title": "Choose the complete jacket",
+        "paragraphs": [
+          "Leather terminology is useful when it helps you ask better questions. Compare species, grain layer, finish, thickness, construction, fit and care as one system. The right jacket is not the one with the longest material label; it is the one whose verified specification fits how you will actually wear it."
+        ]
+      }
+    ],
+    "faqEyebrow": "LEATHER EDUCATION FAQ",
+    "faq": [
+      {
+        "q": "Which leather is best for a jacket?",
+        "a": "There is no universal best. Match the species, finish, thickness and construction to the jacket’s intended use."
+      },
+      {
+        "q": "Is full grain leather always better for clothing?",
+        "a": "No. It preserves the natural surface, while corrected or pigmented finishes may offer greater uniformity and easier care."
+      },
+      {
+        "q": "Does genuine leather mean low quality?",
+        "a": "It is not a precise grade and does not reveal species, layer, finish, thickness or construction quality."
+      },
+      {
+        "q": "Is lambskin suitable for everyday wear?",
+        "a": "Yes, when its finish and construction suit the wearer’s routine and care expectations."
+      },
+      {
+        "q": "Can leather type prove motorcycle protection?",
+        "a": "No. Protection depends on the verified specification and construction of the complete garment."
+      }
+    ],
+    "relatedLinks": [
+      {
+        "url": "https://www.motogripgear.com/jackets",
+        "anchor": "MOTOGRIP leather jacket collection"
+      },
+      {
+        "url": "https://www.motogripgear.com/products/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+        "anchor": "MOTOGRIP semi-aniline sheepskin leather puffer bomber"
+      },
+      {
+        "url": "https://www.motogripgear.com/products/mens-distressed-cowhide-western-fringe-jacket",
+        "anchor": "MOTOGRIP distressed cowhide Western fringe jacket"
+      }
+    ],
+    "nextTitle": "Find the leather jacket that fits your use.",
+    "nextBody": "Compare verified MOTOGRIP GEAR leather jackets, finishes and made-to-measure options.",
+    "nextPrimary": "Shop leather jackets",
+    "nextPrimaryCat": "Jackets"
+  },
+  {
+    "id": "leather-jacket-colors-style-guide",
+    "cat": "Style Guides",
+    "title": "Leather Jacket Colors: How to Choose One You’ll Keep Wearing",
+    "seoTitle": "Leather Jacket Colors: Practical Style Guide | MOTOGRIP",
+    "metaDescription": "Choose a leather jacket color by wardrobe, contrast, finish and care. Compare black, brown, tan, navy, green, burgundy, red and white with confidence.",
+    "dek": "Compare black, brown, tan, navy, green, burgundy, red and white leather jackets using wardrobe compatibility, contrast and care.",
+    "duration": "8 min",
+    "date": "August 14, 2026",
+    "isoDate": "2026-08-14",
+    "byline": "MOTOGRIP GEAR Editorial",
+    "hero": "/assets/generated/blog/leather-jacket-colors-style-guide-hero.jpg",
+    "heroAlt": "MOTOGRIP leather jacket color guide featuring a navy semi-aniline sheepskin puffer bomber in a warm studio",
+    "cardImage": "/assets/generated/blog/leather-jacket-colors-style-guide-card.jpg",
+    "cardImageAlt": "Man wearing a navy MOTOGRIP sheepskin leather puffer jacket beside a leather jacket colors headline",
+    "quickAnswer": "The best leather jacket color works with clothes you already own and the care you will maintain. Black and dark brown are dependable; tan feels lighter; navy and forest green add restrained color; burgundy and red create stronger focus; and white requires more visible-care discipline. Compare the real finish under varied light.",
+    "body": [
+      "The best leather jacket color is not the boldest shade or the one currently receiving the most attention. It is the color that works with your wardrobe, fits the jacket’s purpose and still feels right after the novelty has passed. Black and brown remain dependable, but navy, green, burgundy, tan, red and white can be equally wearable when chosen deliberately."
+    ],
+    "sections": [
+      {
+        "title": "Begin with the wardrobe you own",
+        "paragraphs": [
+          "Open your wardrobe before opening another product tab. Note the colors of your most-worn trousers, knitwear, shirts and footwear. A jacket should connect with several of those combinations rather than depend on one ideal outfit.",
+          "A useful test is the three-outfit rule: before buying, build three complete outfits from pieces you already own. Include the footwear and layers you would realistically use. If the jacket color works only in one carefully staged combination, it may become an occasional piece. If it works with three distinct outfits, it is more likely to earn regular wear."
+        ]
+      },
+      {
+        "title": "Black: clean contrast and a defined silhouette",
+        "paragraphs": [
+          "Black creates a clear outline and usually works with denim, charcoal, grey, white, olive and other neutrals. It can make asymmetric biker details, silver-tone zips and quilted panels feel more graphic. In a minimalist bomber, black becomes quieter and more architectural.",
+          "Black leather is not maintenance-free. Dust, salt marks and some surface scratches can still be visible, especially on high-sheen finishes. Its main advantage is coordination: it asks for fewer color decisions and can move from casual daytime outfits to cleaner evening layers.",
+          "Choose black when your wardrobe already contains cool neutrals, black footwear or monochrome combinations—and when you want the jacket silhouette to read clearly."
+        ]
+      },
+      {
+        "title": "Dark brown: warm, versatile and easy to repeat",
+        "paragraphs": [
+          "Dark brown works especially well with indigo denim, cream, ecru, navy, olive, camel and grey. It often feels less severe than black while remaining easy to coordinate. Brown leather also allows natural-looking tonal variation to become part of the design.",
+          "The specific undertone matters. Chocolate brown, reddish brown and neutral espresso do not behave identically. Compare the product against the footwear and belts you actually wear, but do not feel compelled to match every brown exactly. A controlled mix of related browns usually looks more natural than a forced perfect match."
+        ]
+      },
+      {
+        "title": "Tan and cognac: lighter, more casual energy",
+        "paragraphs": [
+          "Tan, camel and cognac leather bring more contrast into an outfit and naturally attract attention to the jacket. They can work beautifully with white, navy, stone, olive and mid-blue denim. Their lighter surface may also show dark transfer, rain spotting or handling marks more visibly, depending on the finish.",
+          "Choose a lighter brown when you want the jacket to lead the outfit and you are comfortable with a more visible aging pattern. Always follow the product’s care guidance; improvised darkening with oils or household products can permanently change the finish."
+        ]
+      },
+      {
+        "title": "Navy: color without abandoning versatility",
+        "paragraphs": [
+          "Navy is one of the easiest alternatives to black. It remains restrained, coordinates with grey, cream, tan, denim and many shades of brown, and feels distinctive without becoming difficult to repeat.",
+          "The MOTOGRIP navy semi-aniline sheepskin puffer bomber is a useful example: the deep navy changes the character of a familiar winter silhouette while staying compatible with neutral everyday layers.",
+          "When shopping online, check navy images on more than one screen if possible. Dark navy can look almost black in low light and noticeably blue under bright daylight."
+        ]
+      },
+      {
+        "title": "Forest green and olive: grounded statement colors",
+        "paragraphs": [
+          "Dark green pairs naturally with black, charcoal, cream, tan and raw denim. It is more expressive than a neutral but still connected to practical, earthy palettes. Forest green usually feels cleaner and richer; olive tends to read more casual and utilitarian.",
+          "Green works best when the rest of the outfit is controlled. Let the jacket carry the color and keep the base layers simple. This prevents the look from becoming overly themed."
+        ]
+      },
+      {
+        "title": "Burgundy and red: decide how much contrast you want",
+        "paragraphs": [
+          "Burgundy sits between brown, red and purple, which gives it more coordination range than a bright primary red. It can work with black, charcoal, navy and cream while remaining visibly different. Bright red is more direct and usually becomes the center of the outfit.",
+          "Before choosing either, decide whether you want tonal contrast or visual focus. Burgundy can blend into a deeper palette; bright red rarely disappears. That does not make one better—it changes how often and where you may want to wear it."
+        ]
+      },
+      {
+        "title": "White and very light leather: precise and care-sensitive",
+        "paragraphs": [
+          "White, ivory and very pale leather create a sharp premium look, but they can show color transfer, makeup, road grime and handling marks quickly. Dark denim is a common transfer risk. Test outfit combinations carefully and keep bags or straps with unstable dyes away from high-contact areas.",
+          "Light leather is best for someone who accepts visible maintenance and has a storage routine that keeps the jacket away from dust, direct sunlight and rubbing against dark garments."
+        ]
+      },
+      {
+        "title": "Match color to finish, not just the swatch",
+        "paragraphs": [
+          "The same named color can look completely different across finishes. An aniline brown may show rich natural variation. A pigmented brown may appear more uniform. Suede absorbs light and looks softer, while smooth leather reflects more light and can appear deeper or brighter.",
+          "This is why a digital swatch is not enough. Review full-garment photos, close-ups and images under varied lighting. If the product page offers multiple verified views, compare them before deciding."
+        ]
+      },
+      {
+        "title": "Use contrast deliberately",
+        "paragraphs": [
+          "Think of contrast in three simple levels:",
+          "Low contrast feels relaxed and tonal. High contrast makes the jacket more graphic. Choose the level that fits your normal style rather than dressing for a single photograph."
+        ],
+        "bullets": [
+          "Low contrast: brown jacket with cream knitwear and tan trousers; navy with mid-blue denim.",
+          "Medium contrast: dark brown with white; forest green with stone; burgundy with grey.",
+          "High contrast: black with white; red with black; white with dark denim."
+        ]
+      },
+      {
+        "title": "A practical color checklist",
+        "paragraphs": [
+          "Browse MOTOGRIP leather jackets to compare verified colors and silhouettes, or review the MOTOGRIP styling guide for outfit-building principles."
+        ],
+        "bullets": [
+          "Build three outfits with clothes you already own.",
+          "Review the jacket in daylight, warm indoor light and lower light.",
+          "Check whether the finish is matte, suede, semi-aniline or more heavily pigmented.",
+          "Consider visible-care needs and possible color transfer.",
+          "Confirm that the chosen color is an actual listed variant, not a lighting effect.",
+          "Prioritize fit and construction before finalizing the shade."
+        ]
+      },
+      {
+        "title": "Choose for repeat wear",
+        "paragraphs": [
+          "A strong color decision feels personal without becoming impractical. Use your own wardrobe, preferred contrast and care habits as the test. When the color supports the jacket’s silhouette and works across several real outfits, it is more likely to stay in rotation for years."
+        ]
+      }
+    ],
+    "faqEyebrow": "STYLE GUIDES FAQ",
+    "faq": [
+      {
+        "q": "What is the most versatile leather jacket color?",
+        "a": "Black and dark brown are reliable, while navy can be similarly versatile with grey, cream, denim and brown."
+      },
+      {
+        "q": "Should a leather jacket match my shoes?",
+        "a": "No exact match is required. The colors should relate without competing."
+      },
+      {
+        "q": "Do lighter leather colors require more care?",
+        "a": "They often show transfer and marks sooner, although the surface finish also matters."
+      },
+      {
+        "q": "Is a colored leather jacket difficult to style?",
+        "a": "Not when the shade connects with your existing wardrobe and the rest of the outfit stays controlled."
+      },
+      {
+        "q": "Can online photos show the exact leather color?",
+        "a": "Screens and lighting vary, so compare multiple verified views and the listed color name."
+      }
+    ],
+    "relatedLinks": [
+      {
+        "url": "https://www.motogripgear.com/jackets",
+        "anchor": "MOTOGRIP leather jackets"
+      },
+      {
+        "url": "https://www.motogripgear.com/products/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+        "anchor": "MOTOGRIP navy semi-aniline sheepskin puffer bomber"
+      },
+      {
+        "url": "https://www.motogripgear.com/blog/how-to-style-leather-jacket",
+        "anchor": "MOTOGRIP styling guide"
+      }
+    ],
+    "nextTitle": "Find the leather jacket that fits your use.",
+    "nextBody": "Compare verified MOTOGRIP GEAR leather jackets, finishes and made-to-measure options.",
+    "nextPrimary": "Shop leather jackets",
+    "nextPrimaryCat": "Jackets"
+  },
+  {
+    "id": "cowhide-vs-lambskin-leather-jackets",
+    "cat": "Leather Comparisons",
+    "title": "Cowhide vs Lambskin Leather Jackets: Which Suits Your Use?",
+    "seoTitle": "Cowhide vs Lambskin Leather Jackets | MOTOGRIP GEAR",
+    "metaDescription": "Compare cowhide and lambskin leather jackets by structure, softness, movement, care and intended use to choose the right material for your jacket.",
+    "dek": "Compare cowhide and lambskin jackets by structure, softness, movement, visible wear, care and verified motorcycle-use boundaries.",
+    "duration": "7 min",
+    "date": "August 14, 2026",
+    "isoDate": "2026-08-14",
+    "byline": "MOTOGRIP GEAR Editorial",
+    "hero": "/assets/generated/blog/cowhide-vs-lambskin-leather-jackets-hero.jpg",
+    "heroAlt": "MOTOGRIP cowhide versus lambskin guide with two verified leather jackets hanging in a warm studio",
+    "cardImage": "/assets/generated/blog/cowhide-vs-lambskin-leather-jackets-card.jpg",
+    "cardImageAlt": "Brown MOTOGRIP cowhide fringe jacket beside a black MOTOGRIP lambskin hooded jacket for a material comparison",
+    "quickAnswer": "Cowhide commonly creates a firmer, more substantial jacket with a structured silhouette. Lambskin is usually softer, lighter and more fluid. Neither species alone proves quality or protection; tannage, finish, thickness, seams, patterning and the complete garment specification determine the real wearing experience.",
+    "body": [
+      "Cowhide and lambskin can both produce premium leather jackets, but they usually create different wearing experiences. Cowhide often feels more substantial and supports a structured silhouette. Lambskin is commonly softer, lighter and more fluid. The right choice depends on the jacket’s purpose, finish, thickness, construction and how you expect it to age."
+    ],
+    "sections": [
+      {
+        "title": "The comparison at a glance",
+        "paragraphs": [
+          "These are tendencies, not fixed rules. A thin, softly tanned cowhide can feel more flexible than a heavily finished lambskin. Always judge the finished jacket."
+        ],
+        "bullets": [
+          "Factor: Typical hand; Cowhide: Firmer and more substantial; Lambskin: Softer and more supple",
+          "Factor: Silhouette; Cowhide: Often structured; Lambskin: Often fluid and close to the body",
+          "Factor: Surface character; Cowhide: Can show pronounced grain and variation; Lambskin: Often smooth with a refined hand",
+          "Factor: First-wear comfort; Cowhide: May feel more resistant depending on finish; Lambskin: Usually flexible from the start",
+          "Factor: Visible wear; Cowhide: Often develops robust surface character; Lambskin: Can show pressure marks and scratches sooner",
+          "Factor: Best use; Cowhide: Structured jackets, Western and utility-inspired designs; Lambskin: Refined bombers, minimalist jackets and everyday layers"
+        ]
+      },
+      {
+        "title": "How cowhide shapes a jacket",
+        "paragraphs": [
+          "Cowhide gives designers enough body for pronounced yokes, structured collars, extended fringe, strong panel lines and traditional motorcycle-inspired silhouettes. Its substantial feel can be reassuring to a wearer who wants the jacket to hold a clear outline.",
+          "The MOTOGRIP distressed cowhide Western fringe jacket uses cowhide in a design where material presence matters. The embossed yoke, snap front and long fringe need a base that supports the intended Western profile. That does not mean every cowhide jacket should feel the same; thickness and finish remain product-specific.",
+          "Cowhide can also require a more deliberate fit assessment. If the shoulders or upper back are too tight, simply waiting for the jacket to “break in” is not a safe sizing strategy. Leather may relax in high-movement areas, but it will not correct a fundamentally wrong pattern or size."
+        ]
+      },
+      {
+        "title": "How lambskin changes comfort and drape",
+        "paragraphs": [
+          "Lambskin is valued for its soft hand and ability to move close to the body. It works well in lightweight bombers, leather shirts and clean everyday jackets where a rigid feel would fight the design.",
+          "The MOTOGRIP black removable-hood lambskin jacket combines a smooth lambskin shell with a bomber profile. The material supports comfortable movement while the rib-knit edges and removable hood define the casual structure.",
+          "Softness does not make lambskin maintenance-free. A lightly finished surface may show abrasion, pressure or scratches more readily. Owners should keep the jacket away from rough bag straps, sharp edges, direct heat and prolonged moisture, and should use only care products appropriate to the exact finish."
+        ]
+      },
+      {
+        "title": "Structure versus mobility",
+        "paragraphs": [
+          "The most useful decision is not “strong or weak”; it is how much structure do you want to feel?",
+          "Cowhide can create a jacket that sits away from the body and keeps a defined shape. That suits designs with large lapels, belts, Western panels or heavier visual details. Lambskin tends to follow the body more closely and can feel less restrictive in an everyday fashion cut.",
+          "For either leather, test the garment in the movements that matter: zip it fully, reach forward, bend the elbows, sit down and wear the normal base layer. A soft leather in the wrong pattern will still be uncomfortable. A firmer leather in a well-designed pattern may move better than expected."
+        ]
+      },
+      {
+        "title": "Grain, finish and thickness can reverse expectations",
+        "paragraphs": [
+          "Species is only one variable. Surface finish controls how much natural grain remains visible and how protected the leather feels. Thickness changes weight and resistance. Milling can soften a leather, while pigment and coatings can create a more uniform surface.",
+          "Ask for the complete description:",
+          "Without that context, comparing “cowhide” and “lambskin” is like comparing two fabrics by fiber name while ignoring weave and weight."
+        ],
+        "bullets": [
+          "animal species;",
+          "grain or split layer where disclosed;",
+          "finish, such as aniline, semi-aniline, pigmented, suede or distressed;",
+          "garment construction and lining;",
+          "intended use and verified performance claims."
+        ]
+      },
+      {
+        "title": "Which one ages better?",
+        "paragraphs": [
+          "Both can age attractively when the leather, finish and care are appropriate. Cowhide may develop a more rugged pattern of creases and surface variation. Lambskin can develop a softer, more personal drape, but visible marks may appear sooner on delicate finishes.",
+          "Patina should not be confused with neglect. Mold, deep cracking, peeling finish, salt damage and permanent water staining are damage, not desirable aging. Store the jacket on a supportive hanger, allow it to dry naturally after light moisture and follow the care label."
+        ]
+      },
+      {
+        "title": "What about motorcycle use?",
+        "paragraphs": [
+          "Do not choose a motorcycle jacket from species alone. A fashion cowhide jacket is not automatically protective riding equipment, and a lambskin jacket is not automatically unsuitable. Look for clear, verified information about the complete garment: abrasion testing, seam construction, impact-protector compatibility or inclusion, closure security and relevant certification.",
+          "If those details are absent, treat the jacket as fashion or lifestyle apparel rather than certified protective equipment. Read what makes a motorcycle jacket different before comparing riding claims."
+        ]
+      },
+      {
+        "title": "Choose cowhide if…",
+        "bullets": [
+          "you want a substantial, structured feel;",
+          "the jacket relies on pronounced panels, fringe, belts or lapels;",
+          "you appreciate visible grain and a more rugged aging pattern;",
+          "you accept a potentially firmer first wear."
+        ]
+      },
+      {
+        "title": "Choose lambskin if…",
+        "bullets": [
+          "softness and easy movement are the priority;",
+          "you prefer a refined, close drape;",
+          "the jacket is mainly an everyday fashion layer;",
+          "you are comfortable caring for a potentially more mark-sensitive surface."
+        ]
+      },
+      {
+        "title": "The better leather is the one matched to the design",
+        "paragraphs": [
+          "Cowhide and lambskin are not opponents in a universal quality contest. They are different raw materials that designers use for different effects. Decide whether you value structure or softness, then verify the finish, construction, fit and purpose of the actual jacket. That complete view leads to a more reliable purchase."
+        ]
+      }
+    ],
+    "faqEyebrow": "LEATHER COMPARISONS FAQ",
+    "faq": [
+      {
+        "q": "Is cowhide always heavier than lambskin?",
+        "a": "Often, but finished weight also depends on thickness, tannage, lining, hardware and construction."
+      },
+      {
+        "q": "Is lambskin real leather?",
+        "a": "Yes. Lambskin is genuine animal leather, although the species does not define its layer, finish or quality."
+      },
+      {
+        "q": "Which leather is better for a bomber jacket?",
+        "a": "Lambskin supports a soft drape, while cowhide can create a more structured bomber."
+      },
+      {
+        "q": "Does cowhide take longer to break in?",
+        "a": "A firm cowhide may relax more slowly, but a jacket still needs to fit correctly from the start."
+      },
+      {
+        "q": "Which is better for motorcycle protection?",
+        "a": "Compare verified complete-garment specifications and certification; species alone is insufficient."
+      }
+    ],
+    "relatedLinks": [
+      {
+        "url": "https://www.motogripgear.com/products/mens-distressed-cowhide-western-fringe-jacket",
+        "anchor": "MOTOGRIP distressed cowhide Western fringe jacket"
+      },
+      {
+        "url": "https://www.motogripgear.com/products/mens-black-removable-hood-lambskin-jacket",
+        "anchor": "MOTOGRIP black removable-hood lambskin jacket"
+      },
+      {
+        "url": "https://www.motogripgear.com/blog/what-is-a-motorcycle-jacket",
+        "anchor": "what makes a motorcycle jacket different"
+      }
+    ],
+    "nextTitle": "Find the leather jacket that fits your use.",
+    "nextBody": "Compare verified MOTOGRIP GEAR leather jackets, finishes and made-to-measure options.",
+    "nextPrimary": "Shop leather jackets",
+    "nextPrimaryCat": "Jackets"
+  },
+  {
+    "id": "aniline-semi-aniline-pigmented-leather",
+    "cat": "Leather Education",
+    "title": "Aniline, Semi-Aniline and Pigmented Leather Explained",
+    "seoTitle": "Aniline vs Semi-Aniline vs Pigmented Leather | MOTOGRIP",
+    "metaDescription": "Compare aniline, semi-aniline and pigmented leather by grain visibility, color uniformity, surface protection, sensitivity and care needs with confidence.",
+    "dek": "Learn how aniline, semi-aniline and pigmented finishes change natural grain visibility, color consistency, surface protection and care.",
+    "duration": "7 min",
+    "date": "August 14, 2026",
+    "isoDate": "2026-08-14",
+    "byline": "MOTOGRIP GEAR Editorial",
+    "hero": "/assets/generated/blog/aniline-semi-aniline-pigmented-leather-hero.jpg",
+    "heroAlt": "MOTOGRIP guide to aniline, semi-aniline and pigmented leather featuring a brown puffer bomber",
+    "cardImage": "/assets/generated/blog/aniline-semi-aniline-pigmented-leather-card.jpg",
+    "cardImageAlt": "Man wearing a brown MOTOGRIP semi-aniline sheepskin puffer jacket beside a leather finishes headline",
+    "quickAnswer": "Aniline leather retains highly visible natural grain with minimal surface coating. Semi-aniline adds a light pigmented finish while keeping the grain visible. Pigmented leather uses a more covering finish for greater color uniformity and surface protection. The right choice depends on appearance, use and care expectations.",
+    "body": [
+      "Aniline, semi-aniline and pigmented are finish terms. They describe how much surface coating and pigment are used—not the animal species and not a simple ladder from bad to good. The finish affects how clearly you can see the natural grain, how uniform the color appears, how the leather responds to marks and how demanding its care may be."
+    ],
+    "sections": [
+      {
+        "title": "Finish is one layer of the specification",
+        "paragraphs": [
+          "A leather label may combine several different facts: “brown semi-aniline sheepskin,” for example, identifies color, finish and species. Each part answers a separate question.",
+          "This is why “aniline” should not be compared directly with “cowhide.” One is a finish; the other is an animal source."
+        ],
+        "bullets": [
+          "Species may influence natural grain, size, hand and typical use.",
+          "Grain layer explains whether the natural grain is intact, corrected or removed.",
+          "Finish controls surface appearance and protection.",
+          "Thickness, tannage and milling influence body and flexibility.",
+          "Garment construction determines how the material performs as a jacket."
+        ]
+      },
+      {
+        "title": "Aniline leather: natural grain in full view",
+        "paragraphs": [
+          "Aniline leather has a natural grain that remains clearly visible and either no surface coating or a transparent, non-pigmented coating. The result can show pores, scars and tonal variation more openly. Its tactile quality and visual depth are part of the appeal.",
+          "The same openness means less surface protection from soiling, liquid and handling. Aniline leather can darken where it absorbs moisture or oil, and inconsistent household treatment can create permanent patches. Owners who value a natural surface need to accept variation and follow a restrained care routine.",
+          "Aniline is not automatically the correct choice for every jacket. A frequently used travel jacket or garment exposed to unpredictable weather may benefit from a more protected finish. Natural appearance and practical maintenance must be balanced."
+        ]
+      },
+      {
+        "title": "Semi-aniline leather: visible grain with light protection",
+        "paragraphs": [
+          "Semi-aniline leather receives a light finish containing a small amount of pigment. The natural grain remains visible, but the surface gains more uniformity and some additional protection from soiling compared with aniline leather.",
+          "This makes semi-aniline a practical middle ground for many premium garments. It can preserve leather character without demanding the same level of caution as a minimally finished aniline surface. The amount and formulation of finish still vary, so owners should use the product’s actual care guidance rather than assuming every semi-aniline leather reacts identically.",
+          "The MOTOGRIP semi-aniline sheepskin leather puffer bomber is a verified example of the term used as part of a full product specification. The semi-aniline finish, sheepskin shell and padded bomber construction each contribute something different to the final jacket."
+        ]
+      },
+      {
+        "title": "Pigmented leather: uniform color and a more protective surface",
+        "paragraphs": [
+          "Pigmented leather uses an opaque finish that covers more of the natural grain. This can make color more consistent across panels and provide a surface that is easier to maintain in everyday use. It can also make natural pores and tonal differences less visible.",
+          "Pigmented does not mean synthetic. It can still be real leather; the term describes the finishing layer. Quality depends on the base leather, finish formulation, adhesion, flexibility and manufacturing. A poor finish may look artificial or fail prematurely, while a well-engineered pigmented leather can be appropriate for a product that needs consistent color and practical surface protection."
+        ]
+      },
+      {
+        "title": "How the three finishes differ in real use",
+        "paragraphs": [
+          "This table describes general tendencies. A jacket’s exact performance depends on the specific finish and construction."
+        ],
+        "bullets": [
+          "Question: Is natural grain clearly visible?; Aniline: Yes, strongly; Semi-aniline: Yes, with greater uniformity; Pigmented: Often largely concealed",
+          "Question: Surface protection; Aniline: Minimal; Semi-aniline: Light to moderate; Pigmented: Generally greater",
+          "Question: Color uniformity; Aniline: Naturally varied; Semi-aniline: More controlled; Pigmented: Most uniform",
+          "Question: Sensitivity to marks; Aniline: Higher; Semi-aniline: Moderate; Pigmented: Usually lower at the surface",
+          "Question: Care style; Aniline: Very cautious; Semi-aniline: Product-specific, still restrained; Pigmented: Often more forgiving, but care-label-led"
+        ]
+      },
+      {
+        "title": "What about full grain and top grain?",
+        "paragraphs": [
+          "Full grain and corrected grain describe the hide surface, while aniline and pigmented describe finishing. A full grain leather may be aniline, semi-aniline or otherwise lightly finished. A corrected grain leather often receives pigment or embossing to create a more uniform appearance.",
+          "The terms can appear together because they answer different questions. Ask the seller to explain the complete combination rather than treating one word as the final verdict."
+        ]
+      },
+      {
+        "title": "A safe way to inspect the finish",
+        "paragraphs": [
+          "Do not rely on internet “tests” that involve scratching, soaking, bending aggressively or applying unknown products. Those methods can damage a jacket and may still produce a misleading result.",
+          "Instead:",
+          "Water-drop tests are especially risky on a finished garment. Absorption is influenced by waxes, oils, protective coatings and prior care, so it is not a reliable do-it-yourself grading tool."
+        ],
+        "bullets": [
+          "Read the material and care labels.",
+          "Review close-up photographs under neutral light.",
+          "Look for visible pores, tonal variation and the degree of surface uniformity.",
+          "Ask the brand for the stated finish when it is not disclosed.",
+          "Test any approved care product on a hidden area before wider use."
+        ]
+      },
+      {
+        "title": "How finish affects color",
+        "paragraphs": [
+          "Aniline dyes are transparent, allowing natural variation to remain visible. Semi-aniline finishing uses a small amount of pigment to make color more even without fully hiding the grain. Pigmented finishing can create the most consistent color because the surface coat is more opaque.",
+          "This explains why two jackets described as “brown leather” may look very different. One can have varied warm tones and visible grain; another can have an even, matte brown surface. Neither description is complete without the finish."
+        ]
+      },
+      {
+        "title": "Care according to finish",
+        "paragraphs": [
+          "For all three finishes, begin with the care label and avoid excess moisture, direct heat, household cleaners and unverified oils.",
+          "Aniline leather usually needs the most cautious professional guidance for stains. Semi-aniline leather may tolerate carefully selected leather-care products, but spot testing remains essential. Pigmented leather is often more surface-resistant, yet harsh rubbing or incompatible solvents can still damage the coating.",
+          "The MOTOGRIP smooth leather cleaning guide explains a low-risk, care-label-first process. Suede and nubuck require a separate approach."
+        ]
+      },
+      {
+        "title": "Choose the finish that fits your ownership style",
+        "paragraphs": [
+          "Aniline rewards an owner who values natural variation and accepts careful handling. Semi-aniline balances visible grain with light protection. Pigmented leather prioritizes uniformity and everyday surface resistance. None wins every category. The honest choice is the one that matches how you will wear, maintain and expect the jacket to age."
+        ]
+      }
+    ],
+    "faqEyebrow": "LEATHER EDUCATION FAQ",
+    "faq": [
+      {
+        "q": "Is aniline leather the highest quality?",
+        "a": "It often shows attractive natural grain, but product quality and suitability also depend on construction and intended use."
+      },
+      {
+        "q": "Is semi-aniline leather real leather?",
+        "a": "Yes. It is real leather with a light pigmented finish that leaves the natural grain visible."
+      },
+      {
+        "q": "Is pigmented leather fake?",
+        "a": "No. It can be genuine leather with a more opaque protective finish."
+      },
+      {
+        "q": "Which finish is easiest to maintain?",
+        "a": "Pigmented leather is generally most forgiving at the surface, although exact care remains product-specific."
+      },
+      {
+        "q": "Can I identify the finish with a water drop?",
+        "a": "Do not use that test on a finished garment because water can stain it and the result may be misleading."
+      }
+    ],
+    "relatedLinks": [
+      {
+        "url": "https://www.motogripgear.com/products/mens-semi-aniline-sheepskin-leather-puffer-bomber-jacket",
+        "anchor": "MOTOGRIP semi-aniline sheepskin leather puffer bomber"
+      },
+      {
+        "url": "https://www.motogripgear.com/blog/how-to-clean-leather-jacket",
+        "anchor": "MOTOGRIP smooth leather cleaning guide"
+      },
+      {
+        "url": "https://www.motogripgear.com/jackets",
+        "anchor": "MOTOGRIP leather jackets"
+      }
+    ],
+    "nextTitle": "Find the leather jacket that fits your use.",
+    "nextBody": "Compare verified MOTOGRIP GEAR leather jackets, finishes and made-to-measure options.",
+    "nextPrimary": "Shop leather jackets",
+    "nextPrimaryCat": "Jackets"
+  },
+  {
+    "id": "suede-vs-smooth-leather-jackets",
+    "cat": "Leather Comparisons",
+    "title": "Suede vs Smooth Leather Jackets: Texture, Care and Everyday Use",
+    "seoTitle": "Suede vs Smooth Leather Jackets: Guide | MOTOGRIP GEAR",
+    "metaDescription": "Compare suede and smooth leather jackets by texture, care, weather sensitivity, styling and durability to choose the right surface for your routine.",
+    "dek": "Compare suede and smooth leather jackets by texture, color, weather sensitivity, routine care, styling and long-term use.",
+    "duration": "7 min",
+    "date": "August 14, 2026",
+    "isoDate": "2026-08-14",
+    "byline": "MOTOGRIP GEAR Editorial",
+    "hero": "/assets/generated/blog/suede-vs-smooth-leather-jackets-hero.jpg",
+    "heroAlt": "MOTOGRIP suede versus smooth leather guide with two verified jackets hanging in a warm studio",
+    "cardImage": "/assets/generated/blog/suede-vs-smooth-leather-jackets-card.jpg",
+    "cardImageAlt": "Black MOTOGRIP suede fringe jacket beside a brown smooth leather cafe-racer for a texture comparison",
+    "quickAnswer": "Suede offers a soft, matte nap and expressive texture but needs careful brushing, stain caution and limited wet-weather exposure. Smooth leather has a cleaner, more reflective surface and is generally easier to maintain. The better choice depends on climate, style, care habits and the complete jacket construction.",
+    "body": [
+      "Suede and smooth leather can begin with the same broad raw material yet create completely different jackets. Suede has a soft nap that absorbs light and gives a relaxed, tactile appearance. Smooth leather presents the grain or a finished surface with clearer reflection and typically easier day-to-day wiping. The right choice depends on weather exposure, care habits, silhouette and the texture you want to live with."
+    ],
+    "sections": [
+      {
+        "title": "What creates the visual difference?",
+        "paragraphs": [
+          "Smooth leather presents a grain surface or a finished, coated surface. Light reflects across it, which makes color depth, seams and hardware appear more defined. Depending on the finish, the natural grain may be highly visible or more uniform.",
+          "Suede presents a mechanically finished flesh side or split surface with fine raised fibers called nap. Those fibers scatter light, giving suede its soft, matte appearance. Brushing the nap in different directions can make the color look lighter or darker without changing the dye.",
+          "Nubuck is related but not identical. It is made by buffing the grain side to create a fine velvet-like surface, while suede commonly has a longer, more open nap from the flesh side or split."
+        ]
+      },
+      {
+        "title": "Suede: expressive texture with a specialist-care profile",
+        "paragraphs": [
+          "Suede works especially well when texture is central to the design. Western fringe, asymmetric biker details and tonal black hardware can become richer because the matte nap absorbs light rather than reflecting it.",
+          "The MOTOGRIP black suede fringe biker jacket shows this relationship clearly. The suede surface, long fringe, asymmetric zip and belt work as one design system. Converting the same silhouette to a glossy smooth finish would change its character significantly.",
+          "Suede also records contact quickly. Water, oil, pressure and dust can flatten or darken the nap. That does not make suede impractical, but it does mean the owner should use a suede brush, follow product-specific care instructions and seek professional help for large oil stains or widespread discoloration."
+        ]
+      },
+      {
+        "title": "Smooth leather: defined lines and a more direct care routine",
+        "paragraphs": [
+          "Smooth leather emphasizes panel lines, collars, zips and pockets. A brown cafe-racer, for example, gains much of its character from the way light moves across the surface and highlights natural creasing.",
+          "Smooth leather is generally easier to dust or wipe carefully than suede, but the exact finish still matters. Aniline smooth leather can be highly absorbent and mark-sensitive, while a pigmented surface may be more protected. “Smooth” describes texture, not a universal care method.",
+          "The first step is always to identify the finish and read the care label. Avoid household detergent, alcohol, baby wipes, direct heat and heavy oiling. Use minimal moisture and test approved products on a hidden area."
+        ]
+      },
+      {
+        "title": "Weather and moisture",
+        "paragraphs": [
+          "Neither suede nor smooth leather should be treated as waterproof without an explicit, verified product claim. Suede is typically more vulnerable to visible water marks and a flattened nap. Smooth finished leather may tolerate brief light moisture better, but seams, perforations and finish type still affect the result.",
+          "If a jacket becomes lightly damp:",
+          "For predictable rain, choose purpose-built outerwear rather than relying on fashion leather."
+        ],
+        "bullets": [
+          "blot rather than rub;",
+          "reshape it on a supportive hanger;",
+          "allow it to dry slowly at room temperature;",
+          "keep it away from radiators, hair dryers and direct sunlight;",
+          "restore suede nap only when fully dry and according to its care instructions."
+        ]
+      },
+      {
+        "title": "How each texture changes color",
+        "paragraphs": [
+          "Suede color looks softer because the nap scatters light. Brushing direction can create natural tonal movement. Black suede may appear charcoal in bright light, while brown suede can show multiple warm tones across one panel.",
+          "Smooth leather usually looks deeper and more reflective. A semi-aniline brown may show natural grain and tonal variation; a pigmented black can look more even and graphic. Compare full-jacket photographs and close-ups rather than relying on a small swatch."
+        ]
+      },
+      {
+        "title": "Which is easier to style?",
+        "paragraphs": [
+          "Smooth leather is often the more universal choice. A clean cafe-racer or bomber can move between denim, knitwear, tailored trousers and simple evening layers.",
+          "Suede adds visible texture, which means the rest of the outfit should usually be quieter. Pair it with solid cotton, denim, wool or simple knitwear rather than several competing textures. Western fringe already creates movement, so restrained base layers keep the jacket intentional.",
+          "For broader outfit principles, use the MOTOGRIP leather jacket styling guide."
+        ]
+      },
+      {
+        "title": "Care comparison",
+        "paragraphs": [
+          "Read the dedicated MOTOGRIP suede cleaning guide before treating a suede garment."
+        ],
+        "bullets": [
+          "Care task: Routine dust; Suede: Soft suede brush, correct direction; Smooth leather: Soft dry cloth",
+          "Care task: Small dry mark; Suede: Suede-specific method after testing; Smooth leather: Finish-compatible cleaner after testing",
+          "Care task: Oil stain; Suede: Professional care is often safest; Smooth leather: Product-specific treatment; avoid improvised solvents",
+          "Care task: Conditioning; Suede: Do not use ordinary smooth-leather conditioner; Smooth leather: Only when compatible and necessary",
+          "Care task: Drying; Suede: Air dry fully, then restore nap; Smooth leather: Air dry and reshape; condition only if appropriate"
+        ]
+      },
+      {
+        "title": "Durability is more than surface texture",
+        "paragraphs": [
+          "It is misleading to declare all smooth leather more durable than all suede, or vice versa. Durability depends on base leather, thickness, tannage, finish, construction, wear pattern and care. Suede can provide years of use when treated appropriately; smooth leather can fail early if its coating, seams or storage are poor.",
+          "Inspect the complete jacket:"
+        ],
+        "bullets": [
+          "panel layout and seam quality;",
+          "reinforcement at stress points;",
+          "hardware alignment and closure security;",
+          "lining attachment;",
+          "intended use and verified claims;",
+          "realistic maintenance requirements."
+        ]
+      },
+      {
+        "title": "Choose suede if…",
+        "bullets": [
+          "you want tactile, matte texture to lead the design;",
+          "the jacket will be worn mainly in dry conditions;",
+          "you accept suede-specific brushing and professional stain care;",
+          "a Western, fringe or relaxed silhouette fits your wardrobe."
+        ]
+      },
+      {
+        "title": "Choose smooth leather if…",
+        "bullets": [
+          "you prefer a cleaner surface and clearer sheen;",
+          "you want an adaptable everyday jacket;",
+          "you value a generally simpler dust-and-spot-care routine;",
+          "you want seams, zips and structured panels to read sharply."
+        ]
+      },
+      {
+        "title": "Let the texture match your routine",
+        "paragraphs": [
+          "Suede offers depth, softness and unmistakable character. Smooth leather offers defined lines, adaptable styling and generally easier routine care. Choose the surface that matches your climate, wardrobe and maintenance habits, then judge the quality of the complete jacket rather than the texture name alone."
+        ]
+      }
+    ],
+    "faqEyebrow": "LEATHER COMPARISONS FAQ",
+    "faq": [
+      {
+        "q": "Is suede real leather?",
+        "a": "Yes. It is real leather with a napped surface, commonly from the flesh side or split layer."
+      },
+      {
+        "q": "Is suede less durable than smooth leather?",
+        "a": "Not universally, although suede is more sensitive to water, oil and nap flattening."
+      },
+      {
+        "q": "Can I use leather conditioner on suede?",
+        "a": "No ordinary smooth-leather conditioner should be used unless explicitly approved for that suede item."
+      },
+      {
+        "q": "Is smooth leather waterproof?",
+        "a": "Not without a verified waterproof specification."
+      },
+      {
+        "q": "Which is better for an everyday jacket?",
+        "a": "Smooth leather is generally easier for frequent wear, while suede rewards more careful handling."
+      }
+    ],
+    "relatedLinks": [
+      {
+        "url": "https://www.motogripgear.com/products/mens-black-suede-fringe-biker-jacket",
+        "anchor": "MOTOGRIP black suede fringe biker jacket"
+      },
+      {
+        "url": "https://www.motogripgear.com/blog/how-to-clean-suede-leather-jacket",
+        "anchor": "MOTOGRIP suede cleaning guide"
+      },
+      {
+        "url": "https://www.motogripgear.com/blog/how-to-style-leather-jacket",
+        "anchor": "MOTOGRIP leather jacket styling guide"
+      }
+    ],
+    "nextTitle": "Find the leather jacket that fits your use.",
+    "nextBody": "Compare verified MOTOGRIP GEAR leather jackets, finishes and made-to-measure options.",
+    "nextPrimary": "Shop leather jackets",
+    "nextPrimaryCat": "Jackets"
+  },
+  {
     id: 'how-to-buy-your-first-leather-jacket',
     cat: 'Buying Guide',
     title: 'How to buy your first leather jacket.',

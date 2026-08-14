@@ -261,6 +261,81 @@ const publicRoutes = {
       author: 'MOTOGRIP GEAR Editorial',
     },
   },
+  '/blog/types-of-leather-for-jackets-guide': {
+      "view": "article",
+      "params": {
+          "articleId": "types-of-leather-for-jackets-guide"
+      },
+      "title": "Types of Leather for Jackets: Buyer’s Guide | MOTOGRIP",
+      "desc": "Compare cowhide, lambskin, sheepskin, goatskin, grain layers and finishes to choose a leather jacket by feel, use, construction and care with confidence.",
+      "image": "/assets/generated/blog/types-of-leather-for-jackets-guide-hero.jpg",
+      "article": {
+          "headline": "Types of Leather for Jackets: A Practical Buyer’s Guide",
+          "datePublished": "2026-08-14",
+          "dateModified": "2026-08-14",
+          "author": "MOTOGRIP GEAR Editorial"
+      }
+  },
+  '/blog/leather-jacket-colors-style-guide': {
+      "view": "article",
+      "params": {
+          "articleId": "leather-jacket-colors-style-guide"
+      },
+      "title": "Leather Jacket Colors: Practical Style Guide | MOTOGRIP",
+      "desc": "Choose a leather jacket color by wardrobe, contrast, finish and care. Compare black, brown, tan, navy, green, burgundy, red and white with confidence.",
+      "image": "/assets/generated/blog/leather-jacket-colors-style-guide-hero.jpg",
+      "article": {
+          "headline": "Leather Jacket Colors: How to Choose One You’ll Keep Wearing",
+          "datePublished": "2026-08-14",
+          "dateModified": "2026-08-14",
+          "author": "MOTOGRIP GEAR Editorial"
+      }
+  },
+  '/blog/cowhide-vs-lambskin-leather-jackets': {
+      "view": "article",
+      "params": {
+          "articleId": "cowhide-vs-lambskin-leather-jackets"
+      },
+      "title": "Cowhide vs Lambskin Leather Jackets | MOTOGRIP GEAR",
+      "desc": "Compare cowhide and lambskin leather jackets by structure, softness, movement, care and intended use to choose the right material for your jacket.",
+      "image": "/assets/generated/blog/cowhide-vs-lambskin-leather-jackets-hero.jpg",
+      "article": {
+          "headline": "Cowhide vs Lambskin Leather Jackets: Which Suits Your Use?",
+          "datePublished": "2026-08-14",
+          "dateModified": "2026-08-14",
+          "author": "MOTOGRIP GEAR Editorial"
+      }
+  },
+  '/blog/aniline-semi-aniline-pigmented-leather': {
+      "view": "article",
+      "params": {
+          "articleId": "aniline-semi-aniline-pigmented-leather"
+      },
+      "title": "Aniline vs Semi-Aniline vs Pigmented Leather | MOTOGRIP",
+      "desc": "Compare aniline, semi-aniline and pigmented leather by grain visibility, color uniformity, surface protection, sensitivity and care needs with confidence.",
+      "image": "/assets/generated/blog/aniline-semi-aniline-pigmented-leather-hero.jpg",
+      "article": {
+          "headline": "Aniline, Semi-Aniline and Pigmented Leather Explained",
+          "datePublished": "2026-08-14",
+          "dateModified": "2026-08-14",
+          "author": "MOTOGRIP GEAR Editorial"
+      }
+  },
+  '/blog/suede-vs-smooth-leather-jackets': {
+      "view": "article",
+      "params": {
+          "articleId": "suede-vs-smooth-leather-jackets"
+      },
+      "title": "Suede vs Smooth Leather Jackets: Guide | MOTOGRIP GEAR",
+      "desc": "Compare suede and smooth leather jackets by texture, care, weather sensitivity, styling and durability to choose the right surface for your routine.",
+      "image": "/assets/generated/blog/suede-vs-smooth-leather-jackets-hero.jpg",
+      "article": {
+          "headline": "Suede vs Smooth Leather Jackets: Texture, Care and Everyday Use",
+          "datePublished": "2026-08-14",
+          "dateModified": "2026-08-14",
+          "author": "MOTOGRIP GEAR Editorial"
+      }
+  },
   '/brand': { view: 'about', title: 'About MOTOGRIP GEAR | Motorcycle Leather Craftsmanship', desc: 'Discover MOTOGRIP GEAR, a premium leather brand focused on authentic craftsmanship, functional design, precise fit, and lasting value.' },
   '/leather-care': { view: 'care', title: 'Leather Care Guide | MOTOGRIP GEAR', desc: 'Learn how to clean, condition, store, and protect motorcycle leather jackets, vests, and trousers.' },
   '/repairs': { view: 'repairs', title: 'Leather Repairs & Restoration | MOTOGRIP GEAR', desc: 'Review MOTOGRIP GEAR repair, restoration, replaceable hardware, and long-term leather care guidance.' },
