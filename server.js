@@ -328,7 +328,7 @@ const publicRoutes = {
       },
       "title": "Suede vs Smooth Leather Jackets: Guide | MOTOGRIP GEAR",
       "desc": "Compare suede and smooth leather jackets by texture, care, weather sensitivity, styling and durability to choose the right surface for your routine.",
-      "image": "/assets/generated/blog/suede-vs-smooth-leather-jackets-hero.jpg",
+      "image": "/assets/generated/blog/suede-vs-smooth-leather-jackets-hero-v2.jpg",
       "article": {
           "headline": "Suede vs Smooth Leather Jackets: Texture, Care and Everyday Use",
           "datePublished": "2026-08-14",

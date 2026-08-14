@@ -8,8 +8,8 @@ const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const dataSource = fs.readFileSync(path.join(root, 'ssm-data.jsx'), 'utf8');
 
 const assets = [
-  'suede-vs-smooth-leather-jackets-card.jpg',
-  'suede-vs-smooth-leather-jackets-hero.jpg',
+  'suede-vs-smooth-leather-jackets-card-v2.jpg',
+  'suede-vs-smooth-leather-jackets-hero-v2.jpg',
   'suede-vs-smooth-leather-suede-swatch.jpg',
   'suede-vs-smooth-leather-smooth-swatch.jpg',
 ];
@@ -40,6 +40,8 @@ test('pilot blog mirrors approved banner and swatch visuals in both data sources
   for (const source of [indexHtml, dataSource]) {
     assert.match(source, /suede-vs-smooth-leather-suede-swatch\.jpg/);
     assert.match(source, /suede-vs-smooth-leather-smooth-swatch\.jpg/);
+    assert.match(source, /suede-vs-smooth-leather-jackets-hero-v2\.jpg/);
+    assert.match(source, /suede-vs-smooth-leather-jackets-card-v2\.jpg/);
     assert.match(source, /Verified MOTOGRIP tan-brown suede fringe biker jacket close-up/);
     assert.match(source, /Verified MOTOGRIP Aegis black cowhide biker jacket close-up/);
     assert.match(source, /Tan-brown suede and black smooth leather MOTOGRIP jackets/);
