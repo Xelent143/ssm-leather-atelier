@@ -3397,7 +3397,26 @@ const SSM_JOURNAL = [
           "Do you prefer a soft drape or a firm, structured silhouette?",
           "How much surface variation and patina do you want?",
           "Are you prepared for specialist care, or do you need a more forgiving finish?"
-        ]
+        ],
+        "comparisonChart": {
+          "eyebrow": "LEATHER TYPES AT A GLANCE",
+          "title": "Compare the finished wearing experience",
+          "columns": [
+            { "label": "Factor" },
+            { "label": "Cowhide", "image": "/assets/generated/blog/types-of-leather-cowhide-swatch-v2.jpg", "imageAlt": "Brown MOTOGRIP cowhide leather close-up" },
+            { "label": "Lambskin", "image": "/assets/generated/blog/types-of-leather-lambskin-swatch-v2.jpg", "imageAlt": "Black MOTOGRIP lambskin leather close-up" },
+            { "label": "Sheepskin", "image": "/assets/generated/blog/types-of-leather-sheepskin-swatch-v2.jpg", "imageAlt": "Brown MOTOGRIP sheepskin leather close-up" },
+            { "label": "Goatskin", "image": "/assets/generated/blog/types-of-leather-goatskin-suede-swatch-v2.jpg", "imageAlt": "Brown MOTOGRIP goatskin suede close-up" }
+          ],
+          "rows": [
+            ["Typical hand", "Substantial", "Soft and supple", "Flexible", "Balanced flexibility"],
+            ["Common silhouette", "Structured", "Fluid", "Varies by build", "Defined but mobile"],
+            ["Surface character", "Often pronounced", "Often refined", "Finish-dependent", "Often pebbled"],
+            ["Care priority", "Finish-specific conditioning", "Gentle handling", "Check smooth, suede or shearling care", "Follow the exact finish"],
+            ["Best question", "How firm is this jacket?", "How protected is the surface?", "Which finish and construction?", "Smooth or suede goatskin?"]
+          ],
+          "note": "General tendencies only. Tannage, thickness, finish and garment construction can change the result. The goatskin photo is a verified MOTOGRIP goatskin suede example."
+        }
       },
       {
         "title": "Cowhide: substantial and naturally structured",
@@ -3405,28 +3424,40 @@ const SSM_JOURNAL = [
           "Cowhide is associated with a firm hand and visible body, although tanning, thickness and finish can change the result considerably. It is a natural fit for silhouettes that depend on structure: classic motorcycle-inspired jackets, Western jackets and pieces with pronounced seams or panels.",
           "Do not assume that every cowhide jacket is heavy or that every cowhide has the same surface. A heavily corrected, thin cowhide can feel very different from a minimally finished, thicker hide. Judge the finished garment: bend the sleeve, inspect the grain under natural light and check whether the jacket returns to shape without feeling board-like.",
           "The MOTOGRIP distressed cowhide Western fringe jacket shows how material, finish and silhouette work together. Its distressed surface and structured Western pattern are part of one design decision rather than proof that all cowhide behaves the same way."
-        ]
+        ],
+        "image": "/assets/generated/blog/types-of-leather-cowhide-swatch-v2.jpg",
+        "imageAlt": "Close-up of brown distressed cowhide on a MOTOGRIP Western fringe jacket",
+        "imageCaption": "Verified MOTOGRIP distressed cowhide Western fringe jacket close-up. The visible grain, seams and structured surface belong to this product and do not represent every cowhide finish."
       },
       {
         "title": "Lambskin: soft, fluid and comfortable from the first wear",
         "paragraphs": [
           "Lambskin is commonly chosen for its supple hand and clean drape. It works well in refined bombers, minimalist jackets and leather shirts where comfort and close movement matter. The surface can feel smooth and luxurious, but a softer leather may also show pressure marks or scratches more readily than a heavily protected finish.",
           "That trade-off is not automatically a weakness. It simply means the jacket should match the owner’s expectations. If you want a soft everyday layer that follows the body, lambskin can be a strong choice. If you expect rough handling, frequent wet-weather exposure or a very rigid profile, examine the finish and construction carefully rather than relying on the species name alone."
-        ]
+        ],
+        "image": "/assets/generated/blog/types-of-leather-lambskin-swatch-v2.jpg",
+        "imageAlt": "Close-up of smooth black lambskin leather on a MOTOGRIP hooded jacket",
+        "imageCaption": "Verified MOTOGRIP black removable-hood lambskin jacket close-up. The smooth hand and clean drape are assessed on the finished garment, not from the species name alone."
       },
       {
         "title": "Sheepskin: versatile softness with many possible finishes",
         "paragraphs": [
           "Sheepskin is used across lightweight fashion jackets, padded winter silhouettes and shearling products. When the wool remains attached and is cut to a controlled length, the finished material may be described as shearling. When the wool is removed, sheepskin can be finished into smooth garment leather with a flexible hand.",
           "The MOTOGRIP semi-aniline sheepskin leather puffer bomber demonstrates why the full specification matters: the species, semi-aniline surface and padded construction each influence the final feel. “Sheepskin” alone does not explain the whole jacket."
-        ]
+        ],
+        "image": "/assets/generated/blog/types-of-leather-sheepskin-swatch-v2.jpg",
+        "imageAlt": "Close-up of brown semi-aniline sheepskin on a MOTOGRIP leather puffer bomber",
+        "imageCaption": "Verified MOTOGRIP brown semi-aniline sheepskin puffer bomber close-up. Species, light surface finish and padded construction work together."
       },
       {
         "title": "Goatskin: distinctive grain and balanced flexibility",
         "paragraphs": [
           "Goatskin often has a clearly pebbled natural grain. Depending on tannage and thickness, it can offer useful flexibility without losing all structure. It is found in gloves, bags and jackets, but the finished performance still depends on the individual leather and garment construction.",
           "When comparing goatskin with cowhide or lambskin, avoid broad claims such as “always stronger” or “always lighter.” Ask for the actual product specification and assess the leather in the finished piece."
-        ]
+        ],
+        "image": "/assets/generated/blog/types-of-leather-goatskin-suede-swatch-v2.jpg",
+        "imageAlt": "Close-up of chestnut-brown goatskin suede on the MOTOGRIP Ridgeline fur-lined jacket",
+        "imageCaption": "Verified MOTOGRIP Ridgeline real goatskin suede close-up. This napped surface is a goatskin suede example and should not be used to judge every smooth goatskin finish."
       },
       {
         "title": "Full grain, corrected grain and split leather are layer terms",
@@ -3436,20 +3467,57 @@ const SSM_JOURNAL = [
           "Corrected grain leather has part of the grain mechanically buffed and then finished to create a more uniform surface. Correction is not automatically a sign of a poor product; it can support consistent color and a more protected exterior. The quality of the base leather, finish and manufacturing still matters.",
           "Split leather comes from a lower layer after the hide is divided horizontally. It may be finished in several ways. Suede is often made using the flesh side or split layer to create its characteristic nap.",
           "“Genuine leather” should not be treated as a precise grade by itself. It generally tells you that the material is real leather rather than a synthetic substitute, but it does not disclose the species, layer, finish, thickness or construction quality."
-        ]
+        ],
+        "comparisonChart": {
+          "eyebrow": "HIDE LAYERS EXPLAINED",
+          "title": "Layer terms describe what remains at the surface",
+          "columns": [
+            { "label": "Term" },
+            { "label": "Surface" },
+            { "label": "What it tells you" },
+            { "label": "What it does not prove" }
+          ],
+          "rows": [
+            ["Full grain", "Complete natural grain retained", "Minimal corrective removal", "Universal quality or suitability"],
+            ["Corrected grain", "Grain partly buffed and refinished", "A more uniform prepared surface", "Poor quality by itself"],
+            ["Split leather", "Lower hide layer after splitting", "The grain layer is not present", "The final finish or construction"],
+            ["Genuine leather", "Real leather, broadly stated", "Not a precise grade", "Species, layer, finish or thickness"]
+          ],
+          "note": "Read layer, species, finish, thickness and construction together. No single term is a complete quality score."
+        }
       },
       {
         "title": "Aniline, semi-aniline and pigmented describe surface finish",
         "paragraphs": [
           "Aniline leather keeps the natural grain highly visible with minimal surface finishing. It can feel rich and natural but is less protected from soiling. Semi-aniline leather uses a light pigmented finish while allowing the grain to remain visible, balancing natural character with somewhat easier care. Pigmented leather uses a more covering finish that creates greater color uniformity and surface protection, while concealing more of the natural grain.",
           "None is universally “best.” The correct choice depends on whether you prioritize natural variation, easy care, uniform color or a particular aesthetic."
-        ]
+        ],
+        "comparisonChart": {
+          "eyebrow": "FINISH COMPARISON",
+          "title": "Natural grain visibility versus surface protection",
+          "columns": [
+            { "label": "Factor" },
+            { "label": "Aniline" },
+            { "label": "Semi-aniline" },
+            { "label": "Pigmented" }
+          ],
+          "rows": [
+            ["Grain visibility", "Highest", "Clearly visible", "More concealed"],
+            ["Color uniformity", "Naturally varied", "More controlled", "Most uniform"],
+            ["Surface protection", "Minimal", "Light to moderate", "Generally greater"],
+            ["Care approach", "Most cautious", "Restrained and product-specific", "Often more forgiving"]
+          ],
+          "note": "Finish tendencies are not a universal quality ranking. Base leather and manufacturing still matter."
+        }
       },
       {
         "title": "Suede and nubuck are not the same surface",
         "paragraphs": [
           "Suede generally presents the flesh side or a split surface with a longer, more noticeable nap. Nubuck is buffed on the grain side and usually has a finer, velvet-like surface. Both can look premium, but both need a care routine designed for napped leather. Products intended for smooth leather can darken, flatten or stain them."
-        ]
+        ],
+        "image": "/assets/generated/blog/types-of-leather-suede-swatch-v2.jpg",
+        "imageAlt": "Close-up of tan-brown suede nap on a MOTOGRIP fringe biker jacket",
+        "imageCaption": "Verified MOTOGRIP tan-brown suede fringe biker jacket close-up. This visibly raised nap shows suede; nubuck has a finer grain-side nap and is not pictured here."
       },
       {
         "title": "A five-point jacket inspection",
@@ -3538,7 +3606,27 @@ const SSM_JOURNAL = [
         "paragraphs": [
           "Open your wardrobe before opening another product tab. Note the colors of your most-worn trousers, knitwear, shirts and footwear. A jacket should connect with several of those combinations rather than depend on one ideal outfit.",
           "A useful test is the three-outfit rule: before buying, build three complete outfits from pieces you already own. Include the footwear and layers you would realistically use. If the jacket color works only in one carefully staged combination, it may become an occasional piece. If it works with three distinct outfits, it is more likely to earn regular wear."
-        ]
+        ],
+        "comparisonChart": {
+          "eyebrow": "COLOR COMPARISON",
+          "title": "Choose by wardrobe role and visible-care needs",
+          "columns": [
+            { "label": "Color family" },
+            { "label": "Wardrobe role" },
+            { "label": "Useful pairings" },
+            { "label": "Visible-care tendency" }
+          ],
+          "rows": [
+            ["Black", "High-contrast neutral", "Grey, white, denim, olive", "Dust and salt marks can show"],
+            ["Dark brown", "Warm versatile neutral", "Indigo, cream, navy, olive", "Tonal wear can blend naturally"],
+            ["Tan / cognac", "Light statement neutral", "White, stone, navy, mid-blue", "Transfer and spotting may show sooner"],
+            ["Navy", "Restrained alternative to black", "Grey, cream, tan, denim", "Dark shades can shift under lighting"],
+            ["Forest green / olive", "Grounded statement", "Black, charcoal, cream, raw denim", "Finish controls mark visibility"],
+            ["Burgundy / red", "Strong visual focus", "Black, charcoal, navy, cream", "Fading and scuffs can be more noticeable"],
+            ["White / ivory", "Highest contrast", "Controlled neutrals and clean denim", "Transfer and grime are most visible"]
+          ],
+          "note": "These are practical styling and care tendencies, not rules. Always confirm the listed color and finish on the actual product."
+        }
       },
       {
         "title": "Black: clean contrast and a defined silhouette",
@@ -3546,21 +3634,30 @@ const SSM_JOURNAL = [
           "Black creates a clear outline and usually works with denim, charcoal, grey, white, olive and other neutrals. It can make asymmetric biker details, silver-tone zips and quilted panels feel more graphic. In a minimalist bomber, black becomes quieter and more architectural.",
           "Black leather is not maintenance-free. Dust, salt marks and some surface scratches can still be visible, especially on high-sheen finishes. Its main advantage is coordination: it asks for fewer color decisions and can move from casual daytime outfits to cleaner evening layers.",
           "Choose black when your wardrobe already contains cool neutrals, black footwear or monochrome combinations—and when you want the jacket silhouette to read clearly."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-black-swatch-v2.jpg",
+        "imageAlt": "Close-up of black semi-aniline sheepskin on a MOTOGRIP leather puffer bomber",
+        "imageCaption": "Verified MOTOGRIP black semi-aniline sheepskin puffer close-up. Soft highlights keep the black surface readable without changing the listed color."
       },
       {
         "title": "Dark brown: warm, versatile and easy to repeat",
         "paragraphs": [
           "Dark brown works especially well with indigo denim, cream, ecru, navy, olive, camel and grey. It often feels less severe than black while remaining easy to coordinate. Brown leather also allows natural-looking tonal variation to become part of the design.",
           "The specific undertone matters. Chocolate brown, reddish brown and neutral espresso do not behave identically. Compare the product against the footwear and belts you actually wear, but do not feel compelled to match every brown exactly. A controlled mix of related browns usually looks more natural than a forced perfect match."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-dark-brown-swatch-v2.jpg",
+        "imageAlt": "Close-up of distressed dark brown cowhide on a MOTOGRIP Western fringe jacket",
+        "imageCaption": "Verified MOTOGRIP distressed brown cowhide close-up. Natural tonal variation gives this brown finish depth; another brown finish may appear more uniform."
       },
       {
         "title": "Tan and cognac: lighter, more casual energy",
         "paragraphs": [
           "Tan, camel and cognac leather bring more contrast into an outfit and naturally attract attention to the jacket. They can work beautifully with white, navy, stone, olive and mid-blue denim. Their lighter surface may also show dark transfer, rain spotting or handling marks more visibly, depending on the finish.",
           "Choose a lighter brown when you want the jacket to lead the outfit and you are comfortable with a more visible aging pattern. Always follow the product’s care guidance; improvised darkening with oils or household products can permanently change the finish."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-tan-cognac-swatch-v2.jpg",
+        "imageAlt": "Close-up of cognac waxed lambskin on a MOTOGRIP removable-hood bomber jacket",
+        "imageCaption": "Verified MOTOGRIP cognac waxed lambskin bomber close-up. Lighter brown leather can show panel variation, handling and weather marks more visibly."
       },
       {
         "title": "Navy: color without abandoning versatility",
@@ -3568,28 +3665,43 @@ const SSM_JOURNAL = [
           "Navy is one of the easiest alternatives to black. It remains restrained, coordinates with grey, cream, tan, denim and many shades of brown, and feels distinctive without becoming difficult to repeat.",
           "The MOTOGRIP navy semi-aniline sheepskin puffer bomber is a useful example: the deep navy changes the character of a familiar winter silhouette while staying compatible with neutral everyday layers.",
           "When shopping online, check navy images on more than one screen if possible. Dark navy can look almost black in low light and noticeably blue under bright daylight."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-navy-swatch-v2.jpg",
+        "imageAlt": "Close-up of navy semi-aniline sheepskin on a MOTOGRIP puffer bomber jacket",
+        "imageCaption": "Verified MOTOGRIP navy semi-aniline sheepskin puffer close-up. Deep navy can read near-black in low light and distinctly blue in daylight."
       },
       {
         "title": "Forest green and olive: grounded statement colors",
         "paragraphs": [
           "Dark green pairs naturally with black, charcoal, cream, tan and raw denim. It is more expressive than a neutral but still connected to practical, earthy palettes. Forest green usually feels cleaner and richer; olive tends to read more casual and utilitarian.",
           "Green works best when the rest of the outfit is controlled. Let the jacket carry the color and keep the base layers simple. This prevents the look from becoming overly themed."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-green-swatch-v2.jpg",
+        "imageAlt": "Close-up of forest-green semi-aniline sheepskin on a MOTOGRIP puffer jacket",
+        "imageCaption": "Verified MOTOGRIP forest-green semi-aniline sheepskin puffer close-up. The deep green stays grounded while remaining visibly different from black."
       },
       {
         "title": "Burgundy and red: decide how much contrast you want",
         "paragraphs": [
           "Burgundy sits between brown, red and purple, which gives it more coordination range than a bright primary red. It can work with black, charcoal, navy and cream while remaining visibly different. Bright red is more direct and usually becomes the center of the outfit.",
           "Before choosing either, decide whether you want tonal contrast or visual focus. Burgundy can blend into a deeper palette; bright red rarely disappears. That does not make one better—it changes how often and where you may want to wear it."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-burgundy-swatch-v2.jpg",
+        "imageAlt": "Close-up study of burgundy lambskin on a MOTOGRIP leather biker shirt",
+        "imageCaption": "Verified MOTOGRIP burgundy lambskin biker shirt close-up. Burgundy offers a deeper, more tonal statement than bright red.",
+        "secondaryImage": "/assets/generated/blog/leather-colors-red-swatch-v2.jpg",
+        "secondaryImageAlt": "Close-up of red lambskin on a MOTOGRIP cropped trench jacket",
+        "secondaryImageCaption": "Verified MOTOGRIP red lambskin cropped trench close-up. Bright red creates stronger visual focus than burgundy."
       },
       {
         "title": "White and very light leather: precise and care-sensitive",
         "paragraphs": [
           "White, ivory and very pale leather create a sharp premium look, but they can show color transfer, makeup, road grime and handling marks quickly. Dark denim is a common transfer risk. Test outfit combinations carefully and keep bags or straps with unstable dyes away from high-contact areas.",
           "Light leather is best for someone who accepts visible maintenance and has a storage routine that keeps the jacket away from dust, direct sunlight and rubbing against dark garments."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-colors-white-swatch-v2.jpg",
+        "imageAlt": "Close-up of white cowhide on a MOTOGRIP fringe biker jacket",
+        "imageCaption": "Verified MOTOGRIP white cowhide fringe biker jacket close-up. Light leather makes transfer, road grime and handling marks easier to see."
       },
       {
         "title": "Match color to finish, not just the swatch",
@@ -3698,14 +3810,24 @@ const SSM_JOURNAL = [
         "paragraphs": [
           "These are tendencies, not fixed rules. A thin, softly tanned cowhide can feel more flexible than a heavily finished lambskin. Always judge the finished jacket."
         ],
-        "bullets": [
-          "Factor: Typical hand; Cowhide: Firmer and more substantial; Lambskin: Softer and more supple",
-          "Factor: Silhouette; Cowhide: Often structured; Lambskin: Often fluid and close to the body",
-          "Factor: Surface character; Cowhide: Can show pronounced grain and variation; Lambskin: Often smooth with a refined hand",
-          "Factor: First-wear comfort; Cowhide: May feel more resistant depending on finish; Lambskin: Usually flexible from the start",
-          "Factor: Visible wear; Cowhide: Often develops robust surface character; Lambskin: Can show pressure marks and scratches sooner",
-          "Factor: Best use; Cowhide: Structured jackets, Western and utility-inspired designs; Lambskin: Refined bombers, minimalist jackets and everyday layers"
-        ]
+        "comparisonChart": {
+          "eyebrow": "COWHIDE VS LAMBSKIN",
+          "title": "Structure, softness and ownership trade-offs",
+          "columns": [
+            { "label": "Factor" },
+            { "label": "Cowhide", "image": "/assets/generated/blog/cowhide-vs-lambskin-cowhide-swatch-v2.jpg", "imageAlt": "Brown MOTOGRIP cowhide close-up" },
+            { "label": "Lambskin", "image": "/assets/generated/blog/cowhide-vs-lambskin-lambskin-swatch-v2.jpg", "imageAlt": "Black MOTOGRIP lambskin close-up" }
+          ],
+          "rows": [
+            ["Typical hand", "Firmer and more substantial", "Softer and more supple"],
+            ["Silhouette", "Often structured", "Often fluid and close to the body"],
+            ["Surface character", "Can show pronounced grain and variation", "Often smooth with a refined hand"],
+            ["First-wear comfort", "May feel more resistant depending on finish", "Usually flexible from the start"],
+            ["Visible wear", "Often develops robust surface character", "May show pressure marks and scratches sooner"],
+            ["Common use", "Structured, Western and utility-inspired jackets", "Refined bombers and everyday layers"]
+          ],
+          "note": "These are general tendencies, not fixed scores. Thickness, tannage, finish, lining and patterning can change the finished jacket."
+        }
       },
       {
         "title": "How cowhide shapes a jacket",
@@ -3713,7 +3835,10 @@ const SSM_JOURNAL = [
           "Cowhide gives designers enough body for pronounced yokes, structured collars, extended fringe, strong panel lines and traditional motorcycle-inspired silhouettes. Its substantial feel can be reassuring to a wearer who wants the jacket to hold a clear outline.",
           "The MOTOGRIP distressed cowhide Western fringe jacket uses cowhide in a design where material presence matters. The embossed yoke, snap front and long fringe need a base that supports the intended Western profile. That does not mean every cowhide jacket should feel the same; thickness and finish remain product-specific.",
           "Cowhide can also require a more deliberate fit assessment. If the shoulders or upper back are too tight, simply waiting for the jacket to “break in” is not a safe sizing strategy. Leather may relax in high-movement areas, but it will not correct a fundamentally wrong pattern or size."
-        ]
+        ],
+        "image": "/assets/generated/blog/cowhide-vs-lambskin-cowhide-swatch-v2.jpg",
+        "imageAlt": "Close-up of brown distressed cowhide on a MOTOGRIP Western fringe jacket",
+        "imageCaption": "Verified MOTOGRIP distressed cowhide Western fringe jacket close-up. This product uses cowhide where visible structure supports the Western pattern."
       },
       {
         "title": "How lambskin changes comfort and drape",
@@ -3721,7 +3846,10 @@ const SSM_JOURNAL = [
           "Lambskin is valued for its soft hand and ability to move close to the body. It works well in lightweight bombers, leather shirts and clean everyday jackets where a rigid feel would fight the design.",
           "The MOTOGRIP black removable-hood lambskin jacket combines a smooth lambskin shell with a bomber profile. The material supports comfortable movement while the rib-knit edges and removable hood define the casual structure.",
           "Softness does not make lambskin maintenance-free. A lightly finished surface may show abrasion, pressure or scratches more readily. Owners should keep the jacket away from rough bag straps, sharp edges, direct heat and prolonged moisture, and should use only care products appropriate to the exact finish."
-        ]
+        ],
+        "image": "/assets/generated/blog/cowhide-vs-lambskin-lambskin-swatch-v2.jpg",
+        "imageAlt": "Close-up of smooth black lambskin on a MOTOGRIP removable-hood jacket",
+        "imageCaption": "Verified MOTOGRIP black removable-hood lambskin jacket close-up. The soft surface supports a more fluid everyday bomber profile."
       },
       {
         "title": "Structure versus mobility",
@@ -3867,7 +3995,10 @@ const SSM_JOURNAL = [
           "Aniline leather has a natural grain that remains clearly visible and either no surface coating or a transparent, non-pigmented coating. The result can show pores, scars and tonal variation more openly. Its tactile quality and visual depth are part of the appeal.",
           "The same openness means less surface protection from soiling, liquid and handling. Aniline leather can darken where it absorbs moisture or oil, and inconsistent household treatment can create permanent patches. Owners who value a natural surface need to accept variation and follow a restrained care routine.",
           "Aniline is not automatically the correct choice for every jacket. A frequently used travel jacket or garment exposed to unpredictable weather may benefit from a more protected finish. Natural appearance and practical maintenance must be balanced."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-finishes-aniline-swatch-v2.jpg",
+        "imageAlt": "Close-up of black aniline sheepskin on the MOTOGRIP Ionic leather jacket",
+        "imageCaption": "Verified MOTOGRIP Ionic black aniline sheepskin jacket close-up. Natural grain remains visible, while the exact sensitivity still depends on this product’s complete finish and care instructions."
       },
       {
         "title": "Semi-aniline leather: visible grain with light protection",
@@ -3875,27 +4006,44 @@ const SSM_JOURNAL = [
           "Semi-aniline leather receives a light finish containing a small amount of pigment. The natural grain remains visible, but the surface gains more uniformity and some additional protection from soiling compared with aniline leather.",
           "This makes semi-aniline a practical middle ground for many premium garments. It can preserve leather character without demanding the same level of caution as a minimally finished aniline surface. The amount and formulation of finish still vary, so owners should use the product’s actual care guidance rather than assuming every semi-aniline leather reacts identically.",
           "The MOTOGRIP semi-aniline sheepskin leather puffer bomber is a verified example of the term used as part of a full product specification. The semi-aniline finish, sheepskin shell and padded bomber construction each contribute something different to the final jacket."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-finishes-semi-aniline-swatch-v2.jpg",
+        "imageAlt": "Close-up of brown semi-aniline sheepskin on a MOTOGRIP leather puffer bomber",
+        "imageCaption": "Verified MOTOGRIP brown semi-aniline sheepskin puffer bomber close-up. The light finish adds uniformity while allowing surface character to remain visible."
       },
       {
         "title": "Pigmented leather: uniform color and a more protective surface",
         "paragraphs": [
           "Pigmented leather uses an opaque finish that covers more of the natural grain. This can make color more consistent across panels and provide a surface that is easier to maintain in everyday use. It can also make natural pores and tonal differences less visible.",
           "Pigmented does not mean synthetic. It can still be real leather; the term describes the finishing layer. Quality depends on the base leather, finish formulation, adhesion, flexibility and manufacturing. A poor finish may look artificial or fail prematurely, while a well-engineered pigmented leather can be appropriate for a product that needs consistent color and practical surface protection."
-        ]
+        ],
+        "image": "/assets/generated/blog/leather-finishes-pigmented-editorial-swatch-v2.jpg",
+        "imageAlt": "Photorealistic editorial close-up of a uniform black pigmented real leather swatch",
+        "imageCaption": "Original MOTOGRIP editorial material reference for pigmented real leather. This is an illustrative studio swatch—not a claim about a listed MOTOGRIP product."
       },
       {
         "title": "How the three finishes differ in real use",
         "paragraphs": [
           "This table describes general tendencies. A jacket’s exact performance depends on the specific finish and construction."
         ],
-        "bullets": [
-          "Question: Is natural grain clearly visible?; Aniline: Yes, strongly; Semi-aniline: Yes, with greater uniformity; Pigmented: Often largely concealed",
-          "Question: Surface protection; Aniline: Minimal; Semi-aniline: Light to moderate; Pigmented: Generally greater",
-          "Question: Color uniformity; Aniline: Naturally varied; Semi-aniline: More controlled; Pigmented: Most uniform",
-          "Question: Sensitivity to marks; Aniline: Higher; Semi-aniline: Moderate; Pigmented: Usually lower at the surface",
-          "Question: Care style; Aniline: Very cautious; Semi-aniline: Product-specific, still restrained; Pigmented: Often more forgiving, but care-label-led"
-        ]
+        "comparisonChart": {
+          "eyebrow": "FINISH COMPARISON",
+          "title": "How surface treatment changes the leather",
+          "columns": [
+            { "label": "Factor" },
+            { "label": "Aniline", "image": "/assets/generated/blog/leather-finishes-aniline-swatch-v2.jpg", "imageAlt": "Black aniline leather close-up" },
+            { "label": "Semi-aniline", "image": "/assets/generated/blog/leather-finishes-semi-aniline-swatch-v2.jpg", "imageAlt": "Brown semi-aniline leather close-up" },
+            { "label": "Pigmented", "image": "/assets/generated/blog/leather-finishes-pigmented-editorial-swatch-v2.jpg", "imageAlt": "Black pigmented leather editorial swatch" }
+          ],
+          "rows": [
+            ["Natural grain visibility", "High", "Visible with greater uniformity", "Often largely concealed"],
+            ["Surface protection", "Minimal", "Light to moderate", "Generally greater"],
+            ["Color uniformity", "Naturally varied", "More controlled", "Most uniform"],
+            ["Sensitivity to surface marks", "Higher", "Moderate", "Usually lower"],
+            ["Care style", "Very cautious", "Restrained and product-specific", "Often more forgiving, still care-label-led"]
+          ],
+          "note": "General tendencies only. Base leather, coating formulation, thickness and construction determine the real result. The pigmented swatch is an original editorial reference, not a listed product claim."
+        }
       },
       {
         "title": "What about full grain and top grain?",
@@ -9226,6 +9374,80 @@ function BrandedEditorialImage({ src, alt, caption, eager = false, ratio = '3 / 
   );
 }
 
+function LeatherComparisonChart({ chart }) {
+  if (!chart?.columns?.length || !chart?.rows?.length) return null;
+  const minWidth = Math.max(620, chart.columns.length * 170);
+  const hasColumnImages = chart.columns.some(column => column.image);
+  return (
+    <figure style={{ margin: '32px 0 52px', border: '1px solid var(--line)', background: 'var(--bg-2)' }}>
+      <figcaption style={{ padding: '28px 28px 22px', borderBottom: '1px solid var(--line)' }}>
+        <div className="mono" style={{ fontSize: 9, color: 'var(--accent-2)', marginBottom: 9 }}>
+          {(chart.eyebrow || 'LEATHER COMPARISON').toUpperCase()}
+        </div>
+        <div style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(26px, 4vw, 38px)', lineHeight: 1.1, color: 'var(--fg)' }}>
+          {chart.title}
+        </div>
+      </figcaption>
+      <div role="region" aria-label={chart.title} tabIndex="0" style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', minWidth, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <thead>
+            <tr>
+              {chart.columns.map((column, columnIndex) => (
+                <th key={`${column.label}-${columnIndex}`} scope="col" style={{
+                  padding: 0, textAlign: 'left', verticalAlign: 'bottom',
+                  borderRight: columnIndex < chart.columns.length - 1 ? '1px solid var(--line)' : 'none',
+                  borderBottom: '2px solid var(--accent-2)', background: columnIndex === 0 ? 'var(--bg)' : 'var(--bg-3)',
+                }}>
+                  {column.image && (
+                    <img src={column.image} alt={column.imageAlt || ''} loading="lazy" decoding="async"
+                      style={{ display: 'block', width: '100%', height: 118, objectFit: 'cover' }} />
+                  )}
+                  {!column.image && hasColumnImages && (
+                    <div style={{
+                      height: 118, display: 'flex', alignItems: 'center', padding: '0 16px',
+                      fontFamily: 'var(--sans)', fontSize: 24, lineHeight: 1, fontWeight: 700,
+                      color: 'var(--fg)', background: 'var(--bg)',
+                    }}>COMPARE</div>
+                  )}
+                  <div className="mono" style={{ padding: '14px 16px', fontSize: 10, color: columnIndex === 0 ? 'var(--fg-4)' : 'var(--fg)' }}>
+                    {column.label.toUpperCase()}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {chart.rows.map((row, rowIndex) => (
+              <tr key={`${row[0]}-${rowIndex}`}>
+                {row.map((cell, cellIndex) => (
+                  cellIndex === 0 ? (
+                    <th key={`${cell}-${cellIndex}`} scope="row" style={{
+                      padding: '16px', textAlign: 'left', verticalAlign: 'top', fontSize: 13,
+                      lineHeight: 1.5, color: 'var(--fg)', background: 'var(--bg)',
+                      borderRight: '1px solid var(--line)', borderBottom: rowIndex < chart.rows.length - 1 ? '1px solid var(--line)' : 'none',
+                    }}>{cell}</th>
+                  ) : (
+                    <td key={`${cell}-${cellIndex}`} style={{
+                      padding: '16px', verticalAlign: 'top', fontSize: 13, lineHeight: 1.55,
+                      color: 'var(--fg-3)', borderRight: cellIndex < row.length - 1 ? '1px solid var(--line)' : 'none',
+                      borderBottom: rowIndex < chart.rows.length - 1 ? '1px solid var(--line)' : 'none',
+                    }}>{cell}</td>
+                  )
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {chart.note && (
+        <div className="mono" style={{ padding: '16px 20px', borderTop: '1px solid var(--line)', fontSize: 8, lineHeight: 1.6, color: 'var(--fg-4)' }}>
+          {chart.note.toUpperCase()}
+        </div>
+      )}
+    </figure>
+  );
+}
+
 function Journal({ go }) {
   const [feature, ...rest] = SSM_JOURNAL;
   return (
@@ -9387,6 +9609,7 @@ function JournalArticle({ article, go }) {
                   {section.bullets.map(item => <li key={item} style={{ marginBottom: 8 }}>{item}</li>)}
                 </ul>
               )}
+              {section.comparisonChart && <LeatherComparisonChart chart={section.comparisonChart} />}
             </section>
             {section.image && (
               <div style={{ margin: '36px 0 56px' }}>
@@ -9395,6 +9618,16 @@ function JournalArticle({ article, go }) {
                   alt={section.imageAlt}
                   caption={section.imageCaption}
                   ratio={section.imageRatio || (index === 1 ? '4 / 3' : '3 / 2')}
+                />
+              </div>
+            )}
+            {section.secondaryImage && (
+              <div style={{ margin: '-28px 0 56px' }}>
+                <BrandedEditorialImage
+                  src={section.secondaryImage}
+                  alt={section.secondaryImageAlt}
+                  caption={section.secondaryImageCaption}
+                  ratio={section.imageRatio || '3 / 2'}
                 />
               </div>
             )}
